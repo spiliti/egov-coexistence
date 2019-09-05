@@ -105,7 +105,7 @@
 					<td class="greybox"><s:text name="recovery.code" /></td>
 					<td class="greybox"><s:select name="recoveryId"
 							id="recoveryId" list="dropdownData.recoveryList" listKey="id"
-							listValue="type+'-'+recoveryName" headerKey="" headerValue="----Choose----" /></td>
+							listValue="chartofaccounts.glcode+'-'+recoveryName" headerKey="" headerValue="----Choose----" /></td>
 
 				</tr>
 				<jsp:include page="../voucher/vouchertrans-filter.jsp" />

@@ -94,6 +94,7 @@ import org.egov.commons.service.RelationService;
 import org.egov.commons.utils.BankAccountType;
 import org.egov.commons.utils.EntityType;
 import org.egov.egf.commons.EgovCommon;
+import org.egov.egf.contract.model.BankBranch;
 import org.egov.egf.masters.model.LoanGrantBean;
 import org.egov.eis.entity.DrawingOfficer;
 import org.egov.eis.entity.EmployeeView;
@@ -3801,9 +3802,9 @@ public class CommonAction extends BaseFormAction {
             StringBuffer queryString = new StringBuffer();
             // query to fetch vouchers for which RTGS not assigned
             queryString = queryString
-                    .append("SELECT  bankaccount.accountnumber AS accountnumber,  bankaccount.accounttype AS accounttype,"
+                    .append("SELECT  bankaccount.accountnumber AS accountnumber,  bank.name as bankName,"
                             +
-                            " CAST(bankaccount.id AS INTEGER) AS id, coa.glcode AS glCode  FROM chartofaccounts coa, bankaccount bankaccount"
+                            " CAST(bankaccount.id AS INTEGER) AS id, coa.glcode AS glCode  FROM chartofaccounts coa, bankaccount bankaccount,Bank bank,Bankbranch bankBranch"
                             +
                             " WHERE bankaccount.ID IN (SELECT DISTINCT PH.bankaccountnumberid  "
                             +
@@ -3826,14 +3827,14 @@ public class CommonAction extends BaseFormAction {
                             " AND coa.id                =bankaccount.glcodeid AND bankaccount.type     IN ('RECEIPTS_PAYMENTS','PAYMENTS'))"
                             +
                             bankaccountFundQuery +
-                            " AND bankaccount.branchid  =" + branchId + " and bankaccount.isactive=true ");
+                            " AND bankaccount.branchid  =" + branchId + " and bankaccount.isactive=true and bank.id = bankBranch.bankid and bankBranch.id = bankaccount.branchid");
             // query to fetch vouchers for which cheque has been assigned and surrendered
             queryString
-                    .append(" union select bankaccount.accountnumber as accountnumber,bankaccount.accounttype as accounttype,cast(bankaccount.id as integer) as id,coa.glcode as glCode "
+                    .append(" union select bankaccount.accountnumber as accountnumber,bank.name as bankName,cast(bankaccount.id as integer) as id,coa.glcode as glCode "
                             +
                             " from chartofaccounts coa, "
                             +
-                            " Bankaccount bankaccount"
+                            " Bankaccount bankaccount,Bank bank,Bankbranch bankBranch"
                             +
                             " where bankaccount.id in(SELECT DISTINCT PH.bankaccountnumberid  from  "
                             +
@@ -3866,7 +3867,8 @@ public class CommonAction extends BaseFormAction {
                             " and ih.id_status=egws.id and egws.description in ('Surrendered','Surrender_For_Reassign') )"
                             +
                             " and coa.id=bankaccount.glcodeid and bankaccount.type in ('RECEIPTS_PAYMENTS','PAYMENTS')  and bankaccount.branchid="
-                            + branchId);
+                            + branchId
+                            +" and bank.id = bankBranch.bankid and bankBranch.id = bankaccount.branchid");
 
             queryString = queryString.append(bankaccountFundQuery);
 
@@ -3880,11 +3882,16 @@ public class CommonAction extends BaseFormAction {
                 if (!addedBanks.contains(accountNumberAndType)) {
                     final Bankaccount bankaccount = new Bankaccount();
                     bankaccount.setAccountnumber(account[0].toString());
-                    bankaccount.setAccounttype(account[1].toString());
+//                    bankaccount.setAccounttype(account[1].toString());
                     final CChartOfAccounts chartofaccounts = new CChartOfAccounts();
                     chartofaccounts.setGlcode(account[3].toString());
                     bankaccount.setChartofaccounts(chartofaccounts);
                     bankaccount.setId(Long.valueOf(account[2].toString()));
+                    Bank bank= new Bank();
+                    bank.setName(account[1].toString());
+                    Bankbranch branch = new Bankbranch();
+                    branch.setBank(bank);
+                    bankaccount.setBankbranch(branch);
                     addedBanks.add(accountNumberAndType);
                     accNumList.add(bankaccount);
                 }

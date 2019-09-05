@@ -364,7 +364,7 @@ public class BankAdviceReportAction extends BaseFormAction {
             totalAmount = totalAmount.add(bankAdviceReportInfo.getAmount());
             subLedgerList.add(bankAdviceReportInfo);
         }
-
+        // Instruments details For Non conrtrolled code TDS
         return subLedgerList;
     }
 
@@ -513,9 +513,57 @@ public class BankAdviceReportAction extends BaseFormAction {
         final List retList = getSubLedgerDetailQueryAndParams(instrumentnumber);
         if (retList != null && !retList.isEmpty())
             return populateSubLedgerDetails(retList);
-        else
+        else if(retList.isEmpty()){
+            //Instruments for Non contorlled code remitttence.
+            return populateSubledgerForNonControlledRemittence(instrumentnumber);
+        }else{
             return Collections.EMPTY_LIST;
+        }
     }
+
+    private List<BankAdviceReportInfo> populateSubledgerForNonControlledRemittence(InstrumentHeader instrumentHeader) {
+        // TODO Auto-generated method stub
+        final List<BankAdviceReportInfo> subLedgerList = new ArrayList<BankAdviceReportInfo>();
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("select t.remitted,t.accountnumber,t.ifsccode,sum(ph.paymentamount) from egf_instrumentheader ih,egf_instrumentvoucher iv,")
+        .append("paymentheader ph,generalledger gl,TDS t,chartofaccountdetail coa where ih.id=iv.instrumentheaderid and ")
+        .append("ph.voucherheaderid=iv.voucherheaderid and ih.id=")
+        .append(instrumentHeader.getId())
+        .append(" and ph.bankaccountnumberid=")
+        .append(bankaccount.getId())
+        .append(" and gl.voucherheaderid=iv.voucherheaderid and ")
+        .append("t.glcodeid=gl.glcodeid and coa.glcodeid!=t.glcodeid group by t.ifsccode,t.accountnumber,t.remitted");
+        List<Object[]> list = persistenceService.getSession().createSQLQuery(queryBuilder.toString()).list();
+        if(list != null && !list.isEmpty()){
+            for(Object[] objArr : list){
+                final BankAdviceReportInfo bankAdviceReportInfo = new BankAdviceReportInfo();
+                bankAdviceReportInfo.setPartyName(objArr[0].toString());
+                bankAdviceReportInfo.setAccountNumber(objArr[1].toString());
+//                bankAdviceReportInfo.setBank(subDetail.getBankname());
+                // bankAdviceReportInfo.setBankBranch(subDetail.getBankaccount());
+                bankAdviceReportInfo.setIfscCode(objArr[2].toString());
+                bankAdviceReportInfo.setAmount(((BigDecimal) objArr[3]).setScale(2, BigDecimal.ROUND_HALF_EVEN));
+                totalAmount = totalAmount.add(bankAdviceReportInfo.getAmount());
+                subLedgerList.add(bankAdviceReportInfo);
+            }
+        }
+        return subLedgerList;
+    }
+
+//    private boolean isNonControlledCodeRemittenceForInstrument(InstrumentHeader instrumentHeader) {
+//        // TODO Auto-generated method stub
+//        StringBuilder queryBuilder = new StringBuilder();
+//        queryBuilder.append("select t.ifsccode from egf_instrumentheader ih,egf_instrumentvoucher iv,")
+//                    .append("paymentheader ph,generalledger gl,TDS t,chartofaccountdetail coa where ih.id=iv.instrumentheaderid and ")
+//                    .append("ph.voucherheaderid=iv.voucherheaderid and ih.id=")
+//                    .append(instrumentHeader.getId())
+//                    .append(" and ph.bankaccountnumberid=")
+//                    .append(bankaccount.getId())
+//                    .append(" and gl.voucherheaderid=iv.voucherheaderid and ")
+//                    .append("t.glcodeid=gl.glcodeid and coa.glcodeid=t.glcodeid");
+//        List list = persistenceService.getSession().createSQLQuery(queryBuilder.toString()).list();
+//        return list.isEmpty();
+//    }
 
     @Override
     public Object getModel() {

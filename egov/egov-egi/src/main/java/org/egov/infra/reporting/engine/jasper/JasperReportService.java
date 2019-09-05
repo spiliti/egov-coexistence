@@ -149,7 +149,12 @@ public class JasperReportService extends AbstractReportService<JasperReport> {
             } else if (reportData.getClass().isArray()) {
                 dataSource = new JRBeanArrayDataSource((Object[]) reportData, false);
             } else if (reportData instanceof Collection) {
-                dataSource = new JRBeanCollectionDataSource((Collection) reportData, false);
+                Collection rd = (Collection) reportData;
+                if(rd.isEmpty()){
+                    dataSource = new JREmptyDataSource();
+                }else{
+                    dataSource = new JRBeanCollectionDataSource(rd, false);
+                }
             } else {
                 dataSource = new JRBeanArrayDataSource(new Object[]{reportData}, false);
             }

@@ -122,7 +122,7 @@
 				<tr>
 					<egov:ajaxdropdown id="bank_branch" fields="['Text','Value']"
 						dropdownId="bank_branch"
-						url="voucher/common-ajaxLoadBanksWithPayGenAndRTGSNotAssigned.action" />
+						url="voucher/common-ajaxLoadBanksWithPayGenAndRTGSNotAssigned.action" /> 
 					<td class="greybox"><s:text name="chq.assignment.bank" /></td>
 					<td class="greybox"><s:select name="bank_branch"
 							id="bank_branch" list="bankBranchMap" headerKey="-1"
@@ -139,13 +139,13 @@
 							value="%{bankaccount}" /></td>
 				</tr>
 				<tr>
-					<td class="bluebox"><s:text
+					<!-- <td class="bluebox"><s:text
 							name="rtgs.assignment.remittance.pay.do" /></td>
 					<td class="bluebox"><s:select id="drawingOfficerId"
 							name="drawingOfficerId" cssClass="selectwk"
 							list="dropdownData.drawingofficerList" listKey="id"
 							listValue="name" headerValue="Choose" headerKey="0"
-							value="%{drawingOfficer.id}" /></td>
+							value="%{drawingOfficer.id}" /></td> -->
 					<td class="bluebox"><s:text
 							name="rtgs.assignment.remittance.pay.coa" /></td>
 					<td class="bluebox"><s:select name="recoveryId"
@@ -154,12 +154,12 @@
 							onchange="setRecoveryCode();" /></td>
 
 					</td>
-				</tr>
+				</tr> -->
 
 			</table>
 			<div class="buttonbottom">
 				<s:submit method="searchRemittanceRTGS" value="Search"
-					id="searchBtn" cssClass="buttonsubmit" />
+					id="searchBtn" cssClass="buttonsubmit" onclick="submitForm()" />
 				<input type="button" value="Close"
 					onclick="javascript:window.close()" class="button" />
 			</div>
@@ -177,8 +177,13 @@
 		<s:hidden name="serviceTexCOA" id="serviceTexCOA" />
 		<s:hidden name="recoveryCode" id="recoveryCode" />
 	</s:form>
-	<script>
+	<script> 
 				var date='<s:date name="currentDate" format="dd/MM/yyyy"/>';
+				function submitForm() {
+
+					document.chequeAssignment.action = "/services/EGF/payment/chequeAssignment-searchRemittanceRTGS.action";
+					document.chequeAssignment.submit();
+				}
 				function onload()
 				{
 					populatebank_branch(); 

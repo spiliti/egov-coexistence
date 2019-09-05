@@ -217,7 +217,7 @@
 				<s:hidden id="paymentMode" name="paymentMode" value="%{paymentMode}" />
 
 
-				<s:submit id="assignChequeBtn" method="update" value="Assign Cheque"
+				<s:submit id="assignChequeBtn" method="update" value="Assign RTGS Number"
 					cssClass="buttonsubmit" onclick="return validate();" />
 				<input type="button" value="Close"
 					onclick="javascript:window.close()" class="button" />
@@ -258,7 +258,8 @@
 				<s:if test="%{paymentMode=='rtgs'}">
 					//result= validateForRtgsMode();  
 				</s:if>    
-				
+				document.chequeAssignment.action='/services/EGF/payment/chequeAssignment-update.action';
+	    		document.chequeAssignment.submit();
 								 
 				return true;                   
 			}
@@ -314,11 +315,11 @@
 				}     
 			}
 			function viewVoucher(vid){
-				var url = '../voucher/preApprovedVoucher!loadvoucherview.action?vhid='+vid;
+				var url = '../voucher/preApprovedVoucher-loadvoucherview.action?vhid='+vid;
 				window.open(url,'Search','resizable=yes,scrollbars=yes,left=300,top=40, width=900, height=700');
 			}
 			function viewReceiptDetails(phId){
-				var url = '../payment/chequeAssignment!getReceiptDetails.action?paymentId='+phId;
+				var url = '../payment/chequeAssignment-getReceiptDetails.action?paymentId='+phId;
 				window.open(url,'Search','resizable=yes,scrollbars=yes,left=300,top=40, width=900, height=700');
 			}
 			                

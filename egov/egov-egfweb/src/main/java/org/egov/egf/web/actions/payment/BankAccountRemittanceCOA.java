@@ -52,8 +52,8 @@ import org.egov.commons.CChartOfAccounts;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
-public class BankAccountRemittanceCOA {
-
+public class BankAccountRemittanceCOA implements java.io.Serializable{
+    private static final long serialVersionUID = -8610173250208179138L;
     private Bankaccount bankAccount;
     private CChartOfAccounts remittanceCOA;
 

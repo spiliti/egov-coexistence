@@ -153,6 +153,7 @@ import net.sf.jasperreports.engine.JRException;
         @Result(name = "surrendercheques", location = "chequeAssignment-surrendercheques.jsp"),
         @Result(name = "rtgsSearch", location = "chequeAssignment-rtgsSearch.jsp"),
         @Result(name = "tnebRtgsSearch", location = "chequeAssignment-tnebRtgsSearch.jsp"),
+        @Result(name = "searchRemittanceRtgsResult", location = "chequeAssignment-searchRemittanceRtgsResult.jsp"),
         @Result(name = "bankAdvice-PDF", type = "stream", location = Constants.INPUT_STREAM, params = { Constants.INPUT_NAME,
                 Constants.INPUT_STREAM, Constants.CONTENT_TYPE, "application/pdf", Constants.CONTENT_DISPOSITION,
                 "no-cache;filename=BandAdvice.pdf" }),
@@ -456,7 +457,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
             LOGGER.debug("Starting prepareBeforeRemittanceRtgsSearch...");
         addDropdownData("drawingofficerList", getPersistenceService().findAllBy("from DrawingOfficer where id in" +
                 " (select drawingOfficer.id from DepartmentDOMapping) order by code"));
-        final List<Recovery> listRecovery = recoveryService.getAllActiveAutoRemitTds();
+        final List<Recovery> listRecovery = recoveryService.getAllActiveRecoverys();
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("RemitRecoveryAction | Tds list size : " + listRecovery.size());
         addDropdownData("recoveryList", listRecovery);
@@ -475,15 +476,14 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
     public String beforeRemittanceRtgsSearch() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting beforeRemittanceRtgsSearch...");
-        paymentMode = FinancialConstants.MODEOFPAYMENT_RTGS;
-        rtgsContractorAssignment = true;
+        prepareBeforeRemittanceRtgsSearch();
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed beforeRemittanceRtgsSearch.");
         return "remittanceRtgsSearch";
     }
 
     @ValidationErrorPage(value = "remittanceRtgsSearch")
-    @SkipValidation
+    @Action(value = "/payment/chequeAssignment-searchRemittanceRTGS")
     public String searchRemittanceRTGS() throws ApplicationException, ParseException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting searchRemittanceRTGS...");
@@ -543,13 +543,13 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
             }
         }
         getSession().put("accountNoAndRtgsEntryMapSession", accountNoAndRemittanceRtgsEntryMap);
-        if (0 != drawingOfficerId) {
+        if (drawingOfficerId != null && 0 != drawingOfficerId) {
             final DrawingOfficer drawingOfficer = (DrawingOfficer) persistenceService.find("from DrawingOfficer where id =?",
                     drawingOfficerId);
             drawingOfficerCode = drawingOfficer.getCode();
         }
         assignmentType = "BillPayment";
-        if (!"".equals(parameters.get("recoveryId")[0])) {
+        if (parameters.get("recoveryId") != null && !"".equals(parameters.get("recoveryId")[0])) {
             final Recovery recovery = (Recovery) persistenceService.find("from Recovery where id=?",
                     new Long(parameters.get("recoveryId")[0]));
             if (recovery.getChartofaccounts().getChartOfAccountDetails().isEmpty())
