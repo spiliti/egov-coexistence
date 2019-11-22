@@ -111,7 +111,7 @@ function loadDocumentNoAndDate(billVhId) {
 
 function populateAvailableBalance(accnumObj) {
 	if (document.getElementById('voucherDate').value == '') {
-		bootbox.alert("Please Select the Voucher Date!!");
+		bootbox.alert("<s:text name='please.select.voucher.date.message'/>");
 		accnumObj.options.value = -1;
 		return;
 	}

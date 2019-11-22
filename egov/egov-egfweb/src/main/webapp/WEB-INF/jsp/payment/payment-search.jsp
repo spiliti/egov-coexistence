@@ -56,14 +56,14 @@
 	href="/services/EGF/resources/css/ccMenu.css?rnd=${app_release_no}" />
 <s:if
 	test="%{disableExpenditureType == true && enablePensionType == false}">
-	<title>Salary Bill Payment Search</title>
+	<title><s:text name="salary.bill.payment.search.label"/></title>
 </s:if>
 <s:elseif
 	test="%{disableExpenditureType == true && enablePensionType == true}">
-	<title>Pension Bill Payment Search</title>
+	<title><s:text name="pension.bill.payment.search.label"/></title>
 </s:elseif>
 <s:else>
-	<title>Bill Payment Search</title>
+	<title><s:text name="bill.payment.search.label"/></title>
 </s:else>
 </head>
 <body>
@@ -77,10 +77,10 @@
 		<div class="formmainbox">
 			<div class="subheadnew">
 				<s:if
-					test="%{disableExpenditureType == true && enablePensionType == false}">Salary Bill Payment Search</s:if>
+					test="%{disableExpenditureType == true && enablePensionType == false}"><s:text name="salary.bill.payment.search.label"/> </s:if>
 				<s:elseif
-					test="%{disableExpenditureType == true && enablePensionType == true}">Pension Bill Payment Search</s:elseif>
-				<s:else>Bill Payment Search</s:else>
+					test="%{disableExpenditureType == true && enablePensionType == true}"><s:text name="pension.bill.payment.search.label"/> </s:elseif>
+				<s:else><s:text name="bill.payment.search.label"/> </s:else>
 			</div>
 			<table align="center" width="100%" cellpadding="0" cellspacing="0">
 				<tr>
@@ -158,10 +158,8 @@
 			{
 				var fund = document.getElementById('fundId').value;
 				if(fund == "-1"){
-					bootbox.alert("Please select fund");     
+					bootbox.alert("<s:text name='please.select.fund.label'/>");     
 				}else{
-					console.log("department code new");
-					console.log(document.getElementById('departmentid').value);
 					document.forms[0].action='${pageContext.request.contextPath}/payment/payment-search.action';
 	    			document.forms[0].submit();
 				}
