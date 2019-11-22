@@ -54,13 +54,11 @@ import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.egov.commons.CVoucherHeader;
-import org.egov.egf.budget.service.BudgetControlTypeService;
 import org.egov.eis.service.EisCommonService;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.exception.ApplicationRuntimeException;
-import org.egov.infra.script.service.ScriptService;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infra.web.struts.annotation.ValidationErrorPage;
@@ -105,13 +103,9 @@ public class JournalVoucherAction extends BaseVoucherAction
     private VoucherTypeBean voucherTypeBean;
     private String buttonValue;
     private String message = "";
-    private Integer departmentId;
     private String wfitemstate;
     private VoucherHelper voucherHelper;
-    private static final String VOUCHERQUERY = " from CVoucherHeader where id=?";
-    private static final String ACTIONNAME = "actionName";
     private SimpleWorkflowService<CVoucherHeader> voucherWorkflowService;
-    private static final String VHID = "vhid";
     protected EisCommonService eisCommonService;
     @Autowired
     protected AppConfigValueService appConfigValuesService;
@@ -121,11 +115,6 @@ public class JournalVoucherAction extends BaseVoucherAction
     DateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
     SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd");
     Date date;
-    @Autowired
-    private BudgetControlTypeService budgetCheckConfigService;
-
-    @Autowired
-    private ScriptService scriptService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -232,21 +221,15 @@ public class JournalVoucherAction extends BaseVoucherAction
                 {
                     if (voucherHeader.getVouchermis().getBudgetaryAppnumber() == null)
                     {
-                        message = "Voucher  "
-                                + voucherHeader.getVoucherNumber()
-                                + " Created Sucessfully";
+                        message = getText("voucher.created.success.message",  new String[]{voucherHeader.getVoucherNumber()});
                         target = "success";
                     }
 
                     else
                     {
-                        message = "Voucher  "
-                                + voucherHeader.getVoucherNumber()
-                                + " Created Sucessfully"
-                                + "\\n"
+                        message = getText("voucher.created.success.message",  new String[]{voucherHeader.getVoucherNumber()})
                                 + "And "
-                                + getText("budget.recheck.sucessful", new String[] { voucherHeader.getVouchermis()
-                                        .getBudgetaryAppnumber() });
+                                + getText("budget.recheck.sucessful", new String[] { voucherHeader.getVouchermis() .getBudgetaryAppnumber() });
                         target = "success";
 
                     }
@@ -256,29 +239,19 @@ public class JournalVoucherAction extends BaseVoucherAction
                 {
                     if (voucherHeader.getVouchermis().getBudgetaryAppnumber() == null)
                     {
-                        message = "Voucher  "
-                                + voucherHeader.getVoucherNumber()
-                                + " Created Sucessfully"
+                        message = getText("voucher.created.success.message",  new String[]{voucherHeader.getVoucherNumber()})
                                 + "\\n"
-                                + getText("pjv.voucher.approved",
-                                        new String[] { this.getEmployeeName(voucherHeader.getState()
-                                                .getCreatedBy()) });
+                                + getText("pjv.voucher.approved", new String[] { this.getEmployeeName(voucherHeader.getState().getCreatedBy()) });
                         target = "success";
                     }
 
                     else
                     {
-                        message = "Voucher  "
-                                + voucherHeader.getVoucherNumber()
-                                + " Created Sucessfully"
+                        message = getText("voucher.created.success.message",  new String[]{voucherHeader.getVoucherNumber()})
+                                + "\\n And "
+                                + getText("budget.recheck.sucessful", new String[] { voucherHeader.getVouchermis().getBudgetaryAppnumber() })
                                 + "\\n"
-                                + "And "
-                                + getText("budget.recheck.sucessful", new String[] { voucherHeader.getVouchermis()
-                                        .getBudgetaryAppnumber() })
-                                + "\\n"
-                                + getText("pjv.voucher.approved",
-                                        new String[] { this.getEmployeeName(voucherHeader.getState()
-                                                .getCreatedBy()) });
+                                + getText("pjv.voucher.approved",new String[] { this.getEmployeeName(voucherHeader.getState().getCreatedBy()) });
 
                         target = "success";
 

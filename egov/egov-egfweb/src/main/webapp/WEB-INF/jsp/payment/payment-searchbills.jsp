@@ -717,7 +717,7 @@ function disableSelectedRows()
 			<span class="mandatory1"> <s:actionerror /> <s:fielderror />
 				<s:actionmessage />
 			</span>
-			<div class="subheadnew">Bill Payment</div>
+			<div class="subheadnew"><s:text name="bill.payment.label"/> </div>
 			<div id="budgetSearchGrid" style="display: block; width: 100%;">
 				<table width="100%" cellpadding="0" cellspacing="0" border="0">
 					<tr>
@@ -729,14 +729,13 @@ function disableSelectedRows()
 										<td>
 											<div class="tabber">
 												<div class="tabbertab" id="searchtab">
-													<h2>Search Bill</h2>
+													<h2><s:text name="search.bill.label"/></h2>
 													<span>
 														<table width="100%" border="0" cellspacing="0"
 															cellpadding="0">
 															<tr>
 																<td colspan="6">
-																	<div class="subheadsmallnew" style="border: 0;">Search
-																		Bill</div>
+																	<div class="subheadsmallnew" style="border: 0;"><s:text name="search.bill.label"/> </div>
 																</td>
 															</tr>
 															<tr>
@@ -803,13 +802,12 @@ function disableSelectedRows()
 													</span>
 												</div>
 												<div class="tabbertab" id="contractortab">
-													<h2>Contractor Bill</h2>
+													<h2><s:text name="contractor.bill.label"/> </h2>
 													<span>
 														<table name="contractortable" align="center" border="0"
 															cellpadding="0" cellspacing="0" class="newtable">
 															<tr>
-																<td colspan="6"><div class="subheadsmallnew">Contractor
-																		Bill</div></td>
+																<td colspan="6"><div class="subheadsmallnew"><s:text name="contractor.bill.label"/></div></td>
 															</tr>
 															<tr>
 																<td colspan="6">
@@ -961,8 +959,7 @@ function disableSelectedRows()
 																		</table>
 																		<s:if
 																			test="contractorList == null || contractorList.size==0">
-																			<div class="subheadsmallnew" style="border: 0;">No
-																				Records Found</div>
+																			<div class="subheadsmallnew" style="border: 0;"><s:text name="no.recoords.found.label"/> </div>
 																		</s:if>
 																	</div>
 																</td>
@@ -971,14 +968,13 @@ function disableSelectedRows()
 													</span>
 												</div>
 												<div class="tabbertab" id="suppliertab">
-													<h2>Supplier Bill</h2>
+													<h2><s:text name="supplier.bill.label"/></h2>
 													<span>
 														<table align="center" border="0" cellpadding="0"
 															cellspacing="0" class="newtable" name="supSelectAll"
 															id="supSelectAll">
 															<tr>
-																<td colspan="6"><div class="subheadsmallnew">Supplier
-																		Bill</div></td>
+																<td colspan="6"><div class="subheadsmallnew"><s:text name="supplier.bill.label"/></div></td>
 															</tr>
 															<tr>
 																<td colspan="6">
@@ -1126,8 +1122,7 @@ function disableSelectedRows()
 																		</table>
 																		<s:if
 																			test="supplierList == null || supplierList.size==0">
-																			<div class="subheadsmallnew" style="border: 0;">No
-																				Records Found</div>
+																			<div class="subheadsmallnew" style="border: 0;"><s:text name="no.recoords.found.label"/> </div>
 																		</s:if>
 																	</div>
 																</td>
@@ -1136,13 +1131,12 @@ function disableSelectedRows()
 													</span>
 												</div>
 												<div class="tabbertab" id="cbilltab">
-													<h2>Expense Bill</h2>
+													<h2><s:text name="expense.bill.label"/></h2>
 													<span>
 														<table align="center" border="0" cellpadding="0"
 															cellspacing="0" class="newtable" name="expSelectAll">
 															<tr>
-																<td colspan="6"><div class="subheadsmallnew">Expense
-																		Bill</div></td>
+																<td colspan="6"><div class="subheadsmallnew"><s:text name="expense.bill.label"/></div></td>
 															</tr>
 															<tr>
 																<td colspan="6">
@@ -1364,12 +1358,12 @@ function disableSelectedRows()
 									name="payment.mode" /><span class="mandatory1">*</span></strong> <input
 							name="paymentMode" id="paymentModecheque" checked="checked"
 							value="cheque" type="radio"><label
-							for="paymentModecheque">Cheque</label> <input name="paymentMode"
+							for="paymentModecheque"><s:text name="cheque.label"/> </label> <input name="paymentMode"
 							id="paymentModecash" value="cash" type="radio"><label
 							for="paymentModecash"><s:text
 									name="cash.consolidated.cheque" /></label><input name="paymentMode"
 							id="paymentModertgs" value="rtgs" type="radio"><label
-							for="paymentModertgs">RTGS</label></td>
+							for="paymentModertgs"><s:text name="rtgs.label"/></label></td>
 					</tr>
 					<tr>
 						<td colspan="2" align="center">
@@ -1384,8 +1378,7 @@ function disableSelectedRows()
 					</tr>
 					<tr>
 						<td colspan="2" class="text-center">
-					 		<font size="small" color="red">*Maximum of 500 records are
-								displayed here<br>*You can select Maximum of 125 bills for single payment</font>
+					 		<font size="small" color="red"><s:text name="max.record.displayed.for.bill.payments.message"/> </font>
 						</td>
 					</tr>
 </table>

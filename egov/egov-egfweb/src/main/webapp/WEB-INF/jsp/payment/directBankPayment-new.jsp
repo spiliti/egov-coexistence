@@ -311,7 +311,7 @@
 				<jsp:param value="Direct Bank Payment" name="heading" />
 			</jsp:include>
 			<div class="formmainbox">
-				<div class="subheadnew">Create Direct Bank Payment</div>
+				<div class="subheadnew"><s:text name="create.direct.bank.payment.label"/> </div>
 
 				<div align="center">
 					<font style='color: red;'>
@@ -353,7 +353,7 @@
 
 
 					<div class="subheadsmallnew"></div>
-					<div align="left" class="mandatory1">* Mandatory Fields</div>
+					<div align="left" class="mandatory1"><s:text name="mandatory.field.label"/> </div>
 					<s:hidden name="typeOfAccount" id="typeOfAccount"
 						value="%{typeOfAccount}" />
 
@@ -455,11 +455,11 @@ function onSubmit()
 		return true;
 		}
 	else if(!balanceCheck() && jQuery("#bankBalanceCheck").val()==balanceCheckMandatory){
-			 bootbox.alert("Insufficient Bank Balance.");
+			 bootbox.alert("<s:text name ='insufficient.bank.balance.message'/>");
 			 return false;
 			}
 	else if(!balanceCheck() && jQuery("#bankBalanceCheck").val()==balanceCheckWarning){
-		 var msg = confirm("Insufficient Bank Balance. Do you want to process ?");
+		 var msg = confirm("<s:text name ='insufficient.bank.balance.confirm.message'/>");
 		 if (msg == true) {
 			 document.dbpform.action = '/services/EGF/payment/directBankPayment-create.action';
 			 document.dbpform.submit();

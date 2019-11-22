@@ -122,15 +122,15 @@
 				<table width="100%" align="center" cellpadding="0" cellspacing="0"
 					class="setborder" style="border-collapse: inherit;">
 					<tr>
-						<th class="bluebgheadtd">Sl. No.</th>
-						<th class="bluebgheadtd">Expenditure Type</th>
-						<th class="bluebgheadtd">Bill Type</th>
-						<th class="bluebgheadtd">Bill Number</th>
-						<th class="bluebgheadtd">Bill Date</th>
-						<th class="bluebgheadtd">Bill Amount</th>
-						<th class="bluebgheadtd">Passed Amount</th>
-						<th class="bluebgheadtd">Bill Status</th>
-						<th class="bluebgheadtd">Owner Name</th>
+						<th class="bluebgheadtd"><s:text name="sl.no"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.expendituretype"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.Type" /></th>
+						<th class="bluebgheadtd"><s:text name="bill.number" /></th>
+						<th class="bluebgheadtd"><s:text name="billDate"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.Amount"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.passed.Amount"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.status"/></th>
+						<th class="bluebgheadtd"><s:text name="owner.name"/></th>
 					</tr>
 
 					<s:iterator var="p" value="billList" status="s">
@@ -176,15 +176,14 @@
 		<div id="msgdiv" style="display: none">
 			<table align="center" class="tablebottom" width="80%">
 				<tr>
-					<th class="bluebgheadtd" colspan="7">No Records Found
+					<th class="bluebgheadtd" colspan="7"><s:text name="no.record.found"/>
 					</td>
 				</tr>
 			</table>
 		</div>
 		<div id="loading" class="loading"
 			style="width: 700; height: 700; display: none" align="center">
-			<blink style="color: red">Searching processing, Please
-				wait...</blink>
+			<blink style="color: red"><s:text name="search.processing.message"/></blink>
 		</div>
 
 
@@ -196,7 +195,7 @@
 			 {
 				 if(jQuery('#expType').val()==-1)
 					 {
-						 jQuery('#lblError').html("Please select expenditure type");
+						 jQuery('#lblError').html("<s:text name='please.select.expenditure.type'/>");
 						 return false
 					 }
 			 }
@@ -212,15 +211,15 @@
 	
 		document.getElementById('lblError').innerHTML ="";
 		if(document.getElementById('expType').value == -1){
-			document.getElementById('lblError').innerHTML = "Please select expenditure type";
+			document.getElementById('lblError').innerHTML = "<s:text name='please.select.expenditure.type'/>";
 			return false;
 		}
 		if(document.getElementById('billDateFrom').value.trim().length == 0){
-			document.getElementById('lblError').innerHTML = "Please select bill from date";
+			document.getElementById('lblError').innerHTML = "<s:text name='please.select.bill.from.date'/>";
 			return false;
 		}
 		if(document.getElementById('billDateTo').value.trim().length == 0){
-			document.getElementById('lblError').innerHTML = "Please select bill to date";
+			document.getElementById('lblError').innerHTML = "<s:text name='please.select.bill.to.date'/>";
 			return false;
 			
 		}
@@ -233,49 +232,49 @@
 		 <s:if test="%{isFieldMandatory('fund')}"> 
 				 if(null != document.getElementById('fundId') && document.getElementById('fundId').value == -1){
 
-					document.getElementById('lblError').innerHTML = "Please Select a fund";
+					document.getElementById('lblError').innerHTML = "<s:text name='please.select.fund'/>";
 					return false;
 				 }
 			 </s:if>
 			<s:if test="%{isFieldMandatory('department')}"> 
 				 if(null!= document.getElementById('vouchermis.departmentcode') && document.getElementById('vouchermis.departmentcode').value == -1){
 
-					document.getElementById('lblError').innerHTML = "Please select a department";
+					document.getElementById('lblError').innerHTML = "<s:text name='please.select.department'/>";
 					return false;
 				 }
 			</s:if>
 			<s:if test="%{isFieldMandatory('scheme')}"> 
 				 if(null!=document.getElementById('schemeid') &&  document.getElementById('schemeid').value == -1){
 
-					document.getElementById('lblError').innerHTML = "Please select a scheme";
+					document.getElementById('lblError').innerHTML = "<s:text name='please.select.scheme'/>";
 					return false;
 				 }
 			</s:if>
 			<s:if test="%{isFieldMandatory('subscheme')}"> 
 				 if(null!= document.getElementById('subschemeid') && document.getElementById('subschemeid').value == -1){
 
-					document.getElementById('lblError').innerHTML = "Please select a subscheme";
+					document.getElementById('lblError').innerHTML = "<s:text name='please.select.subscheme'/>";
 					return false;
 				 }
 			</s:if>
 			<s:if test="%{isFieldMandatory('functionary')}"> 
 				 if(null!=document.getElementById('vouchermis.functionary') &&  document.getElementById('vouchermis.functionary').value == -1){
 
-					document.getElementById('lblError').innerHTML = "Please select a functionary";
+					document.getElementById('lblError').innerHTML = "<s:text name='please.select.functionary'/>";
 					return false;
 				 }
 			</s:if>
 			<s:if test="%{isFieldMandatory('fundsource')}"> 
 				 if(null !=document.getElementById('fundsourceId') &&  document.getElementById('fundsourceId').value == -1){
 
-					document.getElementById('lblError').innerHTML = "Please select a fundsource";
+					document.getElementById('lblError').innerHTML = "<s:text name='please.select.fundsource'/>";
 					return false;
 				}
 			</s:if>
 			<s:if test="%{isFieldMandatory('field')}"> 
 				 if(null!= document.getElementById('vouchermis.divisionid') && document.getElementById('vouchermis.divisionid').value == -1){
 
-					document.getElementById('lblError').innerHTML = "Please select a field";
+					document.getElementById('lblError').innerHTML = "<s:text name='please.select.field'/>";
 					return false;
 				 }
 			</s:if>

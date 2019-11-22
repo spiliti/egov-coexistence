@@ -115,7 +115,7 @@
 	{
 		if(obj.value.length>1024)
 		{
-			bootbox.alert('Max 1024 characters are allowed for comments. Remaining characters are truncated.')
+			bootbox.alert('<s:text name="max.character.allowed.for.comment.message"/>')
 			obj.value = obj.value.substring(1,1024);
 		}
 	}
@@ -131,13 +131,13 @@
 			<s:actionmessage />
 		</span>
 		<div class="formmainbox">
-			<div class="subheadnew">Voucher View</div>
+			<div class="subheadnew"><s:text name="voucher.view.label"/> </div>
 			<table border="0" width="100%" cellspacing="0">
 				<tr>
-					<td width="10%" class="greybox"><b>Voucher Number :  </b></td>
+					<td width="10%" class="greybox"><b> <s:text name="voucher.number"/> :  </b></td>
 					<td width="25%" class="greybox"><s:property
 							value="%{voucherHeader.voucherNumber}" /></td>
-					<td width="10%" class="greybox"><b>  Date :</b></td>
+					<td width="10%" class="greybox"><b>  <s:text name="date.label"/> :</b></td>
 					<td width="25%" class="greybox"><s:date
 							name="voucherHeader.voucherDate" format="dd/MM/yyyy" /></td>
 				</tr>
@@ -146,7 +146,7 @@
 			<table align="center" id="sourceIcon">
 				<tr>
 					<td class="bluebox"><a href="#" id="sourceLink"
-						onclick=" return openSource();">Source</a></td>
+						onclick=" return openSource();"><s:text name="source.label"/> </a></td>
 
 				</tr>
 			</table>
@@ -158,15 +158,14 @@
 			<br />
 			<table border="1" width="100%" cellspacing="0">
 				<tr>
-					<th colspan="5"><div class="subheadsmallnew">Account
-							Details</div></th>
+					<th colspan="5"><div class="subheadsmallnew"><s:text name="account.details"/> </div></th>
 				</tr>
 				<tr>
-					<th class="bluebgheadtd" width="18%">Function Name</th>
-					<th class="bluebgheadtd" width="17%">Account&nbsp;Code</th>
-					<th class="bluebgheadtd" width="19%">Account Head</th>
-					<th class="bluebgheadtd" width="17%">Debit&nbsp;Amount(Rs)</th>
-					<th class="bluebgheadtd" width="16%">Credit&nbsp;Amount(Rs)</th>
+					<th class="bluebgheadtd" width="18%"><s:text name="function.name.label"/> </th>
+					<th class="bluebgheadtd" width="17%"><s:text name="account.code"/></th>
+					<th class="bluebgheadtd" width="19%"><s:text name="account.head.label"/> </th>
+					<th class="bluebgheadtd" width="17%"><s:text name="debit.amount.label"/> </th>
+					<th class="bluebgheadtd" width="16%"><s:text name="credit.amount.label"/> </th>
 				</tr>
 
 
@@ -192,7 +191,7 @@
 				</s:iterator>
 				<tr>
 					<td class="greybox setborder" style="text-align: right" colspan="3" />
-					<b>Total</b>
+					<b><s:text name="total.label"/> </b>
 					</td>
 					<td class="greybox setborder" style="text-align: right"><fmt:formatNumber
 							value="${db}" pattern="#0.00" /></td>
@@ -209,15 +208,14 @@
 				<br />
 				<table border="1" width="100%" cellspacing="0">
 					<tr>
-						<th colspan="5"><div class="subheadsmallnew">Sub-ledger
-								Details</div></th>
+						<th colspan="5"><div class="subheadsmallnew"><s:text name="subledger.details.label"/> </div></th>
 					</tr>
 					<tr>
-						<th class="bluebgheadtd" width="18%">Function Name</th>
-						<th class="bluebgheadtd" width="18%">Account Code</th>
-						<th class="bluebgheadtd" width="17%">Detailed Type</th>
-						<th class="bluebgheadtd" width="19%">Detailed Key</th>
-						<th class="bluebgheadtd" width="17%">Amount(Rs)</th>
+						<th class="bluebgheadtd" width="18%"><s:text name="function.name.label"/> </th>
+						<th class="bluebgheadtd" width="18%"><s:text name="account.code"/> </th>
+						<th class="bluebgheadtd" width="17%"><s:text name="detailed.type.label"/> </th>
+						<th class="bluebgheadtd" width="19%"><s:text name="detailed.key.label"/> </th>
+						<th class="bluebgheadtd" width="17%"><s:text name="amount"/> </th>
 					</tr>
 					<s:iterator var="p" value="%{billDetails.subLedgerlist}" status="s">
 						<tr>
