@@ -85,10 +85,10 @@
 		</span>
 		<div class="formmainbox">
 			<s:if test="%{showMode=='nonbillPayment'}">
-				<div class="subheadnew">Non Bill Payment Search</div>
+				<div class="subheadnew"><s:text name="non.bill.payment.search"/> </div>
 			</s:if>
 			<s:else>
-				<div class="subheadnew">Voucher Search</div>
+				<div class="subheadnew"><s:text name="voucher.search"/> </div>
 			</s:else>
 			<table align="center" width="100%" cellpadding="0" cellspacing="0">
 				<tr>
@@ -147,7 +147,7 @@
 			</table>
 			<br />
 			<div class="subheadsmallnew"></div>
-			<div align="left" class="mandatory1">Either Voucher Number Or Mandatory Fields(*) Are Required</div>
+			<div align="left" class="mandatory1"><s:text name="voucher.number.or.mendatory.field.required"/></div>
 		</div>
 	
 		<div align="center" class="buttonbottom">
@@ -206,15 +206,15 @@
 					<table width="100%" border="0" align="center" cellpadding="0"
 						cellspacing="0" class="tablebottom">
 						<tr>
-							<th class="bluebgheadtd">Sl.No.</th>
-							<th class="bluebgheadtd">Voucher Number</th>
-							<th class="bluebgheadtd">Type</th>
-							<th class="bluebgheadtd">Name</th>
-							<th class="bluebgheadtd">Voucher Date</th>
-							<th class="bluebgheadtd">Fund Name</th>
-							<th class="bluebgheadtd">Department Name</th>
-							<th class="bluebgheadtd">Amount(Rs)</th>
-							<th class="bluebgheadtd">Status</th>
+							<th class="bluebgheadtd"><s:text name="sl.no"/> .</th>
+							<th class="bluebgheadtd"><s:text name="voucher.number"/> </th>
+							<th class="bluebgheadtd"><s:text name="type"/> </th>
+							<th class="bluebgheadtd"><s:text name="name"/> </th>
+							<th class="bluebgheadtd"><s:text name="voucher.date"/> </th>
+							<th class="bluebgheadtd"><s:text name="fund.name"/> </th>
+							<th class="bluebgheadtd"><s:text name="department.name"/> </th>
+							<th class="bluebgheadtd"><s:text name="amount"/> </th>
+							<th class="bluebgheadtd"><s:text name="status"/> </th>
 							<!-- <th class="bluebgheadtd">Source</th> -->
 						</tr>
 						<c:set var="trclass" value="greybox" />
@@ -352,17 +352,17 @@
 			if(!DateValidation(fromDate,toDate))
 				return false;
 			if(fromDate == "" && voucherNumber!=""){
-				bootbox.alert("Please select from date");
+				bootbox.alert("<s:text name='please.select.from.date'/>");
 				return false;
 				}
 			
 			if(toDate == "" && voucherNumber!=""){
-				bootbox.alert("Please select to date");
+				bootbox.alert("<s:text name='please.select.to.date'/>");
 				return false;
 				}
 
 			if(fundId == "-1" && voucherNumber!=""){
-				bootbox.alert("Please select fund");
+				bootbox.alert("<s:text name='please.select.fund'/>");
 				return false;
 				}
 			
@@ -381,7 +381,7 @@
 			{
 			document.getElementById('type').disabled=true;
 			}
-			document.title="Non Bill Payment Search";
+			document.title="<s:text name='non.bill.payment.search'/>";
 		}
 		
 		function changeField()

@@ -273,8 +273,7 @@ public class VoucherSearchAction extends BaseFormAction {
 			final boolean validateFinancialYearForPosting = voucherSearchUtil.validateFinancialYearForPosting(fromDate,
 					toDate);
 			if (!validateFinancialYearForPosting)
-				throw new ValidationException(Arrays.asList(new ValidationError(
-						"Financial Year  Not active for Posting(either year or date within selected date range)",
+				throw new ValidationException(Arrays.asList(new ValidationError(getText("financial.year.not.active.for.posting", "Financial Year  Not active for Posting(either year or date within selected date range)"),
 						"Financial Year  Not active for Posting(either year or date within selected date range)")));
 		}
 

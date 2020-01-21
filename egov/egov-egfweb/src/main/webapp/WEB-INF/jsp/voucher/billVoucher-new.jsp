@@ -73,7 +73,7 @@
 			var expType=document.getElementById('expType').value;
 			if(expType == "-1")
 			{
-				bootbox.alert("Please select Bill Type");
+				bootbox.alert("<s:text name='please.select.bill.type'/>");
 				return false;
 			}
 			
@@ -103,7 +103,7 @@
 		</jsp:include>
 		<div class="formmainbox">
 			<div class="formheading">
-				<div class="subheadnew">Create Voucher From Bill</div>
+				<div class="subheadnew"><s:text name="create.voucher.from.bill"/></div>
 			</div>
 			<div id="listid" style="display: block">
 				<br />
@@ -116,7 +116,7 @@
 					</span>
 					<table border="0" width="100%">
 						<tr>
-							<td class="bluebox">Bill Type<span class="bluebox"><span class="mandatory1">*</span></span></td>
+							<td class="bluebox"><s:text name="bill.Type" /><span class="bluebox"><span class="mandatory1">*</span></span></td>
 							<td class="bluebox"><s:select name="expType" id="expType" list="dropdownData.expTypeList" headerKey="-1" headerValue="----Choose----" /></td>
 							<td class="bluebox" id="deptLabel"><s:text name="voucher.department" /></td>
 							<td class="bluebox"><s:select name="vouchermis.departmentcode" id="departmentid" list="dropdownData.departmentList" listKey="code" listValue="name" headerKey="-1" headerValue="----Choose----" value="voucherHeader.vouchermis.departmentcode" /></td>
@@ -124,9 +124,9 @@
 						</tr>
 
 						<tr>
-							<td class="greybox">From Date</td>
+							<td class="greybox"><s:text name="from.date" /></td>
 							<td class="greybox"><s:textfield id="voucherDateFrom" name="voucherTypeBean.voucherDateFrom" data-date-end-date="0d" onkeyup="DateFormat(this,this.value,event,false,'3')" placeholder="DD/MM/YYYY" class="form-control datepicker" data-inputmask="'mask': 'd/m/y'"  autocomplete="off"/></td>
-							<td class="greybox">To Date</td>
+							<td class="greybox"><s:text name="to.date" /></td>
 							<td class="greybox"><s:textfield id="voucherDateTo" name="voucherTypeBean.voucherDateTo" data-date-end-date="0d" onkeyup="DateFormat(this,this.value,event,false,'3')" placeholder="DD/MM/YYYY" class="form-control datepicker" data-inputmask="'mask': 'd/m/y'"  autocomplete="off"/>
 						</tr>
 						<tr>
@@ -158,13 +158,13 @@
 			<div id="listid" style="display: block">
 				<table width="100%" align="center" class="tablebottom">
 					<tr>
-						<th class="bluebgheadtd">Sl. No.</th>
-						<th class="bluebgheadtd">Bill Number</th>
-						<th class="bluebgheadtd">Bill Date</th>
-						<th class="bluebgheadtd">Bill Amount</th>
-						<th class="bluebgheadtd">Passed Amount</th>
-						<th class="bluebgheadtd">Expenditure Type</th>
-						<th class="bluebgheadtd">Department</th>
+						<th class="bluebgheadtd"><s:text name="sl.no"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.Number"/> </th>
+						<th class="bluebgheadtd"><s:text name="bill.Date"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.Amount"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.passed.Amount"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.expendituretype"/></th>
+						<th class="bluebgheadtd"><s:text name="bill.Dept.Name"/></th>
 					</tr>
 					<s:iterator var="p" value="preApprovedVoucherList" status="s">
 						<tr class="setborder">

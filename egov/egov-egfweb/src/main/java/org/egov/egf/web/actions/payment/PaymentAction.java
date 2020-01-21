@@ -153,8 +153,6 @@ public class PaymentAction extends BasePaymentAction {
     @Qualifier("voucherService")
     private VoucherService voucherService;
     @Autowired
-    private DepartmentService departmentService;
-    @Autowired
     private FunctionService functionService;
 
     private Integer bankaccount, bankbranch;
@@ -194,9 +192,9 @@ public class PaymentAction extends BasePaymentAction {
     private String newPartyname;
     private String chk = "";
     private String fundNameStr = "";
+    private String fundSourceNameStr = "";
     private String functionNameStr = "";
     private String deptNameStr = "";
-    private String fundSourceNameStr = "";
     private String schemeStr = "";
     private String subSchemeStr = "";
     private Map<String, String> payeeMap = new HashMap<String, String>();
@@ -327,8 +325,7 @@ public class PaymentAction extends BasePaymentAction {
                 for (final AppConfigValues appConfigVal : configValues)
                     bankCode = appConfigVal.getValue();
             } catch (final Exception e) {
-                throw new ApplicationRuntimeException(
-                        "Appconfig value for EB Voucher propartys is not defined in the system");
+                throw new ApplicationRuntimeException(getText("appconfig.value.for.eb.voucher.property.not.defined.label"));
             }
             addDropdownData("bankbranchList",
                     persistenceService.findAllBy(
@@ -386,8 +383,7 @@ public class PaymentAction extends BasePaymentAction {
                     propartyAppConfigResultList.put(key, value);
                 }
             } catch (final Exception e) {
-                throw new ApplicationRuntimeException(
-                        "Appconfig value for EB Voucher propartys is not defined in the system");
+                throw new ApplicationRuntimeException(getText("appconfig.value.for.eb.voucher.property.not.defined.label"));
             }
         }
         for (final String key : propartyAppConfigResultList.keySet()) {
