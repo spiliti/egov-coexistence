@@ -52,7 +52,7 @@
 
 <div class="panel-heading">
 	<div class="panel-title">
-		<spring:message code="lbl.debit.details" />
+		<spring:message code="lbl.debit.details" text="Debit details"/>
 	</div>
 </div>
 <div class="panel-body">
@@ -60,10 +60,10 @@
 	<table class="table table-bordered" id="tbldebitdetails">
 		<thead>
 			<tr>
-				<th><spring:message code="lbl.account.code"/></th>
-				<th><spring:message code="lbl.account.head"/></th>
-				<th><spring:message code="lbl.debit.amount"/></th>
-				<th><spring:message code="lbl.action"/></th>
+				<th><spring:message code="lbl.account.code" text="Account Code"/></th>
+				<th><spring:message code="lbl.account.head" text="Account Head"/></th>
+				<th><spring:message code="lbl.debit.amount" text="Debit Amount"/></th>
+				<th><spring:message code="lbl.action" text="Action"/></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -71,7 +71,7 @@
 				<c:when test="${egBillregister.debitDetails.size() == 0}">
 					<tr id="debitdetailsrow">
 						<td>
-							<input type="text" id="debitDetails[0].debitGlcode" name="debitDetails[0].debitGlcode" class="form-control table-input debitDetailGlcode debitGlcode"  data-errormsg="Account Code is mandatory!" data-idx="0" data-optional="0"   placeholder="Type first 3 letters of Account code" >
+							<input type="text" id="debitDetails[0].debitGlcode" name="debitDetails[0].debitGlcode" class="form-control table-input debitDetailGlcode debitGlcode"  data-errormsg="<spring:message code='account.code.is.mandatory.message'  text='Account Code is mandatory!'/>" data-idx="0" data-optional="0"   placeholder='<spring:message code="type.first.3.letter.of.account.code.message" text="Type first 3 letters of Account code"/>' >
 							<form:hidden path="debitDetails[0].glcodeid" id="debitDetails[0].glcodeid" class="form-control table-input hidden-input debitdetailid"/> 
 						</td>
 						<td>
@@ -88,7 +88,7 @@
 						<c:forEach items="${egBillregister.debitDetails}" var="billDeatils" varStatus="item">
 							<tr id="debitdetailsrow">
 								<td>
-									<input type="text" id="debitDetails[${item.index }].debitGlcode" name="debitDetails[${item.index }].debitGlcode" class="form-control table-input debitDetailGlcode debitGlcode"  data-errormsg="Account Code is mandatory!" data-idx="0" data-optional="0"   placeholder="Type first 3 letters of Account code" value="${billDeatils.chartOfAccounts.glcode }" >
+									<input type="text" id="debitDetails[${item.index }].debitGlcode" name="debitDetails[${item.index }].debitGlcode" class="form-control table-input debitDetailGlcode debitGlcode"  data-errormsg="<spring:message code='account.code.is.mandatory.message'  text='Account Code is mandatory!'/>" data-idx="0" data-optional="0"   placeholder='<spring:message code="type.first.3.letter.of.account.code.message" text="Type first 3 letters of Account code"/>' value="${billDeatils.chartOfAccounts.glcode }" >
 									<form:hidden path="debitDetails[${item.index }].glcodeid" id="debitDetails[${item.index }].glcodeid" class="form-control table-input hidden-input debitdetailid" value="${billDeatils.glcodeid }"/> 
 								</td>
 								<td>

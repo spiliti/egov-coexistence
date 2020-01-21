@@ -111,9 +111,9 @@
 			</table>
 		</div>
 		<div align="center" class="buttonbottom">
-			<input type="submit" class="buttonsubmit" value="Search" id="Search"
+			<input type="submit" class="buttonsubmit" value="<s:text name='lbl.search.button.key'/>" id="Search"
 				name="button" onclick="return validateFormAndSubmit();" /> <input
-				type="button" id="Close" value="Close"
+				type="button" id="Close" value="<s:text name='lbl.close.button.key'/>"
 				onclick="javascript:window.parent.postMessage('close','*');" class="button" />
 		</div>
 		<br />

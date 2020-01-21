@@ -50,6 +50,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Assignment {
 
@@ -101,6 +102,8 @@ public class Assignment {
     private String employeeName;
 
     private String tenantId;
+    @JsonProperty("isCurrentAssignment")
+    private boolean currentAssignment;
 
     public Assignment() {
     }
@@ -281,7 +284,8 @@ public class Assignment {
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
     }
-
+    
+    
     // @Override
     // public int hashCode() {
     // final int prime = 31;
@@ -431,6 +435,14 @@ public class Assignment {
                 + grade + ", govtOrderNumber=" + govtOrderNumber + ", documents=" + documents + ", createdBy="
                 + createdBy + ", createdDate=" + createdDate + ", lastModifiedBy=" + lastModifiedBy
                 + ", lastModifiedDate=" + lastModifiedDate + ", tenantId=" + tenantId + "]";
+    }
+
+    public boolean isCurrentAssignment() {
+        return currentAssignment;
+    }
+
+    public void setCurrentAssignment(boolean currentAssignment) {
+        this.currentAssignment = currentAssignment;
     }
 
 }

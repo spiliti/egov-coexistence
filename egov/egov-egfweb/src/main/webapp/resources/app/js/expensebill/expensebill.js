@@ -92,7 +92,7 @@ $(document).ready(function(){
 			replace: function (url, query) {
 				var subLedgerType = $('#subLedgerType').val();
 				if(subLedgerType == null || subLedgerType == "")
-					bootbox.alert("Please select SubLedger Type");
+					bootbox.alert(jQuery.i18n.prop('please.select.sbuledger.type.message'));
 				return url + query + '&accountDetailType=' + subLedgerType ;
 			},
 			filter : function(data) {
@@ -222,13 +222,13 @@ function debitGlcode_initialize() {
 	   });
 	    if(data.issubledger && originaldetailtypeid!='' && originaldetailkeyid=='')
 	    {
-		   bootbox.alert("Please Enter "+subLedgerDisplayName,function() {
+		   bootbox.alert(jQuery.i18n.prop('please.enter.subledger.display.name.message',subLedgerDisplayName),function() {
 			    var index= dt.length - 1;
 			    if(document.getElementById('tempDebitDetails['+index+'].debitGlcode'))
 			    	document.getElementById('tempDebitDetails['+index+'].debitGlcode').value = "";
 			});
 	    }else if(flag){
-			bootbox.alert("Debit code already added", function() {
+			bootbox.alert(jQuery.i18n.prop('debit.code.already.added.message'), function() {
 				var index= dt.length - 1;
 				if(document.getElementById('tempDebitDetails['+index+'].debitGlcode'))
 					document.getElementById('tempDebitDetails['+index+'].debitGlcode').value = "";
@@ -300,12 +300,12 @@ function creditGlcode_initialize() {
 	   });
 	   if(data.issubledger && originaldetailtypeid!='' && originaldetailkeyid=='')
 	    {
-		   bootbox.alert("Please Enter "+subLedgerDisplayName,function() {
+		   bootbox.alert(jQuery.i18n.prop('please.enter.subledger.display.name.message',subLedgerDisplayName),function() {
 			   var index= dt.length - 1;
 				document.getElementById('tempCreditDetails['+index+'].creditGlcode').value = "";
 			});
 	    }else if(flag){
-			bootbox.alert("Credit code already added", function() {
+			bootbox.alert(jQuery.i18n.prop('credit.code.already.added.message'), function() {
 				var index= dt.length - 1;
 				document.getElementById('tempCreditDetails['+index+'].creditGlcode').value = "";
 			});
@@ -356,7 +356,7 @@ $('#subLedgerType').change(function () {
 		}).done(
 				function(response) {
 					$('#netPayableAccountCode').empty();
-					$('#netPayableAccountCode').append($("<option value=''>Select from below</option>"));
+					$('#netPayableAccountCode').append($("<option value=''>"+jQuery.i18n.prop('select.from.below.label')+"</option>"));
 					var responseObj = JSON.parse(response);
 					$.each(responseObj, function(index, value) {
 						var selected="";
@@ -404,17 +404,17 @@ function loadCheckListTable(){
 							output = output + '<input id="checkLists['+index+'].appconfigvalue.id" name="checkLists['+index+'].appconfigvalue.id" type="hidden" value="'+ value.id +'"/>'
 							output = output + '<select id="checkLists['+index+'].checklistvalue" name="checkLists['+index+'].checklistvalue" data-first-option="false" class="form-control">'
 							if(selected!="" && selectedCheckValue == "na")
-								output = output + '<option value="na" selected = "selected">N/A</option>'
+								output = output + '<option value="na" selected = "selected">'+jQuery.i18n.prop('not.available.label')+'</option>'
 							else
 								output = output + '<option value="na">N/A</option>'
 							if(selected!="" && selectedCheckValue == "Yes")
-								output = output + '<option value="Yes" selected = "selected">Yes</option>'
+								output = output + '<option value="Yes" selected = "selected">'+jQuery.i18n.prop('yes.label')+'</option>'
 							else
 								output = output + '<option value="Yes">Yes</option>'
 							if(selected!="" && selectedCheckValue == "No")
-								output = output + '<option value="No" selected = "selected">No</option>'
+								output = output + '<option value="No" selected = "selected">'+jQuery.i18n.prop('no.label')+'</option>'
 							else
-								output = output + '<option value="No">No</option>'
+								output = output + '<option value="No">'+jQuery.i18n.prop('no.label')+'</option>'
 							
 							output = output + '</select>'
 							output = output + '</td>'
@@ -458,14 +458,14 @@ function addDebitDetailsRow() {
 			addCustomEvent(rowcount,'tempDebitDetails[index].addButton','keydown',shortKeyFunForAddButton);
 		}
 	} else {
-		  bootbox.alert('limit reached!');
+		  bootbox.alert(jQuery.i18n.prop('limit.reached.message'));
 	}
 }
 
 function deleteDebitDetailsRow(obj) {
 	var rowcount=$("#tbldebitdetails tbody tr").length;
     if(rowcount<=1) {
-		bootbox.alert("This row can not be deleted");
+		bootbox.alert(jQuery.i18n.prop("row.can.not.delete.message"));
 		return false;
 	} else {
 		deleteRow(obj,'tbldebitdetails');
@@ -494,14 +494,14 @@ function addCreditDetailsRow() {
 			addCustomEvent(rowcount,'tempCreditDetails[index].addButton','keydown',shortKeyFunForAddButton);
 		}
 	} else {
-		  bootbox.alert('limit reached!');
+		  bootbox.alert(jQuery.i18n.prop('limit.reached.message'));
 	}
 }
 
 function deleteCreditDetailsRow(obj) {
 	var rowcount=$("#tblcreditdetails tbody tr").length;
     if(rowcount<=1) {
-		bootbox.alert("This row can not be deleted");
+		bootbox.alert(jQuery.i18n.prop('row.can.not.delete.message'));
 		return false;
 	} else {
 		deleteRow(obj,'tblcreditdetails');
@@ -574,13 +574,13 @@ function validateAccountDetails()
 	$('#tbldebitdetails  > tbody > tr:visible[id="debitdetailsrow"]').each(function(index) {
 		if($(this).find(".debitdetailid").val()!='' && $(this).find(".debitAmount").val()=='')
 		{
-			bootbox.alert("Please Eneter Debit Amount for the row "+(index+1));
+			bootbox.alert(jQuery.i18n.prop('please.enter.debit.amount.message',(index+1)));
 			flag = false;
 			return false;
 		}
 		if(!validateDuplicateAccountDetail($(this).find(".debitdetailid").val(),$(this).find(".debitDetailTypeId").val(),
 				$(this).find(".debitDetailKeyId").val())){
-			bootbox.alert("Already added debit details for account code: "+ $(this).find(".debitaccountcode").val());
+			bootbox.alert(jQuery.i18n.prop("already.added.debit.detail.message",$(this).find(".debitaccountcode").val()));
 			flag = false;
 			return false;
 		}
@@ -589,14 +589,14 @@ function validateAccountDetails()
 	$('#tblcreditdetails  > tbody > tr:visible[id="creditdetailsrow"]').each(function(index) {
 		if($(this).find(".creditdetailid").val()!='' && $(this).find(".creditAmount").val()=='')
 		{
-			bootbox.alert("Please Eneter credit Amount for the row "+(index+1));
+			bootbox.alert(jQuery.i18n.prop("please.enter.credit.amount.message",(index+1)));
 			flag = false;
 			return false;
 		}
 		
 		if(!validateDuplicateAccountDetail($(this).find(".creditdetailid").val(),$(this).find(".creditDetailTypeId").val(),
 				$(this).find(".creditDetailKeyId").val())){
-			bootbox.alert("Already added credit details for account code: "+ $(this).find(".creditaccountcode").val());
+			bootbox.alert(jQuery.i18n.prop("already.added.credit.detail.message", $(this).find(".creditaccountcode").val()));
 			flag = false;
 			return false;
 		}
@@ -605,13 +605,13 @@ function validateAccountDetails()
 	
 	$('#tblnetpayable  > tbody > tr:visible[id="netpayablerow"]').each(function() {
 		if($(this).find("#netPayableAccountCode").val()!='' && $netPayableAccountCodeId){
-			bootbox.alert("Only one Net Payable Account can select");
+			bootbox.alert(jQuery.i18n.prop('only.one.net.payable.account.can.selected.message'));
 			flag = false;
 			return false
 		}
 		if($(this).find("#netPayableAccountCode").val()!='' && $(this).find("#netPayableAmount").val()=='')
 		{
-			bootbox.alert("Please Enter Net Payable Amount");
+			bootbox.alert(jQuery.i18n.prop('please.enter.net.payable.amount.message'));
 			flag = false;
 			return false
 		}
@@ -812,23 +812,23 @@ function addCustomEventListener(target,type,func){
 
 function validate(){
 	if(billamount == 0){
-		bootbox.alert("Please select Account details");
+		bootbox.alert(jQuery.i18n.prop('please.select.account.details.message'));
 		return false;
 	}
 	
 	if(debitamount != Number(Number(creditamount) + Number(netpayableamount))){
-		bootbox.alert("Debit amount and credit amount is not matching");
+		bootbox.alert(jQuery.i18n.prop('debit.and.credit.amount.not.matching.message'));
 		return false;
 	}
 	
 	if(debitamount == 0){
-		bootbox.alert("Please select at least one Debit Details");
+		bootbox.alert(jQuery.i18n.prop('please.select.atleast.one.debit.details.message'));
 		return false;
 	}
 	
 	if(!$netPayableAccountCodeId)
 	{
-		bootbox.alert("Please select one Net payable account detail");
+		bootbox.alert(jQuery.i18n.prop('please.select.one.netpayable.account.details.message'));
 		return false;
 	}
 	return true;
@@ -974,7 +974,8 @@ function validateCutOff()
 	}
 	else
 	{
-		bootbox.alert("Bills created after "+cutofdate+" cannot be approved on create. Use the Forward option.");
+		var cutoffMessage = jQuery.i18n.prop('bills.creation.cutoff.date.message',cutofdate);
+		bootbox.alert(cutoffMessage);
 		return false;
 	}
 	return false;
@@ -1019,4 +1020,8 @@ function calcualteNetpaybleAmount(){
 function amountConverter(amt) {
 	var formattedAmt = amt.toFixed(2);
 	return formattedAmt;
+}
+
+function callBackPostPropFileLoad(){
+	$('#function').attr("placeholder",jQuery.i18n.prop('type.first.3.letter.of.function.name.message'));
 }

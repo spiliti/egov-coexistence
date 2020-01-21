@@ -53,7 +53,7 @@
 		<tr>
 			<td><s:hidden name="button" id="button" /> <s:submit
 					cssClass="buttonsubmit" name="Save_New" id="Save_New"
-					value="Save"
+					key="lbl.save.button.key"
 					onclick="document.getElementById('button').value='Save_New';return validate();"
 					method="create" /></td>
 			<%-- <td><s:submit cssClass="buttonsubmit" name="Save_View"
@@ -64,7 +64,7 @@
 					id="Save_Close" name="Save_Close" value="Save & Close"
 					onclick="document.getElementById('button').value='Save_Close';return validate();"
 					method="create" /></td> --%>
-			<td><input type="button" id="closeButton" value="Close"
+			<td><input type="button" id="closeButton" value="<s:text name='lbl.close.button.key'/>"
 				onclick="javascript:window.parent.postMessage('close','*');" class="button" /></td>
 		</tr>
 	</table>

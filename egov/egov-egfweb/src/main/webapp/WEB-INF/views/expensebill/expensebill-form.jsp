@@ -85,17 +85,17 @@
     <form:form name="expenseBillForm" role="form" method="post" action="create" modelAttribute="egBillregister" id="egBillregister" class="form-horizontal form-groups-bordered" enctype="multipart/form-data">
 	
     <div class="position_alert">
-        <spring:message code="lbl.netpayable.amount"/>
+        <spring:message code="lbl.netpayable.amount" text="Net Payable Amount"/>
         : &#8377 <span id="expenseNetPayableAmount"><c:out
             value="${expenseNetPayableAmount}" default="0.0"></c:out></span>
     </div>
     <div class="position_alert1">
-        <spring:message code="lbl.total.debit.amount"/>
+        <spring:message code="lbl.total.debit.amount" text="Total Debit Amount"/>
         : &#8377 <span id="expenseBillTotalDebitAmount"> <c:out
             value="${expenseBillTotalDebitAmount}" default="0.0"></c:out></span>
     </div>
     <div class="position_alert2">
-        <spring:message code="lbl.total.credit.amount"/>
+        <spring:message code="lbl.total.credit.amount" text="Total Credit Amount"/>
         : &#8377 <span id="expenseBillTotalCreditAmount"> <c:out
             value="${expenseBillTotalCreditAmount}" default="0.0"></c:out></span>
     </div>
@@ -121,9 +121,9 @@
     </spring:hasBindErrors>
     <ul class="nav nav-tabs" id="settingstab">
         <li class="active"><a data-toggle="tab" href="#expensebillheader"
-                              data-tabidx=0><spring:message code="lbl.header"/></a></li>
+                              data-tabidx=0><spring:message code="lbl.header" text="Header"/></a></li>
         <li><a data-toggle="tab" href="#checklist" data-tabidx=1><spring:message
-                code="lbl.checklist"/> </a></li>
+                code="lbl.checklist" text="CheckList"/> </a></li>
     </ul>
 
     <div class="tab-content">

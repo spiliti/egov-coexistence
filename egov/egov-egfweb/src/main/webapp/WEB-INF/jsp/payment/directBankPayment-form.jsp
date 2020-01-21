@@ -142,16 +142,16 @@
 	<s:iterator var="p" value="instrumentHeaderList" status="s">
 		<tr>
 			<td class="bluebox"></td>
-			<td class="bluebox">Cheque Number</td>
+			<td class="bluebox"><s:text name="chq.assignment.instrument.no"/> </td>
 			<td class="bluebox"><s:property value="%{instrumentNumber}" />
 			</td>
-			<td class="bluebox">Cheque Date</td>
+			<td class="bluebox"><s:text name="chq.assignment.instrument.date"/> </td>
 			<td class="bluebox"><s:date name="%{instrumentDate}"
 					format="dd/MM/yyyy" /></td>
 		</tr>
 		<tr>
 			<td class="greybox"></td>
-			<td class="greybox">Party Name</td>
+			<td class="greybox"><s:text name="chq.assignment.partyname"/> </td>
 			<td class="greybox"><s:property value="%{payTo}" /></td>
 		</tr>
 	</s:iterator>
@@ -174,7 +174,7 @@
 					<td colspan="6">
 						<div id="labelAD" align="center">
 							<div class="subheadsmallnew">
-								<strong>Account Details</strong>
+								<strong><s:text name="payment.account.details.key"/> </strong>
 							</div>
 						</div>
 						<div class="yui-skin-sam" align="center">
@@ -204,7 +204,7 @@
 					<tr>
 						<td colspan="6">
 							<div class="subheadsmallnew">
-								<strong>Sub-Ledger Details</strong>
+								<strong><s:text name="payment.subledger.details.key"/> </strong>
 							</div>
 							</div>
 

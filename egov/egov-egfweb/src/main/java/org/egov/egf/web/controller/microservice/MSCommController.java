@@ -62,9 +62,7 @@ public class MSCommController {
     @ResponseBody
     public List<EmployeeInfo> getApprovers(@PathVariable(name = "deptId") String deptId,
             @PathVariable(name = "desgId") String desgnId) {
-
         List<EmployeeInfo> approvers = microserviceUtils.getApprovers(deptId, desgnId);
-
         return approvers;
     }
 

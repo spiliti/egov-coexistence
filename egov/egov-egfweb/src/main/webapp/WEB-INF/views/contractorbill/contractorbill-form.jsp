@@ -85,17 +85,17 @@
     <form:form name="contractorBillForm" role="form" method="post" action="create" modelAttribute="egBillregister" id="egBillregister" class="form-horizontal form-groups-bordered" enctype="multipart/form-data">
 	
     <div class="position_alert">
-        <spring:message code="lbl.netpayable.amount"/>
+        <spring:message code="lbl.netpayable.amount" text="Net Payable Amount"/>
         : &#8377 <span id="contractorNetPayableAmount"><c:out
             value="${contractorNetPayableAmount}" default="0.0"></c:out></span>
     </div>
     <div class="position_alert1">
-        <spring:message code="lbl.total.debit.amount"/>
+        <spring:message code="lbl.total.debit.amount" text="Total Debit Amount"/>
         : &#8377 <span id="contractorBillTotalDebitAmount"> <c:out
             value="${contractorBillTotalDebitAmount}" default="0.0"></c:out></span>
     </div>
     <div class="position_alert2">
-        <spring:message code="lbl.total.deduction.amount"/>
+        <spring:message code="lbl.total.deduction.amount" text="Total Deduction Amount"/>
         : &#8377 <span id="contractorBillTotalCreditAmount"> <c:out
             value="${contractorBillTotalCreditAmount}" default="0.0"></c:out></span>
     </div>

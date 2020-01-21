@@ -56,23 +56,23 @@
 </style>
 <div class="panel-heading">
 	<div class="panel-title">
-		<spring:message code="lbl.debit.details" />
+		<spring:message code="lbl.debit.details" text="Debit details"/>
 	</div>
 </div>
 <div class="panel-body">
 	<table class="table table-bordered" id="tbldebitdetails">
 		<thead>
 			<tr>
-				<th><spring:message code="lbl.account.code"/></th>
-				<th><spring:message code="lbl.account.head"/></th>
-				<th><spring:message code="lbl.debit.amount"/></th>
-				<th><spring:message code="lbl.action"/></th> 					
+				<th><spring:message code="lbl.account.code" text="Account Code"/></th>
+				<th><spring:message code="lbl.account.head" text="Account Head"/></th>
+				<th><spring:message code="lbl.debit.amount" text="Debit Amount"/></th>
+				<th><spring:message code="lbl.action" text="Action"/></th> 					
 			</tr>
 		</thead>
 		<tbody>
 			<tr id="debitdetailsrow">
 				<td>
-					<input type="text" id="tempDebitDetails[0].debitGlcode" name="tempDebitDetails[0].debitGlcode" class="form-control table-input debitDetailGlcode debitGlcode"  data-errormsg="Account Code is mandatory!" data-idx="0" data-optional="0"   placeholder="Type first 3 letters of Account code">
+					<input type="text" id="tempDebitDetails[0].debitGlcode" name="tempDebitDetails[0].debitGlcode" class="form-control table-input debitDetailGlcode debitGlcode"  data-errormsg="<spring:message code='account.code.is.mandatory.message'  text='Account Code is mandatory!'/>" data-idx="0" data-optional="0"   placeholder='<spring:message code="type.first.3.letter.of.account.code.message" text="Type first 3 letters of Account code"/>'>
 					<form:hidden path="" name="tempDebitDetails[0].glcode" id="tempDebitDetails[0].glcode" class="form-control table-input hidden-input debitaccountcode"/> 
 					<form:hidden path="" name="tempDebitDetails[0].glcodeid" id="tempDebitDetails[0].glcodeid" class="form-control table-input hidden-input debitdetailid"/> 
 					<form:hidden path="" name="tempDebitDetails[0].isSubLedger" id="tempDebitDetails[0].isSubLedger" class="form-control table-input hidden-input debitIsSubLedger"/>
@@ -85,9 +85,9 @@
 					<input type="text" id="tempDebitDetails[0].debitAccountHead" name="tempDebitDetails[0].debitAccountHead" class="form-control debitdetailname" disabled>  
 				</td>
 				<td>
-					<form:input path="" name="tempDebitDetails[0].debitamount" id="tempDebitDetails[0].debitamount"  data-errormsg="Debit Amount is mandatory!" onkeyup="decimalvalue(this);" onblur="calcualteNetpaybleAmount();" data-pattern="decimalvalue" data-idx="0" data-optional="0" class="form-control table-input text-right debitAmount"   maxlength="12" />
+					<form:input path="" name="tempDebitDetails[0].debitamount" id="tempDebitDetails[0].debitamount"  data-errormsg="<spring:message code='debit.amount.is.mandatory.message'  text='Debit Amount is mandatory!'/>"  onkeyup="decimalvalue(this);" onblur="calcualteNetpaybleAmount();" data-pattern="decimalvalue" data-idx="0" data-optional="0" class="form-control table-input text-right debitAmount"   maxlength="12" />
 				</td> 
-				<td class="text-center"><span style="cursor:pointer;" onclick="addDebitDetailsRow();" tabindex="0" id="tempDebitDetails[0].addButton" data-toggle="tooltip" title="" data-original-title="press ENTER to Add!" aria-hidden="true"><i class="fa fa-plus"></i></span>
+				<td class="text-center"><span style="cursor:pointer;" onclick="addDebitDetailsRow();" tabindex="0" id="tempDebitDetails[0].addButton" data-toggle="tooltip" title="" data-original-title="<spring:message code='press.space.to.add.message'  text='press SPACE to Add!'/>" aria-hidden="true"><i class="fa fa-plus"></i></span>
 				 <span class="add-padding debit-delete-row" onclick="deleteDebitDetailsRow(this);"><i class="fa fa-trash"  aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Delete!"></i></span> </td>
 			</tr>
 		</tbody>

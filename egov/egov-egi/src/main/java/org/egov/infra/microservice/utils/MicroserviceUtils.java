@@ -551,7 +551,15 @@ public class MicroserviceUtils {
         requestInfo.setTs(getEpochDate(new Date()));
         reqWrapper.setRequestInfo(requestInfo);
         EmployeeInfoResponse empResponse = restTemplate.postForObject(approver_url, reqWrapper, EmployeeInfoResponse.class);
+        this.getCurrentAssignedEmployee(empResponse.getEmployees(), departmentId, designationId);
          return empResponse.getEmployees();
+    }
+
+    private void getCurrentAssignedEmployee(List<EmployeeInfo> employees, String departmentId, String designationId) {
+        employees.stream().forEach(emp -> {
+            List<Assignment> currAssignments = emp.getAssignments().stream().filter(assnmnt -> assnmnt.isCurrentAssignment() && departmentId.equals(assnmnt.getDepartment()) && designationId.equals(assnmnt.getDesignation())).collect(Collectors.toList());
+            emp.setAssignments(currAssignments);
+        });
     }
 
     public EmployeeInfo getEmployeeByPositionId(Long positionId) {

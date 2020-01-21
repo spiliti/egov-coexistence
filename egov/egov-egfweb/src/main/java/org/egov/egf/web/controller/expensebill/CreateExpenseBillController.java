@@ -90,6 +90,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.View;
 
 
 /**
@@ -248,8 +249,15 @@ public class CreateExpenseBillController extends BaseBillController {
                     savedEgBillregister.getState(), savedEgBillregister.getId(), approvalPosition,approverName);
 //              
 
-            return "redirect:/expensebill/success?approverDetails=" + approverDetails + "&billNumber="
-                    + savedEgBillregister.getBillnumber();
+            String result = "";
+            try {
+                 result = "redirect:/expensebill/success?approverDetails=" + approverDetails + "&billNumber="
+                        + savedEgBillregister.getBillnumber();
+//                 result = "http://jalandhar.lgpunjab.com:8080/services/EGF/expensebill/success?approverDetails=273,&billNumber=SBILL-0801-01";
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+            return result;
 //            return "redirect:/expensebill/success?approverDetails=" + approverDetails + "&billNumber="
 //            + 77777;
 
