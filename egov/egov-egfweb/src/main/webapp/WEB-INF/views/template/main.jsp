@@ -74,7 +74,6 @@
 		<link rel="stylesheet" href="<cdn:url value='/resources/global/css/egov/custom.css?rnd=${app_release_no}' context='/services/egi'/>">
 				
 		<script src="<cdn:url value='/resources/global/js/jquery/jquery.js' context='/services/egi'/>"></script>
-		<script type="text/javascript" src="/services/EGF/resources/javascript/jquery.i18n.properties.js"></script>
 		<script src="<cdn:url value='/resources/global/js/bootstrap/bootstrap.js' context='/services/egi'/>"></script>
 		<script src="<cdn:url value='/resources/global/js/bootstrap/bootbox.min.js' context='/services/egi'/>"></script>
 		<script src="<cdn:url value='/resources/global/js/bootstrap/typeahead.bundle.js' context='/services/egi'/>"></script>
@@ -129,17 +128,6 @@
 	                    if ((e.which || e.keyCode) == 82)
 	                            e.preventDefault();
             }
-			jQuery.i18n.properties( {
-				name : 'messages',
-				path : '/services/EGF/resources/app/messages/',
-				mode : 'map',
-				cache : false,
-				async: true,
-				callback: function() {
-				   console.log("message.properties file loaded successfully");
-				   callBackPostPropFileLoad();
-				}
-			});
             jQuery(document).on("keydown", disableRefresh);
 		</script>
     </body>

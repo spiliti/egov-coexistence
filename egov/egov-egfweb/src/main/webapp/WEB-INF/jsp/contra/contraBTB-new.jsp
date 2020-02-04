@@ -51,7 +51,6 @@
 <head>
 <%@ include file="/includes/taglibs.jsp"%>
 <%@ page language="java"%>
-<script type="text/javascript" src="/services/EGF/resources/javascript/jquery.i18n.properties.js"></script>
 <script type="text/javascript"
 	src="/services/EGF/resources/javascript/voucherHelper.js?rnd=${app_release_no}"></script>
 <script type="text/javascript"
@@ -75,7 +74,7 @@
 			</jsp:include>
 			<div class="formmainbox">
 				<div class="formheading" />
-				<div class="subheadnew"><s:text name="lbl.create.btb.transfer.key"/> </div>
+				<div class="subheadnew">Create Bank to Bank Transfer</div>
 				<div id="listid" style="display: block">
 					<br />
 				</div>
@@ -116,7 +115,7 @@
 					<%@include file="contraBTB-form.jsp"%>
 				</table>
 			</div>
-			<div class="mandatory1" align="left">* <s:text name="lbl.mendatory.fields.key"/> </div>
+			<div class="mandatory1" align="left">* Mandatory Fields</div>
 
 			</br>
 			</br>
@@ -226,13 +225,13 @@ function	onLoadTask_new()
 		if(jQuery('#modeOfCollectioncheque').is(':checked')){
 			document.getElementById('chequeNumberlblError').innerHTML='';
 			if(obj.value.length != 6){
-				document.getElementById('chequeNumberlblError').innerHTML = "<s:text name='cheque.must.be.6.digit.message'/>";
+				document.getElementById('chequeNumberlblError').innerHTML = "Cheque number must be a 6 digits";
 			}
 		}
 	}
 
 	if('<s:text name="%{isBankBalanceMandatory()}"/>'=='')
-		document.getElementById('lblError').innerHTML = "<s:text name='bank.bal.mendatory.param.not.defined.message'/>'";
+		document.getElementById('lblError').innerHTML = "bank_balance_mandatory parameter is not defined";
 		
 		<s:if test="%{!validateUser('createpayment')}">
 			//document.getElementById('errorSpan').innerHTML='<s:text name="payment.invalid.user"/>';

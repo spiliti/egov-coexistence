@@ -205,69 +205,69 @@ function validateMIS(){
 			<s:if test="%{isFieldMandatory('vouchernumber')}"> 
 				 if(null != document.getElementById('voucherNumber') && document.getElementById('voucherNumber').value.trim().length == 0 ){
 
-					document.getElementById('lblError').innerHTML = "<s:text name='please.enter.voucher.number.message'/>";
+					document.getElementById('lblError').innerHTML = "Please enter a voucher number";
 					return false;
 				 }
 			 </s:if>
 		 <s:if test="%{isFieldMandatory('voucherdate')}"> 
 				 if(null != document.getElementById('voucherDate') && document.getElementById('voucherDate').value.trim().length == 0){
 
-					document.getElementById('lblError').innerHTML = "<s:text name='please.enter.voucher.date.message'/>";
+					document.getElementById('lblError').innerHTML = "Please enter a voucher date";
 					return false;
 				 }
 			 </s:if>
 		 <s:if test="%{isFieldMandatory('fund')}"> 
 				 if(null != document.getElementById('fundId') && document.getElementById('fundId').value == -1){
 
-					document.getElementById('lblError').innerHTML = "<s:text name='please.select.fund.message'/>";
+					document.getElementById('lblError').innerHTML = "Please Select a fund";
 					return false;
 				 }
 			 </s:if>
 			<s:if test="%{isFieldMandatory('department')}"> 
 				 if(null!= document.getElementById('departmentid') && document.getElementById('departmentid').value == -1){
 
-					document.getElementById('lblError').innerHTML = "<s:text name='please.select.department.message'/>";
+					document.getElementById('lblError').innerHTML = "Please select a department";
 					return false;
 				 }
 			</s:if>
 			<s:if test="%{isFieldMandatory('scheme')}"> 
 				 if(null!=document.getElementById('schemeid') &&  document.getElementById('schemeid').value == -1){
 
-					document.getElementById('lblError').innerHTML = "<s:text name='please.select.scheme.message'/>";
+					document.getElementById('lblError').innerHTML = "Please select a scheme";
 					return false;
 				 }
 			</s:if>
 			<s:if test="%{isFieldMandatory('subscheme')}"> 
 				 if(null!= document.getElementById('subschemeid') && document.getElementById('subschemeid').value == -1){
 
-					document.getElementById('lblError').innerHTML = "<s:text name='please.select.subscheme.message'/>";
+					document.getElementById('lblError').innerHTML = "Please select a subscheme";
 					return false;
 				 }
 			</s:if>
 			<s:if test="%{isFieldMandatory('functionary')}"> 
 				 if(null!=document.getElementById('vouchermis.functionary') &&  document.getElementById('vouchermis.functionary').value == -1){
 
-					document.getElementById('lblError').innerHTML = "<s:text name='please.select.functionary.message'/>";
+					document.getElementById('lblError').innerHTML = "Please select a functionary";
 					return false;
 				 }
 			</s:if>
 			<s:if test="%{isFieldMandatory('fundsource')}"> 
 				 if(null !=document.getElementById('fundsourceId') &&  document.getElementById('fundsourceId').value == -1){
 
-					document.getElementById('lblError').innerHTML = "<s:text name='please.select.fund.source.message'/>";
+					document.getElementById('lblError').innerHTML = "Please select a fundsource";
 					return false;
 				}
 			</s:if>
 			<s:if test="%{isFieldMandatory('field')}"> 
 				 if(null!= document.getElementById('vouchermis.divisionid') && document.getElementById('vouchermis.divisionid').value == -1){
 
-					document.getElementById('lblError').innerHTML = "<s:text name='please.select.field.message'/>";
+					document.getElementById('lblError').innerHTML = "Please select a field";
 					return false;
 				 }
 			</s:if>
 			<s:if test="%{isFieldMandatory('function')}">                     
 				 if(null!= document.getElementById('functionId') && document.getElementById('functionId').value == -1){
-					document.getElementById('lblError').innerHTML = "<s:text name='please.select.function.message'/>";                                   
+					document.getElementById('lblError').innerHTML = "Please select a function";                                   
 					return false;
 				 }            
 			</s:if>

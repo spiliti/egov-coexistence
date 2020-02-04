@@ -64,7 +64,7 @@
 	function callAlertForDepartment() {
 		var value = document.getElementById("approverDepartment").value;
 		if (value == "-1") {
-			bootbox.alert("<s:text name='please.select.approver.department.message'/>");
+			bootbox.alert("Please select the Approver Department");
 			document.getElementById("approverDepartment").focus();
 			return false;
 		}
@@ -73,7 +73,7 @@
 	function callAlertForDesignation() {
 		var value = document.getElementById("approverDesignation").value;
 		if (value == "-1") {
-			bootbox.alert("<s:text name='please.select.approver.designation.message'/>");
+			bootbox.alert("Please select the approver designation");
 			document.getElementById("approverDesignation").focus();
 			return false;
 		}

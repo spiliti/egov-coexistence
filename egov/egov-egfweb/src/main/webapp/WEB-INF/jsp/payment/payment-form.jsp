@@ -77,7 +77,7 @@
 			<span class="mandatory1"> <s:actionerror /> <s:fielderror />
 				<s:actionmessage />
 			</span>
-			<div class="subheadnew"><s:text name="bill.payment.label"/> </div>
+			<div class="subheadnew">Bill Payment</div>
 			<div id="budgetSearchGrid" style="display: block; width: 100%; margin-top:-25px">
 				<table width="100%" cellpadding="0" cellspacing="0" border="0">
 					<tr>
@@ -89,13 +89,13 @@
 										<td>
 											<div class="tabber">
 												<div class="tabbertab">
-													<h3 style="margin-left:25px"><s:text name="payment.heading"/> </h3>
+													<h3 style="margin-left:25px">Payment Details</h3>
 													<span>
 														<table width="100%" border="0" cellspacing="0"
 															cellpadding="0">
 															<tr>
 																<td colspan="6"><div class="subheadsmallnew"
-																		style="border: 0;"><s:text name="payment.heading"/></div></td>
+																		style="border: 0;">Payment Details</div></td>
 															</tr>
 															<tr>
 																<td width="9%" class="bluebox"><s:hidden
@@ -362,12 +362,13 @@
 													</span>
 												</div>
 												<div class="tabbertab">
-													<h3 style="margin-left:25px"><s:text name="payment.bill.details"/> </h3>
+													<h3 style="margin-left:25px">Bill Details</h3>
 													<span>
 														<table align="center" border="0" cellpadding="0"
 															cellspacing="0" class="newtable">
 															<tr>
-																<td colspan="7"><div class="subheadsmallnew"><s:text name="payment.bill.details"/></div></td>
+																<td colspan="7"><div class="subheadsmallnew">Bill
+																		Details</div></td>
 															</tr>
 															<tr>
 																<td colspan="7">
@@ -375,15 +376,16 @@
 																		<table id="billdetailsTable" align="center" border="0"
 																			cellpadding="0" cellspacing="0" width="100%">
 																			<tr>
-																				<th class="bluebgheadtdnew"><s:text name="payment.billnumber"/> </th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.bill.date"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.bill.voucher.number"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.bill.voucher.date"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.payee.name"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.net.amount"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.earlier.payment"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.payable.amount"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.amount"/></th>
+																				<th class="bluebgheadtdnew">Bill Number</th>
+																				<th class="bluebgheadtdnew">Bill Date</th>
+																				<th class="bluebgheadtdnew">Bill Voucher Number
+																				</th>
+																				<th class="bluebgheadtdnew">Bill Voucher Date</th>
+																				<th class="bluebgheadtdnew">Payee Name</th>
+																				<th class="bluebgheadtdnew">Net Amount</th>
+																				<th class="bluebgheadtdnew">Earlier Payment</th>
+																				<th class="bluebgheadtdnew">Payable Amount</th>
+																				<th class="bluebgheadtdnew">Payment Amount</th>
 																			</tr>
 																			<s:if test="%{billList.size>0}">
 																				<s:iterator var="p" value="billList" status="s">
@@ -480,7 +482,8 @@
 
 																			<tr>
 																				<td style="text-align: right" colspan="8"
-																					class="blueborderfortdnew"><strong><s:text name="payment.grand.total"/> </strong></td>
+																					class="blueborderfortdnew"><strong>Grand
+																						Total</strong></td>
 																				<td style="text-align: right"
 																					class="blueborderfortdnew"><div align="center">
 																						<input type="text" name="grandTotal"
@@ -571,12 +574,12 @@
 			var putBackAmount = parseFloat(document.getElementById('payableAmt'+index).value);
 			var paymentAmount = obj.value;
 			if(paymentAmount == '' || isNaN(paymentAmount)) {
-				bootbox.alert('<s:text name="payment.amt.should.be.numeric.value.message"/>');
+				bootbox.alert('Payment amount should be a numeric value.');
 				obj.value = putBackAmount.toFixed(vFixedDecimal);
 			}
 			
 			if(paymentAmount > parseFloat(document.getElementById('payableAmt'+index).value) ) {
-				bootbox.alert('<s:text name="payment.amnt.not.gt.payable.amt.message"/>');
+				bootbox.alert('Payment amount should not be greater than Payable amount');
 				obj.value = putBackAmount.toFixed(vFixedDecimal);
 			}
 			
@@ -595,7 +598,7 @@
 		function populateAvailableBalance(accnumObj) 
 		{
 					if (document.getElementById('voucherdate').value == '') {
-						bootbox.alert('<s:text name="please.select.voucher.date.message"/>');
+						bootbox.alert("Please Select the Voucher Date!!");
 						accnumObj.options.value = -1;
 						return;
 					}
@@ -647,26 +650,26 @@
 			var noBalanceCheck='<s:text name="payment.none"/>';
 			if(dom.get('department').value=='-1')
 			{
-				bootbox.alert('<s:text name="please.select.department.message"/>');
+				bootbox.alert("Please Select the Department!!");
 				undoLoadingMask();
 				return false;
 			}
 			if(dom.get('function').value=='-1')
 			{
-				bootbox.alert('<s:text name="please.select.function.message"/>');
+				bootbox.alert("Please Select the Function!!");
 				undoLoadingMask();
 				return false;
 			}
 			
 			if(dom.get('vouchernumber') && dom.get('vouchernumber').value=='')
 			{
-				bootbox.alert('<s:text name="please.enter.voucher.number.message"/>');
+				bootbox.alert('Please Enter voucher number');
 				undoLoadingMask();
 				return false;
 			}
 			if(dom.get('voucherdate').value=='')
 			{
-				bootbox.alert('<s:text name="please.select.voucher.date.message"/>');
+				bootbox.alert("Please Select the Voucher Date!!");
 				undoLoadingMask();
 				return false;
 			}
@@ -674,13 +677,13 @@
 			{
 				if(dom.get('bankbranch').options[dom.get('bankbranch').selectedIndex].value==-1)
 				{
-					bootbox.alert('<s:text name="please.select.bank.message"/>');
+					bootbox.alert("Please Select the Bank!!");
 					undoLoadingMask();
 					return false;
 				}
 				if(dom.get('bankaccount').options[dom.get('bankaccount').selectedIndex].value==-1)
 				{
-					bootbox.alert('<s:text name="please.select.bank.account.message"/>');
+					bootbox.alert("Please Select the Bank Account");
 					undoLoadingMask();
 					return false;
 				}
@@ -688,7 +691,7 @@
 		
 			if(document.getElementById('grandTotal').value==0 || document.getElementById('grandTotal').value=='NaN')
 			{
-				bootbox.alert('<s:text name="payment.amt.should.gt.zero.message"/>');
+				bootbox.alert('Payment Amount should be greater than zero!');
 				dom.get('tabber1').onclick();
 				undoLoadingMask();
 				return false;
@@ -698,7 +701,7 @@
 				{
 					if(dom.get("newPartyName").value=='')
 					{
-						bootbox.alert('<s:text name="please.enter.partyname.to.change.message"/>');
+						bootbox.alert('Enter Party Name to Chnage');
 						dom.get("newPartyName").focus();
 						undoLoadingMask();
 						return false;
@@ -715,12 +718,12 @@
 			 document.forms[0].submit();
 			}
 			else if(!balanceCheck() && jQuery("#bankBalanceCheck").val()==balanceCheckMandatory){
-					 bootbox.alert('<s:text name="insuff.bank.balance.message"/>');
+					 bootbox.alert("Insufficient Bank Balance.");
 					 undoLoadingMask();
 					 return false;
 					}
 			else if(!balanceCheck() && jQuery("#bankBalanceCheck").val()==balanceCheckWarning){
-					 var msg = confirm('<s:text name="insuff.bank.bal.confirmation.message"/>');
+					 var msg = confirm("Insufficient Bank Balance. Do you want to process ?");
 					 if (msg == true) {
 						 billIdsToPaymentAmountsMap('billList','billIdsToPaymentAmountsMapId');
 						 document.forms[0].action='${pageContext.request.contextPath}/payment/payment-create.action';
@@ -762,7 +765,7 @@
 		{
 			if(obj.value.length>250)
 			{
-				bootbox.alert('<s:text name="max.character.allowed.message"><s:param>250</s:param> </s:text>')
+				bootbox.alert('Max 250 characters are allowed for comments. Remaining characters are truncated.')
 				obj.value = obj.value.substring(1,250);
 			}
 		}

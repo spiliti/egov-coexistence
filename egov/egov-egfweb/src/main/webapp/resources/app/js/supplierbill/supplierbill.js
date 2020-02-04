@@ -174,8 +174,7 @@ function debitGlcode_initialize() {
 			}
 	   });
 	  if(flag){
-		  jQuery.i18n.prop('');
-			bootbox.alert(jQuery.i18n.prop('debit.code.already.added.message'), function() {
+			bootbox.alert("Debit code already added", function() {
 				var index= dt.length - 1;
 				if(document.getElementById('debitDetails['+index+'].debitGlcode'))
 					document.getElementById('debitDetails['+index+'].debitGlcode').value = "";
@@ -233,7 +232,7 @@ function creditGlcode_initialize() {
 			}
 	   });
 	   if(flag){
-			bootbox.alert(jQuery.i18n.prop('credit.code.already.added.message'), function() {
+			bootbox.alert("Credit code already added", function() {
 				var index= dt.length - 1;
 				document.getElementById('creditDetails['+index+'].creditGlcode').value = "";
 			});
@@ -260,14 +259,14 @@ function addDebitDetailsRow() {
 			++debitAmountrowcount;
 		}
 	} else {
-		  bootbox.alert(jQuery.i18n.prop('limit.reached.message'));
+		  bootbox.alert('limit reached!');
 	}
 }
 
 function deleteDebitDetailsRow(obj) {
 	var rowcount=$("#tbldebitdetails tbody tr").length;
     if(rowcount<=1) {
-		bootbox.alert(jQuery.i18n.prop('row.can.not.delete.message'));
+		bootbox.alert("This row can not be deleted");
 		return false;
 	} else {
 		deleteRow(obj,'tbldebitdetails');
@@ -293,14 +292,14 @@ function addCreditDetailsRow() {
 			++creditAmoutrowcount;
 		}
 	} else {
-		  bootbox.alert(jQuery.i18n.prop('limit.reached.message'));
+		  bootbox.alert('limit reached!');
 	}
 }
 
 function deleteCreditDetailsRow(obj) {
 	var rowcount=$("#tblcreditdetails tbody tr").length;
     if(rowcount<=1) {
-		bootbox.alert(jQuery.i18n.prop('row.can.not.delete.message'));
+		bootbox.alert("This row can not be deleted");
 		return false;
 	} else {
 		deleteRow(obj,'tblcreditdetails');
@@ -320,28 +319,28 @@ var creditamount = $("#supplierBillTotalCreditAmount")["0"].innerHTML;
 	$("#passedamount").val(debitamount);
 
 	if(debitamount != Number(Number(creditamount) + Number(netpayableamount)).toFixed(2)){
-		bootbox.alert(jQuery.i18n.prop('debit.and.credit.amount.not.matching.message'));
+		bootbox.alert("Debit amount and credit amount is not matching");
 		return false;
 	}
 	
 	if(debitamount == 0){
-		bootbox.alert(jQuery.i18n.prop('please.select.atleast.one.debit.details.message'));
+		bootbox.alert("Please select at least one Debit Details");
 		return false;
 	}
 	
 	if(!$("#supplier-netPayableAmount").val())
 	{
-		bootbox.alert(jQuery.i18n.prop('please.select.one.netpayable.account.details.message'));
+		bootbox.alert("Please select one Net payable account detail");
 		return false;
 	}
 	
 	if(parseFloat(billamount) < parseFloat(debitamount)){
-		bootbox.alert(jQuery.i18n.prop('bill.amount.should.not.be.gt.passed.amount.message'));
+		bootbox.alert("Bill amount should be greater than passed amount");
 		return false;
 	}
 	
 	if(parseFloat(debitamount) > parseFloat(billamount)){
-		bootbox.alert(jQuery.i18n.prop('passed.amount.should.not.be.gt.bill.amount.message'));
+		bootbox.alert("Passed amount should not be greater then bill amount");
 		return false;
 	}
 	
@@ -404,7 +403,7 @@ function validateCutOff()
 	}
 	else
 	{
-		bootbox.alert(jQuery.i18n.prop('bills.creation.cutoff.date.message',cutofdate));
+		bootbox.alert("Bills created after "+cutofdate+" cannot be approved on create. Use the Forward option.");
 		return false;
 	}
 	return false;
@@ -455,9 +454,9 @@ function amountConverter(amt) {
 function loadPurchaseOrder(supplierId){
 	if (!supplierId) {
 		$('#purchaseOrder').empty();
-		$('#purchaseOrder').append($('<option>').text(jQuery.i18n.prop('select.from.below.label')).attr('value', ''));
+		$('#purchaseOrder').append($('<option>').text('Select from below').attr('value', ''));
 		$('#purchaseOrder').empty();
-		$('#purchaseOrder').append($('<option>').text(jQuery.i18n.prop('select.from.below.label')).attr('value', ''));
+		$('#purchaseOrder').append($('<option>').text('Select from below').attr('value', ''));
 		return;
 	} else {
 		
@@ -471,7 +470,7 @@ function loadPurchaseOrder(supplierId){
 		}).done(
 				function(response) {
 					$('#purchaseOrder').empty();
-					$('#purchaseOrder').append($("<option value=''>"+jQuery.i18n.prop('select.from.below.label')+"</option>"));
+					$('#purchaseOrder').append($("<option value=''>Select from below</option>"));
 					$.each(response, function(index, value) {
 						var selected="";
 						if($purchaseOrderId && $purchaseOrderId==value.orderNumber)
@@ -521,8 +520,4 @@ function loadMisAttributes(orderNumber){
 				});
 
 	}
-}
-
-function callBackPostPropFileLoad(){
-	$('#function').attr("placeholder",jQuery.i18n.prop('type.first.3.letter.of.function.name.message'));
 }

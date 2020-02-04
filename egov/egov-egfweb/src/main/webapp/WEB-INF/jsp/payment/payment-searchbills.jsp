@@ -128,7 +128,7 @@ function checkMiscAttributes(obj)
 		
 		if(mis!=document.getElementById('miscattributes').value)
 		{
-			bootbox.alert("<s:text name='please.select.bill.with.same.attributes.message'/>");
+			bootbox.alert('Selected bills do not have same attributes. Please select bills with same attributes');
 			obj.checked =false;
 			return;
 			
@@ -171,7 +171,7 @@ function check()
 		
 		if(!document.getElementById("paymentModertgs").checked &&  isAnyOneContratorBillChecked)
 		{
-			bootbox.alert("<s:text name='mode.of.payment.for.contra.message'/>");
+			bootbox.alert("Mode of payment for contractor bills should only be RTGS");
 			return false;
 		}
        addSelectedToForm2();
@@ -181,7 +181,7 @@ function check()
 	}             
 	if(document.getElementById('miscount').value==0)
 	{
-		bootbox.alert("<s:text name='please.select.bill.for.payment.message'/>");
+		bootbox.alert('Please select a bill before making the payment');
 		return false;
 	}
 	if(document.getElementById('vouchermis.departmentid'))
@@ -199,7 +199,7 @@ function search()
 		document.getElementById('vouchermis.departmentid').disabled=false;
 	var fund = document.getElementById('fundId').value;
 	if(fund == "-1"){
-		bootbox.alert("<s:text name='please.select.fund.message'/>"); 
+		bootbox.alert("Please select fund");   
 		return false;  
 	}else{
 		document.getElementById("search").innerHTML="";
@@ -277,7 +277,7 @@ function selectAllContractors(element){
 	if(element.checked == true)	{
 		var concnt=checkcontractorForSameMisAttribs('contractorList',length);
 		if(concnt!=0){
-			bootbox.alert("<s:text name='please.select.fund.message'/>"); 
+		 bootbox.alert("Selected Bills doesnot have same attributes");
 		  document.getElementById('conSelectAll').checked =false; }
 		else
 		checkAll('contractorList',length);
@@ -295,7 +295,7 @@ function selectAllSuppliers(element){
 	{
 		var supcnt= checkSupplierForSameMisAttribs('supplierList',length);
 	    if(supcnt!=0){
-	    	bootbox.alert("<s:text name='selected.bill.same.attribute.message'/>"); 
+	     bootbox.alert("Selected Bills doesnot have same attributes");
 	      document.getElementById('suppSelectAll').checked =false; }
 	     else
 	     checkAll('supplierList',length);
@@ -314,7 +314,7 @@ function selectAllContingent(element){
 		 
 		 var expcnt=checkContingentForSameMisAttribs('contingentList',length);
 		 if(expcnt!=0){
-		bootbox.alert("<s:text name='selected.bill.same.attribute.message'/>"); 
+		  bootbox.alert("Selected Bills doesnot have same attributes" );
 		  document.getElementById('expSelectAll').checked =false;    }
 		  else
 		  checkAll('contingentList',length); 
@@ -783,9 +783,9 @@ function disableSelectedRows()
 															<tr>
 																<td align="center" colspan="5">
 																	<div class="buttonbottom">
-																		<input type="button" method="search" value='<s:text name="payment.search.button"/>'
+																		<input type="button" method="search" value="Search"
 																			Class="button" onclick="return search()" />
-																		<input type="button" value="<s:text name="payment.close.button"/>"
+																		<input type="button" value="Close"
 																			onclick="javascript:window.close()" class="button" />
 																		<s:hidden name="miscount" id="miscount" />
 																		<s:hidden name="miscattributes" id="miscattributes"
@@ -1287,7 +1287,8 @@ function disableSelectedRows()
 																		</table>
 																		<s:if
 																			test="contingentList == null || contingentList.size==0">
-																			<div class="subheadsmallnew" style="border: 0;"><s:text name="no.recoords.found.label"/> </div>
+																			<div class="subheadsmallnew" style="border: 0;">No
+																				Records Found</div>
 																		</s:if>
 																	</div>
 																</td>
@@ -1348,7 +1349,7 @@ function disableSelectedRows()
 				<table align="center" width="100%">
 					<tr>
 						<td class="text-right view-content">
-								<s:text name="payment.total.amout.key"/>:  
+								Total:  
 						</td>
 						<td width="10%" class="text-right view-content"><div id="totalPaymentAmount">0.00</div></td>
 					</tr>
@@ -1373,7 +1374,7 @@ function disableSelectedRows()
 						</td>
 					</tr>
 					<tr>
-					<td align="center" colspan="2"><br/><input type="button" class="buttonsubmit" value='<s:text name="payment.generate.key"/>' id="generatePayment" onclick="return check();"/></td>
+					<td align="center" colspan="2"><br/><input type="button" class="buttonsubmit" value="Generate Payment" id="generatePayment" onclick="return check();"/></td>
 					</tr>
 					<tr>
 						<td colspan="2" class="text-center">

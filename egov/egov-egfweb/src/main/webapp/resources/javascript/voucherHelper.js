@@ -45,18 +45,6 @@
  *   In case of any queries, you can reach eGovernments Foundation at contact@egovernments.org.
  *
  */
-
-jQuery.i18n.properties({
-	name : 'messages',
-	path : '/services/EGF/resources/app/messages/',
-	mode : 'map',
-	cache : false,
-	async : true,
-	callback : function() {
-		console.log("message.properties file loaded successfully");
-	}
-});
-
 var VOUCHERDETAILLIST='billDetailslist';
 var SUBLEDGERLIST='subLedgerlist';                       
 var INSTRUMENTLIST='iHeaderList';
@@ -84,7 +72,9 @@ function updateGridPayInSlip(field,index,value){
 }
 
 function updateGrid(tableName,field,index,value){
+	//bootbox.alert(index);   
 	document.getElementById(tableName+'['+index+'].'+field).value=value;
+	//bootbox.alert(document.getElementById(tableName+'['+index+'].'+field).value);
 }
 
 function updateSLGridPJV(field,index,value){
@@ -507,6 +497,7 @@ function resetonChangeofSubledger()
 	
 	if(document.getElementById("billDetailsTableNet[0].isSubledger").value=='true')
 	{
+	//	bootbox.alert("hii");      
 		document.getElementById("billDetailsTableNet[0].glcodeDetail").value="-1";
 		document.getElementById("billDetailsTableNet[0].glcodeDetail").disabled=true;
 		document.getElementById("billDetailsTableNet[0].glcodeDetail").tabIndex="-1";
@@ -518,6 +509,7 @@ function resetonChangeofSubledger()
 	}
 	var debitTable=document.getElementById('billDetailTable').getElementsByTagName('table')[0];
 	var dtLen=debitTable.rows.length;
+	 // bootbox.alert("Length of debit table is "+dtLen);
 	// debit code table
 	var i=0;
 	var j=0;
@@ -538,6 +530,7 @@ function resetonChangeofSubledger()
 	//var creditTable=document.getElementById('billDetailsTableCredit').getElementsByTagName('table')[0];
 	//var creditTableLen=creditTable.rows.length;
 	var creditTableLen=billDetailsTableCredit.getRecordSet().getLength();
+	//bootbox.alert("Length of credit table is "+creditTableLen);
 	while(i<creditTableLen)    
 	{
 		if(document.getElementById("billDetailsTableCredit["+i+"].isSubledger").value=='true')
@@ -553,6 +546,7 @@ function resetonChangeofSubledger()
 function loadDropDownCodesForAccountDetailType(obj)
 {
      
+//	bootbox.alert("Hiii  inside loadDropDownCodesForAccountDetailType");
 	// reset deatiltable when subledger=true. 
 	resetonChangeofSubledger();
 	var val=0;
@@ -613,6 +607,7 @@ function loadDropDownCodesForEntities(obj)
 			var a = entity.split("^");
 			var eachEntity = a[0];
 			entitiesArray=eachEntity.split("+");
+			//bootbox.alert(":"+entitiesArray[0]+":");
 			entities = new YAHOO.widget.DS_JSArray(entitiesArray);
 		  }
 	  }
@@ -654,12 +649,14 @@ function autocompleteEntitiesBy20()
 
 function getDetailType()
 {
+	bootbox.alert("hello");
 	return 
 }
 
 
 function autocompleteEntities1(obj,myEvent)
 {
+	//bootbox.alert('autocomplete');
 	var src = obj;	
 	var target = document.getElementById('codescontainer');	
 	var posSrc=findPos(src); 
@@ -720,6 +717,7 @@ function autocompleteEntities1By20(obj)
 	 oACDS = new YAHOO.widget.DS_XHR("/services/EGF/voucher/common-ajaxLoadEntitesBy20.action", [ "~^"]);
 	   oACDS.responseType = YAHOO.widget.DS_XHR.TYPE_FLAT;
 	   oACDS.scriptQueryParam = "startsWith";
+	 //bootbox.alert(obj.name);
 	   if (oAutoCompEntityForJV!= undefined) {
 		   oAutoCompEntityForJV.destroy();
 		   oAutoCompEntityForJV = null;
@@ -755,6 +753,7 @@ function autocompleteEntities1By20(obj)
 var yuiflag = new Array();
 function autocompletecode(obj,myEvent)
 {
+	//bootbox.alert('autocomplete');
 	var src = obj;	
 	var target = document.getElementById('codescontainer');	
 	var posSrc=findPos(src); 
@@ -799,6 +798,7 @@ function autocompletecodeCommon(obj,myEvent)
 {
 	
 	var src = obj;	
+	//bootbox.alert(obj.scrollHeight);
 	var target = document.getElementById('codescontainer');	
 	var posSrc=findPos(src); 
 	target.style.left=posSrc[0]+"px";	
@@ -1025,7 +1025,8 @@ function fillNeibrAfterSplitGlcode(obj)
 		}
 		check();
 	}else if (temp!="" &&(accCodeid==null || accCodeid=="")){
-		obj.value="";
+		/*bootbox.alert("Invalid Account Code selected .Please select code from auto complete.");
+		obj.value="";*/
 		//document.getElementById('billDetailslist['+currRow+'].glcodeIdDetail').value="";
 	}
 	var currRow=getRowIndex(obj);
@@ -1053,13 +1054,16 @@ function fillNeibrAfterSplitFunction(obj)
 		//var functionId1 = document.getElementById('functionId').value;
 		var functionId2 = document.getElementById('billDetailslist['+currRow+'].functionIdDetail').value;
 		if(functionValue=="" && functionId1==""){
+			//bootbox.alert("Invalid function selected .Please select code from auto complete.");
 			//obj.value="";
 			document.getElementById('billDetailslist['+currRow+'].functionIdDetail').value="";
 		}else if(functionValue!="" && functionId1!="" && functionId2!="" && functionValue != temp[0] && functionId1==functionId2){
+			bootbox.alert("Invalid function selected .Please select code from auto complete.");
 			obj.value="";
 			document.getElementById("billDetailslist['+currRow+'].functionIdDetail").value="";
 		}*/
 		
+		//bootbox.alert("Invalid function selected .Please select code from auto complete.");
 		
 	}
 		
@@ -1294,7 +1298,7 @@ success: function(o) {
 		} 
     },
     failure: function(o) {
-    	bootbox.alert(jQuery.i18n.prop('falure.message'));
+    	bootbox.alert('failure');
     }
 }
 function check(){
@@ -1339,11 +1343,12 @@ success: function(o) {
 			
     },
     failure: function(o) {
-    	bootbox.alert(jQuery.i18n.prop('falure.message'));
+    	bootbox.alert('failure');
     }
 }
 
 function loaddropdown(){
+//bootbox.alert(coming);
 	
 }
 function updateDebitAmountJV()
@@ -1505,7 +1510,7 @@ function openSearchWindowFromJV(obj) {
 		var	url = "../voucher/common-searchEntites.action?accountDetailType="+detailtypeid;
 		window.open(url, 'EntitySearch','resizable=no,scrollbars=yes,left=300,top=40, width=400, height=500');
 	} else {
-		bootbox.alert(jQuery.i18n.prop("select.type.message"));
+		bootbox.alert("Select the Type.");
 	}
 }
 
@@ -1520,7 +1525,7 @@ function popupCallback(arg0, srchType) {
 		}
 		else
 		{
-			bootbox.alert(jQuery.i18n.prop("invalid.entity.selected.message"));
+			bootbox.alert("Invalid entity selected.");
 			document.getElementById(SUBLEDGERLIST+'['+acctTypeCurrRow+']'+'.detailCode').value="";
 			document.getElementById(SUBLEDGERLIST+'['+acctTypeCurrRow+']'+'.detailKeyId').value="";
 			document.getElementById(SUBLEDGERLIST+'['+acctTypeCurrRow+']'+'.detailKey').value="";
@@ -1553,7 +1558,7 @@ var callbackPJV = {
 			}
 	    },
 	    failure: function(o) {
-	    	bootbox.alert(jQuery.i18n.prop('falure.message'));
+	    	bootbox.alert('failure');
 	    }
 	}
 
@@ -1577,14 +1582,14 @@ var callbackCommon = {
 		}
 		else
 		{
-			bootbox.alert(jQuery.i18n.prop('enter.valid.code.message'));
+			bootbox.alert('Enter valid Code');
 			document.getElementById('detailKey').value='';
 			document.getElementById('detailName').value='';
 			return;
 		}
     },
     failure: function(o) {
-    	bootbox.alert(jQuery.i18n.prop('failure.message'));
+    	bootbox.alert('failure');
     }
 }
 
@@ -1615,17 +1620,17 @@ function validate()
 	var crtotal=document.getElementById('totalcramount').value;
 	if(dbtotal=='' || dbtotal==0)
 	{
-		bootbox.alert(jQuery.i18n.prop('total.debit.amount.cant.be.zero.message'));
+		bootbox.alert('Total Debit Amount can not be zero.');
 		return false;
 	}
 	if(crtotal=='' || crtotal==0)
 	{
-		bootbox.alert(jQuery.i18n.prop('total.credit.amount.cant.be.zero.message'));
+		bootbox.alert('Total Credit Amount can not be zero.');
 		return false;
 	}
 	if(dbtotal!=crtotal)
 	{
-		bootbox.alert(jQuery.i18n.prop('total.debit.credit.amount.should.not.same.message'));
+		bootbox.alert('Total Debit & Credit amount should be same.');
 		return false;
 	}
 	return true;
@@ -1639,7 +1644,7 @@ function checkLength(obj)
 {
 	if(obj.value.length>1024)
 	{
-		bootbox.alert(jQuery.i18n.prop('max.charatcers.warning.for.narration.message'))
+		bootbox.alert('Max 1024 characters are allowed for comments. Remaining characters are truncated.')
 		obj.value = obj.value.substring(1,1024);
 	}
 }
@@ -1648,7 +1653,7 @@ function checkVoucherNarrationLen(obj)
 {
 	if(obj.value.length>250)
 	{
-		bootbox.alert(jQuery.i18n.prop('max.charatcers.warning.for.comment.message'))
+		bootbox.alert('Max 250 characters are allowed for Narration. Remaining characters are truncated.')
 		obj.value = obj.value.substring(0,250);
 	}
 }
@@ -1671,11 +1676,13 @@ function findPos(ob)
 		curleft = obj.offsetLeft;
 		curtop = obj.offsetTop;
 		while (obj = obj.offsetParent) 
-		{
+		{	//bootbox.alert(obj.nodeName+"---"+obj.offsetTop+"--"+obj.offsetLeft+"-----"+curtop);
 			curleft =curleft + obj.offsetLeft;
 			curtop =curtop + obj.offsetTop; 
+			//bootbox.alert(curtop);
 		}
 	}
+	//bootbox.alert(curleft+"             "+curtop);
 	return [curleft,curtop];
 		
 }
@@ -1687,6 +1694,7 @@ function findPos(ob)
 		      posX += oElement.offsetLeft;
 		      posY += oElement.offsetTop;
 		      if( oElement != originalElement && oElement != document.body && oElement != document.documentElement ) {
+		     //  bootbox.alert(oElement.scrollTop+""+oElement.nodeName)
 		    	  posX -= oElement.scrollLeft;
 		        posY -= oElement.scrollTop;
 		      }
@@ -1746,7 +1754,7 @@ function glcodeFormatterCbillModify(tableName,columnName,type){
     	 var table_name=eval(tableName);  var index=table_name.getRecordIndex(oRecord);  	 
     	 var fieldName=tableName+"["+index+"]"+columnName;  	 
     	 while(document.getElementById(fieldName)) 
-    	 {    		 index++;
+    	 {    		 index++;  //bootbox.alert(index) ;
     	 fieldName=tableName+"["+index+"]"+columnName; 
     	 }
     	
@@ -1878,6 +1886,8 @@ if(temp.trim()!="")
 			hiddenfieldname=hiddenfieldname.replace("glcodeDetail","glcodeIdDetail");
 			accountHeadeName=accountHeadeName.replace("glcodeDetail","accounthead");
 			isSubledger=isSubledger.replace("glcodeDetail","isSubledger");
+//			bootbox.alert(codesForAccountDetailType[key]);
+	//		bootbox.alert(key);			
 			document.getElementById(hiddenfieldname).value=codesForAccountDetailType[key].split("`-`")[0];
 			
 			document.getElementById(accountHeadeName).value=key.split("`-`")[1];
@@ -1908,6 +1918,7 @@ if(temp.trim()!="")
 	}else
 	{
 	
+		//bootbox.alert(obj.value+":"+invalidAccountCode); this line will cause problem for mouse selection
 		obj.value="";
 		var hiddenfieldname=obj.name;
 		var accountHeadeName=obj.name;
@@ -2038,7 +2049,7 @@ function validateDigits(obj)
 {
 	if(isNaN(obj.value.trim()))
 	{
-		bootbox.alert(jQuery.i18n.prop("invalid.amount.message"))
+		bootbox.alert("Invalid Amount")
 		obj.value=0;
 		obj.focus();
 	}
@@ -2046,7 +2057,7 @@ function validateDigits(obj)
 	{
 		if(parseFloat(obj.value.trim())<0)
 		{
-			bootbox.alert(jQuery.i18n.prop("negative.amount.not.allowed.message"));
+			bootbox.alert("Negetive Amount is not allowed");
 			obj.value=0;
 			obj.focus();
 		}
@@ -2070,7 +2081,7 @@ function validateDigitsAndDecimal(obj)
 {
 	if(isNaN(obj.value.trim()))
 	{
-		bootbox.alert(jQuery.i18n.prop("invalid.amount.message"))
+		bootbox.alert("Invalid Amount")
 		obj.value=0;
 		obj.focus();
 	}
@@ -2078,7 +2089,7 @@ function validateDigitsAndDecimal(obj)
 	{
 		if(parseFloat(obj.value.trim())<0)
 		{
-			bootbox.alert(jQuery.i18n.prop("negative.amount.not.allowed.message"));
+			bootbox.alert("Negetive Amount is not allowed");
 			obj.value=0;
 			obj.focus();
 		}
@@ -2179,11 +2190,63 @@ if(!Array.indexOf){
    return -1;
   }
 }
+/*
+function check(){
+	var accountCodes=new Array();
+	
+	for(var i=0;i<billDetailTableIndex+1;i++){
+
+	if(null != document.getElementById('billDetailslist['+i+'].glcodeDetail')){
+		accountCodes[i] = document.getElementById('billDetailslist['+i+'].glcodeDetail').value;
+	}
+	}
+	var url = path+'/voucher/common!getDetailCode.action?accountCodes='+accountCodes;
+	var transaction = YAHOO.util.Connect.asyncRequest('POST', url, callbackJV, null);
+
+	
+}
+var callbackJV = {
+success: function(o) {
+		var test= o.responseText;
+		test = test.split('~');
+		for (var j=0; j<slDetailTableIndex;j++ )
+		{
+			if(null != document.getElementById('subLedgerlist['+j+'].glcode.id') && null != document.getElementById('subLedgerlist['+j+'].subledgerCode') && test.length >1 )
+			{
+				d=document.getElementById('subLedgerlist['+j+'].glcode.id');
+				d.options.length=((test.length)/2)+1;
+				for (var i=1; i<((test.length)/2)+1;i++ )
+				{
+					d.options[i].text=test[i*2-2];
+					d.options[i].value=test[i*2 -1];
+					document.getElementById('subLedgerlist['+j+'].subledgerCode').value = test[i*2-2] ;
+				}
+			} 
+			if(test.length<2)
+			{
+				var d = document.getElementById('subLedgerlist['+j+'].glcode.id');
+				if(d)
+				{
+				d.options.length=1;
+				d.options[0].text='---Select---';
+				d.options[0].value=0;
+				document.getElementById('subLedgerlist['+j+'].subledgerCode').value = "";
+				}
+			}
+		}
+    },
+    failure: function(o) {
+    	bootbox.alert('failure');
+    }
+}
+
+*/
 
 function autocompleteSchemeBy20()
 {
 		path="../..";
 	     oACDS = new YAHOO.widget.DS_XHR(path+"/voucher/common-ajaxLoadSchemeBy20.action", [ "~^"]);
+	    // bootbox.alert("helllpo");
 	   oACDS.responseType = YAHOO.widget.DS_XHR.TYPE_FLAT;
 	   oACDS.scriptQueryParam = "startsWith";
 	  
@@ -2257,7 +2320,7 @@ var callbackProjectCodes = {
 	document.getElementById('projectCodes').innerHTML=o.responseText;
     },
     failure: function(o) {
-    	bootbox.alert(jQuery.i18n.prop('failed.to.load.project.codes.message'));
+    	bootbox.alert('Failed to Load Project Codes');
     }
 }
 function disableForm() {

@@ -51,18 +51,6 @@
          xmlns="http://xmlns.jcp.org/xml/ns/javaee"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
     <display-name>eGov Financial Accounting</display-name>
-    
-   <!--  <security-constraint>
-    <web-resource-collection>
-    <web-resource-name>org.egov.egf.web.controller.expensebill.CreateExpenseBillController</web-resource-name>
-    <url-pattern>/expensebill/*</url-pattern>
-    <http-method>POST</http-method>
-    <http-method>GET</http-method>
-    </web-resource-collection>
-    <user-data-constraint>
-    <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-    </user-data-constraint>
-    </security-constraint> -->
     <!-- Context Params Starts -->
     <context-param>
         <param-name>contextConfigLocation</param-name>

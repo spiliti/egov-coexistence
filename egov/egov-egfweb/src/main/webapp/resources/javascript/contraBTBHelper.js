@@ -46,6 +46,8 @@
  *
  */
 function loadBank(fund) {
+	// bootbox.alert(fund.options[fund.selectedIndex].value);
+	//loadFromDepartment();
 	populatefromBankId({
 		fundId : fund.options[fund.selectedIndex].value,
 		typeOfAccount : "RECEIPTS_PAYMENTS,RECEIPTS"
@@ -146,7 +148,7 @@ var postTypeFrom = {
 		document.getElementById('fromAccnumnar').value = fromNarration;
 	},
 	failure : function(o) {
-		bootbox.alert(jQuery.i18n.prop('falure.message'));
+		bootbox.alert('failure');
 	}
 }
 
@@ -157,7 +159,7 @@ var postTypeTo = {
 		document.getElementById('toAccnumnar').value = toNarration;
 	},
 	failure : function(o) {
-		bootbox.alert(jQuery.i18n.prop('falure.message'));
+		bootbox.alert('failure');
 	}
 }
 
@@ -165,12 +167,12 @@ function nextChqNo() {
 	var obj = document.getElementById("fromAccountNumber");
 	var bankBr = document.getElementById("fromBankId");
 	if (bankBr.selectedIndex == -1) {
-		bootbox.alert(jQuery.i18n.prop('select.branch.and.account.number.message'));
+		bootbox.alert("Select Bank Branch and Account No!!");
 		return;
 	}
 
 	if (obj.selectedIndex == -1) {
-		bootbox.alert(jQuery.i18n.prop('select.account.number.message'));
+		bootbox.alert("Select Account No!!");
 		return;
 	}
 	var accNo = obj.options[obj.selectedIndex].text;
@@ -186,6 +188,8 @@ function checkInterFund() {
 	var toFund = document.getElementById('toFundId').value;
 	var splitStr = new Array();
 	var temp;
+	// bootbox.alert("hi"+toFund);
+	// bootbox.alert("from fund"+fromFund);
 	if (fromFund != "" && toFund != "") {
 		if (fromFund != toFund) {
 			for (i = 0, j = 0; i < fund_map.length; i++) {
@@ -200,12 +204,14 @@ function checkInterFund() {
 			document.getElementById('interFundRow2').style.visibility = "visible";
 			document.getElementById('interFundRow3').style.visibility = "visible";
 		} else {
+			// bootbox.alert("from fund="+fromFund+"toFund="+toFund);
 			document.getElementById('interFundRow1').style.visibility = "hidden";
 			document.getElementById('interFundRow2').style.visibility = "hidden";
 			document.getElementById('interFundRow3').style.visibility = "hidden";
 		}
 
 	} else if (fromFund == "" || toFund == "") {
+		// bootbox.alert("min else if");
 		document.getElementById('interFundRow1').style.visibility = "hidden";
 		document.getElementById('interFundRow2').style.visibility = "hidden";
 		document.getElementById('interFundRow3').style.visibility = "hidden";
@@ -214,7 +220,7 @@ function checkInterFund() {
 
 function loadFromBalance(obj) {
 	if (document.getElementById('voucherDate').value == '') {
-		bootbox.alert(jQuery.i18n.prop('please.select.voucher.date.message'));
+		bootbox.alert("Please Select the Voucher Date!!");
 		obj.options.value = -1;
 		return;
 	}
@@ -233,7 +239,7 @@ function loadFromBalance(obj) {
 
 function loadToBalance(obj) {
 	if (document.getElementById('voucherDate').value == '') {
-		bootbox.alert(jQuery.i18n.prop('please.select.voucher.date.message'));
+		bootbox.alert("Please Select the Voucher Date!!");
 		obj.options.value = -1;
 		return;
 	}
@@ -257,8 +263,8 @@ function enableAll() {
 }
 
 function validate() {
-	var insuffientAlert = jQuery.i18n.prop('there.is.no.sufficient.bank.bal.message');
-	var continueAlert = jQuery.i18n.prop('do.you.want.to.continue.message');;
+	var insuffientAlert = 'There is no sufficient bank balance. ';
+	var continueAlert = 'Do you want to continue ? ';
 	var fundFlowNotGeneratedAlert = '';
 	var voucher_date = document.getElementById('voucherDate').value;
 	var fundFlowDateChkStr = document
@@ -268,10 +274,13 @@ function validate() {
 	var month = getMonthNo(sp_date[1]);
 	var app_config_Date_value = new Date(sp_date[2], month - 1, sp_date[0]);
 	var voucherDateChk = new Date(vh_split[2], vh_split[1] - 1, vh_split[0]);
+	// bootbox.alert(voucher_date);
+	// bootbox.alert("Check app date"+app_config_Date_value);
+	// bootbox.alert("Check app date"+voucherDateChk);
 
 	if (parseFloat(document.getElementById('fromBankBalance').value) == -1
 			|| parseFloat(document.getElementById('toBankBalance').value) == -1) {
-		fundFlowNotGeneratedAlert = jQuery.i18n.prop('fund.flow.not.generated.plz.create.fund.flow.first.message');
+		fundFlowNotGeneratedAlert = "FundFlowReport is not generated for the for the day.Please create fund flow first";
 	}
 	if (parseFloat(document.getElementById('amount').value) > parseFloat(document
 			.getElementById('fromBankBalance').value)) {
@@ -299,7 +308,7 @@ function validate() {
 	}
 	var Amount = document.getElementById("amount").value;
 	if (Amount <= 0) {
-		bootbox.alert(jQuery.i18n.prop('amount.should.be.gt.zero.message'));
+		bootbox.alert("Amount should be greater than zero ");
 		return false;
 	}
 	document.cbtbform.action='/services/EGF/contra/contraBTB-create.action';

@@ -980,7 +980,7 @@ public class PaymentAction extends BasePaymentAction {
                     if (LOGGER.isDebugEnabled())
                         LOGGER.debug("Validation Error mismatch in attributes ");
                     throw new ValidationException(
-                            Arrays.asList(new ValidationError("mismatch.attributes.message", "Mismatch in attributes!!")));
+                            Arrays.asList(new ValidationError("Mismatch in attributes", "Mismatch in attributes!!")));
                 }
             }
             // else

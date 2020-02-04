@@ -119,7 +119,7 @@ function openVoucher(vid)
 			<span class="mandatory1"> <s:actionerror /> <s:fielderror /></span>
 			<span style="color: green"><s:actionmessage /></span>
 			<div class="formmainbox">
-				<div class="subheadnew"><s:text name="payment.bill.payment.view"/> </div>
+				<div class="subheadnew">Bill Payment View</div>
 				<table width="100%" cellpadding="0" cellspacing="0" border="0">
 					<tr>
 						<td>
@@ -130,11 +130,11 @@ function openVoucher(vid)
 										<td>
 											<div class="tabber">
 												<div class="tabbertab">
-													<h2><s:text name="payment.heading"/> </h2>
+													<h2>Payment Details</h2>
 													<span>
 														<table width="100%" border="0" cellspacing="0"
 															cellpadding="0">
-															<div class="subheadsmallnew"><s:text name="payment.heading"/> </div>
+															<div class="subheadsmallnew">Payment Details</div>
 															<tr>
 																<td width="9%" class="bluebox">&nbsp;</td>
 																<s:if test="%{shouldShowHeaderField('fund')}">
@@ -269,12 +269,13 @@ function openVoucher(vid)
 
 
 												<div class="tabbertab">
-													<h2><s:text name="payment.bill.details"/> </h2>
+													<h2>Bill Details</h2>
 													<span>
 														<table align="center" border="0" cellpadding="0"
 															cellspacing="0" class="newtable">
 															<tr>
-																<td colspan="6"><div class="subheadsmallnew"><s:text name="payment.bill.details"/></div></td>
+																<td colspan="6"><div class="subheadsmallnew">Bill
+																		Details</div></td>
 															</tr>
 															<tr>
 																<td colspan="6">
@@ -282,14 +283,22 @@ function openVoucher(vid)
 																		<table id="miscBillTable" align="center" border="0"
 																			cellpadding="0" cellspacing="0" width="100%">
 																			<tr>
-																				<th class="bluebgheadtdnew"><s:text name="payment.billnumber"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.bill.date"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.bill.voucher.number"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.bill.voucher.date"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.party.name"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.bill.amount"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.passed.amount"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.paid.amount"/></th>
+																				<th class="bluebgheadtdnew">Bill Number
+																				</td>
+																				<th class="bluebgheadtdnew">Bill Date
+																				</td>
+																				<th class="bluebgheadtdnew">Bill Voucher Number
+																				</th>
+																				<th class="bluebgheadtdnew">Bill Voucher Date
+																				</th>
+																				<th class="bluebgheadtdnew">Party Name
+																				</td>
+																				<th class="bluebgheadtdnew">Bill Amount(Rs)
+																				</td>
+																				<th class="bluebgheadtdnew">Passed Amount(Rs)
+																				</td>
+																				<th class="bluebgheadtdnew">Paid Amount(Rs)
+																				</td>
 																			</tr>
 																			<s:if test="%{miscBillList.size>0}">
 																				<s:iterator var="p" value="miscBillList" status="s">
@@ -334,7 +343,8 @@ function openVoucher(vid)
 																			</s:if>
 																			<tr>
 																				<td style="text-align: right" colspan="7"
-																					class="blueborderfortdnew"><strong><s:text name="payment.grand.total"/> </strong></td>
+																					class="blueborderfortdnew"><strong>Grand
+																						Total</strong></td>
 																				<td style="text-align: right"
 																					class="blueborderfortdnew"><fmt:formatNumber
 																						value="${totalAmt}" pattern="#0.00" /></td>
@@ -347,12 +357,13 @@ function openVoucher(vid)
 													</span>
 												</div>
 												<div class="tabbertab" id="viewtab">
-													<h2><s:text name="payment.cheque.details"/> </h2>
+													<h2>Cheque Details</h2>
 													<span>
 														<table align="center" border="0" cellpadding="0"
 															cellspacing="0" class="newtable">
 															<tr>
-																<td colspan="6"><div class="subheadsmallnew"><s:text name="payment.cheque.details"/></div></td>
+																<td colspan="6"><div class="subheadsmallnew">Cheque
+																		Details</div></td>
 															</tr>
 															<tr>
 																<td colspan="4">
@@ -362,16 +373,23 @@ function openVoucher(vid)
 																			<tr>
 																				<s:if
 																					test="%{paymentheader.type == 'cash' || paymentheader.type == 'Cash'|| paymentheader.type == 'Cheque' || paymentheader.type == 'cheque'}">
-																					<th class="bluebgheadtdnew"><s:text name="chq.assignment.instrument.no"/> </th>
-																					<th class="bluebgheadtdnew"><s:text name="chq.assignment.instrument.date"/></th>
+																					<th class="bluebgheadtdnew">Cheque Number
+																					</td>
+																					<th class="bluebgheadtdnew">Cheque Date
+																					</td>
 																				</s:if>
 																				<s:else>
-																					<th class="bluebgheadtdnew"><s:text name="payment.rtgs.number"/></th>
-																					<th class="bluebgheadtdnew"><s:text name="chq.assignment.transaction.date"/> </th>
+																					<th class="bluebgheadtdnew">RTGS Number
+																					</td>
+																					<th class="bluebgheadtdnew">RTGS Date
+																					</td>
 																				</s:else>
-																				<th class="bluebgheadtdnew"><s:text name="payment.party.code"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="payment.cheque.amount"/></th>
-																				<th class="bluebgheadtdnew"><s:text name="paymnet.cheque.status"/></th>
+																				<th class="bluebgheadtdnew">Party Code
+																				</td>
+																				<th class="bluebgheadtdnew">Cheque Amount(Rs)
+																				</td>
+																				<th class="bluebgheadtdnew">Cheque Status
+																				</td>
 																			</tr>
 																			<s:if test="%{instrumentHeaderList.size>0}">
 																				<s:iterator var="p" value="instrumentHeaderList"
@@ -411,7 +429,8 @@ function openVoucher(vid)
 																		</table>
 																		<s:if
 																			test="%{instrumentHeaderList==null || instrumentHeaderList.size==0}">
-																			<div class="bottom" align="center"><s:text name="payment.no.cheque.details.found"/> </div>
+																			<div class="bottom" align="center">No Cheque
+																				Details Found !</div>
 																		</s:if>
 																	</div>
 																</td>
@@ -437,19 +456,19 @@ function openVoucher(vid)
 				<s:if test="%{!finanicalYearAndClosedPeriodCheckIsClosed}">
 					<%@ include file='../payment/commonWorkflowMatrix.jsp'%>
 					<%@ include file='../workflow/commonWorkflowMatrix-button.jsp'%>
-					<s:submit cssClass="button" id="printPreview" key="payment.print.preview"
+					<s:submit cssClass="button" id="printPreview" value="Print Preview"
 						onclick="printVoucher()" />
 				</s:if>
 				<s:else>
-				<input type="button" name="button2" id="button2" value="<s:text name="payment.close.button"/>"
+				<input type="button" name="button2" id="button2" value="Close"
 						class="button" onclick="window.parent.postMessage('close','*');window.close();" />
 				</s:else>
 				
 				</s:if>
 				<s:else>
-					<s:submit cssClass="button" id="printPreview" key="payment.print.preview"
+					<s:submit cssClass="button" id="printPreview" value="Print Preview"
 						onclick="printVoucher()" />
-					<input type="button" name="button2" id="button2" value='<s:text name="payment.close.button"/>'
+					<input type="button" name="button2" id="button2" value="Close"
 						class="button" onclick="window.parent.postMessage('close','*');window.close();" />
 				</s:else>
 			</div>
@@ -469,7 +488,7 @@ function openVoucher(vid)
 		{
 			if(obj.value.length>1024)
 			{
-				bootbox.alert('<s:text name="max.character.allowed.message"><s:param>1024</s:param> </s:text>'')
+				bootbox.alert('Max 1024 characters are allowed for comments. Remaining characters are truncated.')
 				obj.value = obj.value.substring(1,1024);
 			}
 		}
@@ -498,7 +517,7 @@ function openVoucher(vid)
 			{
 				if(parseFloat(document.getElementById('paymentAmountspan').innerHTML)>parseFloat(document.getElementById('balance').innerHTML))
 				{
-					bootbox.alert('<s:text name="insuff.bank.balance.message"/>');
+					bootbox.alert('Insufficient bank balance');
 					return false;
 				}
 			}
@@ -524,7 +543,7 @@ function openVoucher(vid)
 			</s:if>
 			<s:else>
 				if( (value == 'Approve' || value == 'Save And Forward' || value=='Forward' ) && null != document.getElementById("approverUserId") && document.getElementById("approverUserId").value == -1){
-					document.getElementById('lblError').innerHTML =<s:text name="please.select.user.message"/>;
+					document.getElementById('lblError').innerHTML ="Please Select the user";
 					return false;
 				}
 			</s:else>
@@ -566,7 +585,7 @@ function openVoucher(vid)
 				</s:if>
 				<s:if test="%{balance=='-1'}">
 					<script>
-	bootbox.alert('<s:text name="fund.flow.not.generated.please.generate.report.first.message"/>');
+	bootbox.alert("FundFlow Report not Generated to check Bank Balance. Please generate Report First");
 	for(var i=0;i<document.forms[0].length;i++)
 	if(document.forms[0].elements[i].id!='Close')
 		document.forms[0].elements[i].disabled =true;

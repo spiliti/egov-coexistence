@@ -52,23 +52,23 @@
 
 <div class="panel-heading custom_form_panel_heading">
 	<div class="panel-title">
-		<spring:message code="lbl.credit.details" text="Credit details" />
+		<spring:message code="lbl.credit.details" />
 	</div>
 </div>
 <div class="panel-body">
 	<table class="table table-bordered" id="tblcreditdetails">
 		<thead>
 			<tr>
-				<th><spring:message code="lbl.account.code" text="Account Code"/></th>
-				<th><spring:message code="lbl.account.head" text="Account Head"/></th>
-				<th><spring:message code="lbl.credit.amount" text="Credit Amount"/></th>
-				<th><spring:message code="lbl.action" text="Action"/></th> 					
+				<th><spring:message code="lbl.account.code"/></th>
+				<th><spring:message code="lbl.account.head"/></th>
+				<th><spring:message code="lbl.credit.amount"/></th>
+				<th><spring:message code="lbl.action"/></th> 					
 			</tr>
 		</thead>
 		<tbody>
 			<tr id="creditdetailsrow">
 				<td>
-					<input type="text" id="tempCreditDetails[0].creditGlcode" name="tempCreditDetails[0].creditGlcode" class="form-control table-input creditDetailGlcode creditGlcode"  data-errormsg="<spring:message code='account.code.is.mandatory.message'  text='Account Code is mandatory!'/>" data-idx="0" data-optional="0"   placeholder='<spring:message code="type.first.3.letter.of.account.code.message" text="Type first 3 letters of Account code"/>' >
+					<input type="text" id="tempCreditDetails[0].creditGlcode" name="tempCreditDetails[0].creditGlcode" class="form-control table-input creditDetailGlcode creditGlcode"  data-errormsg="Account Code is mandatory!" data-idx="0" data-optional="0"   placeholder="Type first 3 letters of Account code" >
 					<form:hidden path="" name="tempCreditDetails[0].glcode" id="tempCreditDetails[0].glcode" class="form-control table-input hidden-input creditaccountcode"/> 
 					<form:hidden path="" name="tempCreditDetails[0].glcodeid" id="tempCreditDetails[0].glcodeid"  class="form-control table-input hidden-input creditdetailid"/>
 					<form:hidden path="" name="tempCreditDetails[0].isSubLedger" id="tempCreditDetails[0].isSubLedger" class="form-control table-input hidden-input creditIsSubLedger"/>
@@ -81,9 +81,9 @@
 					<input type="text" id="tempCreditDetails[0].creditAccountHead" name="tempCreditDetails[0].creditAccountHead"  class="form-control creditdetailname" disabled>  
 				</td>
 				<td>
-					<form:input path="" name="tempCreditDetails[0].creditamount" id="tempCreditDetails[0].creditamount" data-errormsg="<spring:message code='credit.amount.is.mandatory.message'  text='Credit Amount is mandatory!'/>" onkeyup="decimalvalue(this);" onblur="calcualteNetpaybleAmount();" data-pattern="decimalvalue" data-idx="0" data-optional="0" class="form-control table-input text-right creditAmount"   maxlength="12"  />
+					<form:input path="" name="tempCreditDetails[0].creditamount" id="tempCreditDetails[0].creditamount" data-errormsg="Credit Amount is mandatory!" onkeyup="decimalvalue(this);" onblur="calcualteNetpaybleAmount();" data-pattern="decimalvalue" data-idx="0" data-optional="0" class="form-control table-input text-right creditAmount"   maxlength="12"  />
 				</td> 
-				<td class="text-center"><span style="cursor:pointer;" onclick="addCreditDetailsRow();" tabindex="0" id="tempCreditDetails[0].addButton" data-toggle="tooltip" title="" data-original-title="<spring:message code='press.space.to.add.message'  text='press SPACE to Add!'/>" aria-hidden="true"><i class="fa fa-plus"></i></span>
+				<td class="text-center"><span style="cursor:pointer;" onclick="addCreditDetailsRow();" tabindex="0" id="tempCreditDetails[0].addButton" data-toggle="tooltip" title="" data-original-title="press ENTER to Add!" aria-hidden="true"><i class="fa fa-plus"></i></span>
 				 <span class="add-padding credit-delete-row" onclick="deleteCreditDetailsRow(this);"><i class="fa fa-trash" data-toggle="tooltip" title="" data-original-title="Delete!"></i></span> </td>
 			</tr>
 		</tbody>

@@ -52,7 +52,7 @@
 
 <div class="panel-heading custom_form_panel_heading">
 	<div class="panel-title">
-		<spring:message code="lbl.netpayable" text="Net payable"/>
+		<spring:message code="lbl.netpayable" />
 	</div>
 </div>
 
@@ -60,8 +60,8 @@
 	<table class="table table-bordered" id="tblnetpayable">
 		<thead>
 			<tr>
-				<th><spring:message code="lbl.account.code"  text="Account Code"/></th>
-				<th><spring:message code="lbl.credit.amount" text="Credit Amount" /></th>
+				<th><spring:message code="lbl.account.code" /></th>
+				<th><spring:message code="lbl.credit.amount" /></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -77,7 +77,7 @@
 					<form:hidden path="" name="netPayableDetailTypeName" id="netPayableDetailTypeName" />
 					<form:hidden path="" name="netPayableDetailKeyName" id="netPayableDetailKeyName" />
 					<form:select path="" data-first-option="false" name="netPayableAccountCode" id="netPayableAccountCode" class="form-control" >
-						<form:option value=""> <spring:message code="lbl.select" text="Select"/> </form:option>
+						<form:option value=""> <spring:message code="lbl.select" /> </form:option>
 					</form:select>
 				</td>
 				<td><input type="text" id="expense-netPayableAmount" name="netPayableAmount"  class="form-control text-right" onkeyup="decimalvalue(this);" data-pattern="decimalvalue"> 
@@ -88,5 +88,5 @@
 </div>
 
 <div class="text-center">
-	<button type="button" id="populateAccountDetails" class="btn btn-secondary" align="center"><spring:message code="lbl.done" text="Done"/></button>
+	<button type="button" id="populateAccountDetails" class="btn btn-secondary" align="center"><spring:message code="lbl.done"/></button>
 </div>

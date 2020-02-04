@@ -47,12 +47,11 @@
   --%>
 
 
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="/includes/taglibs.jsp"%>
+
 <%@ page language="java"%>
 <html>
 <head>
-	<script type="text/javascript" src="/services/EGF/resources/javascript/jquery.i18n.properties.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/resources/javascript/voucherHelper.js?rnd=${app_release_no}"></script>
 	<meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
 	<title>Create Voucher From Bill</title>
@@ -147,9 +146,9 @@
 				<table align="center">
 					<tr>
 
-						<td><s:submit key="lbl.search.key" onclick="return validate()" cssClass="buttonsubmit" />&nbsp;</td>
-						<td><input type="button" value='<s:text name="lbl.reset.key"/>' class="button" onclick="return resetForm();" />&nbsp;</td>
-						<td><input type="button" value='<s:text name="lbl.close.key"></s:text>' onclick="window.parent.postMessage('close','*');window.close();" class="button" />&nbsp;</td>
+						<td><s:submit value="Search" onclick="return validate()" cssClass="buttonsubmit" />&nbsp;</td>
+						<td><input type="button" value="Reset" class="button" onclick="return resetForm();" />&nbsp;</td>
+						<td><input type="button" value="Close" onclick="window.parent.postMessage('close','*');window.close();" class="button" />&nbsp;</td>
 					</tr>
 				</table>
 			</div>

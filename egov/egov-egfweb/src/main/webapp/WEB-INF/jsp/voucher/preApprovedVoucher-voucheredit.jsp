@@ -185,7 +185,7 @@
 					updateDebitAmount();updateCreditAmount();
 				}
 				else{
-					bootbox.alert("<s:text name='this.row.cant.be.deleted.message'/>");
+					bootbox.alert("This row can not be deleted");
 				}
 			}
 			
@@ -245,7 +245,7 @@
 					}
 				}
 				else{
-					bootbox.alert("<s:text name='this.row.cant.be.deleted.message'/>");
+					bootbox.alert("This row can not be deleted");
 				}
 			}        
 		});
@@ -293,14 +293,14 @@ function validate(name,value){
 				<s:if test="%{type == finConstExpendTypeContingency}">
 					<table>
 						<tr class="bluebox">
-							<a href="#" onclick="openSource()"><s:text name="source.label"/></a>
+							<a href="#" onclick="openSource()">Source</a>
 						</tr>
 					</table>
 				</s:if>
 				<br />
 				<div id="labelAD" align="center">
 					<table width="80%" border=0 id="labelid">
-						<th><s:text name="account.details"/> </th>
+						<th>Account Details</th>
 					</table>
 				</div>
 				<div class="yui-skin-sam" align="center">
@@ -314,7 +314,7 @@ function validate(name,value){
 				<br />
 				<div id="labelSL" align="center">
 					<table width="80%" border=0 id="labelid">
-						<th><s:text name="subledger.details.label"/> </th>
+						<th>Sub-Ledger Details</th>
 					</table>
 				</div>
 
@@ -335,7 +335,7 @@ function validate(name,value){
 
 					<table border="0" width="80%">
 						<tr>
-							<td class="bluebox"><s:text name="lbl.comments"/> </td>
+							<td class="bluebox">Comments</td>
 							<td class="bluebox"><s:textarea name="comments"
 									id="comments" cols="50" rows="3"
 									value="%{voucherHeader.state.text1}" onblur="checkLength(this)" /></td>
@@ -344,16 +344,16 @@ function validate(name,value){
 						<tr>
 							<td />
 							<td><s:submit type="submit" cssClass="buttonsubmit"
-									id="save" name="save" key="lbl.save.as.working.copy"
+									value="Save as Working Copy" id="save" name="save"
 									method="saveAsWorkingCopy" onclick="return validate()" /> <s:iterator
 									value="%{getValidActions('')}" var="p">
 									<s:submit type="submit" cssClass="buttonsubmit"
 										value="%{description}" id="%{name}" name="%{name}"
 										method="sendForApprovalForWC"
 										onclick="return validate('%{name}','%{description}')" />
-								</s:iterator> <s:submit cssClass="button" id="print" key="lbl.print.preview"
+								</s:iterator> <s:submit cssClass="button" id="print" value="Print Preview"
 									action="journalVoucherPrint" method="print" /> <input
-								type="button" value="<s:text name='lbl.close.key'/>" onclick="javascript:window.close()"
+								type="button" value="Close" onclick="javascript:window.close()"
 								class="button" /></td>
 						</tr>
 					</table>

@@ -52,7 +52,6 @@
 <%@ page language="java"%>
 <head>
 <title>Direct Bank Payment</title>
-<script type="text/javascript" src="/services/EGF/resources/javascript/jquery.i18n.properties.js"></script>
 <script type="text/javascript"
 	src="${pageContext.request.contextPath}/resources/javascript/voucherHelper.js?rnd=${app_release_no}"></script>
 <script type="text/javascript"
@@ -125,25 +124,25 @@
 				{key:"functionid",hidden:true,  formatter:createTextFieldFormatterJV(VOUCHERDETAILLIST,".functionIdDetail","hidden")},
 				{key:"function",hidden:true,label:'Function Name', formatter:createTextFieldFormatterForFunctionJV(VOUCHERDETAILLIST,".functionDetail","hidden")},    
 				{key:"glcodeid",hidden:true, formatter:createTextFieldFormatterJV(VOUCHERDETAILLIST,".glcodeIdDetail","hidden")},
-				{key:"glcode",label:'<s:text name="payment.account.code.key"/> <span class="mandatory1">*</span>',   formatter:createTextFieldFormatterJV(VOUCHERDETAILLIST,".glcodeDetail","text")},
-				{key:"accounthead", label:'<s:text name="payment.account.head.key"/>',formatter:createLongTextFieldFormatterJV(VOUCHERDETAILLIST,".accounthead")},				
-				{key:"debitamount",label:'<s:text name="payment.debit.amount.key"/>', formatter:createAmountFieldFormatterJV(VOUCHERDETAILLIST,".debitAmountDetail","updateDebitAmountJV()")}, 
-				{key:"creditamount",label:'<s:text name="payment.credit.amount.key"/>',formatter:createAmountFieldFormatterJV(VOUCHERDETAILLIST,".creditAmountDetail","updateCreditAmountJV()")},
-				{key:'Add',label:'<s:text name="payment.add.key"/>',formatter:createAddImageFormatter("${pageContext.request.contextPath}")},
-				{key:'Delete',label:'<s:text name="payment.delete.key"/>',formatter:createDeleteImageFormatter("${pageContext.request.contextPath}")}
+				{key:"glcode",label:'Account Code <span class="mandatory1">*</span>',   formatter:createTextFieldFormatterJV(VOUCHERDETAILLIST,".glcodeDetail","text")},
+				{key:"accounthead", label:'Account Head',formatter:createLongTextFieldFormatterJV(VOUCHERDETAILLIST,".accounthead")},				
+				{key:"debitamount",label:'Debit Amount', formatter:createAmountFieldFormatterJV(VOUCHERDETAILLIST,".debitAmountDetail","updateDebitAmountJV()")}, 
+				{key:"creditamount",label:'Credit Amount',formatter:createAmountFieldFormatterJV(VOUCHERDETAILLIST,".creditAmountDetail","updateCreditAmountJV()")},
+				{key:'Add',label:'Add',formatter:createAddImageFormatter("${pageContext.request.contextPath}")},
+				{key:'Delete',label:'Delete',formatter:createDeleteImageFormatter("${pageContext.request.contextPath}")}
 			];
 			</s:if>
 			<s:else>
 			var voucherDetailColumns = [ 
        			{key:"functionid",hidden:true,  formatter:createTextFieldFormatterJV(VOUCHERDETAILLIST,".functionIdDetail","hidden")},
-       			{key:"function",label:'<s:text name="payment.function.name.key"/>', formatter:createTextFieldFormatterForFunctionJV(VOUCHERDETAILLIST,".functionDetail","text")},         
+       			{key:"function",label:'Function Name', formatter:createTextFieldFormatterForFunctionJV(VOUCHERDETAILLIST,".functionDetail","text")},         
        			{key:"glcodeid",hidden:true, formatter:createTextFieldFormatterJV(VOUCHERDETAILLIST,".glcodeIdDetail","hidden")},
-       			{key:"glcode",label:'<s:text name="payment.account.code.key"/> <span class="mandatory1">*</span>',formatter:createTextFieldFormatterJV(VOUCHERDETAILLIST,".glcodeDetail","text")},
-       			{key:"accounthead", label:'<s:text name="payment.account.head.key"/>',formatter:createLongTextFieldFormatterJV(VOUCHERDETAILLIST,".accounthead")},				
-       			{key:"debitamount",label:'<s:text name="payment.debit.amount.key"/>', formatter:createAmountFieldFormatterJV(VOUCHERDETAILLIST,".debitAmountDetail","updateDebitAmountJV()")}, 
-       			{key:"creditamount",label:'<s:text name="payment.credit.amount.key"/>',formatter:createAmountFieldFormatterJV(VOUCHERDETAILLIST,".creditAmountDetail","updateCreditAmountJV()")},
-       			{key:'Add',label:'<s:text name="payment.add.key"/>',formatter:createAddImageFormatter("${pageContext.request.contextPath}")},
-       			{key:'Delete',label:'<s:text name="payment.delete.key"/>',formatter:createDeleteImageFormatter("${pageContext.request.contextPath}")}
+       			{key:"glcode",label:'Account Code <span class="mandatory1">*</span>',formatter:createTextFieldFormatterJV(VOUCHERDETAILLIST,".glcodeDetail","text")},
+       			{key:"accounthead", label:'Account Head',formatter:createLongTextFieldFormatterJV(VOUCHERDETAILLIST,".accounthead")},				
+       			{key:"debitamount",label:'Debit Amount', formatter:createAmountFieldFormatterJV(VOUCHERDETAILLIST,".debitAmountDetail","updateDebitAmountJV()")}, 
+       			{key:"creditamount",label:'Credit Amount',formatter:createAmountFieldFormatterJV(VOUCHERDETAILLIST,".creditAmountDetail","updateCreditAmountJV()")},
+       			{key:'Add',label:'Add',formatter:createAddImageFormatter("${pageContext.request.contextPath}")},
+       			{key:'Delete',label:'Delete',formatter:createDeleteImageFormatter("${pageContext.request.contextPath}")}
        		];
 		</s:else>         
 	    var voucherDetailDS = new YAHOO.util.DataSource(); 
@@ -171,7 +170,7 @@
 					check();
 				}
 				else{
-					bootbox.alert("<s:text name='row.cant.be.delete.message'/>");
+					bootbox.alert("This row can not be deleted");
 				}
 			}
 			
@@ -233,15 +232,15 @@
 	var makeSubLedgerTable = function() {
 		var subledgerColumns = [ 
 			{key:"subledgerCode",hidden:true, formatter:createSLTextFieldFormatterJV(SUBLEDGERLIST,".subledgerCode","hidden")},
-			{key:"glcode.id",label:'<s:text name="payment.account.code.key"/> <span class="mandatory1">*</span>', formatter:createDropdownFormatterJV(SUBLEDGERLIST,"loaddropdown(this)"),  dropdownOptions:glcodeOptions},
+			{key:"glcode.id",label:'Account Code <span class="mandatory1">*</span>', formatter:createDropdownFormatterJV(SUBLEDGERLIST,"loaddropdown(this)"),  dropdownOptions:glcodeOptions},
 			{key:"detailTypeName",hidden:true, formatter:createSLTextFieldFormatterJV(SUBLEDGERLIST,".detailTypeName","hidden")},
-			{key:"detailType.id",label:'<s:text name="payment.type.key"/> <span class="mandatory1">*</span>', formatter:createDropdownFormatterJV1(SUBLEDGERLIST),dropdownOptions:detailtypeOptions},
-			{key:"detailCode",label:'<s:text name="payment.code.key"/> <span class="mandatory1">*</span>', formatter:createSLDetailCodeTextFieldFormatterJV(SUBLEDGERLIST,".detailCode","splitEntitiesDetailCode(this)", ".search", "openSearchWindowFromJV(this)")},
+			{key:"detailType.id",label:'Type <span class="mandatory1">*</span>', formatter:createDropdownFormatterJV1(SUBLEDGERLIST),dropdownOptions:detailtypeOptions},
+			{key:"detailCode",label:'Code <span class="mandatory1">*</span>', formatter:createSLDetailCodeTextFieldFormatterJV(SUBLEDGERLIST,".detailCode","splitEntitiesDetailCode(this)", ".search", "openSearchWindowFromJV(this)")},
 			{key:"detailKeyId",hidden:true, formatter:createSLHiddenFieldFormatterJV(SUBLEDGERLIST,".detailKeyId")},
-			{key:"detailKey",label:'<s:text name="payment.name.key"/>', formatter:createSLLongTextFieldFormatterJV(SUBLEDGERLIST,".detailKey","")},
-			{key:"amount",label:'<s:text name="payment.amount.key"/>', formatter:createSLAmountFieldFormatterJV(SUBLEDGERLIST,".amount")},
-			{key:'Add',label:'<s:text name="payment.add.key"/>',formatter:createAddImageFormatter("${pageContext.request.contextPath}")},
-			{key:'Delete',label:'<s:text name="payment.delete.key"/>',formatter:createDeleteImageFormatter("${pageContext.request.contextPath}")}
+			{key:"detailKey",label:'Name', formatter:createSLLongTextFieldFormatterJV(SUBLEDGERLIST,".detailKey","")},
+			{key:"amount",label:'Amount', formatter:createSLAmountFieldFormatterJV(SUBLEDGERLIST,".amount")},
+			{key:'Add',label:'Add',formatter:createAddImageFormatter("${pageContext.request.contextPath}")},
+			{key:'Delete',label:'Delete',formatter:createDeleteImageFormatter("${pageContext.request.contextPath}")}
 		];
 	    var subledgerDS = new YAHOO.util.DataSource(); 
 		subLedgersTable = new YAHOO.widget.DataTable("subLedgerTable",subledgerColumns, subledgerDS);
@@ -267,7 +266,7 @@
 					}
 				}
 				else{
-					bootbox.alert("<s:text name='row.cant.be.delete.message'/>");
+					bootbox.alert("This row can not be deleted");
 				}
 			}        
 		});

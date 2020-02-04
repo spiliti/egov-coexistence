@@ -58,7 +58,7 @@
 	<div class="form-group">
 		<c:choose>
 			<c:when test="${!billNumberGenerationAuto}">
-				<label class="col-sm-3 control-label text-right"><spring:message code="lbl.billnumber" text="Bill Number"/>
+				<label class="col-sm-3 control-label text-right"><spring:message code="lbl.billnumber" />
 					<span class="mandatory"></span>
 				</label>
 				<div class="col-sm-3 add-margin">
@@ -66,7 +66,7 @@
 					<form:errors path="billnumber" cssClass="add-margin error-msg" />
 				</div>
 				
-				<label class="col-sm-2 control-label text-right"><spring:message code="lbl.billdate"  text="Bill Date"/>
+				<label class="col-sm-2 control-label text-right"><spring:message code="lbl.billdate" />
 				<span class="mandatory"></span>
 				</label>
 				<div class="col-sm-3 add-margin">
@@ -75,7 +75,7 @@
 				</div>
 			</c:when>
 			<c:otherwise>
-				<label class="col-sm-3 control-label text-right"><spring:message code="lbl.billdate" text="Bill Date"/>
+				<label class="col-sm-3 control-label text-right"><spring:message code="lbl.billdate" />
 				<span class="mandatory"></span>
 				</label>
 				<div class="col-sm-3 add-margin">
@@ -95,11 +95,11 @@
 	
 	<div class="form-group">
 		<label class="col-sm-3 control-label text-right">
-			<spring:message code="lbl.function" text="Function" />	<span class="mandatory"></span>
+			<spring:message code="lbl.function" />	<span class="mandatory"></span>
 		</label>
 		<div class="col-sm-3 add-margin">
 			<c:if test="${egBillregister.egBillregistermis.function != null}">
-				<form:input path="" name ="function" id="function" class="form-control" placeholder="Type first 3 letters of Function name" required="required"  value="${egBillregister.egBillregistermis.function.code} - ${egBillregister.egBillregistermis.function.name}"/>
+				<form:input path="" name ="function" id="function" class="form-control" placeholder="Type first 3 letters of Function name" required="required" value="${egBillregister.egBillregistermis.function.code} - ${egBillregister.egBillregistermis.function.name}"/>
 			</c:if>
 			<c:if test="${egBillregister.egBillregistermis.function == null}">
 				<form:input path="" name ="function" id="function" class="form-control" placeholder="Type first 3 letters of Function name" required="required"/>
@@ -108,7 +108,7 @@
 			<form:errors path="egBillregistermis.function" cssClass="add-margin error-msg" />
 		</div>
 				
-		<label class="col-sm-2 control-label text-right"><spring:message code="lbl.narration" text="Narration" />
+		<label class="col-sm-2 control-label text-right"><spring:message code="lbl.narration" />
 		</label>
 		<div class="col-sm-3 add-margin">
 			<form:textarea path="egBillregistermis.narration" id="narration" class="form-control" maxlength="1024" ></form:textarea>
@@ -118,7 +118,7 @@
 	
 	<div class="form-group">
 		<label class="col-sm-3 control-label text-right">
-			<spring:message code="lbl.party.billnumber" text="Party Bill Number" />
+			<spring:message code="lbl.party.billnumber" />
 		</label>
 		<div class="col-sm-3 add-margin">
 			<form:input class="form-control patternvalidation" data-pattern="alphanumerichyphenbackslash" id="partyBillNumber" path="egBillregistermis.partyBillNumber" maxlength="32" />
@@ -126,7 +126,7 @@
 		</div>
 		
 		<label class="col-sm-2 control-label text-right">
-			<spring:message code="lbl.party.billdate" text="Party Bill Date" />
+			<spring:message code="lbl.party.billdate" />
 		</label>
 		<div class="col-sm-3 add-margin">
 			<form:input id="partyBillDate" path="egBillregistermis.partyBillDate" class="form-control datepicker" data-date-end-date="0d" />
@@ -134,12 +134,12 @@
 		</div>
 	</div>
 	<div class="form-group">
-		<label class="col-sm-3 control-label text-right"><spring:message code="lbl.billsubtype" text="Bill Subtype"/>
+		<label class="col-sm-3 control-label text-right"><spring:message code="lbl.billsubtype" />
 			<span class="mandatory"></span>
 		</label>
 		<div class="col-sm-3 add-margin">
 			<form:select path="egBillregistermis.egBillSubType" data-first-option="false" id="billSubType" class="form-control" required="required">
-				<form:option value=""><spring:message code="lbl.select" text="Select" /></form:option>
+				<form:option value=""><spring:message code="lbl.select" /></form:option>
 				<form:options items="${billSubTypes}" itemValue="id" itemLabel="name" />
 			</form:select>
 			<form:errors path="egBillregistermis.egBillSubType" cssClass="add-margin error-msg" />

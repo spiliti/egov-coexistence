@@ -154,7 +154,6 @@
 	</div>
 
 </form:form>
-<script type="text/javascript" src="/services/EGF/resources/javascript/jquery.i18n.properties.js"></script>
 <script
 	src="<cdn:url value='/resources/app/js/common/helper.js?rnd=${app_release_no}'/>"></script>
 <script
