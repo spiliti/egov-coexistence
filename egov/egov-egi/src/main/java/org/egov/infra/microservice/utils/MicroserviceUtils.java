@@ -733,7 +733,7 @@ public class MicroserviceUtils {
     }
 
     public List<EmployeeInfo> getEmployee(Long empId, Date toDay, String departmentId, String designationId) {
-        return this.getEmployeeBySearchCriteria(new EmployeeSearchCriteria().builder().asOnDate(getEpochDate(toDay))
+        return this.getEmployeeBySearchCriteria(new EmployeeSearchCriteria().builder().asOnDate(toDay!=null ? getEpochDate(toDay) : null)
                 .ids(Collections.singletonList(empId)).departments(Collections.singletonList(departmentId))
                 .designations(Collections.singletonList(designationId)).build());
     }
