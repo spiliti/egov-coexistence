@@ -85,5 +85,9 @@ public class StateService {
     public Date getMaxCreatedDateByPositionId(final Long posId) {
         return stateRepository.findMaxCreatedDateByOwnerPosId(posId);
     }
+    
+    public List<State> getStateByIds(final List<Long> id) {
+        return stateRepository.findAll();
+    }
 
 }

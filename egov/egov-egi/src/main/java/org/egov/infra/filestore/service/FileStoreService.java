@@ -84,12 +84,17 @@ public interface FileStoreService {
     File fetch(String fileStoreId, String moduleName);
 
     Path fetchAsPath(String fileStoreId, String moduleName);
+    
+    Path fetchAsPathNFS(String fileStoreId, String moduleName);
+
 
 //    Path fetchAsDigitPath(String fileStoreId,String moduleName) throws IOException;
 
     Set<File> fetchAll(Set<FileStoreMapper> fileMappers, String moduleName);
 
     void delete(String fileStoreId, String moduleName);
+
+    File fetchNFS(String fileStoreId, String moduleName);
 
 //    FileStoreMapper storeFiles(List<MultipartFile> files, InputStream fileStream, String fileName, String mimeType,
 //            String moduleName, boolean closeStream);

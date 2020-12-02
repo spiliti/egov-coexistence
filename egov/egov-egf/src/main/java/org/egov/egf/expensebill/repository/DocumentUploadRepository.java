@@ -79,5 +79,8 @@ public interface DocumentUploadRepository extends JpaRepository<DocumentUpload, 
     
     @Query("from DocumentUpload where fileStore.fileName like %:fileName% and objectId =:objectId")
     List<DocumentUpload> findByFileNameAndObjectId(@Param("fileName") String fileName, @Param("objectId") Long objectId);
+    
+    @Query("from DocumentUpload where isMigrated=false")
+    List<DocumentUpload> findByIsMigrated();
 
 }

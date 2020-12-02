@@ -51,6 +51,13 @@
 package org.egov.egf.web.actions.bill;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -64,9 +71,12 @@ import org.egov.commons.Scheme;
 import org.egov.commons.SubScheme;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.entity.Boundary;
-import org.egov.infra.admin.master.entity.Department;
 import org.egov.infra.admin.master.service.AppConfigValueService;
+import org.egov.infra.microservice.models.EmployeeInfo;
+import org.egov.infra.microservice.utils.MicroserviceUtils;
 import org.egov.infra.web.struts.actions.BaseFormAction;
+import org.egov.infra.workflow.entity.State;
+import org.egov.infra.workflow.service.StateService;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.infstr.utils.EgovMasterDataCaching;
 import org.egov.model.bills.EgBillregister;
@@ -76,12 +86,6 @@ import org.egov.utils.VoucherHelper;
 import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author manoranjan
@@ -104,6 +108,11 @@ public class BillRegisterSearchAction extends BaseFormAction {
     private List<Map<String, Object>> billList;
     @Autowired
     private AppConfigValueService appConfigValueService;
+    
+    @Autowired
+    private MicroserviceUtils microServiceUtil;
+    @Autowired
+    private StateService stateService;
    
  @Autowired
  @Qualifier("persistenceService")
@@ -193,13 +202,13 @@ public class BillRegisterSearchAction extends BaseFormAction {
         final Map<Long, String> stateIdAndOwnerNameMap = new HashMap<Long, String>();
         for (final Object[] object : list)
             stateIds.add(getLongValue(object[11]));
-        List<Object[]> oWnerNamesList = new ArrayList<Object[]>();
+        Map<Long, String> oWnerNamesList = new HashMap<Long, String>();
         if (stateIds != null && stateIds.size() > 0)
             oWnerNamesList = getOwnersForWorkFlowState(stateIds);
 
-        for (final Object[] owner : oWnerNamesList)
-            if (!stateIdAndOwnerNameMap.containsKey(getLongValue(owner[1])))
-                stateIdAndOwnerNameMap.put(getLongValue(owner[1]), getStringValue(owner[0]));
+        for (final Entry<Long, String> owner : oWnerNamesList.entrySet())
+            if (!stateIdAndOwnerNameMap.containsKey(getLongValue(owner.getKey())))
+                stateIdAndOwnerNameMap.put(getLongValue(owner.getKey()), getStringValue(owner.getValue()));
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Total number of bills found =: " + list.size());
 
@@ -245,11 +254,24 @@ public class BillRegisterSearchAction extends BaseFormAction {
         return NEW;
     }
 
-    private List<Object[]> getOwnersForWorkFlowState(final List<Long> stateIds)
+    private Map<Long, String> getOwnersForWorkFlowState(final List<Long> stateIds)
     {
+        final Map<Long, String> ownerNamesMap = new HashMap<Long, String>();
         List<Object[]> ownerNamesList = new ArrayList<Object[]>();
-        final String ownerNamesQueryStr = "select a.employee.username,bill.state.id from Assignment a,State state, EgBillregister bill"
-                + " where  bill.state.id=state.id and a.position.id = state.ownerPosition.id and bill.state.id in (:IDS)";
+        List<Long> ownerPositionList = new ArrayList<Long>();
+
+        final String ownerPositionQueryStr = "select state.ownerPosition from State state, EgBillregister bill"
+                + " where  bill.state.id=state.id and bill.state.id in (:IDS)";
+        ownerPositionList = persistenceService.getSession().createQuery(ownerPositionQueryStr)
+                .setParameterList("IDS", stateIds)
+                .list();
+        State states=null;
+        for(Long state:stateIds) {
+            states=stateService.getStateById(state);
+        EmployeeInfo employee= this.microServiceUtil.getEmployeeByPositionId(states.getOwnerPosition());
+        if (employee!=null) {
+            ownerNamesMap.put(states.getId(), employee.getUser().getUserName());
+        }
         int size = stateIds.size();
         if (size > 999)
         {
@@ -261,7 +283,8 @@ public class BillRegisterSearchAction extends BaseFormAction {
             {
                 newGLDList = new ArrayList<Object[]>();
                 toIndex += step;
-                final Query ownerNamesQuery = persistenceService.getSession().createQuery(ownerNamesQueryStr);
+                //need to correct it 
+                final Query ownerNamesQuery = persistenceService.getSession().createQuery(ownerPositionQueryStr);
                 ownerNamesQuery.setParameterList("IDS", stateIds.subList(fromIndex, toIndex));
                 newGLDList = ownerNamesQuery.list();
                 fromIndex = toIndex;
@@ -276,18 +299,20 @@ public class BillRegisterSearchAction extends BaseFormAction {
                 newGLDList = new ArrayList<Object[]>();
                 fromIndex = toIndex;
                 toIndex = fromIndex + size;
-                final Query ownerNamesQuery = persistenceService.getSession().createQuery(ownerNamesQueryStr);
+                // need to correct it
+                final Query ownerNamesQuery = persistenceService.getSession().createQuery(ownerPositionQueryStr);
                 ownerNamesQuery.setParameterList("IDS", stateIds.subList(fromIndex, toIndex));
                 newGLDList = ownerNamesQuery.list();
                 if (newGLDList != null)
                     ownerNamesList.addAll(newGLDList);
             }
 
-        } else
-            ownerNamesList = persistenceService.getSession().createQuery(ownerNamesQueryStr)
-            .setParameterList("IDS", stateIds)
-            .list();
-        return ownerNamesList;
+        }
+        else
+            
+        return ownerNamesMap;
+        }
+        return ownerNamesMap;
     }
 
     public EgwStatus getStatusId(final String moduleType, final Integer statusid) {
