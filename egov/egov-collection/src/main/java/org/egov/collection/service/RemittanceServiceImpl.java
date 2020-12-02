@@ -234,7 +234,7 @@ public class RemittanceServiceImpl extends RemittanceService {
                             receipts = microserviceUtils.getReceipts(PaymentStatusEnum.NEW.name(),
                                     receipt.getService(),
                                     receipt.getFund(), receipt.getDepartment(), receipt.getReceiptDate());
-                            if (receipts != null && !receipts.isEmpty()) {
+                           if (receipts != null) {
                                 paymentIdSet = new HashSet<>();
                                 for (Receipt r : receipts) {
                                     receiptMap.put(r.getPaymentId(), r);
@@ -247,7 +247,7 @@ public class RemittanceServiceImpl extends RemittanceService {
                             receipts = microserviceUtils.getReceipts(CollectionConstants.RECEIPT_STATUS_APPROVED,
                                     receipt.getService(),
                                     receipt.getFund(), receipt.getDepartment(), receipt.getReceiptDate());
-                            if (receipts != null && !receipts.isEmpty()) {
+                            if (receipts != null) {
                                 for (Receipt r : receipts) {
                                     receiptMap.put(r.getBill().get(0).getBillDetails().get(0).getReceiptNumber(), r);
                                     receiptIds.add(r.getBill().get(0).getBillDetails().get(0).getId());
@@ -255,7 +255,7 @@ public class RemittanceServiceImpl extends RemittanceService {
                             }
                             break;
                         }
-                        if (receipts != null && !receipts.isEmpty()) {
+                        if (receipts != null) {
                         instrumentsList = microserviceUtils.getInstrumentsByReceiptIds(
                                 CollectionConstants.INSTRUMENTTYPE_NAME_CASH, CollectionConstants.INSTRUMENT_NEW_STATUS,
                                 StringUtils.join(receiptIds, ","));
@@ -552,7 +552,6 @@ public class RemittanceServiceImpl extends RemittanceService {
      *
      * @return List of HashMap
      */
-    @Override
     public List<ReceiptBean> findCashRemittanceDetailsForServiceAndFund(final String boundaryIdList,
             final String serviceCodes, final String fundCodes, final Long startDate, final Long endDate, String instrumentStatus) {
      // TODO : need to make this call to mdms
@@ -788,7 +787,6 @@ public class RemittanceServiceImpl extends RemittanceService {
      *
      * @return List of HashMap
      */
-    @Override
     public List<ReceiptBean> findChequeRemittanceDetailsForServiceAndFund(final String boundaryIdList,
             final String serviceCodes, final String fundCodes, final Long startDate, final Long endDate) {
         // TODO : need to make this call to mdms

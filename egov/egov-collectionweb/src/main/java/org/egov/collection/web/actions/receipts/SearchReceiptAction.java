@@ -197,6 +197,7 @@ public class SearchReceiptAction extends SearchFormAction {
     @Override
     @Action(value = "/receipts/searchReceipt-search")
     public String search() {
+        
         target = "searchresult";
         collectionVersion = ApplicationThreadLocals.getCollectionVersion();
 
