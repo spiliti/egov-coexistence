@@ -248,7 +248,7 @@ public class RemittanceServiceImpl extends RemittanceService {
                                     receipt.getService(),
                                     receipt.getFund(), receipt.getDepartment(), receipt.getReceiptDate());
                             if (receipts != null) {
-                                for (Receipt r : receipts) {
+                              for (Receipt r : receipts) {
                                     receiptMap.put(r.getBill().get(0).getBillDetails().get(0).getReceiptNumber(), r);
                                     receiptIds.add(r.getBill().get(0).getBillDetails().get(0).getId());
                                 }
