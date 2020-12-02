@@ -552,6 +552,7 @@ public class RemittanceServiceImpl extends RemittanceService {
      *
      * @return List of HashMap
      */
+    @Override
     public List<ReceiptBean> findCashRemittanceDetailsForServiceAndFund(final String boundaryIdList,
             final String serviceCodes, final String fundCodes, final Long startDate, final Long endDate, String instrumentStatus) {
      // TODO : need to make this call to mdms
@@ -787,6 +788,7 @@ public class RemittanceServiceImpl extends RemittanceService {
      *
      * @return List of HashMap
      */
+    @Override
     public List<ReceiptBean> findChequeRemittanceDetailsForServiceAndFund(final String boundaryIdList,
             final String serviceCodes, final String fundCodes, final Long startDate, final Long endDate) {
         // TODO : need to make this call to mdms
