@@ -527,8 +527,6 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
         
         Map<String, Object> data= cityService.cityDataAsMap();
         Object citynamefull=data.get("citymunicipalityname");
-       String ss=cityService.getMunicipalityName();
-       String tt=cityService.getCityGrade();
         heading=citynamefull.toString();
         Object cityname=data.get("citynamelocal");
         grade=cityname.toString();
