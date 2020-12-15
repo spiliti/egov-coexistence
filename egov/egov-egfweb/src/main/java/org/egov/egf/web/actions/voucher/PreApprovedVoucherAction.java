@@ -149,7 +149,8 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
     private final static String FORWARD = "Forward";
     private static final long serialVersionUID = 1L;
     private String heading = "";
-    private VoucherService voucherService;
+    private String grade = "";
+ 	private VoucherService voucherService;
     private CVoucherHeader voucherHeader = new CVoucherHeader();
     private EgBillregister egBillregister = new EgBillregister();
     private SimpleWorkflowService<CVoucherHeader> voucherWorkflowService;
@@ -165,6 +166,8 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
     private PreApprovedActionHelper preApprovedActionHelper;
     @Autowired
     private EgwStatusHibernateDAO egwStatusDAO;
+    @Autowired
+    private CityService cityService;
     @Autowired
     private VoucherTypeForULB voucherTypeForULB;
     private List<EgBillregister> preApprovedVoucherList;
@@ -521,7 +524,14 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
                     Long.valueOf(parameters.get(VHID)[0]));
             from = FinancialConstants.STANDARD_VOUCHER_TYPE_JOURNAL;
         }
-        heading = ReportUtil.getCityName();
+        
+        Map<String, Object> data= cityService.cityDataAsMap();
+        Object citynamefull=data.get("citymunicipalityname");
+       String ss=cityService.getMunicipalityName();
+       String tt=cityService.getCityGrade();
+        heading=citynamefull.toString();
+        Object cityname=data.get("citynamelocal");
+        grade=cityname.toString();
         getMasterDataForBillVoucher();
         getHeaderMandateFields();
         return "view";
@@ -1294,6 +1304,13 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
 
  	public void setHeading(String heading) {
  		this.heading = heading;
+ 	}
+    public String getGrade() {
+ 		return grade;
+ 	}
+
+ 	public void setGrade(String grade) {
+ 		this.grade = grade;
  	}
     public void setBillsAccountingService(final BillsAccountingService mngr) {
         billsAccountingService = mngr;
