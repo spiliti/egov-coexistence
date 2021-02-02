@@ -56,7 +56,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>egov-ear</artifactId>
+    <artifactId>egov-ear-secfix</artifactId>
     <packaging>ear</packaging>
 
     <name>e-governments erp ear</name>
