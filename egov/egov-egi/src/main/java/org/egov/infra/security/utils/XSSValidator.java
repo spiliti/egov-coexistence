@@ -46,43 +46,60 @@
  *
  */
 
-package org.egov.infra.web.security.filter;
+package org.egov.infra.security.utils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
+import org.egov.infra.exception.ApplicationRuntimeException;
+import org.egov.infra.validation.exception.ValidationException;
+import org.owasp.validator.html.AntiSamy;
+import org.owasp.validator.html.CleanResults;
+import org.owasp.validator.html.Policy;
+import org.owasp.validator.html.PolicyException;
+import org.owasp.validator.html.ScanException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.egov.infra.security.utils.VirtualSanitizer.sanitize;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
- * Request wrapper where it sanitize user inputs
+ * XSSValidator.java This class used to sanitize user input from possible XSS attacks.
  **/
-public final class XSSRequestWrapper extends HttpServletRequestWrapper {
+public final class XSSValidator {
 
-	public XSSRequestWrapper(final HttpServletRequest request) {
-		super(request);
-	}
+    private static final Logger LOG = LoggerFactory.getLogger(XSSValidator.class);
+    private static Policy policy;
+    private static AntiSamy antiSamy;
 
-	@Override
-	public String[] getParameterValues(final String paramName) {
-		final String[] values = super.getParameterValues(paramName);
-		if (values != null) {
-			final String[] cleanValues = new String[values.length];
-			int index = 0;
-			for (final String value : values) {
-				cleanValues[index++] = sanitize(value);
-			}
-			return cleanValues;
-		}
-		return null;
-	}
+    private XSSValidator() {
+        //static methods only
+    }
 
-	@Override
-	public String getParameter(final String paramName) {
-		return sanitize(super.getParameter(paramName));
-	}
+    private static AntiSamy getAntiSamy() throws PolicyException {
+        if (antiSamy == null) {
+            policy = getPolicy("antisamy-myspace-1.4.3.xml");
+            antiSamy = new AntiSamy();
+        }
+        return antiSamy;
+    }
 
-	@Override
-	public String getHeader(final String headerName) {
-		return sanitize(super.getHeader(headerName));
-	}
+    private static Policy getPolicy(String name) throws PolicyException {
+        return Policy.getInstance(XSSValidator.class.getResource(name));
+    }
+
+    public static String validate(String field, String input) {
+        try {
+            if (isBlank(input)) {
+                return input;
+            }
+            CleanResults cr = getAntiSamy().scan(input, policy);
+            if (!cr.getErrorMessages().isEmpty()) {
+                if (LOG.isWarnEnabled())
+                    LOG.warn(cr.getErrorMessages().toString());
+                throw new ValidationException(field, "Invalid, contains unsafe value");
+            }
+            return input;
+        } catch (PolicyException | ScanException exp) {
+            throw new ApplicationRuntimeException("Error occurred while validating inputs", exp);
+        }
+
+    }
 }

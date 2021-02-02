@@ -55,6 +55,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -139,6 +140,9 @@ public class XMLLoader extends DefaultHandler {
 
             // Create a JAXP SAXParser
             final SAXParser saxParser = spf.newSAXParser();
+            saxParser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            saxParser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            saxParser.setProperty(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 
             // Get the encapsulated SAX XMLReader
             final XMLReader xmlReader = saxParser.getXMLReader();
