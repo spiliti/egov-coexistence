@@ -2,7 +2,7 @@
  *    eGov  SmartCity eGovernance suite aims to improve the internal efficiency,transparency,
  *    accountability and the service delivery of the government  organizations.
  *
- *     Copyright (C) 2017  eGovernments Foundation
+ *     Copyright (C) 2018  eGovernments Foundation
  *
  *     The updated version of eGov suite of products as by eGovernments Foundation
  *     is available at http://www.egovernments.org
@@ -46,29 +46,48 @@
  *
  */
 
-package org.egov.infra.web.security.filter;
+package org.egov.infra.persistence.validator;
 
-import javax.servlet.Filter;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import org.egov.infra.persistence.entity.AbstractPersistable;
+import org.egov.infra.validation.exception.ValidationError;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-/**
- * Filter which handles possible XSS attack
- **/
-public class XSSFilter implements Filter {
+import javax.validation.ConstraintViolation;
+import javax.validation.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-	@Override
-	public void init(final javax.servlet.FilterConfig filterConfig) throws ServletException {
-	}
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
-	@Override
-	public void destroy() {
-	}
+@Component
+public class EntityValidatorUtil {
 
-	@Override
-	public void doFilter(final javax.servlet.ServletRequest request, final javax.servlet.ServletResponse response, final javax.servlet.FilterChain filterChain) throws IOException, ServletException {
-		final XSSRequestWrapper xssRequest = new XSSRequestWrapper((HttpServletRequest) request);
-		filterChain.doFilter(xssRequest, response);
-	}
+    @Autowired
+    @Qualifier("entityValidator")
+    private LocalValidatorFactoryBean entityValidator;
+
+    @SuppressWarnings("rawtypes")
+	public boolean isValid(AbstractPersistable entity) {
+        return entityValidator.validate(entity).isEmpty();
+    }
+
+    @SuppressWarnings("rawtypes")
+	public List<ValidationError> validateEntity(AbstractPersistable entity) {
+        List<ValidationError> errors = new ArrayList<>();
+        if (entity != null) {
+            Set<ConstraintViolation<AbstractPersistable>> constraintViolations = entityValidator.validate(entity);
+            for (ConstraintViolation<AbstractPersistable> constraintViolation : constraintViolations) {
+                Path fieldPath = constraintViolation.getPropertyPath();
+                String message = constraintViolation.getMessage().replaceAll("(\\{|\\})+", EMPTY);
+                errors.add(new ValidationError(fieldPath.toString(), message,
+                        String.valueOf(constraintViolation.getInvalidValue())));
+            }
+        }
+        return errors;
+    }
 }
+
