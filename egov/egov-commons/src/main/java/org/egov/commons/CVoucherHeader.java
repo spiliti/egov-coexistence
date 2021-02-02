@@ -68,13 +68,16 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 import org.egov.infra.workflow.entity.StateAware;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.SafeHtml;
 
 @Entity
 @Table(name = "VOUCHERHEADER")
 @SequenceGenerator(name = SEQ_VOUCHERHEADER, sequenceName = SEQ_VOUCHERHEADER, allocationSize = 1)
-public class CVoucherHeader extends StateAware implements java.io.Serializable{
+public class CVoucherHeader extends StateAware implements java.io.Serializable {
 
     public static final String SEQ_VOUCHERHEADER = "SEQ_VOUCHERHEADER";
     private static final long serialVersionUID = -1950866465902911747L;
@@ -82,10 +85,21 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     @GeneratedValue(generator = SEQ_VOUCHERHEADER, strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @SafeHtml
+    @NotNull
+    @Length(max = 50)
     private String name;
+
+    @SafeHtml
+    @NotNull
+    @Length(max = 100)
     private String type;
+
+    @SafeHtml
     private String description;
     private Date effectiveDate;
+    @SafeHtml
+    @Length(max = 30)
     private String voucherNumber;
     private Date voucherDate;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -96,13 +110,17 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     private Long originalvcId;
     private Integer isConfirmed;
     private Long refvhId;
+    @SafeHtml
+    @Length(max = 50)
     private String cgvn;
     private Integer moduleId;
     @Transient
+    @SafeHtml
     private String voucherSubType;
     @Transient
     private Boolean isRestrictedtoOneFunctionCenter;
     @Transient
+    @SafeHtml
     private String voucherNumberPrefix;
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "voucherHeaderId", targetEntity = CGeneralLedger.class)
     private Set<CGeneralLedger> generalLedger;
@@ -116,18 +134,22 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     private List<CGeneralLedgerDetail> subLedgerDetails = new ArrayList<>();
 
     @Transient
+    @SafeHtml
     private String partyName;
 
     @Transient
+    @SafeHtml
     private String partyBillNumber;
 
     @Transient
     private Date partyBillDate;
 
     @Transient
+    @SafeHtml
     private String billNumber;
-    
+
     @Transient
+    @SafeHtml
     private String departmentName;
 
     @Transient
@@ -137,24 +159,28 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     private Long approvalDepartment;
 
     @Transient
+    @SafeHtml
     private String approvalComent;
 
     @Transient
+    @SafeHtml
     private String voucherNumType;
-    
+
     @Transient
+    @SafeHtml
     private String fiscalName;
+
     public CVoucherHeader() {
         // TODO Auto-generated constructor stub
     }
 
     public String getDepartmentName() {
-		return departmentName;
-	}
+        return departmentName;
+    }
 
-	public void setDepartmentName(String departmentName) {
-		this.departmentName = departmentName;
-	}
+    public void setDepartmentName(final String departmentName) {
+        this.departmentName = departmentName;
+    }
 
     @Override
     public Long getId() {
@@ -174,7 +200,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param name The name to set.
+     * @param name
+     *            The name to set.
      */
     public void setName(final String name) {
         this.name = name;
@@ -189,7 +216,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param type The type to set.
+     * @param type
+     *            The type to set.
      */
     public void setType(final String type) {
         this.type = type;
@@ -204,7 +232,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param Description The Description to set.
+     * @param Description
+     *            The Description to set.
      */
     public void setDescription(final String description) {
         this.description = description;
@@ -219,7 +248,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param effectiveDate The effectiveDate to set.
+     * @param effectiveDate
+     *            The effectiveDate to set.
      */
     public void setEffectiveDate(final Date effectiveDate) {
         this.effectiveDate = effectiveDate;
@@ -233,7 +263,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param voucherDate The voucherDate to set.
+     * @param voucherDate
+     *            The voucherDate to set.
      */
     public void setVoucherDate(final Date voucherDate) {
         this.voucherDate = voucherDate;
@@ -247,7 +278,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param voucherNumber The voucherNumber to set.
+     * @param voucherNumber
+     *            The voucherNumber to set.
      */
     public void setVoucherNumber(final String voucherNumber) {
         this.voucherNumber = voucherNumber;
@@ -262,7 +294,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param fundId The fundId to set.
+     * @param fundId
+     *            The fundId to set.
      */
     public void setFundId(final Fund fundId) {
         this.fundId = fundId;
@@ -277,7 +310,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param fiscalPeriodId The fiscalPeriodId to set.
+     * @param fiscalPeriodId
+     *            The fiscalPeriodId to set.
      */
     public void setFiscalPeriodId(final Integer fiscalPeriodId) {
         this.fiscalPeriodId = fiscalPeriodId;
@@ -292,7 +326,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param status The status to set.
+     * @param status
+     *            The status to set.
      */
     public void setStatus(final Integer status) {
         this.status = status;
@@ -306,7 +341,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param originalvcId The originalvcId to set.
+     * @param originalvcId
+     *            The originalvcId to set.
      */
     public void setOriginalvcId(final Long originalvcId) {
         this.originalvcId = originalvcId;
@@ -321,7 +357,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param isConfirmed The isConfirmed to set.
+     * @param isConfirmed
+     *            The isConfirmed to set.
      */
     public void setIsConfirmed(final Integer isConfirmed) {
         this.isConfirmed = isConfirmed;
@@ -344,7 +381,8 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
     }
 
     /**
-     * @param cgvn The cgvn to set.
+     * @param cgvn
+     *            The cgvn to set.
      */
     public void setCgvn(final String cgvn) {
         this.cgvn = cgvn;
@@ -519,7 +557,7 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable{
         return fiscalName;
     }
 
-    public void setFiscalName(String fiscalName) {
+    public void setFiscalName(final String fiscalName) {
         this.fiscalName = fiscalName;
     }
 }

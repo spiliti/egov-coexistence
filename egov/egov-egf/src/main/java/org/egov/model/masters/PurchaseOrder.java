@@ -59,6 +59,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.egov.commons.EgwStatus;
@@ -73,6 +74,7 @@ import org.egov.infra.persistence.validator.annotation.Unique;
 import org.egov.utils.FinancialConstants;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.validator.constraints.SafeHtml;
 
 @Entity
 @Table(name = "EGF_PURCHASEORDER")
@@ -88,15 +90,17 @@ public class PurchaseOrder extends AbstractAuditable implements EntityType {
     @GeneratedValue(generator = SEQ_EGF_PURCHASEORDER, strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @SafeHtml
     @Length(max = 100, message = "Maximum of 100 Characters allowed for Order Number")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialcharForContraWOAndSupplierName, message = "Special Characters are not allowed in Order Number")
-    @NotEmpty
+    @NotNull
     private String orderNumber;
 
+    @SafeHtml
     @Required(message = "Please Enter the Name")
     @Length(max = 100, message = "Maximum of 100 Characters allowed for Name")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialcharForContraWOAndSupplierName, message = "Special Characters are not allowed in Name")
-    @NotEmpty
+    @NotNull
     private String name;
 
     @NotNull
@@ -108,10 +112,13 @@ public class PurchaseOrder extends AbstractAuditable implements EntityType {
     private Supplier supplier;
 
     @NotNull
+    @Min(1)
     private BigDecimal orderValue;
 
+    @Min(1)
     private BigDecimal advancePayable;
 
+    @SafeHtml
     private String description;
 
     @NotNull
@@ -120,6 +127,7 @@ public class PurchaseOrder extends AbstractAuditable implements EntityType {
     private Fund fund;
 
     @NotEmpty
+    @SafeHtml
     private String department;
 
     @ManyToOne
@@ -130,6 +138,7 @@ public class PurchaseOrder extends AbstractAuditable implements EntityType {
     @JoinColumn(name = "subScheme")
     private SubScheme subScheme;
 
+    @SafeHtml
     private String sanctionNumber;
 
     private Date sanctionDate;

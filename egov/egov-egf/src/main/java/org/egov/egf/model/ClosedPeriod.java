@@ -70,6 +70,7 @@ import org.egov.infra.persistence.entity.AbstractAuditable;
 import org.hibernate.envers.AuditOverride;
 import org.hibernate.envers.AuditOverrides;
 import org.hibernate.envers.Audited;
+import org.hibernate.validator.constraints.SafeHtml;
 
 @Entity
 @Table(name = "closedperiods")
@@ -104,6 +105,7 @@ public class ClosedPeriod extends AbstractAuditable {
     @JoinColumn(name = "financialYearId", nullable = false)
     private CFinancialYear financialYear;
 
+    @SafeHtml
     private String remarks;
 
     public int getFromDate() {

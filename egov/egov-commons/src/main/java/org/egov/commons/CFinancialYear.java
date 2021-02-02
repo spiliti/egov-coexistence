@@ -54,7 +54,7 @@ import org.hibernate.envers.AuditOverrides;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.SafeHtml;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -90,7 +90,8 @@ public class CFinancialYear extends AbstractAuditable {
     private Long id;
 
     @Length(min = 1, max = 25)
-    @NotBlank
+    @NotNull
+    @SafeHtml
     @Column(name="financialyear")
     private String finYearRange;
 
@@ -103,6 +104,7 @@ public class CFinancialYear extends AbstractAuditable {
     
     private Boolean isActive;
   
+    @NotNull
     private Boolean isActiveForPosting;
     
     private Boolean isClosed;

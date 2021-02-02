@@ -51,17 +51,25 @@ import org.egov.commons.Bankaccount;
 import org.egov.commons.CVoucherHeader;
 import org.egov.eis.entity.DrawingOfficer;
 import org.egov.infra.workflow.entity.StateAware;
-import org.egov.pims.commons.Position;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.SafeHtml;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
+import javax.validation.constraints.NotNull;
 
 public class Paymentheader extends StateAware {
 
     private static final long serialVersionUID = 1300661952219397466L;
     private Long id;
+    @NotNull
     private CVoucherHeader voucherheader;
+    @SafeHtml
     private String isSelected;
+    @NotNull
+    @SafeHtml
+    @Length(max = 50)
     private String type;
     private Date concurrenceDate;
 
