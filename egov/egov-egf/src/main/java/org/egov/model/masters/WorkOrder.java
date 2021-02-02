@@ -59,6 +59,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.egov.commons.EgwStatus;
@@ -73,6 +74,7 @@ import org.egov.infra.persistence.validator.annotation.Unique;
 import org.egov.utils.FinancialConstants;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.validator.constraints.SafeHtml;
 
 @Entity
 @Table(name = "EGF_WORKORDER")
@@ -90,13 +92,15 @@ public class WorkOrder extends AbstractAuditable implements EntityType {
 
     @Length(max = 100, message = "Maximum of 100 Characters allowed for Order Number")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialcharForContraWOAndSupplierName, message = "Special Characters are not allowed in Order Number")
-    @NotEmpty
+    @NotNull
+    @SafeHtml
     private String orderNumber;
 
     @Required(message = "Please Enter the Name")
     @Length(max = 100, message = "Maximum of 100 Characters allowed for Name")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialcharForContraWOAndSupplierName, message = "Special Characters are not allowed in Name")
     @NotEmpty
+    @SafeHtml
     private String name;
 
     @NotNull
@@ -108,8 +112,10 @@ public class WorkOrder extends AbstractAuditable implements EntityType {
     private Contractor contractor;
 
     @NotNull
+    @Min(1)
     private BigDecimal orderValue;
 
+    @Min(1)
     private BigDecimal advancePayable;
 
     private String description;
@@ -120,6 +126,7 @@ public class WorkOrder extends AbstractAuditable implements EntityType {
     private Fund fund;
 
     @NotEmpty
+    @SafeHtml
     private String department;
 
     @ManyToOne
@@ -130,6 +137,7 @@ public class WorkOrder extends AbstractAuditable implements EntityType {
     @JoinColumn(name = "subScheme")
     private SubScheme subScheme;
 
+    @SafeHtml
     private String sanctionNumber;
 
     private Date sanctionDate;
@@ -138,6 +146,7 @@ public class WorkOrder extends AbstractAuditable implements EntityType {
     private Boolean active;
 
     @Transient
+    @SafeHtml
     private String departmentName;
 
     @Transient

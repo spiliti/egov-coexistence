@@ -60,11 +60,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import org.egov.infra.persistence.entity.AbstractPersistable;
 import org.egov.infra.persistence.validator.annotation.Required;
 import org.egov.infra.persistence.validator.annotation.Unique;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.SafeHtml;
 
 @Entity
 @Table(name = "fund")
@@ -79,15 +82,19 @@ public class Fund extends AbstractPersistable<Integer> {
     private Integer id;
 
     @Length(max = 50, min = 2)
-    @Required
+    @SafeHtml
+    @NotNull
     private String name;
 
     @Length(max = 50, min = 2)
-    @Required
+    @NotNull
+    @SafeHtml
     private String code;
 
     private Character identifier;
-    @Required
+    
+    @NotNull
+    @Min(1)
     private BigDecimal llevel = BigDecimal.ONE;
 
     @ManyToOne(fetch = FetchType.LAZY)

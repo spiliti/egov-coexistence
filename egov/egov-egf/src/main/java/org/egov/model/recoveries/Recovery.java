@@ -51,8 +51,12 @@ import org.egov.commons.Bank;
 import org.egov.commons.CChartOfAccounts;
 import org.egov.commons.EgPartytype;
 import org.egov.infra.persistence.entity.AbstractAuditable;
+import org.egov.infra.persistence.validator.annotation.OptionalPattern;
 import org.egov.infra.persistence.validator.annotation.Unique;
+import org.egov.infra.validation.regex.Constants;
+import org.egov.utils.FinancialConstants;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.SafeHtml;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -83,9 +87,12 @@ public class Recovery extends AbstractAuditable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "glcodeid")
+    @NotNull
     private CChartOfAccounts chartofaccounts;
 
     @Length(max = 20)
+    @SafeHtml
+    @NotNull
     private String type;
 
     // private Boolean ispaid;
@@ -97,12 +104,15 @@ public class Recovery extends AbstractAuditable {
     // private Date effectivefrom;
 
     @Length(max = 100)
+    @SafeHtml
+    @NotNull
     private String remitted;
 
     /*
      * @Length(max = 20) private String bsrcode;
      */
     @Length(max = 200)
+    @SafeHtml
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -118,19 +128,26 @@ public class Recovery extends AbstractAuditable {
     // private String isEarning = "0";
 
     @Length(max = 50)
+    @SafeHtml
+    @NotNull
     private String recoveryName;
 
     @Length(max = 50)
+    @SafeHtml
     private String calculationType;
 
     /*
      * @Length(max = 50) private String section;
      */
 
-    @Length(max = 16)
+    @SafeHtml
+    @Length(min = 11, max = 11, message = "Maximum of 11 Characters allowed for IFSC Code")
+    @OptionalPattern(regex = Constants.ALPHANUMERIC, message = "Special Characters are not allowed in IFSC Code")
     private String ifscCode;
 
     @Length(max = 32)
+    @SafeHtml
+    @OptionalPattern(regex = FinancialConstants.numericwithoutspecialchar, message = "Special Characters are not allowed in accountNumber")
     private String accountNumber;
 
     @NotNull
