@@ -65,6 +65,9 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -89,6 +92,7 @@ import org.egov.infstr.models.ServiceDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.InputSource;
 
 /**
  * The PaymentRequestAdaptor class frames the request object for the payment service.
@@ -153,11 +157,17 @@ public class AtomAdaptor implements PaymentGatewayAdaptor {
                 data.append(line);
             reader.close();
 
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            
             LOGGER.info("First Response ATOM: " + data.toString());
             JAXBContext jaxbContext = JAXBContext.newInstance(ResponseAtomMmp.class);
             Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
-            StringReader strReader = new StringReader(data.toString());
-            ResponseAtomMmp responseMmp = (ResponseAtomMmp) unMarshaller.unmarshal(strReader);
+            Source xmlSource = new SAXSource(spf.newSAXParser().getXMLReader(),
+                    new InputSource(new StringReader(data.toString())));
+            ResponseAtomMmp responseMmp = (ResponseAtomMmp) unMarshaller.unmarshal(xmlSource);
 
             // Setting first request response values to second request
             // parameters.
