@@ -117,20 +117,21 @@ public class User {
 
     // this method gets the assigned role for the user from the database.
     public String getRole(final Connection con) throws TaskFailedException {
-        // if(LOGGER.isDebugEnabled()) LOGGER.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>domain user");
-        final String query = "select r.Role_name as role from EG_ROLES r, EG_USER u,EG_USERROLE ur where u.user_name=? and ur.id_role=r.id_role and u.id_user=ur.id_user ";
-        String role = "";
-        try {
-            final Query ps = persistenceService.getSession().createSQLQuery(query);
-            ps.setString(0, userName);
-            final List<Object[]> rs = ps.list();
-            for (final Object[] element : rs)
-                role = element[0].toString();
-        } catch (final Exception ex) {
-            LOGGER.error("Task Failed Error" + ex.getMessage(), ex);
-            throw new TaskFailedException();
-        }
-        return role;
+		final StringBuilder query = new StringBuilder(
+				"select r.Role_name as role from EG_ROLES r, EG_USER u,EG_USERROLE ur")
+						.append(" where u.user_name=? and ur.id_role=r.id_role and u.id_user=ur.id_user ");
+		String role = "";
+		try {
+			final Query ps = persistenceService.getSession().createSQLQuery(query.toString());
+			ps.setString(0, userName);
+			final List<Object[]> rs = ps.list();
+			for (final Object[] element : rs)
+				role = element[0].toString();
+		} catch (final Exception ex) {
+			LOGGER.error("Task Failed Error" + ex.getMessage(), ex);
+			throw new TaskFailedException();
+		}
+		return role;
     }
 
     public int getId() throws TaskFailedException {

@@ -57,8 +57,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -89,9 +92,9 @@ public class GeneralLedgerReport {
     String accEntityKey = null;
     BigDecimal slDrAmount = new BigDecimal("0.00");
     BigDecimal slCrAmount = new BigDecimal("0.00");
-    String engineQry = null;
     private static TaskFailedException taskExc;
-    String startDate, endDate, effTime, rType = "gl";
+    String startDate, endDate, rType = "gl";
+    Map<String, Map<String, Object>> effTime;
     private static final Logger LOGGER = Logger.getLogger(GeneralLedgerReport.class);
     com.exilant.eGov.src.transactions.OpBal OpBal = new com.exilant.eGov.src.transactions.OpBal();
     DecimalFormat dft = new DecimalFormat("##############0.00");
@@ -132,7 +135,7 @@ public class GeneralLedgerReport {
         try {
             final String snapShotDateTime = reportBean.getSnapShotDateTime();
             if (snapShotDateTime.equalsIgnoreCase(""))
-                effTime = "";
+                effTime = new HashMap<>();
             else
                 effTime = eGovernCommon.getEffectiveDateFilter(snapShotDateTime);
         } catch (final Exception e) {
@@ -223,21 +226,23 @@ public class GeneralLedgerReport {
 
         // engine.setAppConfigValuesService(appConfigValuesService);
         final ReportEngineBean reBean = engine.populateReportEngineBean(reportBean);
-        engineQry = engine.getVouchersListQuery(reBean);
+        final Entry<String, Map<String, Object>> queryWithParams = engine.getVouchersListQuery(reBean).entrySet().iterator().next(); 
 
-        final String query = getQuery(glCode1, startDate, endDate, accEntityId, accEntityKey, reportBean.getFieldId(),
-                reBean.getFunctionId());
+        final Map<String, Map<String, Object>> query = getQuery(glCode1, startDate, endDate, accEntityId, accEntityKey, reportBean.getFieldId(),
+                reBean.getFunctionId(), queryWithParams);
+        final Entry<String, Map<String, Object>> entry = query.entrySet().iterator().next();
         final String functionId = reBean.getFunctionId();
         if (LOGGER.isInfoEnabled())
             LOGGER.info("**************QUERY: " + query);
         try {
 
-            try {
-                pstmt = persistenceService.getSession().createSQLQuery(query);
-            } catch (final Exception e) {
-                LOGGER.error("Exception in creating statement:" + pstmt, e);
-                throw taskExc;
-            }
+			try {
+				pstmt = persistenceService.getSession().createSQLQuery(entry.getKey());
+				entry.getValue().entrySet().forEach(rec -> pstmt.setParameter(rec.getKey(), rec.getValue()));
+			} catch (final Exception e) {
+				LOGGER.error("Exception in creating statement:" + pstmt, e);
+				throw taskExc;
+			}
 
             final List list = pstmt.list();
             resultset1 = list;
@@ -849,80 +854,97 @@ public class GeneralLedgerReport {
     }
 
     @SuppressWarnings("unchecked")
-    private String getQuery(final String glCode1, final String startDate, final String endDate,
-            final String accEntityId, final String accEntityKey, final String fieldId, final String functionId)
-                    throws TaskFailedException {
-        String addTableToQuery = "";
-        String entityCondition = "";
-        String functionCondition = "";
+	private Map<String, Map<String, Object>> getQuery(final String glCode1, final String startDate, final String endDate,
+			final String accEntityId, final String accEntityKey, final String fieldId, final String functionId,
+			Entry<String, Map<String, Object>> queryWithParams) throws TaskFailedException {
+		String addTableToQuery = "";
+		StringBuilder entityCondition = new StringBuilder("");
+		String functionCondition = "";
+		final Map<String, Map<String, Object>> queryMap = new HashMap<>();
+		final Map<String, Object> params = new HashMap<>();
+		final StringBuilder queryString = new StringBuilder();
 
-        if (!accEntityId.equalsIgnoreCase("") && !accEntityKey.equalsIgnoreCase(""))
-            entityCondition = " AND gl.id=gldet.generalledgerid  AND gldet.detailtypeid=" + accEntityId
-            + " AND cdet.detailtypeid = " + accEntityId + " AND gldet.detailkeyid=" + accEntityKey + "";
-        if (addTableToQuery.trim().equals("") && null != fieldId && !fieldId.trim().equals(""))
-            addTableToQuery = ", vouchermis vmis ";
-        if (!StringUtils.isEmpty(functionId))
-            functionCondition = " and gl.functionid=" + functionId;
-        if (!accEntityKey.equals(""))
-            return "SELECT  gl.glcode as \"code\",(select ca.type from chartofaccounts ca where glcode=gl.glcode) as \"glType\" ,"
-            + " vh.id AS \"vhid\",vh.voucherDate AS \"vDate\",TO_CHAR(vh.voucherDate ,'dd-Mon-yyyy') "
-            + " AS \"voucherdate\",vh.voucherNumber AS \"vouchernumber\",gl.glCode AS \"glcode\",coa.name||"
-            + " (CASE WHEN (GLDET.GENERALLEDGERID=GL.ID) THEN '-['||(CASE WHEN gldet.detailtypeid = (select id from accountdetailtype where name='Creditor') "
-            + "THEN (select name from Supplier where id=gldet.detailkeyid ) "
-            + "ELSE (CASE WHEN gldet.detailtypeid = (select id from accountdetailtype where name='EMPLOYEE') "
-            + "THEN (select name from eg_user where id=gldet.detailkeyid) "
-            + "ELSE (select name from accountentitymaster where id=gldet.detailkeyid) END) END)||']'"
-            + " ELSE NULL END) as \"Name\",CASE WHEN gl.glcode = '"
-            + glCode1
-            + "' THEN (CASE WHEN gl.DEBITAMOUNT = 0 THEN (gldet.amount||'.00cr') ELSE (gldet.amount||'.00dr') END)"
-            + "ELSE (CASE WHEN gl.DEBITAMOUNT = 0 THEN (gl.creditamount||'.00cr') ELSE (gl.debitamount||'.00dr') END) END"
-            + " as \"amount\",gl.description as \"narration\",vh .type || '-' || vh.name||CASE WHEN status = 1 THEN '(Reversed)' ELSE (CASE WHEN status = 2 THEN '(Reversal)' ELSE '' END) END"
-            + " AS \"type\","
-            + " CASE WHEN gl.glcode = '"
-            + glCode1
-            + "' THEN (CASE WHEN gl.debitAMOUNT = 0 THEN 0 ELSE gldet.amount END) ELSE (CASE WHEN gl.debitAMOUNT = 0 THEN 0 ELSE gl.debitamount END) END"
-            + " as \"debitamount\",CASE WHEN gl.glcode = '"
-            + glCode1
-            + "' THEN (CASE WHEN gl.creditAMOUNT = 0 THEN 0 ELSE gldet.amount END) ELSE (CASE WHEN gl.debitAMOUNT = 0 THEN 0 ELSE gl.creditamount END) END"
-            + " as \"creditamount\","
-            + " f.name as \"fundName\",vh.isconfirmed as \"isconfirmed\",case when (gldet.generalledgerid=gl.id) "
-            + " then gldet.detailkeyid else null end as \"DetailKeyId\",vh.type||'-'||vh.name as \"vouchertypename\" "
-            + " FROM generalLedger gl, voucherHeader vh, chartOfAccounts coa,"
-            + " generalledgerdetail gldet, chartofaccountdetail cdet ,"
-            + " fund f WHERE coa.glCode = gl.glCode AND gl.voucherHeaderId = vh.id "
-            + " and cdet.glcodeid=coa.id "
-            + " and gl.glcode='"
-            + glCode1
-            + "'"
-            + " AND f.id= vh.fundId "
-            + entityCondition
-            + ""
-            + " and vh.id in ("
-            + engineQry
-            + " )"
-            + " AND (gl .debitamount>0 OR gl .creditamount>0) " + " order by vh.id asc ,gl.glCode";
-        else {
+		if (!accEntityId.equalsIgnoreCase("") && !accEntityKey.equalsIgnoreCase("")) {
+			entityCondition.append(" AND gl.id = gldet.generalledgerid  AND gldet.detailtypeid = :accEntityId")
+					.append(" AND cdet.detailtypeid = :accEntityId AND gldet.detailkeyid = :accEntityKey");
+			params.put("accEntityId", accEntityId);
+			params.put("accEntityKey", accEntityKey);
+		}
 
-            final StringBuffer sql = new StringBuffer(
-                    "SELECT  gl.glcode as \"code\",(select ca.type from chartofaccounts ca where glcode=gl.glcode) as \"glType\",vh.id AS \"vhid\", vh.voucherDate AS \"vDate\", ")
-            .append(" TO_CHAR(vh.voucherDate, 'dd-Mon-yyyy') AS voucherdate, ")
-            .append(" vh.voucherNumber AS \"vouchernumber\", gl.glCode AS \"glcode\", ")
-            .append(" coa.name AS \"name\",CASE WHEN gl.debitAmount = 0 THEN (case (gl.creditamount) when 0 then gl.creditAmount||'.00cr' when floor(gl.creditamount) then gl.creditAmount||'.00cr' else  gl.creditAmount||'cr'  end ) ELSE (case (gl.debitamount) when 0 then gl.debitamount||'.00dr' when floor(gl.debitamount) then gl.debitamount||'.00dr' else  gl.debitamount||'dr' end ) END"
-                    + " AS \"amount\", ")
-                    .append(" gl.description AS \"narration\", vh.type || '-' || vh.name||CASE WHEN status = 1 THEN '(Reversed)' ELSE (CASE WHEN status = 2 THEN '(Reversal)' ELSE '' END) END AS \"type\", ")
-                    .append(" gl.debitamount  AS \"debitamount\", gl.creditamount  AS \"creditamount\",f.name as \"fundName\",  vh.isconfirmed as \"isconfirmed\",gl.functionid as \"functionid\",vh.type||'-'||vh.name as \"vouchertypename\" ")
-                    .append(" FROM generalLedger gl, voucherHeader vh, chartOfAccounts coa,  fund f " + addTableToQuery
-                            + "").append(" WHERE coa.glCode = gl.glCode AND gl.voucherHeaderId = vh.id  ")
-                            .append(" AND	f.id=vh.fundid ").append(" AND gl.glcode ='" + glCode1 + "'")
-                            .append(" AND (gl.debitamount>0 OR gl.creditamount>0) ").append(functionCondition)
-                            .append(" and vh.id in (" + engineQry + " )")
-                            .append(" group by vh.id,gl.glcode,vh.voucherDate ,vh.voucherNumber,coa.name,gl.description,  vh.type || '-' || vh.name||CASE WHEN status = 1 THEN '(Reversed)' ELSE (CASE WHEN status = 2 THEN '(Reversal)' ELSE '' END) END, gl.debitamount , gl.creditamount  ,f.name, vh.isconfirmed, vh.type  ||'-'  ||vh.name, gl.functionid   ")
-                            .append(" order by \"code\",\"vDate\" ");
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("____________________________________________________________" + sql.toString());
-            return sql.toString();
-        }
-    }
+		if (addTableToQuery.trim().equals("") && null != fieldId && !fieldId.trim().equals(""))
+			addTableToQuery = ", vouchermis vmis ";
+		if (!StringUtils.isEmpty(functionId)) {
+			functionCondition = " and gl.functionid = :functionId" + functionId;
+			params.put("functionId", functionId);
+		}
+		if (!accEntityKey.equals("")) {
+			queryString.append(
+					"SELECT  gl.glcode as \"code\",(select ca.type from chartofaccounts ca where glcode=gl.glcode) as \"glType\" ,")
+					.append(" vh.id AS \"vhid\",vh.voucherDate AS \"vDate\",TO_CHAR(vh.voucherDate ,'dd-Mon-yyyy') ")
+					.append(" AS \"voucherdate\",vh.voucherNumber AS \"vouchernumber\",gl.glCode AS \"glcode\",coa.name||")
+					.append(" (CASE WHEN (GLDET.GENERALLEDGERID=GL.ID) THEN '-['||(CASE WHEN gldet.detailtypeid =")
+					.append(" (select id from accountdetailtype where name='Creditor') ")
+					.append("THEN (select name from Supplier where id=gldet.detailkeyid ) ")
+					.append("ELSE (CASE WHEN gldet.detailtypeid = (select id from accountdetailtype where name='EMPLOYEE') ")
+					.append("THEN (select name from eg_user where id=gldet.detailkeyid) ")
+					.append("ELSE (select name from accountentitymaster where id=gldet.detailkeyid) END) END)||']'")
+					.append(" ELSE NULL END) as \"Name\",CASE WHEN gl.glcode = :glcode")
+					.append(" THEN (CASE WHEN gl.DEBITAMOUNT = 0 THEN (gldet.amount||'.00cr') ELSE (gldet.amount||'.00dr') END)")
+					.append("ELSE (CASE WHEN gl.DEBITAMOUNT = 0 THEN (gl.creditamount||'.00cr')")
+					.append(" ELSE (gl.debitamount||'.00dr') END) END")
+					.append(" as \"amount\",gl.description as \"narration\",vh .type || '-' || vh.name||")
+					.append("CASE WHEN status = 1 THEN '(Reversed)' ELSE (CASE WHEN status = 2 THEN '(Reversal)' ELSE '' END) END")
+					.append(" AS \"type\", CASE WHEN gl.glcode = :glcode")
+					.append(" THEN (CASE WHEN gl.debitAMOUNT = 0 THEN 0 ELSE gldet.amount END)")
+					.append(" ELSE (CASE WHEN gl.debitAMOUNT = 0 THEN 0 ELSE gl.debitamount END) END")
+					.append(" as \"debitamount\",CASE WHEN gl.glcode = :glcode")
+					.append(" THEN (CASE WHEN gl.creditAMOUNT = 0 THEN 0 ELSE gldet.amount END)")
+					.append(" ELSE (CASE WHEN gl.debitAMOUNT = 0 THEN 0 ELSE gl.creditamount END) END")
+					.append(" as \"creditamount\",")
+					.append(" f.name as \"fundName\",vh.isconfirmed as \"isconfirmed\",case when (gldet.generalledgerid=gl.id) ")
+					.append(" then gldet.detailkeyid else null end as \"DetailKeyId\",vh.type||'-'||")
+					.append("vh.name as \"vouchertypename\" ")
+					.append(" FROM generalLedger gl, voucherHeader vh, chartOfAccounts coa,")
+					.append(" generalledgerdetail gldet, chartofaccountdetail cdet ,")
+					.append(" fund f WHERE coa.glCode = gl.glCode AND gl.voucherHeaderId = vh.id ")
+					.append(" and cdet.glcodeid=coa.id and gl.glcode = :glcode").append(" AND f.id= vh.fundId ")
+					.append(entityCondition).append(" and vh.id in (").append(queryWithParams.getKey()).append(" )")
+					.append(" AND (gl .debitamount>0 OR gl .creditamount>0) ").append(" order by vh.id asc ,gl.glCode");
+			params.put("glcode", glCode1);
+			params.putAll(queryWithParams.getValue());
+		} else {
+			queryString.append(
+					"SELECT  gl.glcode as \"code\",(select ca.type from chartofaccounts ca where glcode=gl.glcode) as \"glType\",")
+					.append("vh.id AS \"vhid\", vh.voucherDate AS \"vDate\", ")
+					.append(" TO_CHAR(vh.voucherDate, 'dd-Mon-yyyy') AS voucherdate, ")
+					.append(" vh.voucherNumber AS \"vouchernumber\", gl.glCode AS \"glcode\", ")
+					.append(" coa.name AS \"name\",CASE WHEN gl.debitAmount = 0 THEN (case (gl.creditamount)")
+					.append(" when 0 then gl.creditAmount||'.00cr' when floor(gl.creditamount) then gl.creditAmount||'.00cr'")
+					.append(" else  gl.creditAmount||'cr'  end ) ELSE (case (gl.debitamount) when 0 then gl.debitamount||'.00dr'")
+					.append(" when floor(gl.debitamount) then gl.debitamount||'.00dr' else  gl.debitamount||'dr' end ) END")
+					.append(" AS \"amount\", ")
+					.append(" gl.description AS \"narration\", vh.type || '-' || vh.name||CASE WHEN status = 1")
+					.append(" THEN '(Reversed)' ELSE (CASE WHEN status = 2 THEN '(Reversal)' ELSE '' END) END AS \"type\", ")
+					.append(" gl.debitamount  AS \"debitamount\", gl.creditamount  AS \"creditamount\",f.name as \"fundName\",")
+					.append("  vh.isconfirmed as \"isconfirmed\",gl.functionid as \"functionid\",vh.type||'-'||vh.name")
+					.append(" as \"vouchertypename\" ")
+					.append(" FROM generalLedger gl, voucherHeader vh, chartOfAccounts coa,  fund f ")
+					.append(addTableToQuery).append(" WHERE coa.glCode = gl.glCode AND gl.voucherHeaderId = vh.id  ")
+					.append(" AND f.id=vh.fundid ").append(" AND gl.glcode = :glcode")
+					.append(" AND (gl.debitamount>0 OR gl.creditamount>0) ").append(functionCondition)
+					.append(" and vh.id in (").append(queryWithParams.getKey()).append(" )")
+					.append(" group by vh.id,gl.glcode,vh.voucherDate ,vh.voucherNumber,coa.name,gl.description,")
+					.append(" vh.type || '-' || vh.name||CASE WHEN status = 1 THEN '(Reversed)' ELSE (CASE WHEN status = 2")
+					.append(" THEN '(Reversal)' ELSE '' END) END, gl.debitamount , gl.creditamount  ,f.name, vh.isconfirmed,")
+					.append(" vh.type  ||'-'  ||vh.name, gl.functionid   ").append(" order by \"code\",\"vDate\" ");
+			params.put("glcode", glCode1);
+			params.putAll(queryWithParams.getValue());
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("____________________________________________________________" + queryString.toString());
+		}
+		queryMap.put(queryString.toString(), params);
+		return queryMap;
+	}
 
     private OpBal getOpeningBalance(final String glCode, final String fundId, final String fundSourceId,
             final String fyId, final String accEntityId, final String accEntityKey, final String tillDate,
@@ -936,53 +958,53 @@ public class GeneralLedgerReport {
         String deptWhereCondition = "";
 
         double opDebit = 0, opCredit = 0;
+        
+        Map<String, Object> params = new  HashMap<>();
 
         /** opening balance of the Year **/
-        if (!fundId.equalsIgnoreCase(""))
-            fundCondition = "fundId = ? AND ";
-        if (deptCode != null && !deptCode.equalsIgnoreCase("")) {
-            deptCondition = "DEPARTMENTCODE = ? AND ";
-            deptFromCondition = ", vouchermis mis";
-            deptWhereCondition = " mis.voucherheaderid =vh.id   and mis.DepartmentCode = ? and ";
+        if (!fundId.equalsIgnoreCase("")) {
+            fundCondition = "fundId = :fundId AND ";
+            params.put("fundId", fundId);
         }
-        if (!fundSourceId.equalsIgnoreCase(""))
-            fundSourceCondition = "fundSourceId = ? AND ";
-        if (!accEntityId.equalsIgnoreCase(""))
-            accEntityCondition = "accountDetailTypeid=? AND accountDetailKey=? AND ";
-        if (!StringUtils.isEmpty(functionId))
-            functionCondition = " functionid=? AND ";
-        final String queryYearOpBal = "SELECT CASE WHEN sum(openingDebitBalance) is null THEN 0 ELSE sum(openingDebitBalance) END AS \"openingDebitBalance\", "
-                + "CASE WHEN sum(openingCreditBalance) is null THEN 0 ELSE sum(openingCreditBalance) END AS \"openingCreditBalance\" "
-                + "FROM transactionSummary WHERE "
-                + fundCondition
-                + fundSourceCondition
-                + functionCondition
-                + accEntityCondition
-                + deptCondition
-                + " financialYearId=? "
-                + "AND glCodeId = (SELECT id FROM chartOfAccounts WHERE glCode in(?))";
+        if (deptCode != null && !deptCode.equalsIgnoreCase("")) {
+            deptCondition = "DEPARTMENTCODE = :departmentCode AND ";
+            deptFromCondition = ", vouchermis mis";
+            deptWhereCondition = " mis.voucherheaderid = vh.id   and mis.DepartmentCode = :departmentCode and ";
+            params.put("departmentCode", deptCode);
+        }
+        if (!fundSourceId.equalsIgnoreCase("")) {
+            fundSourceCondition = "fundSourceId = :fundSourceId AND ";
+            params.put("fundSourceId", fundSourceId);
+        }
+        if (!accEntityId.equalsIgnoreCase("")) {
+            accEntityCondition = "accountDetailTypeid = :accountDetailTypeid AND accountDetailKey = :accountDetailKey AND ";
+            params.put("accountDetailTypeid", accEntityId);
+            params.put("accountDetailKey", accEntityKey);
+        }
+        if (!StringUtils.isEmpty(functionId)) {
+            functionCondition = " functionid = :functionid AND ";
+            params.put("functionid", functionId);
+        }
+        final StringBuilder queryYearOpBal = new  StringBuilder(
+        		"SELECT CASE WHEN sum(openingDebitBalance) is null THEN 0 ELSE sum(openingDebitBalance) END AS \"openingDebitBalance\", ")
+        		.append("CASE WHEN sum(openingCreditBalance) is null THEN 0 ELSE sum(openingCreditBalance) END AS \"openingCreditBalance\" ")
+        		.append("FROM transactionSummary WHERE ")
+                .append(fundCondition)
+                .append(fundSourceCondition)
+                .append(functionCondition)
+                .append(accEntityCondition)
+                .append(deptCondition)
+                .append(" financialYearId = :financialYearId ")
+                .append("AND glCodeId = (SELECT id FROM chartOfAccounts WHERE glCode in (:glCode))");
+        params.put("financialYearId", fyId);
+        params.put("glCode", glCode);
         if (LOGGER.isInfoEnabled())
             LOGGER.info("**********************: OPBAL: " + queryYearOpBal);
         try {
             int i = 0;
-            pstmt = persistenceService.getSession().createSQLQuery(queryYearOpBal);
-            if (!fundId.equalsIgnoreCase(""))
-                pstmt.setLong(i++, Long.valueOf(fundId));
-            if (!fundSourceId.equalsIgnoreCase(""))
-                pstmt.setLong(i++, Long.valueOf(fundSourceId));
-            if (!StringUtils.isEmpty(functionId))
-                pstmt.setLong(i++, Long.valueOf(functionId));
-            if (!accEntityId.equalsIgnoreCase("")) {
-                pstmt.setLong(i++, Long.valueOf(accEntityId));
-                pstmt.setLong(i++, Long.valueOf(accEntityKey));
-            }
-            if (deptCode != null && !deptCode.equalsIgnoreCase(""))
-                pstmt.setString(i++, deptCode);
-            pstmt.setLong(i++, Long.valueOf(fyId));
-            pstmt.setString(i++, glCode);
-            resultset = null;
-            final List list = pstmt.list();
-            resultset = list;
+            pstmt = persistenceService.getSession().createSQLQuery(queryYearOpBal.toString());
+            params.entrySet().forEach(rec -> pstmt.setParameter(rec.getKey(), rec.getValue()));
+            resultset = pstmt.list();
             for (final Object[] element : resultset) {
                 opDebit = Double.parseDouble(element[0] != null ? element[0].toString() : "0");
                 opCredit = Double.parseDouble(element[1] != null ? element[1].toString() : "0");
@@ -993,15 +1015,22 @@ public class GeneralLedgerReport {
             throw taskExc;
         }
 
+        params = new HashMap<>();
         /** opening balance till the date from the start of the Year **/
         final String startDate = commnFunctions.getStartDate(Integer.parseInt(fyId));
-        if (!fundId.equalsIgnoreCase(""))
-            fundCondition = "AND vh.fundId = ? ";
-        if (!fundSourceId.equalsIgnoreCase(""))
-            fundSourceCondition = "AND vh.fundId = ? ";
-        if (!StringUtils.isEmpty(functionId))
-            functionCondition = " and gl.functionid=? ";
-        String queryTillDateOpBal = "";
+        if (!fundId.equalsIgnoreCase("")) {
+            fundCondition = "AND vh.fundId = :fundId ";
+            params.put("fundId", fundId);
+        }
+        if (!fundSourceId.equalsIgnoreCase("")) {
+            fundSourceCondition = "AND vh.fundId = :fundSourceId ";
+            params.put("fundSourceId", fundSourceId);
+        }
+        if (!StringUtils.isEmpty(functionId)) {
+            functionCondition = " and gl.functionid = :functionId ";
+            params.put("functionId", functionId);
+        }
+        final StringBuilder queryTillDateOpBal = new StringBuilder();
         String defaultStatusExclude = null;
         final List<AppConfigValues> listAppConfVal = appConfigValuesService.getConfigValuesByModuleAndKey("EGF",
                 "statusexcludeReport");
@@ -1012,103 +1041,62 @@ public class GeneralLedgerReport {
 
         if (!accEntityId.equalsIgnoreCase("") && !accEntityKey.equalsIgnoreCase("")) {
             // addGldtlTableToQuery=", generalledgerdetail gldet ";
-            accEntityCondition = " AND gl.id=gldet.generalledgerid  AND gldet.detailtypeid=? AND gldet.detailkeyid=? ";
+            accEntityCondition = " AND gl.id = gldet.generalledgerid  AND gldet.detailtypeid = :detailtypeid"
+            		+ " AND gldet.detailkeyid = :detailkeyid ";
+            params.put("detailtypeid", accEntityId);
+            params.put("detailkeyid", accEntityKey);
 
-            queryTillDateOpBal = "SELECT coa.glcode,(SELECT SUM(gldet.amount) FROM generalLedger gl, voucherHeader vh "
-                    + deptFromCondition
-                    + " , generalledgerdetail gldet "
-                    + " WHERE vh.id = gl.voucherHeaderId AND gl.glcodeid IN (coa.id) "
-                    + fundCondition
-                    + fundSourceCondition
-                    + functionCondition
-                    + accEntityCondition
-                    + " AND "
-                    + deptWhereCondition
-                    + " vh.voucherDate >= to_date(?,'dd/mm/yyyy')  AND vh.voucherDate < to_date(?,'dd/mm/yyyy') AND vh.status not in ("
-                    + defaultStatusExclude
-                    + ")"
-                    + " AND "
-                    + " gl.DEBITamount>0) AS \"debitAmount\",(SELECT SUM(gldet.amount) FROM generalLedger gl, voucherHeader vh "
-                    + deptFromCondition
-                    + " , "
-                    + " generalledgerdetail gldet WHERE vh.id = gl.voucherHeaderId AND "
-                    + deptWhereCondition
-                    + " "
-                    + " gl.glcodeid IN (coa.id) "
-                    + fundCondition
-                    + fundSourceCondition
-                    + functionCondition
-                    + accEntityCondition
-                    + " AND vh.voucherDate >= to_date(?,'dd/mm/yyyy') AND vh.voucherDate <to_date(?,'dd/mm/yyyy') AND vh.status not in ("
-                    + defaultStatusExclude + ") AND"
-                    + " gl.CREDITamount>0) AS \"creditAmount\" FROM chartofaccounts coa WHERE 	coa.glcode IN (?)";
-
-        } else
-            queryTillDateOpBal = "SELECT CASE WHEN sum(gl.debitAmount) is null THEN 0 ELSE sum(gl.debitAmount) END AS \"debitAmount\", "
-                    + " CASE WHEN sum(gl.creditAmount) is null THEN 0 ELSE sum(gl.creditAmount) END AS \"creditAmount\" "
-                    + " FROM generalLedger gl, voucherHeader vh "
-                    + deptFromCondition
-                    + " WHERE vh.id = gl.voucherHeaderId AND "
-                    + deptWhereCondition
-                    + " gl.glCode IN (?)"
-                    + " "
-                    + fundCondition
-                    + fundSourceCondition
-                    + functionCondition
-                    + " AND vh.voucherDate >= to_date(?,'dd/MM/YYYY') AND vh.voucherDate <to_date(?,'dd/MM/YYYY') AND vh.status not in ("
-                    + defaultStatusExclude + ")";
+			queryTillDateOpBal.append("SELECT coa.glcode,(SELECT SUM(gldet.amount) FROM generalLedger gl, voucherHeader vh ")
+			.append(deptFromCondition)
+                    .append(" , generalledgerdetail gldet ")
+                    .append(" WHERE vh.id = gl.voucherHeaderId AND gl.glcodeid IN (coa.id) ")
+                    .append(fundCondition)
+                    .append(fundSourceCondition)
+                    .append(functionCondition)
+                    .append(accEntityCondition)
+                    .append(" AND ")
+                    .append(deptWhereCondition)
+                    .append(" vh.voucherDate >= to_date(:voucherFromDate,'dd/mm/yyyy') ")
+                    .append(" AND vh.voucherDate < to_date(:voucherToDate,'dd/mm/yyyy') AND vh.status not in (")
+                    .append(defaultStatusExclude)
+                    .append(")")
+                    .append(" AND ")
+                    .append(" gl.DEBITamount>0) AS \"debitAmount\",(SELECT SUM(gldet.amount) FROM generalLedger gl, voucherHeader vh ")
+                    .append(deptFromCondition)
+                    .append(" , ")
+                    .append(" generalledgerdetail gldet WHERE vh.id = gl.voucherHeaderId AND ")
+                    .append(deptWhereCondition)
+                    .append(" ")
+                    .append(" gl.glcodeid IN (coa.id) ")
+                    .append(fundCondition)
+                    .append(fundSourceCondition)
+                    .append(functionCondition)
+                    .append(accEntityCondition)
+                    .append(" AND vh.voucherDate >= to_date(:voucherFromDate,'dd/mm/yyyy')")
+                    .append(" AND vh.voucherDate <to_date(:voucherToDate,'dd/mm/yyyy') AND vh.status not in (")
+                    .append(defaultStatusExclude).append(") AND")
+                    .append(" gl.CREDITamount>0) AS \"creditAmount\" FROM chartofaccounts coa WHERE coa.glcode IN (:glcode)");
+        } else {
+			queryTillDateOpBal.append(
+					"SELECT CASE WHEN sum(gl.debitAmount) is null THEN 0 ELSE sum(gl.debitAmount) END AS \"debitAmount\", ")
+					.append(" CASE WHEN sum(gl.creditAmount) is null THEN 0 ELSE sum(gl.creditAmount) END AS \"creditAmount\" ")
+					.append(" FROM generalLedger gl, voucherHeader vh ").append(deptFromCondition)
+					.append(" WHERE vh.id = gl.voucherHeaderId AND ").append(deptWhereCondition)
+					.append(" gl.glCode IN (:glcode)").append(" ").append(fundCondition).append(fundSourceCondition)
+					.append(functionCondition).append(" AND vh.voucherDate >= to_date(:voucherFromDate,'dd/MM/YYYY')")
+					.append(" AND vh.voucherDate <to_date(:voucherToDate,'dd/MM/YYYY') AND vh.status not in (")
+					.append(defaultStatusExclude).append(")");
+        }
+        params.put("departmentCode", deptCode);
+        params.put("voucherFromDate", startDate);
+        params.put("voucherToDate", tillDate);
+        params.put("glcode", glCode);
         if (LOGGER.isInfoEnabled())
             LOGGER.info("***********: OPBAL: " + queryTillDateOpBal);
         try {
-            pstmt = persistenceService.getSession().createSQLQuery(queryTillDateOpBal);
-            int i = 0;
-            if (!accEntityId.equalsIgnoreCase("") && !accEntityKey.equalsIgnoreCase("")) {
-                if (!fundId.equalsIgnoreCase(""))
-                    pstmt.setLong(i++, Long.parseLong(fundId));
-                if (!fundSourceId.equalsIgnoreCase(""))
-                    pstmt.setLong(i++, Long.parseLong(fundSourceId));
-                if (!StringUtils.isEmpty(functionId))
-                    pstmt.setLong(i++, Long.parseLong(functionId));
-                if (!accEntityId.equalsIgnoreCase("")) {
-                    pstmt.setLong(i++, Long.parseLong(accEntityId));
-                    pstmt.setLong(i++, Long.parseLong(accEntityKey));
-                }
-                if (deptCode != null && !deptCode.equalsIgnoreCase(""))
-                    pstmt.setString(i++,deptCode);
-                pstmt.setString(i++, startDate);
-                pstmt.setString(i++, tillDate);
-                if (deptCode != null && !deptCode.equalsIgnoreCase(""))
-                    pstmt.setString(i++, deptCode);
-                if (!fundId.equalsIgnoreCase(""))
-                    pstmt.setLong(i++, Long.parseLong(fundId));
-                if (!fundSourceId.equalsIgnoreCase(""))
-                    pstmt.setLong(i++, Long.parseLong(fundSourceId));
-                if (!StringUtils.isEmpty(functionId))
-                    pstmt.setLong(i++, Long.parseLong(functionId));
-                if (!accEntityId.equalsIgnoreCase("")) {
-                    pstmt.setLong(i++, Long.parseLong(accEntityId));
-                    pstmt.setLong(i++, Long.parseLong(accEntityKey));
-                }
-                pstmt.setString(i++, startDate);
-                pstmt.setString(i++, tillDate);
-                pstmt.setString(i++, glCode);
-            } else {
-
-                if (deptCode != null && !deptCode.equalsIgnoreCase(""))
-                    pstmt.setString(i++, deptCode);
-                pstmt.setString(i++, glCode);
-                if (!fundId.equalsIgnoreCase(""))
-                    pstmt.setLong(i++, Long.parseLong(fundId));
-                if (!fundSourceId.equalsIgnoreCase(""))
-                    pstmt.setLong(i++, Long.parseLong(fundSourceId));
-                if (!StringUtils.isEmpty(functionId))
-                    pstmt.setLong(i++, Long.parseLong(functionId));
-                pstmt.setString(i++, startDate);
-                pstmt.setString(i++, tillDate);
-            }
-            resultset = null;
-            final List<Object[]> list = pstmt.list();
-            resultset = list;
+            pstmt = persistenceService.getSession().createSQLQuery(queryTillDateOpBal.toString());
+            params.entrySet().forEach(rec -> pstmt.setParameter(rec.getKey(), rec.getValue()));
+            resultset = pstmt.list();
             if (!accEntityId.equalsIgnoreCase("") && !accEntityKey.equalsIgnoreCase(""))
                 for (final Object[] element : resultset) {
                     if (element[1] != null)

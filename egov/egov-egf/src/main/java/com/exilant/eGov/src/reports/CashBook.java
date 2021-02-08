@@ -71,8 +71,11 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 class OpBalance {
     public double dr;
@@ -86,15 +89,17 @@ public class CashBook {
     List<Object[]> resultset = null;
     List<Object[]> resultset1 = null;
     TaskFailedException taskExc;
-    String startDate, endDate, effTime, rType = "gl";
+    String startDate, endDate, rType = "gl";
+
+	Map<String, Map<String, Object>> effTime;
     NumberFormat numberformatter = new DecimalFormat("##############0.00");
     private final CommnFunctions commonFun = new CommnFunctions();
     private static final Logger LOGGER = Logger.getLogger(CashBook.class);
    
- @Autowired
- @Qualifier("persistenceService")
- private PersistenceService persistenceService;
- @Autowired
+	@Autowired
+	@Qualifier("persistenceService")
+	private PersistenceService persistenceService;
+	@Autowired
     private FinancialYearHibernateDAO financialYearDAO;
     final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
     final SimpleDateFormat formatter1 = new SimpleDateFormat("dd-MMM-yyyy");
@@ -108,7 +113,8 @@ public class CashBook {
         connection = con;
     }
 
-    public LinkedList getGeneralLedgerList(final GeneralLedgerReportBean reportBean)
+    @SuppressWarnings("unchecked")
+	public LinkedList getGeneralLedgerList(final GeneralLedgerReportBean reportBean)
             throws TaskFailedException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Inside getGeneralLedgerList");
@@ -138,16 +144,16 @@ public class CashBook {
                 glCode2 = getMaxCode(glCode2);
             }
 
-            try {
-                final String snapShotDateTime = reportBean.getSnapShotDateTime();
-                if (snapShotDateTime.equalsIgnoreCase(""))
-                    effTime = "";
-                else
-                    effTime = eGovernCommon.getEffectiveDateFilter(snapShotDateTime);
-            } catch (final Exception ex) {
-                LOGGER.error("exception in getGeneralLedgerList", ex);
-                throw taskExc;
-            }
+			try {
+				final String snapShotDateTime = reportBean.getSnapShotDateTime();
+				if (snapShotDateTime.equalsIgnoreCase(""))
+					effTime = new HashMap<>();
+				else
+					effTime = eGovernCommon.getEffectiveDateFilter(snapShotDateTime);
+			} catch (final Exception ex) {
+				LOGGER.error("exception in getGeneralLedgerList", ex);
+				throw taskExc;
+			}
 
             String formstartDate = "", formendDate = "";
             Date dt = new Date();
@@ -230,21 +236,8 @@ public class CashBook {
 
             final ReportEngineBean reBean = engine
                     .populateReportEngineBean(reportBean);
-            final String engineQry = engine.getVouchersListQuery(reBean);
-
-            final String query = getQuery(engineQry);
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("**************QUERY: " + query);
-
-            // try{
-
-            try {
-                pstmt = persistenceService.getSession().createSQLQuery(query);
-            } catch (final Exception e) {
-                LOGGER.error("Exception in creating statement:", e);
-                throw taskExc;
-            }
-            resultset1 = pstmt.list();
+            final Entry<String, Map<String, Object>> queryWithParams = engine.getVouchersListQuery(reBean).entrySet().iterator().next();
+            resultset1 = getQuery(queryWithParams).list();
             String accCode = "", vcNum = "", vcDate = "";
             StringBuffer detail = new StringBuffer();
             StringBuffer amount = new StringBuffer();
@@ -700,27 +693,42 @@ public class CashBook {
         return dataList;
     }
 
-    private String getQuery(final String engineQry) {
-        return "SELECT distinct gl1.glcode as \"code\",vh.type as \"vhType\",vh.cgn as \"CGN\",coa.purposeid as \"purposeid\",case  coa.purposeid when 4 then 1 when 5 then 1 else 0 end as \"order\","
-                + "(select ca.type from chartofaccounts ca where glcode=gl1.glcode) as \"glType\","
-                + " (select name from fundsource where id=vh.FUNDSOURCEID) as \"fundsource\",(select name from function where id=gl.FUNCTIONID) as \"function\","
-                + " vh.id AS \"vhid\", vh.voucherDate AS \"vDate\", "
-                + "to_char(vh.voucherDate, 'dd-Mon-yyyy') AS \"voucherdate\", "
-                + "vh.voucherNumber AS \"vouchernumber\", gl.glCode AS \"glcode\", "
-                + "coa.name||case  vh.STATUS when 1 then '(Reversed)' when 2 then '(Reversal)' else '' end AS \"name\",case when gl.debitAmount = 0 then (case (gl.creditamount) when 0 then gl.creditAmount||'.00cr' when floor(gl.creditamount)    then gl.creditAmount||'.00cr' else  gl.creditAmount||'cr'  end ) else (case (gl.debitamount) when 0 then gl.debitamount||'.00dr' when floor(gl.debitamount)    then gl.debitamount||'.00dr' else  gl.debitamount||'dr' 	 end ) end AS \"amount\", "
-                + "gl.description AS \"narration\", vh.name AS \"vhname\", "
-                + "gl.debitamount  AS \"debitamount\", gl.creditamount  AS \"creditamount\",f.name as \"fundName\",  vh.isconfirmed as \"isconfirmed\"  "
-                + "FROM generalLedger gl, voucherHeader vh, chartOfAccounts coa, generalLedger gl1, fund f "
-                + "WHERE coa.glCode = gl.glCode AND gl.voucherHeaderId = vh.id AND gl.voucherHeaderId = vh.id "
-                + " AND gl.voucherHeaderId = gl1.voucherHeaderId AND f.id=vh.fundId "
-                + effTime
-                + " AND gl1.glcode in (SELECT GLCODE FROM CHARTOFACCOUNTS WHERE PURPOSEID=4 or purposeid=5) "
-                + " AND vh.id in ("
-                + engineQry
-                + " )"
-                + " AND (gl.debitamount>0 OR gl.creditamount>0)  "
-                + " order by \"vDate\",\"vhid\",\"order\" desc ";
-    }
+	private Query getQuery(final Entry<String, Map<String, Object>> queryWithParams) {
+		StringBuilder query = new StringBuilder(
+				"SELECT distinct gl1.glcode as \"code\",vh.type as \"vhType\",vh.cgn as \"CGN\",").append(
+						"coa.purposeid as \"purposeid\",case  coa.purposeid when 4 then 1 when 5 then 1 else 0 end as \"order\",")
+						.append("(select ca.type from chartofaccounts ca where glcode=gl1.glcode) as \"glType\",")
+						.append(" (select name from fundsource where id=vh.FUNDSOURCEID) as \"fundsource\",")
+						.append(" (select name from function where id=gl.FUNCTIONID) as \"function\",")
+						.append(" vh.id AS \"vhid\", vh.voucherDate AS \"vDate\", ")
+						.append("to_char(vh.voucherDate, 'dd-Mon-yyyy') AS \"voucherdate\", ")
+						.append("vh.voucherNumber AS \"vouchernumber\", gl.glCode AS \"glcode\", ")
+						.append("coa.name||case  vh.STATUS when 1 then '(Reversed)' when 2 then '(Reversal)' else '' end AS \"name\",")
+						.append(" case when gl.debitAmount = 0 then (case (gl.creditamount) when 0 then gl.creditAmount||'.00cr'")
+						.append(" when floor(gl.creditamount)    then gl.creditAmount||'.00cr' else  gl.creditAmount||'cr'  end )")
+						.append(" else (case (gl.debitamount) when 0 then gl.debitamount||'.00dr' when floor(gl.debitamount) ")
+						.append("then gl.debitamount||'.00dr' else  gl.debitamount||'dr' 	 end ) end AS \"amount\", ")
+						.append("gl.description AS \"narration\", vh.name AS \"vhname\", ")
+						.append("gl.debitamount  AS \"debitamount\", gl.creditamount  AS \"creditamount\",f.name as \"fundName\",")
+						.append("  vh.isconfirmed as \"isconfirmed\"  ")
+						.append("FROM generalLedger gl, voucherHeader vh, chartOfAccounts coa, generalLedger gl1, fund f ")
+						.append("WHERE coa.glCode = gl.glCode AND gl.voucherHeaderId = vh.id AND gl.voucherHeaderId = vh.id ")
+						.append(" AND gl.voucherHeaderId = gl1.voucherHeaderId AND f.id=vh.fundId ");
+		if (!effTime.isEmpty()) {
+			query.append(effTime.entrySet().iterator().next().getKey());
+		}
+		query.append(" AND gl1.glcode in (SELECT GLCODE FROM CHARTOFACCOUNTS WHERE PURPOSEID=4 or purposeid=5) ")
+				.append(" AND vh.id in (").append(queryWithParams.getKey()).append(" )")
+				.append(" AND (gl.debitamount>0 OR gl.creditamount>0)  ")
+				.append(" order by \"vDate\",\"vhid\",\"order\" desc ");
+		Query sqlQuery = persistenceService.getSession().createSQLQuery(query.toString());
+		if (!effTime.isEmpty()) {
+			effTime.entrySet().iterator().next().getValue().entrySet()
+					.forEach(entry -> sqlQuery.setParameter(entry.getKey(), entry.getValue()));
+		}
+		queryWithParams.getValue().entrySet().forEach(rec -> sqlQuery.setParameter(rec.getKey(), rec.getValue()));
+		return sqlQuery;
+	}
 
     private OpBalance getOpeningBalance(final String glCode, final String fundId,
             final String fundSourceId, final String fyId, final String tillDate)
@@ -734,20 +742,21 @@ public class CashBook {
             fundCondition = "fundId = ? AND ";
         if (!fundSourceId.equalsIgnoreCase(""))
             fundSourceCondition = "fundSourceId = ? AND ";
-        final String queryYearOpBal = "SELECT case when sum(openingDebitBalance) = null then 0 else sum(openingDebitBalance) end AS \"openingDebitBalance\", "
-                + "case when sum(openingCreditBalance) = null then 0 else sum(openingCreditBalance) AS \"openingCreditBalance\" "
-                + "FROM transactionSummary WHERE "
-                + fundCondition
-                + fundSourceCondition
-                + " financialYearId=? "
-                + "AND glCodeId = (SELECT id FROM chartOfAccounts WHERE glCode in(?))";
+        final StringBuilder queryYearOpBal = new StringBuilder("SELECT case when sum(openingDebitBalance) = null then 0 else")
+        		.append(" sum(openingDebitBalance) end AS \"openingDebitBalance\", ")
+        		.append("case when sum(openingCreditBalance) = null then 0 else sum(openingCreditBalance) AS \"openingCreditBalance\" ")
+        		.append("FROM transactionSummary WHERE ")
+        		.append(fundCondition)
+        		.append(fundSourceCondition)
+        		.append(" financialYearId=? ")
+        		.append("AND glCodeId = (SELECT id FROM chartOfAccounts WHERE glCode in(?))");
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("***********: OPBAL for glcode -->" + glCode
                     + " is-->: " + queryYearOpBal);
 
         int j = 1;
         pstmt = persistenceService.getSession()
-                .createSQLQuery(queryYearOpBal);
+                .createSQLQuery(queryYearOpBal.toString());
         if (!fundId.equalsIgnoreCase(""))
             pstmt.setString(j++, fundId);
         if (!fundSourceId.equalsIgnoreCase(""))
@@ -769,18 +778,20 @@ public class CashBook {
                 fundCondition = "AND vh.fundId = ? ";
             if (!fundSourceId.equalsIgnoreCase(""))
                 fundSourceCondition = "AND vh.fundId = ? ";
-            String queryTillDateOpBal = "";
+            StringBuilder queryTillDateOpBal = new StringBuilder("");
             // if(showRev.equalsIgnoreCase("on")){
 
-            queryTillDateOpBal = "SELECT case when sum(gl.debitAmount) = null then 0 else sum(gl.debitAmount) end AS \"debitAmount\", "
-                    + "case when sum(gl.creditAmount)  = null then 0 else sum(gl.creditAmount) end AS \"creditAmount\" "
-                    + "FROM generalLedger gl, voucherHeader vh "
-                    + "WHERE vh.id = gl.voucherHeaderId "
-                    + "AND gl.glCode in(?) "
-                    + fundCondition
-                    + fundSourceCondition
-                    + effTime
-                    + "AND vh.voucherDate >= ? AND vh.voucherDate < ? AND vh.status<>4";
+			queryTillDateOpBal.append("SELECT case when sum(gl.debitAmount) = null then 0 else sum(gl.debitAmount) end")
+					.append(" AS \"debitAmount\", ")
+					.append("case when sum(gl.creditAmount)  = null then 0 else sum(gl.creditAmount) end AS \"creditAmount\" ")
+					.append("FROM generalLedger gl, voucherHeader vh ").append("WHERE vh.id = gl.voucherHeaderId ")
+					.append("AND gl.glCode in(?) ").append(fundCondition).append(fundSourceCondition);
+
+			if (!effTime.isEmpty()) {
+				queryTillDateOpBal.append(effTime.entrySet().iterator().next().getKey());
+			}
+
+			queryTillDateOpBal.append(" AND vh.voucherDate >= ? AND vh.voucherDate < ? AND vh.status<>4");
 
             if (LOGGER.isInfoEnabled())
                 LOGGER.info("***********: tilldate OPBAL for glcode -->"
@@ -788,7 +799,7 @@ public class CashBook {
 
             int i = 1;
             pstmt = persistenceService.getSession().createSQLQuery(
-                    queryTillDateOpBal);
+                    queryTillDateOpBal.toString());
             pstmt.setString(i++, glCode);
             if (!fundId.equalsIgnoreCase(""))
                 pstmt.setString(i++, fundId);
@@ -796,6 +807,10 @@ public class CashBook {
                 pstmt.setString(i++, fundSourceId);
             pstmt.setString(i++, startDate);
             pstmt.setString(i++, tillDate);
+            if (!effTime.isEmpty()) {
+    			effTime.entrySet().iterator().next().getValue().entrySet()
+    					.forEach(entry -> pstmt.setParameter(entry.getKey(), entry.getValue()));
+    		}
             resultset = null;
             resultset = pstmt.list();
             for (final Object[] element : resultset) {
@@ -830,8 +845,9 @@ public class CashBook {
         // if(LOGGER.isInfoEnabled()) LOGGER.info("coming");
         String minCode = "";
         try {
-            final String query = "select glcode from chartofaccounts where glcode like ?|| '%' and classification = 4 order by glcode asc";
-            pstmt = persistenceService.getSession().createSQLQuery(query);
+            final StringBuilder query = new StringBuilder("select glcode from chartofaccounts ")
+            		.append("where glcode like ?|| '%' and classification = 4 order by glcode asc");
+            pstmt = persistenceService.getSession().createSQLQuery(query.toString());
             pstmt.setString(0, minGlCode);
             final List<Object[]> rset = pstmt.list();
             for (final Object[] element : rset)
@@ -848,8 +864,9 @@ public class CashBook {
     public String getMaxCode(final String maxGlCode) throws TaskFailedException {
         String maxCode = "";
         try {
-            final String query = "  select glcode from chartofaccounts where glcode like ?|| '%' and classification = 4 order by glcode desc";
-            pstmt = persistenceService.getSession().createSQLQuery(query);
+            final StringBuilder query = new StringBuilder("  select glcode from chartofaccounts ")
+            		.append("where glcode like ?|| '%' and classification = 4 order by glcode desc");
+            pstmt = persistenceService.getSession().createSQLQuery(query.toString());
             pstmt.setString(0, maxGlCode);
             final List<Object[]> rset = pstmt.list();
             for (final Object[] element : rset)
@@ -920,16 +937,18 @@ public class CashBook {
 
         try {
 
-            final String query = "select glcode as \"glcode\" from chartofaccounts where id in (select cashinhand from codemapping where eg_boundaryid=?)";
+            final StringBuilder query = new StringBuilder("select glcode as \"glcode\" from chartofaccounts ")
+            		.append("where id in (select cashinhand from codemapping where eg_boundaryid=?)");
             if (LOGGER.isInfoEnabled())
                 LOGGER.info(query);
-            pstmt = persistenceService.getSession().createSQLQuery(query);
+            pstmt = persistenceService.getSession().createSQLQuery(query.toString());
             pstmt.setString(0, bId);
             rs = pstmt.list();
             for (final Object[] element : rs)
                 glcode[0] = element[0].toString();
-            final String str = "select glcode from chartofaccounts where id in (select chequeinHand from codemapping where eg_boundaryid=?)";
-            pstmt = persistenceService.getSession().createSQLQuery(str);
+            final StringBuilder str = new StringBuilder("select glcode from chartofaccounts ")
+            		.append("where id in (select chequeinHand from codemapping where eg_boundaryid=?)");
+            pstmt = persistenceService.getSession().createSQLQuery(str.toString());
             pstmt.setString(0, bId);
             rs = pstmt.list();
             for (final Object[] element : rs)
