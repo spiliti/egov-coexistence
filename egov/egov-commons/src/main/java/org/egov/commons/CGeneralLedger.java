@@ -62,7 +62,7 @@ import java.util.Set;
 public class CGeneralLedger implements Serializable {
 
     private Long id = null;
-    @SafeHtml
+    
     @NotNull
     private Integer voucherlineId;
     private Date effectiveDate;
