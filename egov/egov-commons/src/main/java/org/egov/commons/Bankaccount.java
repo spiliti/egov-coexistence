@@ -107,7 +107,7 @@ public class Bankaccount extends AbstractAuditable implements java.io.Serializab
     @NotNull
     @Length(max = 20)
     @SafeHtml
-    @OptionalPattern(regex = CommonsConstants.numericwithoutspecialchar, message = "Special Characters are not allowed in ESI No")
+    @OptionalPattern(regex = CommonsConstants.numericwithoutspecialchar, message = "Special Characters are not allowed in Accountnumber")
     private String accountnumber;
 
     @SafeHtml
