@@ -92,10 +92,11 @@ public class ScheduleMapping {
     private String isRemission = null;
     private static TaskFailedException taskExc;
    
- @Autowired
- @Qualifier("persistenceService")
- private PersistenceService persistenceService;
- @Autowired EGovernCommon eGovernCommon;
+	@Autowired
+	@Qualifier("persistenceService")
+	private PersistenceService persistenceService;
+	@Autowired
+	EGovernCommon eGovernCommon;
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale
             .getDefault());
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy",
@@ -114,7 +115,6 @@ public class ScheduleMapping {
 
         setId(String.valueOf(PrimaryKeyGenerator.getNextKey("schedulemapping")));
         try {
-            final SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
             createdDate = formatter.format(new Date());
             setCreatedDate(createdDate);
             lastModifiedDate = null;
@@ -122,24 +122,24 @@ public class ScheduleMapping {
             setCreatedDate(createdDate);
             setLastModifiedDate(lastModifiedDate);
 
-            // scheduleName=common.formatString(scheduleName);
-            final String insertQuery = "INSERT INTO schedulemapping (id, reportType,schedule, scheduleName, createdBy, createdDate, "
-                    + "lastModifiedBy,lastModifiedDate,repSubType,isRemission) "
-                    + "values(?,?,?,?,?,?,?,?,?,?)";
-            if (LOGGER.isInfoEnabled())
-                LOGGER.info(insertQuery);
-            pstmt = persistenceService.getSession().createSQLQuery(insertQuery);
-            pstmt.setString(0, id);
-            pstmt.setString(1, reportType);
-            pstmt.setString(2, schedule);
-            pstmt.setString(3, scheduleName);
-            pstmt.setString(4, createdBy);
-            pstmt.setString(5, createdDate);
-            pstmt.setString(6, lastModifiedBy);
-            pstmt.setString(7, lastModifiedDate);
-            pstmt.setString(8, repSubType);
-            pstmt.setString(9, isRemission);
-            pstmt.executeUpdate();
+			final StringBuilder insertQuery = new StringBuilder(
+					"INSERT INTO schedulemapping (id, reportType,schedule, scheduleName,")
+							.append(" createdBy, createdDate, lastModifiedBy,lastModifiedDate,repSubType,isRemission) ")
+							.append("values(?,?,?,?,?,?,?,?,?,?)");
+			if (LOGGER.isInfoEnabled())
+				LOGGER.info(insertQuery);
+			pstmt = persistenceService.getSession().createSQLQuery(insertQuery.toString());
+			pstmt.setString(0, id);
+			pstmt.setString(1, reportType);
+			pstmt.setString(2, schedule);
+			pstmt.setString(3, scheduleName);
+			pstmt.setString(4, createdBy);
+			pstmt.setString(5, createdDate);
+			pstmt.setString(6, lastModifiedBy);
+			pstmt.setString(7, lastModifiedDate);
+			pstmt.setString(8, repSubType);
+			pstmt.setString(9, isRemission);
+			pstmt.executeUpdate();
         } catch (final Exception e) {
             LOGGER.error("ERROR" + e.getMessage(), e);
             throw taskExc;

@@ -93,7 +93,6 @@
         <constructor-arg value="/index.jsp"/>
         <constructor-arg>
             <list>
-                <ref bean="applicationLogoutHandler"/>
                 <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
             </list>
         </constructor-arg>

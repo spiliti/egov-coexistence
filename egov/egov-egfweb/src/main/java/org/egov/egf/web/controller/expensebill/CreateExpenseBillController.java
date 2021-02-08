@@ -141,7 +141,7 @@ public class CreateExpenseBillController extends BaseBillController {
     	if(null!=cookies && cookies.length>0)
     	{
     	   for(Cookie ck:cookies) {
-    		   System.out.println("Name:"+ck.getName()+" value"+ck.getValue());
+    		   System.out.println("Name:"+ck.getName()+" value:"+ck.getValue());
     	   }
     	}
         setDropDownValues(model);
