@@ -83,10 +83,11 @@ public class DishonoredChequeReport
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
     private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss.SSS", Locale.getDefault());
    
- @Autowired
- @Qualifier("persistenceService")
- private PersistenceService persistenceService;
- @Autowired CommnFunctions commnFunctions;
+	@Autowired
+	@Qualifier("persistenceService")
+	private PersistenceService persistenceService;
+	@Autowired
+	CommnFunctions commnFunctions;
     private static final Logger LOGGER = Logger.getLogger(DishonoredChequeReport.class);
 
     public DishonoredChequeReport() {

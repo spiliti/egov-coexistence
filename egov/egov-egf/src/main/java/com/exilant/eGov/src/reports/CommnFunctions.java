@@ -102,19 +102,19 @@ public class CommnFunctions
     public void getFundList(final String fundId, final String startDate, final String endDate) throws Exception
     {
         String fundCondition = "";
-        // String fundCondition1="";
         if (!fundId.equalsIgnoreCase(""))
-            fundCondition = " AND Id=? ";
-        // fundCondition1="AND transactionsummary.fundId="+fundId+" ";
+            fundCondition = " AND Id = ? ";
         try
         {
-            final String query = " select id,name from fund where isactive=true and isnotleaf!=true " + fundCondition + " order by id";
-            if (LOGGER.isInfoEnabled())
-                LOGGER.info("getFundList: " + query);
-            pstmt = persistenceService.getSession().createSQLQuery(query);
-            if (!fundId.equalsIgnoreCase(""))
-                pstmt.setString(0, fundId);
-            resultset = pstmt.list();
+			final StringBuilder query = new StringBuilder(
+					" select id,name from fund where isactive=true and isnotleaf!=true ").append(fundCondition)
+							.append(" order by id");
+			if (LOGGER.isInfoEnabled())
+				LOGGER.info("getFundList: " + query);
+			pstmt = persistenceService.getSession().createSQLQuery(query.toString());
+			if (!fundId.equalsIgnoreCase(""))
+				pstmt.setString(0, fundId);
+			resultset = pstmt.list();
             int resSize = 0, i = 0;
             resSize = resultset.size();
             reqFundId = new String[resSize];
@@ -156,31 +156,31 @@ public class CommnFunctions
     {
         String fundCondition = "";
         if (!fundId.equalsIgnoreCase(""))
-            fundCondition = "AND f.Id=? ";
+            fundCondition = "AND f.Id = ? ";
         String glcode = "", fuId = "";
-        final String query = "SELECT substr(coa.glcode,0,"
-                + substringVal
-                + ") as \"glcode\",ts.fundid as \"fundid\" ,"
-                + " case when coa.type = ? then sum(ts.openingcreditbalance)-sum(ts.openingdebitbalance) else sum(ts.openingdebitbalance)-sum(ts.openingcreditbalance) end as \"amount\" "
-                + " FROM transactionsummary ts,  chartofaccounts coa,fund  f   WHERE (coa.TYPE = ? OR coa.TYPE = ?) and coa.id = ts.glcodeid "
-                + " AND financialyearid =(SELECT ID FROM financialyear WHERE startingdate <= ? AND endingdate >= ?)  "
-                + fundCondition + " and f.id=ts.fundid and f.isactive=true and f.isnotleaf!=true "
-                + " GROUP BY substr(coa.glcode,0," + substringVal + "), fundid ,coa.type ";
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("query " + query);
-        try
-        {
-            int j = 1;
-            getFundList(fundId, startDate, endDate);
-            pstmt = persistenceService.getSession().createSQLQuery(query);
-            pstmt.setString(j++, type2);
-            pstmt.setString(j++, type1);
-            pstmt.setString(j++, type2);
-            pstmt.setString(j++, startDate);
-            pstmt.setString(j++, endDate);
-            if (!fundId.equalsIgnoreCase(""))
-                pstmt.setString(j++, fundId);
-            resultset = pstmt.list();
+		final StringBuilder query = new StringBuilder("SELECT substr(coa.glcode,0,").append(substringVal)
+				.append(") as \"glcode\",ts.fundid as \"fundid\" ,")
+				.append(" case when coa.type = ? then sum(ts.openingcreditbalance)-sum(ts.openingdebitbalance)")
+				.append(" else sum(ts.openingdebitbalance)-sum(ts.openingcreditbalance) end as \"amount\" ")
+				.append(" FROM transactionsummary ts,  chartofaccounts coa,fund  f   WHERE (coa.TYPE = ? OR coa.TYPE = ?)")
+				.append(" and coa.id = ts.glcodeid ")
+				.append(" AND financialyearid =(SELECT ID FROM financialyear WHERE startingdate <= ? AND endingdate >= ?)  ")
+				.append(fundCondition).append(" and f.id=ts.fundid and f.isactive=true and f.isnotleaf!=true ")
+				.append(" GROUP BY substr(coa.glcode,0,").append(substringVal).append("), fundid ,coa.type ");
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("query " + query);
+		try {
+			int j = 1;
+			getFundList(fundId, startDate, endDate);
+			pstmt = persistenceService.getSession().createSQLQuery(query.toString());
+			pstmt.setString(j++, type2);
+			pstmt.setString(j++, type1);
+			pstmt.setString(j++, type2);
+			pstmt.setString(j++, startDate);
+			pstmt.setString(j++, endDate);
+			if (!fundId.equalsIgnoreCase(""))
+				pstmt.setString(j++, fundId);
+			resultset = pstmt.list();
             Double opeBal = null;
             HashMap openingBalsubList = null;
             for (final Object[] element : resultset) {
@@ -233,26 +233,27 @@ public class CommnFunctions
         if (fundid != null && !fundid.equals(""))
             fundCondition = " and vh.fundid= ?";
 
-        final String query1 = "SELECT SUBSTR(coa.GLCODE,1,2)as \"glCode\",vh.fundid as \"fundId\",case when sum(gl.debitamount)-sum(gl.creditAmount) = null then 0 else sum(gl.debitamount)-sum(gl.creditAmount)"
-                + "as \"amount\" FROM chartofaccounts  coa,generalledger gl,"
-                + " voucherHeader vh WHERE coa.TYPE = ? and vh.ID =  gl.VOUCHERHEADERID AND  gl.glcode=coa.glcode "
-                + " AND vh.VOUCHERDATE >= ? AND vh.VOUCHERDATE <= ?" + fundCondition + "  " + effFilter;
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug("getI: " + query1);
-        try
-        {
-            int j = 1;
-            pstmt = persistenceService.getSession().createSQLQuery(query1);
-            pstmt.setString(j++, type1);
-            pstmt.setString(j++, startDate);
-            pstmt.setString(j++, endDate);
-            if (fundid != null && !fundid.equals(""))
-                pstmt.setString(j++, fundid);
-            resultset = pstmt.list();
+		final StringBuilder query1 = new StringBuilder(
+				"SELECT SUBSTR(coa.GLCODE,1,2)as \"glCode\",vh.fundid as \"fundId\",").append(
+						"case when sum(gl.debitamount)-sum(gl.creditAmount) = null then 0 else sum(gl.debitamount)-sum(gl.creditAmount)")
+						.append("as \"amount\" FROM chartofaccounts  coa,generalledger gl,")
+						.append(" voucherHeader vh WHERE coa.TYPE = ? and vh.ID =  gl.VOUCHERHEADERID AND  gl.glcode=coa.glcode ")
+						.append(" AND vh.VOUCHERDATE >= ? AND vh.VOUCHERDATE <= ?").append(fundCondition).append("  ")
+						.append(effFilter);
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("getI: " + query1);
+		try {
+			int j = 1;
+			pstmt = persistenceService.getSession().createSQLQuery(query1.toString());
+			pstmt.setString(j++, type1);
+			pstmt.setString(j++, startDate);
+			pstmt.setString(j++, endDate);
+			if (fundid != null && !fundid.equals(""))
+				pstmt.setString(j++, fundid);
+			resultset = pstmt.list();
             final Object[] firstElement = resultset != null && resultset.size() > 0 ? resultset.get(1) : null;
             for (final Object[] element : resultset) {
                 final String accntCode = element[0].toString();
-                // String accntCode2=accntCode;
                 final String fund = element[1].toString();
                 final String amt = element[2].toString();
                 final HashMap txnBalance = new HashMap();
@@ -306,27 +307,28 @@ public class CommnFunctions
         String type = "(coa.TYPE = ? OR coa.TYPE = ?) and";
         if (type1 == null || type1.trim().equals(""))
             type = "";
-        final String query = "SELECT substr(coa.glcode,0," + substringVal + ") as \"glcode\",ts.fundid as \"fundid\" ,"
-                + " sum(ts.openingcreditbalance) as \"amount\" "
-                + " FROM transactionsummary ts,  chartofaccounts coa,fund  f   WHERE " + type + " coa.id = ts.glcodeid "
-                + " AND financialyearid =(SELECT ID FROM financialyear WHERE startingdate <= ? AND endingdate >= ?)  "
-                + fundCondition + " and f.id=ts.fundid and f.isactive=true and f.isnotleaf!=true "
-                + " GROUP BY substr(coa.glcode,0," + substringVal + "), fundid ,coa.type";
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("query " + query);
-        try
-        {
-            int j = 1;
-            pstmt = persistenceService.getSession().createSQLQuery(query);
-            if (type1 == null || type1.trim().equals("")) {
-                pstmt.setString(j++, type1);
-                pstmt.setString(j++, type2);
-            }
-            pstmt.setString(j++, startDate);
-            pstmt.setString(j++, endDate);
-            if (!fundId.equalsIgnoreCase(""))
-                pstmt.setString(j++, fundId);
-            resultset = pstmt.list();
+		final StringBuilder query = new StringBuilder("SELECT substr(coa.glcode,0,").append(substringVal)
+				.append(") as \"glcode\",ts.fundid as \"fundid\" ,")
+				.append(" sum(ts.openingcreditbalance) as \"amount\" ")
+				.append(" FROM transactionsummary ts,  chartofaccounts coa,fund  f   WHERE ").append(type)
+				.append(" coa.id = ts.glcodeid ")
+				.append(" AND financialyearid =(SELECT ID FROM financialyear WHERE startingdate <= ? AND endingdate >= ?)  ")
+				.append(fundCondition).append(" and f.id=ts.fundid and f.isactive=true and f.isnotleaf!=true ")
+				.append(" GROUP BY substr(coa.glcode,0,").append(substringVal).append("), fundid ,coa.type");
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("query " + query);
+		try {
+			int j = 1;
+			pstmt = persistenceService.getSession().createSQLQuery(query.toString());
+			if (type1 == null || type1.trim().equals("")) {
+				pstmt.setString(j++, type1);
+				pstmt.setString(j++, type2);
+			}
+			pstmt.setString(j++, startDate);
+			pstmt.setString(j++, endDate);
+			if (!fundId.equalsIgnoreCase(""))
+				pstmt.setString(j++, fundId);
+			resultset = pstmt.list();
             Double opeBal = null;
             HashMap creditBalsubList = null;
             for (final Object[] element : resultset) {
@@ -376,27 +378,26 @@ public class CommnFunctions
         if (!fundId.equalsIgnoreCase(""))
             fundCondition = "AND f.Id=? ";
         String glcode = "", fuId = "";
-        final String query = "SELECT substr(coa.glcode,0,"
-                + substringVal
-                + ") as \"glcode\",ts.fundid as \"fundid\" ,"
-                + " sum(ts.openingdebitbalance) as \"amount\" "
-                + " FROM transactionsummary ts,  chartofaccounts coa,fund  f   WHERE (coa.TYPE = ? OR coa.TYPE = ?) and coa.id = ts.glcodeid "
-                + " AND financialyearid =(SELECT ID FROM financialyear WHERE startingdate <= ? AND endingdate >= ?)  "
-                + fundCondition + " and f.id=ts.fundid and f.isactive=true and f.isnotleaf!=true "
-                + " GROUP BY substr(coa.glcode,0," + substringVal + "), fundid ,coa.type";
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("query " + query);
-        try
-        {
-            int j = 1;
-            pstmt = persistenceService.getSession().createSQLQuery(query);
-            pstmt.setString(j++, type1);
-            pstmt.setString(j++, type2);
-            pstmt.setString(j++, startDate);
-            pstmt.setString(j++, endDate);
-            if (!fundId.equalsIgnoreCase(""))
-                pstmt.setString(j++, fundId);
-            resultset = pstmt.list();
+		final StringBuilder query = new StringBuilder("SELECT substr(coa.glcode,0,").append(substringVal)
+				.append(") as \"glcode\",ts.fundid as \"fundid\" ,")
+				.append(" sum(ts.openingdebitbalance) as \"amount\" ")
+				.append(" FROM transactionsummary ts,  chartofaccounts coa,fund  f ")
+				.append(" WHERE (coa.TYPE = ? OR coa.TYPE = ?) and coa.id = ts.glcodeid ")
+				.append(" AND financialyearid =(SELECT ID FROM financialyear WHERE startingdate <= ? AND endingdate >= ?)  ")
+				.append(fundCondition).append(" and f.id=ts.fundid and f.isactive=true and f.isnotleaf!=true ")
+				.append(" GROUP BY substr(coa.glcode,0,").append(substringVal).append("), fundid ,coa.type");
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("query " + query);
+		try {
+			int j = 1;
+			pstmt = persistenceService.getSession().createSQLQuery(query.toString());
+			pstmt.setString(j++, type1);
+			pstmt.setString(j++, type2);
+			pstmt.setString(j++, startDate);
+			pstmt.setString(j++, endDate);
+			if (!fundId.equalsIgnoreCase(""))
+				pstmt.setString(j++, fundId);
+			resultset = pstmt.list();
             Double opeBal = null;
             HashMap debitBalsubList = null;
             for (final Object[] element : resultset) {

@@ -48,11 +48,9 @@
 
 package com.exilant.eGov.src.domain;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.egov.commons.Bankaccount;
-import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.microservice.models.Instrument;
 import org.egov.infra.microservice.models.InstrumentSearchContract;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
@@ -94,26 +92,36 @@ public class BankReconciliationSummary {
 	
 	public String getUnReconciledDrCr(Integer bankAccId,Date fromDate,Date toDate) throws Exception
 	{
-		String totalQuery="SELECT (sum(case when ih.ispaycheque='1' then ih.instrumentAmount else 0 end))  AS \"brs_creditTotal\", "
-			+" (sum( case when ih.ispaycheque= '0' then ih.instrumentAmount else 0 end) ) AS \"brs_debitTotal\" "
-			+" FROM egf_instrumentheader ih 	WHERE   ih.bankAccountId =:bankAccountId "
-			+" AND IH.INSTRUMENTDATE >= :fromDate" 
-			+" AND IH.INSTRUMENTDATE <= :toDate"
-			+" AND  ( (ih.ispaycheque='0' and  ih.id_status=(select id from egw_status where moduletype='Instrument'  and description='Deposited'))or (ih.ispaycheque='1' and  ih.id_status=(select id from egw_status where moduletype='Instrument'  and description='New'))) "
-			+" and ih.instrumentnumber is not null";
+		final StringBuilder totalQuery= new StringBuilder(
+				"SELECT (sum(case when ih.ispaycheque='1' then ih.instrumentAmount else 0 end))  AS \"brs_creditTotal\", ")
+				.append(" (sum( case when ih.ispaycheque= '0' then ih.instrumentAmount else 0 end) ) AS \"brs_debitTotal\" ")
+			.append(" FROM egf_instrumentheader ih 	WHERE ih.bankAccountId =:bankAccountId ")
+			.append(" AND IH.INSTRUMENTDATE >= :fromDate")
+			.append(" AND IH.INSTRUMENTDATE <= :toDate")
+			.append(" AND  ( (ih.ispaycheque='0' and  ih.id_status=(select id from egw_status where moduletype='Instrument'")
+			.append("  and description='Deposited'))or (ih.ispaycheque='1' and  ih.id_status=(select id from egw_status")
+			.append(" where moduletype='Instrument'  and description='New'))) ")
+			.append(" and ih.instrumentnumber is not null");
 	//see u might need to exclude brs entries here 
 		
-		String otherTotalQuery=" SELECT (sum(case when ih.ispaycheque='1' then ih.instrumentAmount else 0 end ))  AS \"brs_creditTotalOthers\", "
-			+" (sum(case when ih.ispaycheque='0' then ih.instrumentAmount else 0 end ) ) AS \"brs_debitTotalOthers\" "
-			+" FROM  egf_instrumentheader ih	WHERE   ih.bankAccountId =:bankAccountId"
-			+" AND IH.transactiondate >= :fromDate"
-			+" AND IH.transactiondate <= :toDate  "
-			+" AND ( (ih.ispaycheque='0' and ih.id_status=(select id from egw_status where moduletype='Instrument'  and description='Deposited'))or (ih.ispaycheque='1' and  ih.id_status=(select id from egw_status where moduletype='Instrument'  and description='New'))) "
-			+" AND ih.transactionnumber is not null";
+		final StringBuilder otherTotalQuery = new StringBuilder(
+				" SELECT (sum(case when ih.ispaycheque='1' then ih.instrumentAmount else 0 end ))  AS \"brs_creditTotalOthers\", ")
+			.append(" (sum(case when ih.ispaycheque='0' then ih.instrumentAmount else 0 end ) ) AS \"brs_debitTotalOthers\" ")
+			.append(" FROM  egf_instrumentheader ih	WHERE   ih.bankAccountId =:bankAccountId")
+			.append(" AND IH.transactiondate >= :fromDate")
+			.append(" AND IH.transactiondate <= :toDate  ")
+			.append(" AND ( (ih.ispaycheque='0' and ih.id_status=(select id from egw_status where moduletype='Instrument'")
+			.append(" and description='Deposited'))or (ih.ispaycheque='1' and  ih.id_status=(select id from egw_status")
+			.append(" where moduletype='Instrument'  and description='New'))) ")
+			.append(" AND ih.transactionnumber is not null");
 
-		String brsEntryQuery="select (sum(case when be.type='Receipt' then (case when be.voucherheaderid is null then be.txnamount else 0 end) else 0 end))AS \"brs_creditTotalBrsEntry\","
-				+"(sum(case when be.type='Payment' then (case when be.voucherheaderid is null then be.txnamount else 0 end) else 0 end))AS \"brs_debitTotalBrsEntry\""
-				+"FROM  bankentries be WHERE   be.bankAccountId = :bankAccountId and be.voucherheaderid is null AND be.txndate >=:fromDate   AND be.txndate <= :toDate";
+		final StringBuilder brsEntryQuery = new StringBuilder("select (sum(case when be.type='Receipt'")
+				.append(" then (case when be.voucherheaderid is null then be.txnamount else 0 end) else 0 end))")
+				.append(" AS \"brs_creditTotalBrsEntry\",")
+				.append("(sum(case when be.type='Payment' then (case when be.voucherheaderid is null then be.txnamount else 0 end)")
+				.append(" else 0 end))AS \"brs_debitTotalBrsEntry\"")
+				.append("FROM  bankentries be WHERE   be.bankAccountId = :bankAccountId and be.voucherheaderid is null")
+				.append(" AND be.txndate >=:fromDate   AND be.txndate <= :toDate");
 
 		if(LOGGER.isInfoEnabled())     LOGGER.info("  query  for  total : "+totalQuery);
 		if(LOGGER.isInfoEnabled())     LOGGER.info("  query  for other than cheque/DD: "+otherTotalQuery);
@@ -129,7 +137,7 @@ public class BankReconciliationSummary {
 		
 		try
 		{
-			SQLQuery totalSQLQuery =  persistenceService.getSession().createSQLQuery(totalQuery);
+			SQLQuery totalSQLQuery =  persistenceService.getSession().createSQLQuery(totalQuery.toString());
 			totalSQLQuery.setInteger("bankAccountId",bankAccId);
 			totalSQLQuery.setDate("fromDate",fromDate);
 			totalSQLQuery.setDate("toDate",toDate);
@@ -143,7 +151,7 @@ public class BankReconciliationSummary {
 				debitTotal=my[1]!=null?my[1].toString():null;
 			}
 
-			totalSQLQuery = persistenceService.getSession().createSQLQuery(otherTotalQuery);
+			totalSQLQuery = persistenceService.getSession().createSQLQuery(otherTotalQuery.toString());
 			totalSQLQuery.setInteger("bankAccountId",bankAccId);
 			totalSQLQuery.setDate("fromDate",fromDate);
 			totalSQLQuery.setDate("toDate",toDate);
@@ -156,7 +164,7 @@ public class BankReconciliationSummary {
 				debitOtherTotal=my[1]!=null?my[1].toString():null;
 			}
 
-			totalSQLQuery = persistenceService.getSession().createSQLQuery(brsEntryQuery);
+			totalSQLQuery = persistenceService.getSession().createSQLQuery(brsEntryQuery.toString());
 			totalSQLQuery.setInteger("bankAccountId",bankAccId);
 			totalSQLQuery.setDate("fromDate",fromDate);
 			totalSQLQuery.setDate("toDate",toDate);
@@ -214,47 +222,52 @@ public class BankReconciliationSummary {
         }
 	
 	private String getBankAccountNumberById(Integer bankAccId) {
-	    StringBuilder query = new StringBuilder("from Bankaccount ba where ba.id=:bankAccountId and isactive=true");
+	    final StringBuilder query = new StringBuilder("from Bankaccount ba where ba.id=:bankAccountId and isactive=true");
 	    Query createSQLQuery = persistenceService.getSession().createQuery(query.toString());
 	    List<Bankaccount> bankAccount = createSQLQuery.setLong("bankAccountId", bankAccId).list();
 	    return !bankAccount.isEmpty() && bankAccount.get(0) != null ? bankAccount.get(0).getAccountnumber() : null;
 	}
 	
 	public List<InstrumentHeader> getIssuedInstrumentsNotPresentInBank(String type, Date fromDate, Date toDate, Long bankAccountId){
-	    String query = "SELECT *"
-	            +" FROM egf_instrumentheader ih         WHERE   ih.bankAccountId =:bankAccountId"
-	            +" AND  ((ih.ispaycheque='1' and  ih.id_status=(select id from egw_status where moduletype='Instrument'  and description='New')))";
-	    if(type.equalsIgnoreCase("Cheque/DD")){
-	        query += " and ih.INSTRUMENTDATE >= :fromDate  and ih.INSTRUMENTDATE <= :toDate and ih.instrumentnumber is not null";
-	    }else if(type.equalsIgnoreCase("Other")){
-	        query += " and ih.transactiondate >= :fromDate  and ih.transactiondate <= :toDate   and ih.transactionnumber is not null";
-	    }
-	    try {
-	        SQLQuery sqlQuery = persistenceService.getSession().createSQLQuery(query);
-	        sqlQuery.setLong("bankAccountId",bankAccountId);
-	        sqlQuery.setDate("fromDate",fromDate);
-	        sqlQuery.setDate("toDate",toDate);
-	        sqlQuery.addEntity(InstrumentHeader.class);
-	        return sqlQuery.list();
-            } catch (Exception e) {
-                LOGGER.error("ERROR occurred while fetching the details of getIssuedInstrumentsNotPresentInBank : ", e);
-            }
+		final StringBuilder query = new StringBuilder("SELECT *")
+				.append(" FROM egf_instrumentheader ih WHERE   ih.bankAccountId =:bankAccountId")
+				.append(" AND  ((ih.ispaycheque='1' and  ih.id_status=(select id from egw_status where moduletype='Instrument' ")
+				.append(" and description='New')))");
+		if (type.equalsIgnoreCase("Cheque/DD")) {
+			query.append(
+					" and ih.INSTRUMENTDATE >= :fromDate  and ih.INSTRUMENTDATE <= :toDate and ih.instrumentnumber is not null");
+		} else if (type.equalsIgnoreCase("Other")) {
+			query.append(
+					" and ih.transactiondate >= :fromDate  and ih.transactiondate <= :toDate   and ih.transactionnumber is not null");
+		}
+		try {
+			SQLQuery sqlQuery = persistenceService.getSession().createSQLQuery(query.toString());
+			sqlQuery.setLong("bankAccountId", bankAccountId);
+			sqlQuery.setDate("fromDate", fromDate);
+			sqlQuery.setDate("toDate", toDate);
+			sqlQuery.addEntity(InstrumentHeader.class);
+			return sqlQuery.list();
+		} catch (Exception e) {
+			LOGGER.error("ERROR occurred while fetching the details of getIssuedInstrumentsNotPresentInBank : ", e);
+		}
 	    return Collections.EMPTY_LIST;
 	}
 	
 	public List<BrsEntries> getBrsEntriesList(String type, Date fromDate, Date toDate, Long bankAccountId){
-	    String query = "select * FROM  bankentries be WHERE   be.bankAccountId = :bankAccountId and be.voucherheaderid is null AND be.txndate >=:fromDate   AND be.txndate <= :toDate and be.type=:type";
-	    try {
-	        SQLQuery sqlQuery = persistenceService.getSession().createSQLQuery(query);
-	        sqlQuery.setLong("bankAccountId",bankAccountId);
-	        sqlQuery.setDate("fromDate",fromDate);
-	        sqlQuery.setDate("toDate",toDate);
-	        sqlQuery.setString("type", type);
-	        sqlQuery.addEntity(BrsEntries.class);
-	        return sqlQuery.list();
-            } catch (Exception e) {
-                LOGGER.error("ERROR occurred while fetching the details of getBrsEntriesList : ",e);
-            }
+		final StringBuilder query = new StringBuilder(
+				"select * FROM  bankentries be WHERE   be.bankAccountId = :bankAccountId").append(
+						" and be.voucherheaderid is null AND be.txndate >=:fromDate   AND be.txndate <= :toDate and be.type=:type");
+		try {
+			SQLQuery sqlQuery = persistenceService.getSession().createSQLQuery(query.toString());
+			sqlQuery.setLong("bankAccountId", bankAccountId);
+			sqlQuery.setDate("fromDate", fromDate);
+			sqlQuery.setDate("toDate", toDate);
+			sqlQuery.setString("type", type);
+			sqlQuery.addEntity(BrsEntries.class);
+			return sqlQuery.list();
+		} catch (Exception e) {
+			LOGGER.error("ERROR occurred while fetching the details of getBrsEntriesList : ", e);
+		}
 	    return Collections.EMPTY_LIST;
 	}
 }
