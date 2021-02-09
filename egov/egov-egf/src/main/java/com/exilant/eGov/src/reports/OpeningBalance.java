@@ -114,34 +114,39 @@ public class OpeningBalance
     }
 
     private void getReport() throws SQLException {
-        String query = " ";
+        StringBuilder query = new StringBuilder();
         String fundCondition = "";
         String deptCondition = "";
         double totalDr = 0.0, totalCr = 0.0;
         new DecimalFormat();
         new DecimalFormat("###############.00");
-        if (!fundId.equalsIgnoreCase(""))
-            fundCondition = " and b.id=? ";
-        if (!deptCode.equalsIgnoreCase(""))
-            deptCondition = " and a.departmentcode=? ";
-        query = "SELECT b.name AS \"fund\",c.glcode AS \"accountcode\",c.name AS \"accountname\",'' as \"narration\",SUM(a.openingdebitbalance) AS \"debit\","
-                + " SUM(a.openingcreditbalance)AS \"credit\",a.departmentcode AS \"deptcode\",fn.code AS \"functioncode\"  FROM TRANSACTIONSUMMARY a,FUND  b,CHARTOFACCOUNTS c,function fn "
-                + " WHERE c.id in (select glcodeid from chartofaccountdetail ) and fn.id = a.functionid and  a.financialyearid=? "
-                + fundCondition
-                + deptCondition
-                + " AND a.fundid=b.id AND a.glcodeid=c.id AND (a.openingdebitbalance>0 OR a.openingcreditbalance>0) GROUP BY b.name, c.glcode,c.name,a.departmentcode,fn.code union";
-        query = query + " SELECT b.name AS \"fund\",c.glcode AS \"accountcode\",c.name AS \"accountname\",a.narration as \"narration\",SUM(a.openingdebitbalance) AS \"debit\","
-                + " SUM(a.openingcreditbalance)AS \"credit\",a.departmentcode AS \"deptcode\",fn.code AS \"functioncode\"  FROM TRANSACTIONSUMMARY a,FUND  b,CHARTOFACCOUNTS c,function fn "
-                + " WHERE c.id not in (select glcodeid from chartofaccountdetail  ) and fn.id = a.functionid and  a.financialyearid=? "
-                + fundCondition
-                + deptCondition
-                + " AND a.fundid=b.id AND a.glcodeid=c.id AND (a.openingdebitbalance>0 OR a.openingcreditbalance>0) GROUP BY b.name, c.glcode,c.name,a.departmentcode,fn.code, a.narration ";
+		if (!fundId.equalsIgnoreCase(""))
+			fundCondition = " and b.id=? ";
+		if (!deptCode.equalsIgnoreCase(""))
+			deptCondition = " and a.departmentcode=? ";
+		query.append(
+				"SELECT b.name AS \"fund\",c.glcode AS \"accountcode\",c.name AS \"accountname\",'' as \"narration\",")
+				.append("SUM(a.openingdebitbalance) AS \"debit\",")
+				.append(" SUM(a.openingcreditbalance)AS \"credit\",a.departmentcode AS \"deptcode\",fn.code AS \"functioncode\" ")
+				.append(" FROM TRANSACTIONSUMMARY a,FUND  b,CHARTOFACCOUNTS c,function fn ")
+				.append(" WHERE c.id in (select glcodeid from chartofaccountdetail ) and fn.id = a.functionid and  a.financialyearid=? ")
+				.append(fundCondition).append(deptCondition)
+				.append(" AND a.fundid=b.id AND a.glcodeid=c.id AND (a.openingdebitbalance>0 OR a.openingcreditbalance>0)")
+				.append(" GROUP BY b.name, c.glcode,c.name,a.departmentcode,fn.code union")
+				.append(" SELECT b.name AS \"fund\",c.glcode AS \"accountcode\",c.name AS \"accountname\",a.narration as \"narration\",")
+				.append("SUM(a.openingdebitbalance) AS \"debit\",")
+				.append(" SUM(a.openingcreditbalance)AS \"credit\",a.departmentcode AS \"deptcode\",fn.code AS \"functioncode\" ")
+				.append(" FROM TRANSACTIONSUMMARY a,FUND  b,CHARTOFACCOUNTS c,function fn ")
+				.append(" WHERE c.id not in (select glcodeid from chartofaccountdetail  ) and fn.id = a.functionid and  a.financialyearid=? ")
+				.append(fundCondition).append(deptCondition)
+				.append(" AND a.fundid=b.id AND a.glcodeid=c.id AND (a.openingdebitbalance>0 OR a.openingcreditbalance>0)")
+				.append(" GROUP BY b.name, c.glcode,c.name,a.departmentcode,fn.code, a.narration ");
        if (LOGGER.isDebugEnabled())
             LOGGER.debug("Opening balance Query ...." + query);
 
         try {
             OpeningBalanceBean ob = null;
-            pstmt = persistenceService.getSession().createSQLQuery(query);
+            pstmt = persistenceService.getSession().createSQLQuery(query.toString());
             int i = 0;
             pstmt.setLong(i++, Long.valueOf(finYear));
             if (!fundId.equalsIgnoreCase(""))

@@ -88,10 +88,11 @@ public class CommonMethodsImpl implements CommonMethodsI {
 	public String getCashInHand(final int BoundaryId, final Connection connection) throws Exception {
 		String cashinHandCode = "";
 		try {
-			final String query = " SELECT a.glcode FROM CHARTOFACCOUNTS a,EG_BOUNDARY b,eg_boundary_type c "
-					+
-					" WHERE id=(SELECT cashinhand FROM CODEMAPPING WHERE EG_BOUNDARYID= ? )  and b.ID_BNDRY_TYPE=c.ID_BNDRY_TYPE and b.ID_BNDRY= ?";
-			Query pst = persistenceService.getSession().createSQLQuery(query);
+			final StringBuilder query = new StringBuilder(
+					" SELECT a.glcode FROM CHARTOFACCOUNTS a,EG_BOUNDARY b,eg_boundary_type c ")
+							.append(" WHERE id=(SELECT cashinhand FROM CODEMAPPING WHERE EG_BOUNDARYID= ? ) ")
+							.append(" and b.ID_BNDRY_TYPE=c.ID_BNDRY_TYPE and b.ID_BNDRY= ?");
+			Query pst = persistenceService.getSession().createSQLQuery(query.toString());
 			pst.setInteger(0, BoundaryId);
 			pst.setInteger(1, BoundaryId);
 			List<Object[]> rset = pst.list();
@@ -115,10 +116,11 @@ public class CommonMethodsImpl implements CommonMethodsI {
 	public String getChequeInHand(final int BoundaryId, final Connection connection) throws Exception {
 		String chequeinHandCode = "";
 		try {
-			final String query = " SELECT a.glcode FROM CHARTOFACCOUNTS a,EG_BOUNDARY b,eg_boundary_type c "
-					+
-					" WHERE id=(SELECT chequeinhand FROM CODEMAPPING WHERE EG_BOUNDARYID= ? )  and b.ID_BNDRY_TYPE=c.ID_BNDRY_TYPE and b.ID_BNDRY= ?";
-			Query pst = persistenceService.getSession().createSQLQuery(query);
+			final StringBuilder query = new StringBuilder(
+					" SELECT a.glcode FROM CHARTOFACCOUNTS a,EG_BOUNDARY b,eg_boundary_type c ")
+							.append(" WHERE id=(SELECT chequeinhand FROM CODEMAPPING WHERE EG_BOUNDARYID= ? ) ")
+							.append(" and b.ID_BNDRY_TYPE=c.ID_BNDRY_TYPE and b.ID_BNDRY= ?");
+			Query pst = persistenceService.getSession().createSQLQuery(query.toString());
 			pst.setInteger(0, BoundaryId);
 			pst.setInteger(1, BoundaryId);
 			List<Object[]> rset = pst.list();
@@ -157,8 +159,9 @@ public class CommonMethodsImpl implements CommonMethodsI {
 					fId = element[0].toString();
 				if (rset == null || rset.size() == 0)
 				{
-					final String query2 = "select a.glcode,a.name from chartofaccounts a,egf_tax_account_mapping b where b.glcodeid=a.id and upper(b.financialyear)=upper('old')";
-					pst = persistenceService.getSession().createSQLQuery(query2);
+					final StringBuilder query2 = new StringBuilder("select a.glcode,a.name from chartofaccounts a,")
+							.append("egf_tax_account_mapping b where b.glcodeid=a.id and upper(b.financialyear)=upper('old')");
+					pst = persistenceService.getSession().createSQLQuery(query2.toString());
 					rset = pst.list();
 					for (final Object[] element : rset) {
 						ptCodeAndName = element[0].toString();
@@ -169,8 +172,11 @@ public class CommonMethodsImpl implements CommonMethodsI {
 				}
 				if (!fId.equalsIgnoreCase(""))
 				{
-					final String query3 = "select a.isold from egf_tax_account_mapping a,egf_tax_code b,financialyear c where a.taxcodeid=b.id and b.code='PT' and a.financialyear=c.financialyear and c.financialyear= ?";
-					pst = persistenceService.getSession().createSQLQuery(query3);
+					final StringBuilder query3 = new StringBuilder(
+							"select a.isold from egf_tax_account_mapping a,egf_tax_code b,").append(
+									"financialyear c where a.taxcodeid=b.id and b.code='PT' and a.financialyear=c.financialyear")
+									.append(" and c.financialyear= ?");
+					pst = persistenceService.getSession().createSQLQuery(query3.toString());
 					pst.setString(0, fId);
 					rset = pst.list();
 					for (final Object[] element : rset) {
@@ -182,8 +188,10 @@ public class CommonMethodsImpl implements CommonMethodsI {
 					{
 						if (LOGGER.isInfoEnabled())
 							LOGGER.info("   inside 4    ");
-						final String query4 = "select a.glcode,a.name from chartofaccounts a,egf_tax_account_mapping b where b.glcodeid=a.id and upper(b.financialyear)=upper('old')";
-						pst = persistenceService.getSession().createSQLQuery(query4);
+						final StringBuilder query4 = new StringBuilder("select a.glcode,a.name")
+								.append(" from chartofaccounts a,egf_tax_account_mapping b")
+								.append(" where b.glcodeid=a.id and upper(b.financialyear)=upper('old')");
+						pst = persistenceService.getSession().createSQLQuery(query4.toString());
 						rset = pst.list();
 						for (final Object[] element : rset) {
 							ptCodeAndName = element[0].toString();
@@ -196,8 +204,11 @@ public class CommonMethodsImpl implements CommonMethodsI {
 					{
 						if (LOGGER.isInfoEnabled())
 							LOGGER.info("   inside 5   ");
-						final String query5 = "select a.glcode,a.name from chartofaccounts a,egf_tax_account_mapping b,egf_tax_code c,financialyear d where b.taxcodeid=c.id and c.code='PT' and b.glcodeid=a.id and b.financialyear=d.financialyear and d.financialyear= ?";
-						pst = persistenceService.getSession().createSQLQuery(query5);
+						final StringBuilder query5 = new StringBuilder("select a.glcode,a.name from chartofaccounts a,")
+								.append("egf_tax_account_mapping b,egf_tax_code c,financialyear d where b.taxcodeid=c.id")
+								.append(" and c.code='PT' and b.glcodeid=a.id and b.financialyear=d.financialyear")
+								.append(" and d.financialyear= ?");
+						pst = persistenceService.getSession().createSQLQuery(query5.toString());
 						pst.setString(0, fId);
 						rset = pst.list();
 						for (final Object[] element : rset) {
@@ -215,8 +226,9 @@ public class CommonMethodsImpl implements CommonMethodsI {
 			else
 			{
 				// if foryear is not given, then use Sespense code
-				final String query = "select a.glcode, a.name from chartofaccounts a,egf_accountcode_purpose b where a.purposeid=b.id and upper(b.name)=upper('SuspenseCode')";
-				Query pst = persistenceService.getSession().createSQLQuery(query);
+				final StringBuilder query = new StringBuilder("select a.glcode, a.name from chartofaccounts a,").append(
+						"egf_accountcode_purpose b where a.purposeid=b.id and upper(b.name)=upper('SuspenseCode')");
+				Query pst = persistenceService.getSession().createSQLQuery(query.toString());
 				List<Object[]> rset = pst.list();
 				for (final Object[] element : rset) {
 					ptCodeAndName = element[0].toString();
@@ -302,8 +314,9 @@ public class CommonMethodsImpl implements CommonMethodsI {
 	{
 		String bankAndBranchId = "null";
 		try {
-			final String sql = "select b.id,c.id from bankaccount a,bankbranch b,bank c where a.branchid=b.id and b.bankid=c.id and a.id= ?";
-			Query pst = persistenceService.getSession().createSQLQuery(sql);
+			final StringBuilder sql = new StringBuilder("select b.id,c.id from bankaccount a,bankbranch b,bank c")
+					.append(" where a.branchid=b.id and b.bankid=c.id and a.id= ?");
+			Query pst = persistenceService.getSession().createSQLQuery(sql.toString());
 			pst.setInteger(0, bankAccountId);
 			List<Object[]> rset = pst.list();
 			for (final Object[] element : rset) {
@@ -330,13 +343,14 @@ public class CommonMethodsImpl implements CommonMethodsI {
 		double opeAvailable = 0, totalAvailable = 0;
 		try {
 
-			final String str = "SELECT case when sum(openingDebitBalance) = null then 0 ELSE sum(openingDebitBalance) end - case when sum(openingCreditBalance) = null then 0 else sum(openingCreditBalance) end AS \"openingBalance\" "
-					+
-					"FROM transactionSummary WHERE financialYearId=( SELECT id FROM financialYear WHERE startingDate <= ?" +
-					"AND endingDate >= ?)  AND glCodeId =(select glcodeid from bankaccount where id= ?)";
+			final StringBuilder str = new StringBuilder("SELECT case when sum(openingDebitBalance) = null then 0")
+					.append(" ELSE sum(openingDebitBalance) end - case when sum(openingCreditBalance) = null then 0")
+					.append(" else sum(openingCreditBalance) end AS \"openingBalance\" ")
+					.append("FROM transactionSummary WHERE financialYearId=( SELECT id FROM financialYear WHERE startingDate <= ?")
+					.append("AND endingDate >= ?)  AND glCodeId =(select glcodeid from bankaccount where id= ?)");
 			if (LOGGER.isInfoEnabled())
 				LOGGER.info(str);
-			Query pst = persistenceService.getSession().createSQLQuery(str);
+			Query pst = persistenceService.getSession().createSQLQuery(str.toString());
 			pst.setString(0, vcDate);
 			pst.setString(1, vcDate);
 			pst.setInteger(2, bankAccountId);
@@ -346,16 +360,16 @@ public class CommonMethodsImpl implements CommonMethodsI {
 			if (LOGGER.isInfoEnabled())
 				LOGGER.info("opening balance  " + opeAvailable);
 
-			final String str1 = "SELECT (case when sum(gl.debitAmount) = null then 0 else sum(gl.debitAmount) end - case when sum(gl.creditAmount)  = null then 0 else sum(gl.creditAmount) end) + "
-					+ opeAvailable
-					+ ""
-					+
-					" as \"totalAmount\" FROM   generalLedger gl, voucherHeader vh WHERE vh.id = gl.voucherHeaderId AND gl.glCodeid = (select glcodeid from bankaccount where id= ?) AND  "
-					+
-					" vh.voucherDate >=( SELECT TO_CHAR(startingDate, 'dd-Mon-yyyy') FROM financialYear WHERE startingDate <= ? AND endingDate >= ?) AND vh.voucherDate <= ?";
+			final StringBuilder str1 = new StringBuilder("SELECT (case when sum(gl.debitAmount) = null then 0")
+					.append(" else sum(gl.debitAmount) end - case when sum(gl.creditAmount)  = null then 0")
+					.append(" else sum(gl.creditAmount) end) + ").append(opeAvailable).append("")
+					.append(" as \"totalAmount\" FROM   generalLedger gl, voucherHeader vh WHERE vh.id = gl.voucherHeaderId")
+					.append(" AND gl.glCodeid = (select glcodeid from bankaccount where id= ?) AND  ")
+					.append(" vh.voucherDate >=( SELECT TO_CHAR(startingDate, 'dd-Mon-yyyy')")
+					.append(" FROM financialYear WHERE startingDate <= ? AND endingDate >= ?) AND vh.voucherDate <= ?");
 			if (LOGGER.isInfoEnabled())
 				LOGGER.info(str1);
-			pst = persistenceService.getSession().createSQLQuery(str1);
+			pst = persistenceService.getSession().createSQLQuery(str1.toString());
 			pst.setInteger(0, bankAccountId);
 			pst.setString(1, vcDate);
 			pst.setString(2, vcDate);
@@ -382,8 +396,10 @@ public class CommonMethodsImpl implements CommonMethodsI {
 	{
 		String codeAndName = "null";
 		try {
-			final String query = "select a.glcode, a.name from chartofaccounts a,egf_accountcode_purpose b where a.purposeid=b.id and b.id= ?";
-			Query pst = persistenceService.getSession().createSQLQuery(query);
+			final StringBuilder query = new StringBuilder(
+					"select a.glcode, a.name from chartofaccounts a,egf_accountcode_purpose b")
+							.append(" where a.purposeid=b.id and b.id= ?");
+			Query pst = persistenceService.getSession().createSQLQuery(query.toString());
 			pst.setString(0, purposeId);
 			List<Object[]> rset = pst.list();
 			// for(int i=0;rset.next();i++){
@@ -522,12 +538,13 @@ public class CommonMethodsImpl implements CommonMethodsI {
 	{
 		Integer divId = null;
 		// String sql="SELECT distinct BNDRY_NUM FROM EG_BOUNDARY where ID_BNDRY='"+divid+"'";
-		final String sql = "Select PARENT from EG_BOUNDARY where ID_BNDRY='" + fieldId + "'";
+		final String sql = "Select PARENT from EG_BOUNDARY where ID_BNDRY=:fieldId";
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Division id query-->>>>>>>> " + sql);
 		try {
 
 			Query pst = persistenceService.getSession().createSQLQuery(sql);
+			pst.setParameter("fieldId", fieldId);
 			List<Object[]> rset = pst.list();
 			for (final Object[] element : rset)
 				divId = Integer.parseInt(element[0].toString());
@@ -548,10 +565,10 @@ public class CommonMethodsImpl implements CommonMethodsI {
 	public String getFinacialYear(final String vDate, final Connection connection) throws Exception
 	{
 		String finYear = "null";
-		final String sql = "select FINANCIALYEAR from FINANCIALYEAR  where '" + vDate + "' between startingdate and endingdate";
-		try
-		{
+		final String sql = "select FINANCIALYEAR from FINANCIALYEAR  where :vDate between startingdate and endingdate";
+		try {
 			Query pst = persistenceService.getSession().createSQLQuery(sql);
+			pst.setParameter("vDate", vDate);
 			List<Object[]> rset = pst.list();
 			for (final Object[] element : rset) {
 				finYear = element[0].toString();
@@ -615,12 +632,12 @@ public class CommonMethodsImpl implements CommonMethodsI {
 		// dt = sdf.parse( vDate );
 		final String txndate = formatter.format(sdf.parse(vDate));
 
-		final String sql = "select a.FINANCIALYEAR,b.id from FINANCIALYEAR a,fiscalperiod b  where a.id=b.financialyearid AND ? between b.startingdate and b.endingdate";
+		final StringBuilder sql = new StringBuilder("select a.FINANCIALYEAR,b.id from FINANCIALYEAR a,fiscalperiod b ")
+				.append(" where a.id=b.financialyearid AND ? between b.startingdate and b.endingdate");
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info(sql);
-		try
-		{
-			Query pst = persistenceService.getSession().createSQLQuery(sql);
+		try {
+			Query pst = persistenceService.getSession().createSQLQuery(sql.toString());
 			pst.setString(0, txndate);
 			List<Object[]> rset = pst.list();
 			for (final Object[] element : rset) {
@@ -682,12 +699,11 @@ public class CommonMethodsImpl implements CommonMethodsI {
 		final SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 		final String txndate = formatter.format(sdf.parse(vDate));
 
-		final String sql = "select a.FINANCIALYEAR,b.id from FINANCIALYEAR a,fiscalperiod b  where a.id=b.financialyearid AND '"
-				+ txndate + "' between b.startingdate and b.endingdate";
+		final StringBuilder sql = new StringBuilder("select a.FINANCIALYEAR,b.id from FINANCIALYEAR a,fiscalperiod b ")
+				.append(" where a.id=b.financialyearid AND :txndate between b.startingdate and b.endingdate");
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info(sql);
-		try
-		{
+		try {
 
 			// This is for getting fund type based on the fund id.
 			final String query = "SELECT identifier as \"fund_identi\" from fund where id= ?";
@@ -703,7 +719,8 @@ public class CommonMethodsImpl implements CommonMethodsI {
 			if (rset == null || rset.size() == 0)
 				throw new Exception("Fund is not defined in the system");
 
-			pst = persistenceService.getSession().createSQLQuery(sql);
+			pst = persistenceService.getSession().createSQLQuery(sql.toString());
+			pst.setParameter("txndate", txndate);
 			rset = pst.list();
 			for (final Object[] element : rset) {
 				finYear = element[0].toString();
@@ -765,12 +782,11 @@ public class CommonMethodsImpl implements CommonMethodsI {
 		final SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 		final String txndate = formatter.format(sdf.parse(vDate));
 
-		final String sql = "select a.FINANCIALYEAR,b.id from FINANCIALYEAR a,fiscalperiod b  where a.id=b.financialyearid AND '"
-				+ txndate + "' between b.startingdate and b.endingdate";
+		final StringBuilder sql = new StringBuilder("select a.FINANCIALYEAR,b.id from FINANCIALYEAR a,fiscalperiod b ")
+				.append(" where a.id=b.financialyearid AND :txndate between b.startingdate and b.endingdate");
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("sql in getTransRunningNumber() :" + sql);
-		try
-		{
+		try {
 
 			// This is for getting fund type based on the fund id.
 			final String query = "SELECT identifier as \"fund_identi\" from fund where id= ?";
@@ -784,7 +800,8 @@ public class CommonMethodsImpl implements CommonMethodsI {
 			}
 			if (rset == null || rset.size() == 0)
 				throw new Exception("Fund is not defined in the system");
-			pst = persistenceService.getSession().createSQLQuery(sql);
+			pst = persistenceService.getSession().createSQLQuery(sql.toString());
+			pst.setParameter("txndate", txndate);
 			rset = pst.list();
 			for (final Object[] element : rset) {
 				finYear = element[0].toString();
