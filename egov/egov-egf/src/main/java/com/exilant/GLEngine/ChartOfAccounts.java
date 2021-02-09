@@ -913,9 +913,9 @@ public class ChartOfAccounts {
 			LOGGER.info("count**********" + count);
 		for (int k = 0; k < count; k++)
 			try {
-				final String delremitsql = "delete from eg_remittance_gldtl where gldtlid in (select id from generalledgerdetail where generalledgerid='"
-						+ glHeaderId.get(k).toString() + "')";
-				pst = persistenceService.getSession().createSQLQuery(delremitsql);
+				final StringBuilder delremitsql = new StringBuilder("delete from eg_remittance_gldtl")
+						.append(" where gldtlid in (select id from generalledgerdetail where generalledgerid=?)");
+				pst = persistenceService.getSession().createSQLQuery(delremitsql.toString());
 				pst.setString(0, glHeaderId.get(k).toString());
 				if (LOGGER.isInfoEnabled())
 					LOGGER.info("deleting remittance Query " + delremitsql);
@@ -1073,8 +1073,9 @@ public class ChartOfAccounts {
 			throws TaskFailedException {
 		String code = "";
 		try {
-			final String str = "select glcode as \"code\" from chartofaccounts,bankaccount where bankaccount.glcodeid=chartofaccounts.id and bankaccount.id= ?";
-			final PreparedStatement pst = con.prepareStatement(str);
+			final StringBuilder str = new StringBuilder("select glcode as \"code\" from chartofaccounts,bankaccount")
+					.append(" where bankaccount.glcodeid=chartofaccounts.id and bankaccount.id= ?");
+			final PreparedStatement pst = con.prepareStatement(str.toString());
 			pst.setString(0, detailKey);
 			final ResultSet resultset = pst.executeQuery();
 
@@ -1088,10 +1089,10 @@ public class ChartOfAccounts {
 
 	public String getFiscalYearID(final String voucherDate, final Connection con, final DataCollection dc) {
 		String fiscalyearid = "";
-		final String sql = "select ID as \"fiscalperiodID\" from fiscalperiod where "
-				+ "to_date(?,'dd-mon-yyyy') between startingdate and endingdate";
+		final StringBuilder sql = new StringBuilder("select ID as \"fiscalperiodID\" from fiscalperiod where ")
+				.append("to_date(?,'dd-mon-yyyy') between startingdate and endingdate");
 		try {
-			final PreparedStatement pst = con.prepareStatement(sql);
+			final PreparedStatement pst = con.prepareStatement(sql.toString());
 			pst.setString(0, voucherDate);
 			final ResultSet rs = pst.executeQuery();
 			if (rs.next())
@@ -1220,11 +1221,12 @@ public class ChartOfAccounts {
 
 			if (!isClosed) {
 				List<Object[]> rs = null;
-				final String qry = "SELECT id FROM closedPeriods WHERE isClosed=true and to_char(startingDate, 'DD-MON-YYYY')<='" + date
-						+ "' AND endingDate>='" + date + "'";
+				final StringBuilder qry = new StringBuilder("SELECT id FROM closedPeriods WHERE isClosed=true")
+						.append(" and to_char(startingDate, 'DD-MON-YYYY')<=:date AND endingDate>=:date");
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(qry);
-				psmt1 = persistenceService.getSession().createSQLQuery(qry);
+				psmt1 = persistenceService.getSession().createSQLQuery(qry.toString());
+				psmt1.setParameter("date", date);
 				rs = psmt1.list();
 
 				if (!(rs != null && rs.size() > 0))

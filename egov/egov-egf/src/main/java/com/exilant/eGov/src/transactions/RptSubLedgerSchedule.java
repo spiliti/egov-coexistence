@@ -54,8 +54,14 @@
 package com.exilant.eGov.src.transactions;
 
 
-import com.exilant.GLEngine.GeneralLedgerBean;
-import com.exilant.exility.common.TaskFailedException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.egov.commons.Accountdetailtype;
 import org.egov.commons.CFinancialYear;
@@ -70,11 +76,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import com.exilant.GLEngine.GeneralLedgerBean;
+import com.exilant.exility.common.TaskFailedException;
 
 /**
  * @author Administrator TODO To change the template for this generated type
@@ -181,66 +184,60 @@ public class RptSubLedgerSchedule {
         else
             throw new ApplicationRuntimeException("Exlcude statuses not defined for Reports");
 
-        String query ="Select complist.detkeyid as slid,sum(coalesce(complist.OpbCredit,0)) as OpgCreditBal,sum(coalesce(complist.OpbDebit,0)) as OpgDebitBal,"
-            +" sum(coalesce(complist.PrevDebit,0))  as PrvDb,sum(coalesce(complist.PrevCredit,0))  as PrvCr,"
-            +" sum(coalesce(complist.Credit,0)) as TxnCredit,sum(coalesce(complist.Debit,0)) as TxnDebit"
-            +" from("
-            +" Select gld.detailkeyid as detkeyid,0 as OpbCredit,0 as OpbDebit,0 as PrevDebit,0 as PrevCredit,SUM (gld.amount)  AS Debit , 0 AS Credit"
-            +" FROM generalledgerdetail gld, generalledger gl,voucherheader vh "
-            + departmentFromCondition
-            +" WHERE gld.detailtypeid  = ? AND gld.generalledgerid = gl .ID "
-            +" AND gl.glcodeid=(Select ID FROM chartofaccounts WHERE glcode = ?) AND gl.debitamount > 0 AND gl.voucherheaderid = vh .ID"
-             +" AND vh.voucherdate >= to_date(?,'dd/mm/yyyy') AND vh.voucherdate <= to_date(?,'dd/mm/yyyy')  AND vh.fundid= ? "
-            + departmentWhereCondition
-            +"  AND vh.status NOT IN ("
-            + defaultStatusExclude
-            +") GROUP BY gld.detailkeyid "
-            +" UNION ALL "
-            +" Select gld.detailkeyid as detkeyid,0 as OpbCredit,0 as OpbDebit,0 as PrevDebit,0 as PrevCredit, 0 AS Debit , SUM (gld.amount) AS Credit "
-            +" FROM generalledgerdetail gld, generalledger gl,voucherheader vh  "
-            + departmentFromCondition
-            +" WHERE gld.detailtypeid  = ? AND gld.generalledgerid = gl .ID AND gl.glcodeid=(Select ID FROM chartofaccounts WHERE glcode = ?) "
-            +" AND gl.creditamount > 0 AND gl.voucherheaderid = vh .ID AND vh.voucherdate >= to_date(?,'dd/mm/yyyy') AND vh.voucherdate <= "
-            +" to_date(?,'dd/mm/yyyy')  AND vh.fundid= ? "
-            + departmentWhereCondition
-            +" AND vh.status NOT IN ("
-            + defaultStatusExclude
-            +") GROUP BY gld.detailkeyid  "
-            +" UNION ALL"
-            +" Select gld.detailkeyid AS detkeyid ,0 as OpbCredit,0 as OpbDebit,coalesce( SUM (gld.amount ),0)  AS PrevDebit , 0 AS PrevCredit ,0 AS Debit,0 AS Credit "
-            +" FROM generalledgerdetail gld, generalledger gl, voucherheader vh  "
-            + departmentFromCondition
-            + " WHERE gld.detailtypeid  = ? AND gld.generalledgerid = gl.ID "
-            +" AND gl.glcodeid=(Select ID FROM chartofaccounts WHERE glcode = ?) AND gl.debitamount > 0 AND gl.voucherheaderid = vh .ID "
-            +" AND vh.voucherdate >=(Select startingdate FROM financialyear WHERE startingdate <= to_date(?,'dd/mm/yyyy') "
-            +" AND endingdate >= to_date(?,'dd/mm/yyyy') ) AND vh.voucherdate <= to_date(?,'dd/mm/yyyy')-1 "
-            + departmentWhereCondition
-            +" AND vh.fundid = ? AND vh.status NOT  IN ("
-            + defaultStatusExclude
-            +") GROUP BY gld.detailkeyid  "
-            +" UNION ALL"
-            +" Select gld.detailkeyid AS detkeyid ,0 as OpbCredit,0 as OpbDebit,0  AS PrevDebit , coalesce( SUM (gld.amount ),0) AS PrevCredit ,0 AS Debit,0 AS Credit "
-            +" FROM generalledgerdetail gld, generalledger gl, voucherheader vh  "
-            + departmentFromCondition
-            + " WHERE gld.detailtypeid  = ? AND gld.generalledgerid = gl.ID "
-            +" AND gl.glcodeid=(Select ID FROM chartofaccounts WHERE glcode = ?) AND gl.creditamount > 0 AND gl.voucherheaderid = vh .ID "
-            +" AND vh.voucherdate >=(Select startingdate FROM financialyear WHERE startingdate <= to_date(?,'dd/mm/yyyy') "
-            +" AND endingdate >= to_date(?,'dd/mm/yyyy') ) AND vh.voucherdate <= to_date(?,'dd/mm/yyyy')-1 "
-            + departmentWhereCondition
-            +" AND vh.fundid = ? AND vh.status NOT  IN ("
-            + defaultStatusExclude
-            +") GROUP BY gld.detailkeyid "
-            +" UNION ALL"
-            +" Select ACCOUNTDETAILKEY AS detkeyid , SUM(openingcreditbalance) AS OpbCredit , SUM(openingdebitbalance) AS OpbDebit,0  AS PrevDebit , 0 AS PrevCredit ,0 AS Debit,0 AS Credit "
-            +" FROM transactionsummary WHERE glcodeid=(Select ID FROM chartofaccounts WHERE glcode = ?) "
-            +" AND (openingcreditbalance > 0 OR openingdebitbalance > 0) AND accountdetailtypeid= ? AND fundid= ? AND financialyearid= ?  "
-            + departmentConditionTran
-            +" GROUP BY detkeyid "
-            +") as complist"
-            +" group by  slid order by slid";
+		final StringBuilder query = new StringBuilder("Select complist.detkeyid as slid,").append(
+				"sum(coalesce(complist.OpbCredit,0)) as OpgCreditBal,sum(coalesce(complist.OpbDebit,0)) as OpgDebitBal,")
+				.append(" sum(coalesce(complist.PrevDebit,0))  as PrvDb,sum(coalesce(complist.PrevCredit,0))  as PrvCr,")
+				.append(" sum(coalesce(complist.Credit,0)) as TxnCredit,sum(coalesce(complist.Debit,0)) as TxnDebit")
+				.append(" from(")
+				.append(" Select gld.detailkeyid as detkeyid,0 as OpbCredit,0 as OpbDebit,0 as PrevDebit,0 as PrevCredit,")
+				.append("SUM (gld.amount)  AS Debit , 0 AS Credit")
+				.append(" FROM generalledgerdetail gld, generalledger gl,voucherheader vh ")
+				.append(departmentFromCondition)
+				.append(" WHERE gld.detailtypeid  = ? AND gld.generalledgerid = gl .ID ")
+				.append(" AND gl.glcodeid=(Select ID FROM chartofaccounts WHERE glcode = ?) AND gl.debitamount > 0")
+				.append(" AND gl.voucherheaderid = vh .ID")
+				.append(" AND vh.voucherdate >= to_date(?,'dd/mm/yyyy') AND vh.voucherdate <= to_date(?,'dd/mm/yyyy') ")
+				.append(" AND vh.fundid= ? ").append(departmentWhereCondition).append("  AND vh.status NOT IN (")
+				.append(defaultStatusExclude).append(") GROUP BY gld.detailkeyid UNION ALL ")
+				.append(" Select gld.detailkeyid as detkeyid,0 as OpbCredit,0 as OpbDebit,0 as PrevDebit,0 as PrevCredit,")
+				.append(" 0 AS Debit , SUM (gld.amount) AS Credit ")
+				.append(" FROM generalledgerdetail gld, generalledger gl,voucherheader vh  ")
+				.append(departmentFromCondition)
+				.append(" WHERE gld.detailtypeid  = ? AND gld.generalledgerid = gl .ID AND gl.glcodeid=")
+				.append("(Select ID FROM chartofaccounts WHERE glcode = ?) ")
+				.append(" AND gl.creditamount > 0 AND gl.voucherheaderid = vh .ID AND vh.voucherdate >= to_date(?,'dd/mm/yyyy')")
+				.append(" AND vh.voucherdate <= to_date(?,'dd/mm/yyyy')  AND vh.fundid= ? ")
+				.append(departmentWhereCondition).append(" AND vh.status NOT IN (").append(defaultStatusExclude)
+				.append(") GROUP BY gld.detailkeyid UNION ALL")
+				.append(" Select gld.detailkeyid AS detkeyid ,0 as OpbCredit,0 as OpbDebit,coalesce( SUM (gld.amount ),0) ")
+				.append(" AS PrevDebit , 0 AS PrevCredit ,0 AS Debit,0 AS Credit ")
+				.append(" FROM generalledgerdetail gld, generalledger gl, voucherheader vh  ")
+				.append(departmentFromCondition).append(" WHERE gld.detailtypeid  = ? AND gld.generalledgerid = gl.ID ")
+				.append(" AND gl.glcodeid=(Select ID FROM chartofaccounts WHERE glcode = ?) AND gl.debitamount > 0")
+				.append(" AND gl.voucherheaderid = vh .ID ")
+				.append(" AND vh.voucherdate >=(Select startingdate FROM financialyear WHERE startingdate <= to_date(?,'dd/mm/yyyy') ")
+				.append(" AND endingdate >= to_date(?,'dd/mm/yyyy') ) AND vh.voucherdate <= to_date(?,'dd/mm/yyyy')-1 ")
+				.append(departmentWhereCondition).append(" AND vh.fundid = ? AND vh.status NOT  IN (")
+				.append(defaultStatusExclude).append(") GROUP BY gld.detailkeyid UNION ALL")
+				.append(" Select gld.detailkeyid AS detkeyid ,0 as OpbCredit,0 as OpbDebit,0  AS PrevDebit , ")
+				.append("coalesce( SUM (gld.amount ),0) AS PrevCredit ,0 AS Debit,0 AS Credit ")
+				.append(" FROM generalledgerdetail gld, generalledger gl, voucherheader vh  ")
+				.append(departmentFromCondition).append(" WHERE gld.detailtypeid  = ? AND gld.generalledgerid = gl.ID ")
+				.append(" AND gl.glcodeid=(Select ID FROM chartofaccounts WHERE glcode = ?) AND gl.creditamount > 0")
+				.append(" AND gl.voucherheaderid = vh .ID ")
+				.append(" AND vh.voucherdate >=(Select startingdate FROM financialyear WHERE startingdate <= to_date(?,'dd/mm/yyyy') ")
+				.append(" AND endingdate >= to_date(?,'dd/mm/yyyy') ) AND vh.voucherdate <= to_date(?,'dd/mm/yyyy')-1 ")
+				.append(departmentWhereCondition).append(" AND vh.fundid = ? AND vh.status NOT  IN (")
+				.append(defaultStatusExclude).append(") GROUP BY gld.detailkeyid UNION ALL")
+				.append(" Select ACCOUNTDETAILKEY AS detkeyid , SUM(openingcreditbalance) AS OpbCredit ,")
+				.append(" SUM(openingdebitbalance) AS OpbDebit,0  AS PrevDebit , 0 AS PrevCredit ,0 AS Debit,0 AS Credit ")
+				.append(" FROM transactionsummary WHERE glcodeid=(Select ID FROM chartofaccounts WHERE glcode = ?) ")
+				.append(" AND (openingcreditbalance > 0 OR openingdebitbalance > 0) AND accountdetailtypeid= ? AND fundid= ?")
+				.append(" AND financialyearid= ?  ").append(departmentConditionTran).append(" GROUP BY detkeyid ")
+				.append(") as complist group by  slid order by slid");
             
             int i = 0;
-            pst = persistenceService.getSession().createSQLQuery(query);
+            pst = persistenceService.getSession().createSQLQuery(query.toString());
             pst.setLong(i++, Integer.valueOf(accEntityId));
             pst.setString(i++, glCode);
             pst.setString(i++, startDate);
@@ -304,14 +301,16 @@ public class RptSubLedgerSchedule {
                 double debitamount = 0.0;
                 double creditamount = 0.0;
              
-                try {
-                       entity = (EntityType) persistenceService.find(" from " + accountdetailtype.getFullQualifiedName()
-                                + " where id="+element[0].toString());
-                    } catch ( final Exception ee) {
-                        LOGGER.error(ee.getMessage(), ee);
-                        entity = (EntityType) persistenceService.find(" from " + accountdetailtype.getFullQualifiedName()
-                                + " where id="+element[0].toString());
-                    }    
+					try {
+						entity = (EntityType) persistenceService.find(
+								" from " + accountdetailtype.getFullQualifiedName() + " where id = ?",
+								element[0].toString());
+					} catch (final Exception ee) {
+						LOGGER.error(ee.getMessage(), ee);
+						entity = (EntityType) persistenceService.find(
+								" from " + accountdetailtype.getFullQualifiedName() + " where id = ?",
+								element[0].toString());
+					} 
           
                 if (entity != null) {
                     gb.setCode(entity.getCode());
