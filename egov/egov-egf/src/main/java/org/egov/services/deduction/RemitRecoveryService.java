@@ -55,8 +55,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.egov.commons.CVoucherHeader;
@@ -73,7 +76,6 @@ import org.egov.utils.Constants;
 import org.egov.utils.VoucherHelper;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,32 +95,39 @@ public class RemitRecoveryService {
     @Autowired
     private TdsHibernateDAO tdsHibernateDAO;
 
-    public List<RemittanceBean> getPendingRecoveryDetails(final RemittanceBean remittanceBean,
-            final CVoucherHeader voucherHeader,
-            final Integer detailKeyId) throws ValidationException {
-        final List<RemittanceBean> listRemitBean = new ArrayList<RemittanceBean>();
-        final StringBuffer query = new StringBuffer(200);
-        query.append("select vh.name,vh.voucherNumber ,vh.voucherDate,egr.gldtlamt,gld.detailTypeId.id,gld.detailKeyId,egr.id ");
-        query.append(
-                " from CVoucherHeader vh ,Vouchermis mis , CGeneralLedger gl ,CGeneralLedgerDetail gld , EgRemittanceGldtl egr , Recovery rec  where ")
-                .append("  rec.chartofaccounts.id = gl.glcodeId.id and gld.id = egr.generalledgerdetail.id and  gl.id = gld.generalLedgerId.id and vh.id = gl.voucherHeaderId.id ")
-                .append(" and mis.voucherheaderid.id = vh.id  and vh.status=0  and vh.fundId.id=?  and  egr.gldtlamt - "
-                        +
-                        " (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end  from EgRemittanceGldtl egr1,"
-                        +
-                        "EgRemittanceDetail egd,EgRemittance  eg,CVoucherHeader vh  where vh.status not in (1,2,4) and  eg.voucherheader.id=vh.id"
-                        +
-                        " and egd.egRemittance.id=eg.id and egr1.id=egd.egRemittanceGldtl.id and egr1.id=egr.id) != 0 and rec.id =")
-                .append(remittanceBean.getRecoveryId()).append(" and ( egr.recovery.id =").append(remittanceBean.getRecoveryId())
-                .append(" OR egr.recovery.id is null )")
-                .append(" and vh.voucherDate <='").append(Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()))
-                .append("'");
-        if (detailKeyId != null && detailKeyId != -1)
-            query.append(" and egr.generalledgerdetail.detailkeyid=" + detailKeyId);
-        query.append(VoucherHelper.getMisQuery(voucherHeader)).append(" order by vh.voucherNumber,vh.voucherDate");
-        populateDetails(voucherHeader, listRemitBean, query);
-        return listRemitBean;
-    }
+	public List<RemittanceBean> getPendingRecoveryDetails(final RemittanceBean remittanceBean,
+			final CVoucherHeader voucherHeader, final Integer detailKeyId) throws ValidationException {
+		final List<RemittanceBean> listRemitBean = new ArrayList<>();
+		final StringBuilder query = new StringBuilder();
+		final Map<String, Object> params = new HashMap<>();
+		query.append(
+				"select vh.name,vh.voucherNumber ,vh.voucherDate,egr.gldtlamt,gld.detailTypeId.id,gld.detailKeyId,egr.id ")
+				.append(" from CVoucherHeader vh ,Vouchermis mis , CGeneralLedger gl ,CGeneralLedgerDetail gld , EgRemittanceGldtl egr ,")
+				.append(" Recovery rec  where ")
+				.append("  rec.chartofaccounts.id = gl.glcodeId.id and gld.id = egr.generalledgerdetail.id")
+				.append(" and  gl.id = gld.generalLedgerId.id and vh.id = gl.voucherHeaderId.id ")
+				.append(" and mis.voucherheaderid.id = vh.id  and vh.status=0  and vh.fundId.id=:vhFundId  and  egr.gldtlamt - ")
+				.append(" (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append("  from EgRemittanceGldtl egr1,")
+				.append("EgRemittanceDetail egd,EgRemittance  eg,CVoucherHeader vh  where vh.status not in (1,2,4)")
+				.append(" and  eg.voucherheader.id=vh.id")
+				.append(" and egd.egRemittance.id=eg.id and egr1.id=egd.egRemittanceGldtl.id and egr1.id=egr.id) != 0 and rec.id =:recId")
+				.append(" and ( egr.recovery.id = :recId").append(" OR egr.recovery.id is null )")
+				.append(" and vh.voucherDate <=:vhVoucherDate");
+		params.put("vhFundId", voucherHeader.getFundId().getId());
+		params.put("recId", remittanceBean.getRecoveryId());
+		params.put("vhVoucherDate", Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()));
+		if (detailKeyId != null && detailKeyId != -1) {
+			query.append(" and egr.generalledgerdetail.detailkeyid = :gldDetailKeyId");
+			params.put("gldDetailKeyId", detailKeyId);
+		}
+		Entry<String, Map<String, Object>> queryWithParams = VoucherHelper.getMisQuery(voucherHeader).entrySet()
+				.iterator().next();
+		query.append(queryWithParams.getKey()).append(" order by vh.voucherNumber,vh.voucherDate");
+		params.putAll(queryWithParams.getValue());
+		populateDetails(voucherHeader, listRemitBean, query.toString(), params);
+		return listRemitBean;
+	}
 
     public List<RemittanceBean> getRecoveryDetails(final RemittanceBean remittanceBean, final CVoucherHeader voucherHeader)
             throws ValidationException {
@@ -503,9 +512,11 @@ public class RemitRecoveryService {
     }
 
     private void populateDetails(final CVoucherHeader voucherHeader, final List<RemittanceBean> listRemitBean,
-            final StringBuffer query) {
+            final String query, Map<String, Object> params) {
         RemittanceBean remitBean;
-        final List<Object[]> list = persistenceService.findAllBy(query.toString(), voucherHeader.getFundId().getId());
+        final Query qry = persistenceService.getSession().createQuery(query);
+        params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+        final List<Object[]> list = qry.list();
         for (final Object[] element : list) {
             remitBean = new RemittanceBean();
             remitBean.setVoucherName(element[0].toString());

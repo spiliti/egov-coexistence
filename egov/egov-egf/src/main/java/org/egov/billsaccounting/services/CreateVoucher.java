@@ -501,7 +501,7 @@ public class CreateVoucher {
 				detailMap.put(VoucherConstant.CREDITAMOUNT,
 						egBilldetails.getCreditamount() == null ? BigDecimal.ZERO : egBilldetails.getCreditamount());
 				final String glcode = persistenceService.getSession().createQuery(
-						"select glcode from CChartOfAccounts where id = " + egBilldetails.getGlcodeid().longValue())
+						"select glcode from CChartOfAccounts where id = ?").setParameter(0, egBilldetails.getGlcodeid().longValue())
 						.list().get(0).toString();
 				detailMap.put(VoucherConstant.GLCODE, glcode);
 				accountdetails.add(detailMap);
@@ -1966,7 +1966,7 @@ public class CreateVoucher {
 			} else
 				throw new ApplicationRuntimeException("glcode is missing");
 			final Query querytds = persistenceService.getSession()
-					.createQuery("select t.id from Recovery t where " + "t.chartofaccounts.glcode=:glcode");
+					.createQuery("select t.id from Recovery t where t.chartofaccounts.glcode=:glcode");
 			querytds.setString("glcode", glcode);
 			querytds.setCacheable(true);
 			if (null != querytds.list() && querytds.list().size() > 0
@@ -2759,18 +2759,22 @@ public class CreateVoucher {
 		Query pst = null;
 		List<Object[]> rs = null;
 		try {
-			final String query1 = "SELECT to_char(startingDate, 'DD-Mon-YYYY') AS \"startingDate\", to_char(endingDate, 'DD-Mon-YYYY') AS \"endingDate\" FROM financialYear WHERE startingDate <= '"
-					+ vcDate + "' AND endingDate >= '" + vcDate + "'";
-			pst = persistenceService.getSession().createSQLQuery(query1);
+			final StringBuilder query1 = new StringBuilder(
+					"SELECT to_char(startingDate, 'DD-Mon-YYYY') AS \"startingDate\",").append(
+							" to_char(endingDate, 'DD-Mon-YYYY') AS \"endingDate\" FROM financialYear WHERE startingDate <= ?")
+							.append(" AND endingDate >= ?");
+			pst = persistenceService.getSession().createQuery(query1.toString()).setParameter(0, vcDate).setParameter(1,
+					vcDate);
 			rs = pst.list();
 			if (rs != null && rs.size() > 0)
 				for (final Object[] element : rs) {
 					fyStartDate = element[0].toString();
 					fyEndDate = element[1].toString();
 				}
-			final String query2 = "SELECT id FROM voucherHeader WHERE voucherNumber = '" + vcNum
-					+ "' AND voucherDate>='" + fyStartDate + "' AND voucherDate<='" + fyEndDate + "' and status!=4";
-			pst = persistenceService.getSession().createSQLQuery(query2);
+			final StringBuilder query2 = new StringBuilder("SELECT id FROM voucherHeader WHERE voucherNumber = ? ")
+					.append(" AND voucherDate>= ? AND voucherDate<=? and status!=4");
+			pst = persistenceService.getSession().createQuery(query2.toString()).setParameter(0, vcNum)
+					.setParameter(1, fyStartDate).setParameter(2, fyEndDate);
 			rs = pst.list();
 			if (rs != null && rs.size() > 0) {
 				if (LOGGER.isDebugEnabled())
@@ -2788,9 +2792,9 @@ public class CreateVoucher {
 
 	public CFiscalPeriod getFiscalPeriod(final String vDate) throws TaskFailedException {
 	        CFiscalPeriod fiscalPeriod = null;
-		final String sql = "select id from fiscalperiod  where '" + vDate + "' between startingdate and endingdate";
+		final String sql = "select id from fiscalperiod  where ? between startingdate and endingdate";
 		try {
-			final Query pst = persistenceService.getSession().createSQLQuery(sql).addEntity(CFiscalPeriod.class);
+			final Query pst = persistenceService.getSession().createSQLQuery(sql).addEntity(CFiscalPeriod.class).setParameter(0, vDate);
 			final List<CFiscalPeriod> rset = pst.list();
 			fiscalPeriod = rset != null ? rset.get(0) : null;
 		} catch (final Exception e) {
