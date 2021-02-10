@@ -82,6 +82,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author manoranjan
@@ -175,20 +176,31 @@ public class BillRegisterSearchAction extends BaseFormAction {
 
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("BillRegisterSearchAction | search | Start");
-        final StringBuffer query = new StringBuffer(500);
-        query
-        .append(
-                "select br.expendituretype , br.billtype ,br.billnumber , br.billdate , br.billamount , br.passedamount ,egwstatus.description,billmis.sourcePath,")
-                .append(" br.id ,br.status.id,egwstatus.description ,br.state.id,br.lastModifiedBy.id ")
-                .append(
-                        " from EgBillregister br, EgBillregistermis billmis , EgwStatus egwstatus where   billmis.egBillregister.id = br.id and egwstatus.id = br.status.id  ")
-                        .append(" and br.expendituretype=?").append(
-                                VoucherHelper
-                                .getBillDateQuery(billDateFrom, billDateTo))
-                                .append(VoucherHelper.getBillMisQuery(billregister));
+        final Map<String, Object> params = new HashMap<>();
+		final StringBuilder query = new StringBuilder(
+				"select br.expendituretype , br.billtype ,br.billnumber , br.billdate ,")
+						.append(" br.billamount , br.passedamount ,egwstatus.description,billmis.sourcePath,")
+						.append(" br.id ,br.status.id,egwstatus.description ,br.state.id,br.lastModifiedBy.id ")
+						.append(" from EgBillregister br, EgBillregistermis billmis , EgwStatus egwstatus")
+						.append(" where   billmis.egBillregister.id = br.id and egwstatus.id = br.status.id  ")
+						.append(" and br.expendituretype=:expendituretype");
 
-        final List<Object[]> list = persistenceService.findAllBy(query.toString(),
-                expType);
+		Entry<String, Map<String, Object>> queryWithParams = VoucherHelper.getBillDateQuery(billDateFrom, billDateTo)
+				.entrySet().iterator().next();
+
+		query.append(queryWithParams.getKey());
+		params.putAll(queryWithParams.getValue());
+
+		queryWithParams = VoucherHelper.getBillMisQuery(billregister).entrySet().iterator().next();
+		query.append(queryWithParams.getKey());
+		params.putAll(queryWithParams.getValue());
+
+		params.put("expendituretype", expType);
+        
+        final Query qry = persistenceService.getSession().createQuery(query.toString());
+        params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+        
+        final List<Object[]> list = qry.list();
         final List<Long> stateIds = new ArrayList<Long>();
         final Map<Long, String> stateIdAndOwnerNameMap = new HashMap<Long, String>();
         for (final Object[] object : list)
