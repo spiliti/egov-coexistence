@@ -91,6 +91,8 @@ import org.egov.model.voucher.VoucherDetails;
 import org.egov.model.voucher.WorkflowBean;
 import org.egov.utils.CheckListHelper;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.Query;
+import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -529,9 +531,12 @@ public class ContingentBillAction extends BaseBillAction {
             cbill.getCreatedBy();
         // billRegisterWorkflowService.transition(parameters.get(ACTION_NAME)[0]+"|"+userId, cbill,parameters.get("comments")[0]);
         cbill.transition().end().withOwner(getPosition()).withComments(parameters.get("comments")[0]);
-        final String statusQury = "from EgwStatus where upper(moduletype)=upper('" + FinancialConstants.CONTINGENCYBILL_FIN
-                + "') and  upper(description)=upper('" + FinancialConstants.CONTINGENCYBILL_CANCELLED_STATUS + "')";
-        final EgwStatus egwStatus = (EgwStatus) persistenceService.find(statusQury);
+		StringBuilder statusQuery =  new StringBuilder();
+        statusQuery = statusQuery.append("from EgwStatus where upper(moduletype)=upper(:contigencyBill) and upper(description) = upper(:contigencyBillCancel)");
+        final Query query = persistenceService.getSession().createQuery(statusQuery.toString())
+                .setParameter("contigencyBill",FinancialConstants.CONTINGENCYBILL_FIN, StringType.INSTANCE)
+                .setParameter("contigencyBillCancel",FinancialConstants.CONTINGENCYBILL_CANCELLED_STATUS, StringType.INSTANCE);
+        final EgwStatus egwStatus = (EgwStatus) persistenceService.find(query.toString());
         cbill.setStatus(egwStatus);
         cbill.setBillstatus(FinancialConstants.CONTINGENCYBILL_CANCELLED_STATUS);
         // persistenceService.setType(Cbill.class);
@@ -1191,9 +1196,13 @@ public class ContingentBillAction extends BaseBillAction {
         }
 
         bill.setBillstatus(FinancialConstants.CONTINGENCYBILL_CREATED_STATUS);
-        final String statusQury = "from EgwStatus where upper(moduletype)=upper('" + FinancialConstants.CONTINGENCYBILL_FIN
-                + "') and  upper(description)=upper('" + FinancialConstants.CONTINGENCYBILL_CREATED_STATUS + "')";
-        final EgwStatus egwStatus = (EgwStatus) persistenceService.find(statusQury);
+        
+        StringBuilder statusQuery = new StringBuilder();
+        statusQuery = statusQuery.append("from EgwStatus where upper(moduletype)=upper(:moduletype) and upper(description)=:description");
+        final Query query = persistenceService.getSession().createQuery(statusQuery.toString())
+                .setParameter("moduletype" , FinancialConstants.CONTINGENCYBILL_FIN, StringType.INSTANCE)
+                .setParameter("description" , FinancialConstants.CONTINGENCYBILL_CREATED_STATUS.toUpperCase(), StringType.INSTANCE);
+        final EgwStatus egwStatus = (EgwStatus) query.uniqueResult();
         bill.setStatus(egwStatus);
         bill.setBilltype("Final Bill");
 
@@ -1250,8 +1259,12 @@ public class ContingentBillAction extends BaseBillAction {
 
     public boolean isBillNumUnique(final String billNumber) {
 
-        final String billNum = (String) persistenceService.find("select billnumber from EgBillregister where upper(billnumber)='"
-                + billNumber.toUpperCase() + "'");
+    	StringBuilder billNumQuery = new StringBuilder();
+    	billNumQuery = billNumQuery.append("select billnumber from EgBillregister where upper(billnumber)=:billnumber");
+        final Query query = persistenceService.getSession().createQuery(billNumQuery.toString())
+                .setParameter("billnumber" , billNumber.toUpperCase(), StringType.INSTANCE);
+        final String billNum = (String) query.uniqueResult();
+        
         if (null == billNum)
             return true;
         else

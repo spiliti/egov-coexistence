@@ -74,6 +74,8 @@ import org.egov.model.bills.EgBillregistermis;
 import org.egov.utils.FinancialConstants;
 import org.egov.utils.VoucherHelper;
 import org.hibernate.Query;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -303,9 +305,13 @@ public class BillRegisterSearchAction extends BaseFormAction {
     }
 
     public EgwStatus getStatusId(final String moduleType, final Integer statusid) {
-        final String statusQury = "from EgwStatus where upper(moduletype)=upper('" + moduleType + "') and  id=" + statusid;
-        // "upper(description)=upper('"+ statusString + "')";
-        final EgwStatus egwStatus = (EgwStatus) persistenceService.find(statusQury);
+    	
+    	StringBuffer statusQuery = new StringBuffer();
+        statusQuery.append("from EgwStatus where upper(moduletype)=upper(:moduleType) and id=:statusId");
+        final Query query = persistenceService.getSession().createQuery(statusQuery.toString())
+                .setParameter("moduleType", moduleType, StringType.INSTANCE)
+                .setParameter("statusId", statusid, IntegerType.INSTANCE);
+        final EgwStatus egwStatus = (EgwStatus) persistenceService.find(query.toString());
         return egwStatus;
 
     }
