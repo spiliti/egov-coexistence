@@ -96,6 +96,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -521,12 +522,11 @@ public class BudgetReAppropriationAction extends BaseFormAction {
     }
 
     protected List getApprovedBudgetsForFY(final Long id, final String finalStatus) {
+        StringBuilder queryString = new StringBuilder("from Budget where id not in (select parent from Budget where parent is not null) and isactivebudget = true")
+                .append(" and status.moduletype='BUDGET' and status.code=?1 and financialYear.id=?2 and isbere=?3 order by name");
         if (id != null && id != 0L)
-            return budgetService
-                    .findAllBy(
-                            "from Budget where id not in (select parent from Budget where parent is not null) and isactivebudget = true and status.moduletype='BUDGET' and status.code='"
-                                    + finalStatus + "' and financialYear.id=? and isbere=? order by name",
-                            id, beRe);
+            return budgetService.findAllBy(queryString.toString(), finalStatus, id, beRe);
+        
         return new ArrayList();
     }
 
@@ -542,36 +542,58 @@ public class BudgetReAppropriationAction extends BaseFormAction {
     @SkipValidation
     @Action(value = "/budget/budgetReAppropriation-search")
     public String search() {
-        String sql = " ba.budgetDetail.budget.financialYear=" + financialYear.getId() + " and ba.budgetDetail.budget.isbere='"
-                + budgetDetail.getBudget().getIsbere() + "' ";
-        if (budgetDetail.getFund().getId() != null && budgetDetail.getFund().getId() != 0)
-            sql = sql + " and ba.budgetDetail.fund=" + budgetDetail.getFund().getId();
-        if (budgetDetail.getExecutingDepartment() != null && "".equals(budgetDetail.getExecutingDepartment()))
-            sql = sql + " and ba.budgetDetail.executingDepartment=" + budgetDetail.getExecutingDepartment();
-        if (budgetDetail.getFunction() != null && budgetDetail.getFunction().getId() != 0)
-            sql = sql + " and ba.budgetDetail.function=" + budgetDetail.getFunction().getId();
-        if (budgetDetail.getFunctionary() != null && budgetDetail.getFunctionary().getId() != 0)
-            sql = sql + " and ba.budgetDetail.functionary=" + budgetDetail.getFunctionary().getId();
-        if (budgetDetail.getScheme() != null && budgetDetail.getScheme().getId() != 0)
-            sql = sql + " and ba.budgetDetail.scheme=" + budgetDetail.getScheme().getId();
-        if (budgetDetail.getSubScheme() != null && budgetDetail.getSubScheme().getId() != 0)
-            sql = sql + " and ba.budgetDetail.subScheme=" + budgetDetail.getSubScheme().getId();
-        if (budgetDetail.getBoundary() != null && budgetDetail.getBoundary().getId() != 0)
-            sql = sql + " and ba.budgetDetail.boundary=" + budgetDetail.getBoundary().getId();
-        if (budgetDetail.getBudgetGroup().getId() != null && budgetDetail.getBudgetGroup().getId() != 0)
-            sql = sql + " and ba.budgetDetail.budgetGroup=" + budgetDetail.getBudgetGroup().getId();
+        final StringBuilder sql = new StringBuilder();
+        final Map<String, Object> params = new HashMap<>();
+        sql.append(" ba.budgetDetail.budget.financialYear=:finYear and ba.budgetDetail.budget.isbere=:isBere");
+        params.put("finYear", financialYear.getId());
+        params.put("isBere", budgetDetail.getBudget().getIsbere());
+        if (budgetDetail.getFund().getId() != null && budgetDetail.getFund().getId() != 0) {
+            sql.append(" and ba.budgetDetail.fund=:fundId");
+            params.put("fundId", budgetDetail.getFund().getId());
+        }
+        if (budgetDetail.getExecutingDepartment() != null && "".equals(budgetDetail.getExecutingDepartment())) {
+            sql.append(" and ba.budgetDetail.executingDepartment=:executingdept");
+            params.put("executingdept", budgetDetail.getExecutingDepartment());
+        }
+        if (budgetDetail.getFunction() != null && budgetDetail.getFunction().getId() != 0) {
+            sql.append(" and ba.budgetDetail.function=:functionId");
+            params.put("functionId", budgetDetail.getFunction().getId());
+        }
+        if (budgetDetail.getFunctionary() != null && budgetDetail.getFunctionary().getId() != 0) {
+            sql.append(" and ba.budgetDetail.functionary=:functionary");
+            params.put("functionary", budgetDetail.getFunctionary().getId());
+        }
+        if (budgetDetail.getScheme() != null && budgetDetail.getScheme().getId() != 0) {
+            sql.append(" and ba.budgetDetail.scheme=:schemeId");
+            params.put("schemeId", budgetDetail.getScheme().getId());
+        }
+        if (budgetDetail.getSubScheme() != null && budgetDetail.getSubScheme().getId() != 0) {
+            sql.append(" and ba.budgetDetail.subScheme=:subSchemeId");
+            params.put("subSchemeId", budgetDetail.getSubScheme().getId());
+        }
+        if (budgetDetail.getBoundary() != null && budgetDetail.getBoundary().getId() != 0) {
+            sql.append(" and ba.budgetDetail.boundary=:boundaryId");
+            params.put("boundaryId", budgetDetail.getBoundary().getId());
+        }
+        if (budgetDetail.getBudgetGroup().getId() != null && budgetDetail.getBudgetGroup().getId() != 0) {
+            sql.append(" and ba.budgetDetail.budgetGroup=:budgetGroup");
+            params.put("budgetGroup", budgetDetail.getBudgetGroup().getId());
+        }
         if (type.equals("A"))
-            sql = sql + " and ba.additionAmount is not null and ba.additionAmount!=0 ";
+            sql.append(" and ba.additionAmount is not null and ba.additionAmount!=0 ");
         else if (type.equals("R"))
-            sql = sql + " and ba.deductionAmount is not null and ba.deductionAmount!=0 ";
+            sql.append(" and ba.deductionAmount is not null and ba.deductionAmount!=0 ");
 
         if (LOGGER.isInfoEnabled())
-            LOGGER.info("search query==" + sql);
-        reAppropriationList = getPersistenceService()
-                .findAllBy(
-                        " from BudgetReAppropriation ba where ba.status.code='Approved' and "
-                                + sql
-                                + " order by ba.budgetDetail.fund,ba.budgetDetail.executingDepartment,ba.budgetDetail.function,ba.reAppropriationMisc.sequenceNumber");
+            LOGGER.info("search query==" + sql.toString());
+        StringBuilder queryString = new StringBuilder(" from BudgetReAppropriation ba where ba.status.code='Approved' and ")
+                .append(sql)
+                .append(" order by ba.budgetDetail.fund,ba.budgetDetail.executingDepartment,ba.budgetDetail.function,ba.reAppropriationMisc.sequenceNumber");
+
+        final Query query = getPersistenceService().getSession().createQuery(queryString.toString());
+        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+        reAppropriationList = query.list();
+
         return "search";
     }
 

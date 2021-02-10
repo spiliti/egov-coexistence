@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @ParentPackage("egov")
 @Results({
@@ -153,13 +154,17 @@ public class DishonoredChequeAction extends SearchFormAction {
             final String id[] = bankBranchId.split("-");
             bankId = Long.parseLong(id[0]);
         }
-        final String searchQuery = receiptService.getReceiptHeaderforDishonor(instrumentMode, accountCodes, bankId, chequeNo,
-                chqDDDate.toString());
-        final String srchQry = "select rpt.id as receiptheaderid,ih.id as instrumentheaderid,rpt.receiptnumber as receiptnumber,rpt.receiptdate as receiptdate,ih.instrumentnumber as instrumentnumber,"
-                + "ih.instrumentdate as instrumentdate,ih.instrumentamount as instrumentamount,b.name as bankname,ba.accountnumber as accountnumber,ih.payto as payto,status.description as description "
-                + searchQuery + " ORDER BY rpt.receiptnumber, rpt.receiptdate ";
-        final String countQry = "select count(distinct rpt) " + searchQuery + "";
-        return new SearchQuerySQL(srchQry, countQry, null);
+        final Map<String, List<Object>> queryWithParams = receiptService.getReceiptHeaderforDishonor(instrumentMode, accountCodes, bankId, chequeNo, chqDDDate.toString());
+        final Map.Entry<String, List<Object>> queryWithParamsEntry = queryWithParams.entrySet().iterator().next();
+        final String searchQuery = queryWithParamsEntry.getKey();
+        StringBuilder srchQry = new StringBuilder();
+        srchQry.append("select rpt.id as receiptheaderid,ih.id as instrumentheaderid,rpt.receiptnumber as receiptnumber,rpt.receiptdate as receiptdate,")
+                .append("ih.instrumentnumber as instrumentnumber, ih.instrumentdate as instrumentdate,ih.instrumentamount as instrumentamount,b.name as bankname,")
+                .append("ba.accountnumber as accountnumber,ih.payto as payto,status.description as description ")
+                .append(searchQuery)
+                .append(" ORDER BY rpt.receiptnumber, rpt.receiptdate ");
+        StringBuilder countQry = new StringBuilder("select count(distinct rpt) ").append(searchQuery);
+        return new SearchQuerySQL(srchQry.toString(), countQry.toString(), queryWithParamsEntry.getValue());
 
     }
 
