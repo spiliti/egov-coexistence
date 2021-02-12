@@ -136,47 +136,48 @@ public class RemitRecoveryService {
         final List<RemittanceBean> listRemitBean = new ArrayList<>();
         final StringBuilder dateQry = new StringBuilder();
         StringBuilder query = new StringBuilder();
-        if (remittanceBean.getFromVhDate() != null && voucherHeader.getVoucherDate() != null)
-            dateQry.append(" and vh.VOUCHERDATE >='" + Constants.DDMMYYYYFORMAT1.format(remittanceBean.getFromVhDate())
-                    + "' and vh.VOUCHERDATE <='" + Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()) + "' ");
-        else
-            dateQry.append(" and vh.VOUCHERDATE <='" + Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()) + "' ");
-        if (remittanceBean.getBank() != null && remittanceBean.getBankBranchId() != null
-                && remittanceBean.getBankAccountId() != null) {
-            query = getRecoveryListForSelectedBank(remittanceBean, voucherHeader, dateQry);
-        } else {
-            query.append(" SELECT vh.NAME  AS col_0_0_,  vh.VOUCHERNUMBER AS col_1_0_,  vh.VOUCHERDATE   AS col_2_0_,");
-            query.append(" egr.GLDTLAMT   AS col_3_0_,  gld.DETAILTYPEID  AS col_4_0_,  gld.DETAILKEYID   AS col_5_0_,");
-            query.append(
-                    " egr.ID    AS col_6_0_, (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end");
-            query.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh");
-            query.append(
-                    " where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid ");
-            query.append(" and egr1.id=egr.id) As col_7_0 , mis.departmentcode as col_8_0,mis.functionid as col_9_0");
-            query.append(
-                    "  FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  GENERALLEDGERDETAIL gld,  EG_REMITTANCE_GLDTL egr,  TDS recovery5_");
-            query.append(
-                    " WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gld.ID =egr.GLDTLID AND gl.ID =gld.GENERALLEDGERID AND vh.ID =gl.VOUCHERHEADERID");
-            query.append(" AND mis.VOUCHERHEADERID  =vh.ID AND vh.STATUS    =0 AND vh.FUNDID    =");
-            query.append(voucherHeader.getFundId().getId());
-            query.append(" AND egr.GLDTLAMT-");
-            query.append(
-                    " (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh");
-            query.append(
-                    " where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid and egr1.id=egr.id)");
-            query.append(" <>0 AND recovery5_.ID  = ");
-            query.append(remittanceBean.getRecoveryId()).append(" AND (egr.TDSID = ");
-            query.append(remittanceBean.getRecoveryId());
-            query.append(" OR egr.TDSID  IS NULL) ");
-            query.append(dateQry);
-            query.append(getMisSQlQuery(voucherHeader));
-            query.append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
-        }
+        final Map<String, Object> params = new HashMap<>();
+		if (remittanceBean.getFromVhDate() != null && voucherHeader.getVoucherDate() != null) {
+			dateQry.append(" and vh.VOUCHERDATE >=:FromVhDate and vh.VOUCHERDATE <= :voucherDate ");
+			params.put("FromVhDate", Constants.DDMMYYYYFORMAT1.format(remittanceBean.getFromVhDate()));
+			params.put("voucherDate", Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()));
+		} else {
+			dateQry.append(" and vh.VOUCHERDATE <= :voucherDate ");
+			params.put("voucherDate", Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()));
+		}
+		if (remittanceBean.getBank() != null && remittanceBean.getBankBranchId() != null
+				&& remittanceBean.getBankAccountId() != null) {
+			query = getRecoveryListForSelectedBank(remittanceBean, voucherHeader, dateQry, params);
+		} else {
+			query.append(" SELECT vh.NAME  AS col_0_0_,  vh.VOUCHERNUMBER AS col_1_0_,  vh.VOUCHERDATE   AS col_2_0_,")
+					.append(" egr.GLDTLAMT   AS col_3_0_,  gld.DETAILTYPEID  AS col_4_0_,  gld.DETAILKEYID   AS col_5_0_,")
+					.append(" egr.ID    AS col_6_0_, (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+					.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+					.append(" where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid ")
+					.append(" and egr1.id=egr.id) As col_7_0 , mis.departmentcode as col_8_0,mis.functionid as col_9_0")
+					.append("  FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  GENERALLEDGERDETAIL gld, ")
+					.append(" EG_REMITTANCE_GLDTL egr,  TDS recovery5_")
+					.append(" WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gld.ID =egr.GLDTLID AND gl.ID =gld.GENERALLEDGERID")
+					.append(" AND vh.ID =gl.VOUCHERHEADERID")
+					.append(" AND mis.VOUCHERHEADERID  =vh.ID AND vh.STATUS    =0 AND vh.FUNDID    = :vhFundId")
+					.append(" AND egr.GLDTLAMT-")
+					.append(" (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+					.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+					.append(" where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id")
+					.append(" and egr1.id=egd.remittancegldtlid and egr1.id=egr.id)")
+					.append(" <>0 AND recovery5_.ID  = :recoveryId").append(" AND (egr.TDSID = :tdsId")
+					.append(" OR egr.TDSID  IS NULL) ").append(dateQry).append(getMisSQlQuery(voucherHeader, params))
+					.append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
+
+			params.put("vhFundId", voucherHeader.getFundId().getId());
+			params.put("recoveryId", remittanceBean.getRecoveryId());
+			params.put("tdsId", remittanceBean.getRecoveryId());
+		}
 
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("RemitRecoveryService | getRecoveryDetails | query := " + query.toString());
 
-        populateDetailsBySQL(voucherHeader, listRemitBean, query);
+        populateDetailsBySQL(voucherHeader, listRemitBean, query, params);
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("RemitRecoveryService | listRemitBean size : " + listRemitBean.size());
         if (LOGGER.isDebugEnabled())
@@ -184,95 +185,109 @@ public class RemitRecoveryService {
         return listRemitBean;
     }
     
-    public boolean isNonControlledCodeTds(RemittanceBean remittanceBean){
-        Recovery recovery = tdsHibernateDAO.findById(remittanceBean.getRecoveryId(), false);
-        final String query = "from CChartOfAccountDetail where glCodeId.id="+recovery.getChartofaccounts().getId();
-        Query pst = persistenceService.getSession().createQuery(query);
-        return pst.list().isEmpty();
-    }
+	public boolean isNonControlledCodeTds(RemittanceBean remittanceBean) {
+		Recovery recovery = tdsHibernateDAO.findById(remittanceBean.getRecoveryId(), false);
+		final String query = "from CChartOfAccountDetail where glCodeId.id = :glcodeId";
+		Query pst = persistenceService.getSession().createQuery(query).setParameter("glcodeId",
+				recovery.getChartofaccounts().getId());
+		return pst.list().isEmpty();
+	}
     
-    public List<RemittanceBean> getRecoveryDetailsForNonControlledCode(final RemittanceBean remittanceBean, final CVoucherHeader voucherHeader){
-            final List<RemittanceBean> listRemitBean = new ArrayList<>();
-            StringBuilder query2 = new StringBuilder();
-            final StringBuilder dateQry = new StringBuilder();
-            if (remittanceBean.getFromVhDate() != null && voucherHeader.getVoucherDate() != null)
-                dateQry.append(" and vh.VOUCHERDATE >='" + Constants.DDMMYYYYFORMAT1.format(remittanceBean.getFromVhDate())
-                        + "' and vh.VOUCHERDATE <='" + Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()) + "' ");
-            else
-                dateQry.append(" and vh.VOUCHERDATE <='" + Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()) + "' ");
-            query2.append("SELECT vh.NAME,  vh.VOUCHERNUMBER,  vh.VOUCHERDATE, egr.glamt, egr.ID, ");
-            query2.append("(select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end from EG_REMITTANCE_GL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egd.REMITTANCEGLID=egr1.id  and egr1.id=egr.id) As col_7_0 , ");
-            query2.append("mis.departmentcode,mis.functionid  ");
-            query2.append("FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  EG_REMITTANCE_GL egr,  TDS recovery5_ ");
-            query2.append("WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gl.id=egr.glid and ");
-            query2.append("vh.ID =gl.VOUCHERHEADERID AND mis.VOUCHERHEADERID  =vh.ID AND ");
-            query2.append("vh.STATUS =0 AND vh.FUNDID =");
-            query2.append(voucherHeader.getFundId().getId());
-            query2.append(" AND egr.glamt- (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end from EG_REMITTANCE_GL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egd.REMITTANCEGLID=egr1.id and egr1.id=egr.id) <>0 AND ");
-            query2.append("recovery5_.ID  = ");
-            query2.append(remittanceBean.getRecoveryId());
-            query2.append(" AND (egr.TDSID = ");
-            query2.append(remittanceBean.getRecoveryId());
-            query2.append(" OR egr.TDSID  IS NULL) ");
-            query2.append(dateQry);
-            query2.append(getMisSQlQuery(voucherHeader));
-            query2.append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
-            populateNonConrolledTdsDataBySQL(voucherHeader, listRemitBean, query2);
-            return listRemitBean;
-    }
+	public List<RemittanceBean> getRecoveryDetailsForNonControlledCode(final RemittanceBean remittanceBean,
+			final CVoucherHeader voucherHeader) {
+		final List<RemittanceBean> listRemitBean = new ArrayList<>();
+		final StringBuilder query2 = new StringBuilder();
+		final Map<String, Object> params = new HashMap<>();
+		final StringBuilder dateQry = new StringBuilder();
+		if (remittanceBean.getFromVhDate() != null && voucherHeader.getVoucherDate() != null) {
+			dateQry.append(" and vh.VOUCHERDATE >= :fromVhDate and vh.VOUCHERDATE <= :voucherDate");
+			params.put("fromVhDate", Constants.DDMMYYYYFORMAT1.format(remittanceBean.getFromVhDate()));
+			params.put("voucherDate", Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()));
+		} else {
+			dateQry.append(" and vh.VOUCHERDATE <= :voucherDate ");
+			params.put("voucherDate", Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()));
+		}
+		query2.append("SELECT vh.NAME,  vh.VOUCHERNUMBER,  vh.VOUCHERDATE, egr.glamt, egr.ID, ")
+				.append("(select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id")
+				.append(" and egd.REMITTANCEGLID=egr1.id  and egr1.id=egr.id) As col_7_0 , ")
+				.append("mis.departmentcode,mis.functionid  ")
+				.append("FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  EG_REMITTANCE_GL egr,  TDS recovery5_ ")
+				.append("WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gl.id=egr.glid and ")
+				.append("vh.ID =gl.VOUCHERHEADERID AND mis.VOUCHERHEADERID  =vh.ID AND ")
+				.append("vh.STATUS =0 AND vh.FUNDID = :vhFundid")
+				.append(" AND egr.glamt- (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id")
+				.append(" and egd.REMITTANCEGLID=egr1.id and egr1.id=egr.id) <>0 AND ")
+				.append("recovery5_.ID  = :recoveryId").append(" AND (egr.TDSID = :tdsId")
+				.append(" OR egr.TDSID  IS NULL) ").append(dateQry).append(getMisSQlQuery(voucherHeader, params))
+				.append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
+
+		params.put("vhFundid", voucherHeader.getFundId().getId());
+		params.put("recoveryId", remittanceBean.getRecoveryId());
+		params.put("tdsId", remittanceBean.getRecoveryId());
+
+		populateNonConrolledTdsDataBySQL(voucherHeader, listRemitBean, query2, params);
+		return listRemitBean;
+	}
     
-    public List<RemittanceBean> getRecoveryDetailsForNonControlledCode(final String selectedRows){
-        final List<RemittanceBean> listRemitBean = new ArrayList<>();
-        StringBuilder query = new StringBuilder();
-        query.append("SELECT vh.NAME,  vh.VOUCHERNUMBER,  vh.VOUCHERDATE, egr.glamt, egr.ID, ");
-        query.append("(select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end from EG_REMITTANCE_GL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egd.REMITTANCEGLID=egr1.id and egr1.id=egr.id) As col_7_0 , ");
-        query.append("mis.departmentcode,mis.functionid  ");
-        query.append("FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  EG_REMITTANCE_GL egr,  TDS recovery5_ ");
-        query.append("WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gl.id=egr.glid and ");
-        query.append("vh.ID =gl.VOUCHERHEADERID AND mis.VOUCHERHEADERID  =vh.ID AND ");
-        query.append("vh.STATUS =0 AND egr.id in ( ");
-        query.append(selectedRows);
-        query.append(" ) and recovery5_.isactive=true");
-        query.append(" AND egr.glamt- (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end from EG_REMITTANCE_GL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egd.REMITTANCEGLID=egr1.id and egr1.id=egr.id) <>0 ");
-        query.append("ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
-        populateNonConrolledTdsDataBySQL(null, listRemitBean, query);
-        return listRemitBean;
-}
+	public List<RemittanceBean> getRecoveryDetailsForNonControlledCode(final String selectedRows) {
+		final List<RemittanceBean> listRemitBean = new ArrayList<>();
+		final StringBuilder query = new StringBuilder();
+		final Map<String, Object> params = new HashMap<>();
+		query.append("SELECT vh.NAME,  vh.VOUCHERNUMBER,  vh.VOUCHERDATE, egr.glamt, egr.ID, ")
+				.append("(select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egd.REMITTANCEGLID=egr1.id")
+				.append(" and egr1.id=egr.id) As col_7_0 , mis.departmentcode,mis.functionid  ")
+				.append("FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  EG_REMITTANCE_GL egr,  TDS recovery5_ ")
+				.append("WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gl.id=egr.glid and ")
+				.append("vh.ID =gl.VOUCHERHEADERID AND mis.VOUCHERHEADERID  =vh.ID AND ")
+				.append("vh.STATUS =0 AND egr.id in (:selectedRows) and recovery5_.isactive=true")
+				.append(" AND egr.glamt- (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id")
+				.append(" and egd.REMITTANCEGLID=egr1.id and egr1.id=egr.id) <>0 ")
+				.append("ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
+		params.put("selectedRows", selectedRows);
+		populateNonConrolledTdsDataBySQL(null, listRemitBean, query, params);
+		return listRemitBean;
+	}
 
-    public StringBuilder getRecoveryListForSelectedBank(final RemittanceBean remittanceBean, final CVoucherHeader voucherHeader,
-            final StringBuilder dateQuery) {
-        StringBuilder query = new StringBuilder();
-        query.append(" SELECT vh.NAME  AS col_0_0_,  vh.VOUCHERNUMBER AS col_1_0_,  vh.VOUCHERDATE   AS col_2_0_,");
-        query.append(" egr.GLDTLAMT   AS col_3_0_,  gld.DETAILTYPEID  AS col_4_0_,  gld.DETAILKEYID   AS col_5_0_,");
-        query.append(
-                " egr.ID    AS col_6_0_, (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end");
-        query.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh");
-        query.append(
-                " where vh.status not in (4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid ");
-        query.append(" and egr1.id=egr.id) As col_7_0 , mis.departmentcode as col_8_0,mis.functionid as col_9_0");
-        query.append(
-                "  FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  GENERALLEDGERDETAIL gld,  EG_REMITTANCE_GLDTL egr,  TDS recovery5_ ,PAYMENTHEADER ph,miscbilldetail misbill");
-        query.append(
-                " WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gld.ID =egr.GLDTLID AND gl.ID =gld.GENERALLEDGERID AND vh.ID =gl.VOUCHERHEADERID");
-        query.append(
-                " AND mis.VOUCHERHEADERID  =vh.ID AND vh.STATUS    =0 and misbill.billvhid=vh.id and misbill.payvhid=ph.voucherheaderid and (select status from voucherheader where id=misbill.payvhid )=0  AND ph.bankaccountnumberid=");
-        query.append(remittanceBean.getBankAccountId()).append(" and vh.FUNDID    =");
-        query.append(voucherHeader.getFundId().getId());
-        query.append(" AND egr.GLDTLAMT-");
-        query.append(
-                " (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh");
-        query.append(
-                " where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid and egr1.id=egr.id)");
-        query.append(" <>0 AND recovery5_.ID  = ");
-        query.append(remittanceBean.getRecoveryId()).append(" AND (egr.TDSID = ");
-        query.append(remittanceBean.getRecoveryId());
-        query.append(" OR egr.TDSID  IS NULL) ");
-        query.append(dateQuery);
-        query.append(getMisSQlQuery(voucherHeader));
-        query.append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
+	public StringBuilder getRecoveryListForSelectedBank(final RemittanceBean remittanceBean,
+			final CVoucherHeader voucherHeader, final StringBuilder dateQuery, Map<String, Object> params) {
+		final StringBuilder query = new StringBuilder();
+		query.append(" SELECT vh.NAME  AS col_0_0_,  vh.VOUCHERNUMBER AS col_1_0_,  vh.VOUCHERDATE   AS col_2_0_,")
+				.append(" egr.GLDTLAMT   AS col_3_0_,  gld.DETAILTYPEID  AS col_4_0_,  gld.DETAILKEYID   AS col_5_0_,")
+				.append(" egr.ID    AS col_6_0_, (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status not in (4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid ")
+				.append(" and egr1.id=egr.id) As col_7_0 , mis.departmentcode as col_8_0,mis.functionid as col_9_0")
+				.append("  FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  GENERALLEDGERDETAIL gld,  EG_REMITTANCE_GLDTL egr,")
+				.append("  TDS recovery5_ ,PAYMENTHEADER ph,miscbilldetail misbill")
+				.append(" WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gld.ID =egr.GLDTLID AND gl.ID =gld.GENERALLEDGERID")
+				.append(" AND vh.ID =gl.VOUCHERHEADERID")
+				.append(" AND mis.VOUCHERHEADERID  =vh.ID AND vh.STATUS    =0 and misbill.billvhid=vh.id")
+				.append(" and misbill.payvhid=ph.voucherheaderid and (select status from voucherheader where id=misbill.payvhid )=0")
+				.append(" AND ph.bankaccountnumberid = :bankaccountnumberid and vh.FUNDID = :vhFundId")
+				.append(" AND egr.GLDTLAMT-")
+				.append(" (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id")
+				.append(" and egr1.id=egd.remittancegldtlid and egr1.id=egr.id)")
+				.append(" <>0 AND recovery5_.ID  = :recoveryId AND (egr.TDSID = :tdsId")
+				.append(" OR egr.TDSID  IS NULL) ").append(dateQuery)
+				.append(getMisSQlQuery(voucherHeader, params))
+				.append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
 
-        return query;
-    }
+		params.put("bankaccountnumberid", remittanceBean.getBankAccountId());
+		params.put("vhFundId", voucherHeader.getFundId().getId());
+		params.put("recoveryId", remittanceBean.getRecoveryId());
+		params.put("tdsId", remittanceBean.getRecoveryId());
+		return query;
+	}
 
     public List<RemittanceBean> getRecoveryDetails(final String selectedRows)
             throws ValidationException {
@@ -280,35 +295,32 @@ public class RemitRecoveryService {
             LOGGER.debug("RemitRecoveryService | getRecoveryDetails | Start");
         final List<RemittanceBean> listRemitBean = new ArrayList<RemittanceBean>();
 
-        StringBuilder query = new StringBuilder();
-        query.append(" SELECT vh.NAME  AS col_0_0_,  vh.VOUCHERNUMBER AS col_1_0_,  vh.VOUCHERDATE   AS col_2_0_,");
-        query.append(" egr.GLDTLAMT   AS col_3_0_,  gld.DETAILTYPEID  AS col_4_0_,  gld.DETAILKEYID   AS col_5_0_,");
-        query.append(
-                " egr.ID    AS col_6_0_, (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end");
-        query.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh");
-        query.append(
-                " where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid ");
-        query.append(" and egr1.id=egr.id) As col_7_0 , mis.departmentcode as col_8_0,mis.functionid as col_9_0");
-        query.append(
-                "  FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  GENERALLEDGERDETAIL gld,  EG_REMITTANCE_GLDTL egr,  TDS recovery5_");
-        query.append(
-                " WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gld.ID =egr.GLDTLID AND gl.ID =gld.GENERALLEDGERID AND vh.ID =gl.VOUCHERHEADERID");
-        query.append(" AND mis.VOUCHERHEADERID  =vh.ID AND vh.STATUS    =0 ");
-        query.append(" and egr.id in ( ");
-        query.append(selectedRows);
-        query.append(" ) and recovery5_.isactive=true");
-        query.append(" AND egr.GLDTLAMT-");
-        query.append(
-                " (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh");
-        query.append(
-                " where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid and egr1.id=egr.id)");
-        query.append(" <>0  ");
-        query.append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
+        final StringBuilder query = new StringBuilder();
+        final Map<String, Object> params = new HashMap<>();
+		query.append(" SELECT vh.NAME  AS col_0_0_,  vh.VOUCHERNUMBER AS col_1_0_,  vh.VOUCHERDATE   AS col_2_0_,")
+				.append(" egr.GLDTLAMT   AS col_3_0_,  gld.DETAILTYPEID  AS col_4_0_,  gld.DETAILKEYID   AS col_5_0_,")
+				.append(" egr.ID    AS col_6_0_, (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid ")
+				.append(" and egr1.id=egr.id) As col_7_0 , mis.departmentcode as col_8_0,mis.functionid as col_9_0")
+				.append("  FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  GENERALLEDGERDETAIL gld,")
+				.append("  EG_REMITTANCE_GLDTL egr,  TDS recovery5_")
+				.append(" WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gld.ID =egr.GLDTLID AND gl.ID =gld.GENERALLEDGERID")
+				.append(" AND vh.ID =gl.VOUCHERHEADERID")
+				.append(" AND mis.VOUCHERHEADERID  =vh.ID AND vh.STATUS    =0 ")
+				.append(" and egr.id in (:selectedRows) and recovery5_.isactive=true AND egr.GLDTLAMT-")
+				.append(" (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id")
+				.append(" and egr1.id=egd.remittancegldtlid and egr1.id=egr.id) <>0  ")
+				.append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
+
+		params.put("selectedRows", selectedRows);
 
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("RemitRecoveryService | getRecoveryDetails | query := " + query.toString());
 
-        populateDetailsBySQL(null, listRemitBean, query);
+        populateDetailsBySQL(null, listRemitBean, query, params);
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("RemitRecoveryService | listRemitBean size : " + listRemitBean.size());
         if (LOGGER.isDebugEnabled())
@@ -316,113 +328,117 @@ public class RemitRecoveryService {
         return listRemitBean;
     }
 
-    public List<RemittanceBean> getRecoveryDetailsForReport(final RemittanceBean remittanceBean,
-            final CVoucherHeader voucherHeader,
-            final Integer detailKeyId) throws ValidationException {
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug("RemitRecoveryService | getRecoveryDetails | Start");
-        final List<RemittanceBean> listRemitBean = new ArrayList<RemittanceBean>();
-        StringBuilder query = new StringBuilder();
-        query.append(" SELECT vh.NAME     AS col_0_0_,  vh.VOUCHERNUMBER AS col_1_0_,  vh.VOUCHERDATE   AS col_2_0_,");
-        query.append(" egr.GLDTLAMT      AS col_3_0_,  gld.DETAILTYPEID  AS col_4_0_,  gld.DETAILKEYID   AS col_5_0_,");
-        query.append(
-                " egr.ID            AS col_6_0_, (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end");
-        query.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh");
-        query.append(
-                " where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid ");
-        query.append(" and egr1.id=egr.id) As col_7_0, mis.departmentcode as col_8_0,mis.functionid as col_9_0");
-        query.append(
-                "  FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  GENERALLEDGERDETAIL gld,  EG_REMITTANCE_GLDTL egr,  TDS recovery5_");
-        query.append(
-                " WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gld.ID =egr.GLDTLID AND gl.ID =gld.GENERALLEDGERID AND vh.ID =gl.VOUCHERHEADERID");
-        query.append(" AND mis.VOUCHERHEADERID  =vh.ID AND vh.STATUS    =0 AND vh.FUNDID    =");
-        query.append(voucherHeader.getFundId().getId());
-        query.append(" AND egr.GLDTLAMT-");
-        query.append(
-                " (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh");
-        query.append(
-                " where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid and egr1.id=egr.id)");
-        query.append(" <>0 AND recovery5_.ID  = ");
-        query.append(remittanceBean.getRecoveryId()).append(" AND (egr.TDSID  = ");
-        query.append(remittanceBean.getRecoveryId());
-        query.append(" OR egr.TDSID  IS NULL) AND vh.VOUCHERDATE <= '");
-        query.append(Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()) + "' ");
-        if (remittanceBean.getFromDate() != null && !remittanceBean.getFromDate().isEmpty())
-            query.append("  and vh.VoucherDate>= '")
-                    .append(remittanceBean.getFromDate() + "'");
-        if (detailKeyId != null && detailKeyId.intValue() != 0)
-            query.append(" and gld.detailkeyid=" + detailKeyId);
-        query.append("   " + getMisSQlQuery(voucherHeader))
-                .append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
+	public List<RemittanceBean> getRecoveryDetailsForReport(final RemittanceBean remittanceBean,
+			final CVoucherHeader voucherHeader, final Integer detailKeyId) throws ValidationException {
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("RemitRecoveryService | getRecoveryDetails | Start");
+		final List<RemittanceBean> listRemitBean = new ArrayList<RemittanceBean>();
+		final StringBuilder query = new StringBuilder();
+		final Map<String, Object> params = new HashMap<>();
+		query.append(" SELECT vh.NAME     AS col_0_0_,  vh.VOUCHERNUMBER AS col_1_0_,  vh.VOUCHERDATE   AS col_2_0_,")
+				.append(" egr.GLDTLAMT      AS col_3_0_,  gld.DETAILTYPEID  AS col_4_0_,  gld.DETAILKEYID   AS col_5_0_,")
+				.append(" egr.ID            AS col_6_0_, (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status!=4 and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id and egr1.id=egd.remittancegldtlid ")
+				.append(" and egr1.id=egr.id) As col_7_0, mis.departmentcode as col_8_0,mis.functionid as col_9_0")
+				.append("  FROM VOUCHERHEADER vh,  VOUCHERMIS mis,  GENERALLEDGER gl,  GENERALLEDGERDETAIL gld,")
+				.append("  EG_REMITTANCE_GLDTL egr,  TDS recovery5_")
+				.append(" WHERE recovery5_.GLCODEID  =gl.GLCODEID AND gld.ID =egr.GLDTLID AND gl.ID =gld.GENERALLEDGERID")
+				.append(" AND vh.ID =gl.VOUCHERHEADERID")
+				.append(" AND mis.VOUCHERHEADERID  =vh.ID AND vh.STATUS    =0 AND vh.FUNDID = :vhFundId")
+				.append(" AND egr.GLDTLAMT-")
+				.append(" (select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
+				.append(" from EG_REMITTANCE_GLDTL egr1,eg_remittance_detail egd,eg_remittance  eg,voucherheader vh")
+				.append(" where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id")
+				.append(" and egr1.id=egd.remittancegldtlid and egr1.id=egr.id)")
+				.append(" <>0 AND recovery5_.ID  = :recoveryId").append(" AND (egr.TDSID  = :tdsId")
+				.append(" OR egr.TDSID  IS NULL) AND vh.VOUCHERDATE <= :vhVoucherDate");
+		if (remittanceBean.getFromDate() != null && !remittanceBean.getFromDate().isEmpty()) {
+			query.append("  and vh.VoucherDate>= :vhVoucherFromDate");
+			params.put("vhVoucherFromDate", remittanceBean.getFromDate());
+		}
+		if (detailKeyId != null && detailKeyId.intValue() != 0) {
+			query.append(" and gld.detailkeyid = :detailKeyId");
+			params.put("detailKeyId", detailKeyId);
+		}
+		query.append(" ").append(getMisSQlQuery(voucherHeader, params))
+				.append(" ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
 
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug("RemitRecoveryService | getRecoveryDetails | query := " + query.toString());
+		params.put("vhFundId", voucherHeader.getFundId().getId());
+		params.put("recoveryId", remittanceBean.getRecoveryId());
+		params.put("tdsId", remittanceBean.getRecoveryId());
+		params.put("vhVoucherDate", Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()));
 
-        populateDetailsBySQL(voucherHeader, listRemitBean, query);
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug("RemitRecoveryService | listRemitBean size : " + listRemitBean.size());
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug("RemitRecoveryService | getRecoveryDetails | End");
-        return listRemitBean;
-    }
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("RemitRecoveryService | getRecoveryDetails | query := " + query.toString());
+
+		populateDetailsBySQL(voucherHeader, listRemitBean, query, params);
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("RemitRecoveryService | listRemitBean size : " + listRemitBean.size());
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("RemitRecoveryService | getRecoveryDetails | End");
+		return listRemitBean;
+	}
 
     /**
      * @param voucherHeader
+     * @param params 
      * @return
      */
-    private Object getMisSQlQuery(final CVoucherHeader voucherHeader) {
-        final StringBuilder misQuery = new StringBuilder();
-        if (null != voucherHeader && null != voucherHeader.getVouchermis()) {
-            if (null != voucherHeader.getVouchermis().getDepartmentcode()
-                    && !voucherHeader.getVouchermis().getDepartmentcode().equalsIgnoreCase("-1")) {
-                misQuery.append("and  mis.departmentcode='");
-                misQuery.append(voucherHeader.getVouchermis().getDepartmentcode() + "'");
-            }
-            if (null != voucherHeader.getVouchermis().getFunctionary()
-                    && null != voucherHeader.getVouchermis().getFunctionary().getId()
-                    && -1 != voucherHeader.getVouchermis().getFunctionary().getId()) {
-                misQuery.append(" and mis.functionaryid=");
-                misQuery.append(voucherHeader.getVouchermis().getFunctionary().getId());
-            }
-            if (null != voucherHeader.getVouchermis().getFunction()
-                    && null != voucherHeader.getVouchermis().getFunction().getId()
-                    && -1 != voucherHeader.getVouchermis().getFunction().getId()) {
-                misQuery.append(" and mis.functionid=");
-                misQuery.append(voucherHeader.getVouchermis().getFunction().getId());
-            }
-            if (null != voucherHeader.getVouchermis().getSchemeid()
-                    && null != voucherHeader.getVouchermis().getSchemeid().getId()
-                    && -1 != voucherHeader.getVouchermis().getSchemeid().getId()) {
-                misQuery.append(" and mis.schemeid=");
-                misQuery.append(voucherHeader.getVouchermis().getSchemeid().getId());
-            }
-            if (null != voucherHeader.getVouchermis().getSubschemeid()
-                    && null != voucherHeader.getVouchermis().getSubschemeid().getId()
-                    && -1 != voucherHeader.getVouchermis().getSubschemeid().getId()) {
-                misQuery.append(" and mis.subschemeid=");
-                misQuery.append(voucherHeader.getVouchermis().getSubschemeid().getId());
-            }
-            if (null != voucherHeader.getVouchermis().getFundsource()
-                    && null != voucherHeader.getVouchermis().getFundsource().getId()
-                    && -1 != voucherHeader.getVouchermis().getFundsource().getId()) {
-                misQuery.append(" and mis.fundsourceid=");
-                misQuery.append(voucherHeader.getVouchermis().getFundsource().getId());
-            }
-            if (null != voucherHeader.getVouchermis().getDivisionid()
-                    && null != voucherHeader.getVouchermis().getDivisionid().getId()
-                    && -1 != voucherHeader.getVouchermis().getDivisionid().getId()) {
-                misQuery.append(" and mis.divisionid=");
-                misQuery.append(voucherHeader.getVouchermis().getDivisionid().getId());
-            }
-        }
-        return misQuery.toString();
-    }
+	private Object getMisSQlQuery(final CVoucherHeader voucherHeader, Map<String, Object> params) {
+		final StringBuilder misQuery = new StringBuilder();
+		if (null != voucherHeader && null != voucherHeader.getVouchermis()) {
+			if (null != voucherHeader.getVouchermis().getDepartmentcode()
+					&& !voucherHeader.getVouchermis().getDepartmentcode().equalsIgnoreCase("-1")) {
+				misQuery.append("and  mis.departmentcode=:misDepartmentcode");
+				params.put("misDepartmentcode", voucherHeader.getVouchermis().getDepartmentcode());
+			}
+			if (null != voucherHeader.getVouchermis().getFunctionary()
+					&& null != voucherHeader.getVouchermis().getFunctionary().getId()
+					&& -1 != voucherHeader.getVouchermis().getFunctionary().getId()) {
+				misQuery.append(" and mis.functionaryid = :misFunctionaryid");
+				params.put("misFunctionaryid", voucherHeader.getVouchermis().getFunctionary().getId());
+			}
+			if (null != voucherHeader.getVouchermis().getFunction()
+					&& null != voucherHeader.getVouchermis().getFunction().getId()
+					&& -1 != voucherHeader.getVouchermis().getFunction().getId()) {
+				misQuery.append(" and mis.functionid = :misFunctionid");
+				params.put("misFunctionid", voucherHeader.getVouchermis().getFunction().getId());
+			}
+			if (null != voucherHeader.getVouchermis().getSchemeid()
+					&& null != voucherHeader.getVouchermis().getSchemeid().getId()
+					&& -1 != voucherHeader.getVouchermis().getSchemeid().getId()) {
+				misQuery.append(" and mis.schemeid = :misSchemeid");
+				params.put("misSchemeid", voucherHeader.getVouchermis().getSchemeid().getId());
+			}
+			if (null != voucherHeader.getVouchermis().getSubschemeid()
+					&& null != voucherHeader.getVouchermis().getSubschemeid().getId()
+					&& -1 != voucherHeader.getVouchermis().getSubschemeid().getId()) {
+				misQuery.append(" and mis.subschemeid = :misSubschemeid");
+				params.put("misSubschemeid", voucherHeader.getVouchermis().getSubschemeid().getId());
+			}
+			if (null != voucherHeader.getVouchermis().getFundsource()
+					&& null != voucherHeader.getVouchermis().getFundsource().getId()
+					&& -1 != voucherHeader.getVouchermis().getFundsource().getId()) {
+				misQuery.append(" and mis.fundsourceid = :misFundsourceid");
+				params.put("misFundsourceid", voucherHeader.getVouchermis().getFundsource().getId());
+			}
+			if (null != voucherHeader.getVouchermis().getDivisionid()
+					&& null != voucherHeader.getVouchermis().getDivisionid().getId()
+					&& -1 != voucherHeader.getVouchermis().getDivisionid().getId()) {
+				misQuery.append(" and mis.divisionid = :misDivisionid");
+				params.put("misDivisionid", voucherHeader.getVouchermis().getDivisionid().getId());
+			}
+		}
+		return misQuery.toString();
+	}
 
     private void populateDetailsBySQL(final CVoucherHeader voucherHeader, final List<RemittanceBean> listRemitBean,
-            final StringBuilder query) {
+            final StringBuilder query, Map<String, Object> params) {
         RemittanceBean remitBean;
-        final SQLQuery searchSQLQuery = persistenceService.getSession().createSQLQuery(query.toString());
-        final List<Object[]> list = searchSQLQuery.list();
+		final SQLQuery searchSQLQuery = persistenceService.getSession().createSQLQuery(query.toString());
+		params.entrySet().forEach(entry -> searchSQLQuery.setParameter(entry.getKey(), entry.getValue()));
+		final List<Object[]> list = searchSQLQuery.list();
         for (final Object[] element : list) {
             remitBean = new RemittanceBean();
             remitBean.setVoucherName(element[0].toString());
@@ -474,10 +490,11 @@ public class RemitRecoveryService {
     }
     
     private void populateNonConrolledTdsDataBySQL(final CVoucherHeader voucherHeader, final List<RemittanceBean> listRemitBean,
-            final StringBuilder query) {
+            final StringBuilder query, Map<String, Object> params) {
         RemittanceBean remitBean;
-        final SQLQuery searchSQLQuery = persistenceService.getSession().createSQLQuery(query.toString());
-        final List<Object[]> list = searchSQLQuery.list();
+		final SQLQuery searchSQLQuery = persistenceService.getSession().createSQLQuery(query.toString());
+		params.entrySet().forEach(entry -> searchSQLQuery.setParameter(entry.getKey(), entry.getValue()));
+		final List<Object[]> list = searchSQLQuery.list();
         for (final Object[] element : list) {
             remitBean = new RemittanceBean();
             remitBean.setVoucherName(element[0].toString());
@@ -551,65 +568,57 @@ public class RemitRecoveryService {
         final List<AutoRemittanceBeanReport> remittanceList = sqlQuery.list();
         final List<AutoRemittanceBeanReport> autoRemittance = new ArrayList<AutoRemittanceBeanReport>(0);
 
-        final StringBuffer voucherQueryOne = new StringBuffer(
-                "SELECT   remgldtl.REMITTEDAMT AS remittedAmount,"
-                        +
-                        "( SELECT SUM(creditamount) FROM GENERALLEDGER gld1 WHERE gld1.voucherheaderid =gld.voucherheaderid) AS billAmount,"
-                        +
-                        " vh.VOUCHERNUMBER AS voucherNumber, miscbilldtl.billnumber AS billNumber,remdtl.id as remittanceDTId,"
-                        +
-                        " gldtl.DETAILTYPEID  as detailKeyTypeId ,  gldtl.DETAILKEYID as detailKeyId,vh.id as voucherId,billmis.BILLID as billId"
-                        +
-                        " FROM EG_REMITTANCE_DETAIL remdtl,EG_REMITTANCE_GLDTL remgldtl, "
-                        +
-                        " GENERALLEDGERDETAIL gldtl,GENERALLEDGER gld,VOUCHERHEADER vh, MISCBILLDETAIL miscbilldtl,eg_billregistermis billmis "
-                        +
-                        " WHERE  remdtl.REMITTANCEGLDTLID = remgldtl.id" +
-                        " AND gldtl.ID = remgldtl.GLDTLID " +
-                        " AND gldtl.GENERALLEDGERID = gld.id" +
-                        " AND gld.VOUCHERHEADERID =vh.id" +
-                        " AND miscbilldtl.billvhid =vh.id" +
-                        " AND billmis.VOUCHERHEADERID=vh.id ");
-        StringBuffer inquery = new StringBuffer(" AND remdtl.id in ( ");
+		final StringBuilder voucherQueryOne = new StringBuilder("SELECT   remgldtl.REMITTEDAMT AS remittedAmount,")
+				.append("( SELECT SUM(creditamount) FROM GENERALLEDGER gld1 WHERE gld1.voucherheaderid =gld.voucherheaderid)")
+				.append(" AS billAmount, vh.VOUCHERNUMBER AS voucherNumber, miscbilldtl.billnumber AS billNumber,")
+				.append("remdtl.id as remittanceDTId, gldtl.DETAILTYPEID  as detailKeyTypeId , gldtl.DETAILKEYID")
+				.append(" as detailKeyId,vh.id as voucherId,billmis.BILLID as billId")
+				.append(" FROM EG_REMITTANCE_DETAIL remdtl,EG_REMITTANCE_GLDTL remgldtl, ")
+				.append(" GENERALLEDGERDETAIL gldtl,GENERALLEDGER gld,VOUCHERHEADER vh, MISCBILLDETAIL miscbilldtl,")
+				.append("eg_billregistermis billmis ")
+				.append(" WHERE  remdtl.REMITTANCEGLDTLID = remgldtl.id AND gldtl.ID = remgldtl.GLDTLID ")
+				.append(" AND gldtl.GENERALLEDGERID = gld.id AND gld.VOUCHERHEADERID =vh.id")
+				.append(" AND miscbilldtl.billvhid =vh.id AND billmis.VOUCHERHEADERID=vh.id ");
+        StringBuilder inquery = new StringBuilder(" AND remdtl.id in ( ");
         int i = 1;
+        final Map<String, Object > params = new HashMap<>();
         if (null != remittanceList && !remittanceList.isEmpty()) {
-
-            for (final AutoRemittanceBeanReport remittance : remittanceList) {
-                if (i % 1000 == 0) {
-                    inquery.append(")");
-                    final StringBuffer voucherQueryTwo = new StringBuffer(
-                            voucherQueryOne
-                                    + inquery.toString()
-                                    +
-                                    " GROUP BY  vh.vouchernumber, miscbilldtl.billnumber , remgldtl.remittedamt, remdtl.ID,  gldtl.detailtypeid , gldtl.detailkeyid,vh.id,gld.voucherheaderid,billmis.BILLID");
-                    final Query sqlVoucherQuery = persistenceService.getSession().createSQLQuery(voucherQueryTwo.toString())
-                            .addScalar("remittedAmount").addScalar("billAmount").addScalar("voucherNumber")
-                            .addScalar("billNumber").addScalar("remittanceDTId")
-                            .addScalar("detailKeyTypeId").addScalar("detailKeyId").addScalar("voucherId").addScalar("billId")
-                            .setResultTransformer(Transformers.aliasToBean(AutoRemittanceBeanReport.class));
-                    autoRemittance.addAll(sqlVoucherQuery.list());
-                    inquery = new StringBuffer(" AND remdtl.id in ( " + remittance.getRemittanceDTId().toString());
-                } else {
-                    if (i != 1)
-                        inquery.append(",");
-                    inquery.append(remittance.getRemittanceDTId().toString());
-                }
-                i++;
-            }
+        	int index = 0;
+			for (final AutoRemittanceBeanReport remittance : remittanceList) {
+				if (i % 1000 == 0) {
+					inquery.append(")");
+					final StringBuilder voucherQueryTwo = new StringBuilder(voucherQueryOne).append(inquery.toString())
+							.append(" GROUP BY  vh.vouchernumber, miscbilldtl.billnumber , remgldtl.remittedamt, remdtl.ID,")
+							.append("  gldtl.detailtypeid , gldtl.detailkeyid,vh.id,gld.voucherheaderid,billmis.BILLID");
+					final Query sqlVoucherQuery = persistenceService.getSession()
+							.createSQLQuery(voucherQueryTwo.toString()).addScalar("remittedAmount")
+							.addScalar("billAmount").addScalar("voucherNumber").addScalar("billNumber")
+							.addScalar("remittanceDTId").addScalar("detailKeyTypeId").addScalar("detailKeyId")
+							.addScalar("voucherId").addScalar("billId")
+							.setResultTransformer(Transformers.aliasToBean(AutoRemittanceBeanReport.class));
+					autoRemittance.addAll(sqlVoucherQuery.list());
+					inquery = new StringBuilder(" AND remdtl.id in (:remittanceDTId").append(index);
+					params.put("remittanceDTId" + index++, remittance.getRemittanceDTId().toString());
+				} else {
+					if (i != 1)
+						inquery.append(",");
+					inquery.append(":remittanceDetailId").append(index);
+					params.put("remittanceDetailId" + index++, remittance.getRemittanceDTId().toString());
+				}
+				i++;
+			}
             inquery.append(")");
-            final StringBuffer voucherQueryTwo = new StringBuffer(
-                    voucherQueryOne
-                            + inquery.toString()
-                            +
-                            " GROUP BY  vh.vouchernumber, miscbilldtl.billnumber , remgldtl.remittedamt,    gldtl.detailtypeid , gldtl.detailkeyid,"
-                            +
-                            " remdtl.ID,vh.id,gld.voucherheaderid,billmis.BILLID");
-            final Query sqlVoucherQuery = persistenceService.getSession().createSQLQuery(voucherQueryTwo.toString())
-                    .addScalar("remittedAmount").addScalar("billAmount").addScalar("voucherNumber")
-                    .addScalar("billNumber").addScalar("remittanceDTId")
-                    .addScalar("detailKeyTypeId").addScalar("detailKeyId").addScalar("voucherId").addScalar("billId")
-                    .setResultTransformer(Transformers.aliasToBean(AutoRemittanceBeanReport.class));
-            autoRemittance.addAll(sqlVoucherQuery.list());
+			final StringBuilder voucherQueryTwo = new StringBuilder(voucherQueryOne).append(inquery.toString())
+					.append(" GROUP BY  vh.vouchernumber, miscbilldtl.billnumber , remgldtl.remittedamt,   ")
+					.append(" gldtl.detailtypeid , gldtl.detailkeyid,")
+					.append(" remdtl.ID,vh.id,gld.voucherheaderid,billmis.BILLID");
+			final Query sqlVoucherQuery = persistenceService.getSession().createSQLQuery(voucherQueryTwo.toString())
+					.addScalar("remittedAmount").addScalar("billAmount").addScalar("voucherNumber")
+					.addScalar("billNumber").addScalar("remittanceDTId").addScalar("detailKeyTypeId")
+					.addScalar("detailKeyId").addScalar("voucherId").addScalar("billId")
+					.setResultTransformer(Transformers.aliasToBean(AutoRemittanceBeanReport.class));
+			params.entrySet().forEach(entry -> sqlVoucherQuery.setParameter(entry.getKey(), entry.getValue()));
+			autoRemittance.addAll(sqlVoucherQuery.list());
         }
         final ArrayList<AutoRemittanceBeanReport> autoRemittanceList = new ArrayList<AutoRemittanceBeanReport>();
         for (final AutoRemittanceBeanReport remittance : remittanceList)

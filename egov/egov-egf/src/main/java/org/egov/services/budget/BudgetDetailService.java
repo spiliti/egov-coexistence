@@ -47,6 +47,25 @@
  */
 package org.egov.services.budget;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.script.ScriptContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.egov.commons.CChartOfAccounts;
@@ -110,24 +129,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.script.ScriptContext;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 
 @Service
 @Transactional(readOnly = true)
@@ -1453,405 +1454,533 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
     }
 
     // For Consolidated Budget Report
-    public List<Object[]> fetchMajorCodeAndApprovedAmountForReport(final CFinancialYear financialYear,
-            final String fundType, final String budgetType) {
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Starting fetchMajorCodeAndApprovedAmount................");
-        final String excludeDept = " and bd.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
-        final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
-        StringBuffer query = new StringBuffer();
+	public List<Object[]> fetchMajorCodeAndApprovedAmountForReport(final CFinancialYear financialYear,
+			final String fundType, final String budgetType) {
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Starting fetchMajorCodeAndApprovedAmount................");
+		final String excludeDept = " and bd.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
+		final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
+		final StringBuilder query = new StringBuilder();
+		final Map<String, Object> params = new HashMap<>();
 
-        query = query
-                .append("SELECT cao.majorcode, SUM(round(bd.approvedamount/1000,0)) FROM egf_budgetdetail bd, egf_budgetgroup bg, egf_budget b, chartofaccounts cao, financialyear f, egw_status wf"
-                        + " WHERE bd.budget =b.id AND b.isbere='RE' AND f.id =" + financialYear.getId()
-                        + " AND b.financialyearid=" + financialYear.getId()
-                        + " AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode =bg.majorcode) AND bg.mincode! =bg.maxcode AND wf.code='Approved' AND bd.status = wf.id GROUP BY cao.majorcode");
+		query.append("SELECT cao.majorcode, SUM(round(bd.approvedamount/1000,0)) FROM egf_budgetdetail bd,")
+				.append(" egf_budgetgroup bg, egf_budget b, chartofaccounts cao, financialyear f, egw_status wf")
+				.append(" WHERE bd.budget =b.id AND b.isbere='RE' AND f.id = :financialYearId")
+				.append(" AND b.financialyearid = :financialYearId")
+				.append(" AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode =bg.majorcode)")
+				.append(" AND bg.mincode! =bg.maxcode AND wf.code='Approved' AND bd.status = wf.id GROUP BY cao.majorcode")
+				.append(" UNION ")
+				.append("SELECT cao.majorcode, SUM(round(bd.approvedamount/1000,0)) FROM egf_budgetdetail bd,")
+				.append(" egf_budgetgroup bg, egf_budget b, chartofaccounts cao, financialyear f, egw_status wf")
+				.append(" WHERE bd.budget =b.id AND b.isbere='RE' AND f.id = :financialYearId")
+				.append(" AND b.financialyearid = :financialYearId")
+				.append(" AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL AND wf.code='Approved'")
+				.append(" AND bd.status = wf.id GROUP BY cao.majorcode");
 
-        query = query.append(" UNION ");
+		params.put("financialYearId", financialYear.getId());
+		params.put("budgetingType", budgetingType);
 
-        query = query
-                .append("SELECT cao.majorcode, SUM(round(bd.approvedamount/1000,0)) FROM egf_budgetdetail bd, egf_budgetgroup bg, egf_budget b, chartofaccounts cao, financialyear f, egw_status wf"
-                        + " WHERE bd.budget =b.id AND b.isbere='RE' AND f.id =" + financialYear.getId()
-                        + " AND b.financialyearid=" + financialYear.getId()
-                        + " AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL AND wf.code='Approved' AND bd.status = wf.id GROUP BY cao.majorcode");
+		final Query qry = getSession().createSQLQuery(query.toString());
+		params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
 
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Finished fetchMajorCodeAndApprovedAmount");
+		final List<Object[]> result = qry.list();
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Finished fetchMajorCodeAndApprovedAmount");
 
-        return result;
-    }
+		return result;
+	}
+
+	// For Consolidated Budget Report
+	public List<Object[]> fetchMajorCodeAndBENextYrApprovedForReport(final CFinancialYear financialYear,
+			final String fundType, final String budgetType) {
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Starting fetchMajorCodeAndBENextYrApproved................");
+		final String excludeDept = " and bd2.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
+		final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
+		final StringBuilder query = new StringBuilder();
+		final Map<String, Object> params = new HashMap<>();
+
+		query.append("SELECT cao.majorcode, SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1,").append(
+				" egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2, chartofaccounts cao, egw_status wf")
+				.append(" WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE'")
+				.append(" AND b1.financialyearid = :financialYearId")
+				.append(" AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode   =bg.majorcode)")
+				.append(" AND bd1.uniqueno = bd2.uniqueno AND b2.reference_budget = b1.id AND wf.code='Approved'")
+				.append(" AND bd1.status = wf.id GROUP BY cao.majorcode").append(" UNION ")
+				.append("SELECT cao.majorcode, SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1,")
+				.append(" egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2, chartofaccounts cao, egw_status wf")
+				.append(" WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE'")
+				.append(" AND b1.financialyearid = :financialYearId")
+				.append(" AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL AND bd1.uniqueno = bd2.uniqueno")
+				.append(" AND b2.reference_budget = b1.id AND wf.code='Approved' AND bd1.status = wf.id GROUP BY cao.majorcode");
+
+		params.put("financialYearId", financialYear.getId());
+		params.put("budgetingType", budgetingType);
+
+		final Query qry = getSession().createSQLQuery(query.toString());
+		params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+
+		final List<Object[]> result = qry.list();
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Finished fetchMajorCodeAndBENextYrApproved");
+
+		return result;
+	}
+
+	// For Consolidate Budget Report.
+	public List<Object[]> fetchGlCodeAndNameForReport(final CFinancialYear financialYear, final String fundType,
+			final String budgetType) {
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Starting fetchGlCodeAndNameForReport............");
+		final String excludeDept = " and bd.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
+		final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
+		final StringBuilder query = new StringBuilder();
+		final Map<String, Object> params = new HashMap<>();
+		query.append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'")
+				.append("||substr(cao.glcode,8,2), cao.glcode||'-'||cao.name FROM egf_budgetdetail bd, egf_budgetgroup bg,")
+				.append(" egf_budget b, chartofaccounts cao, chartofaccounts cao1, financialyear f, egw_status wf")
+				.append(" WHERE bd.budget=b.id AND b.isbere='RE' AND f.id = :financialYearId")
+				.append(" AND b.financialyearid = :financialYearId")
+				.append(" AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode=bg.majorcode)")
+				.append(" AND bg.mincode!=bg.maxcode AND wf.code='Approved' AND bd.status = wf.id")
+				.append(" GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2), cao.glcode||'-'||cao.name").append(" UNION ")
+				.append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||")
+				.append("substr(cao.glcode,8,2), cao.glcode||'-'||cao.name FROM egf_budgetdetail bd, egf_budgetgroup bg,")
+				.append(" egf_budget b, chartofaccounts cao, chartofaccounts cao1, financialyear f, egw_status wf")
+				.append(" WHERE bd.budget=b.id AND b.isbere='RE' AND f.id = :financialYearId")
+				.append(" AND b.financialyearid = :financialYearId")
+				.append(" AND bd.budgetgroup=bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND cao.id=bg.mincode AND cao.id=bg.maxcode AND bg.majorcode IS NULL")
+				.append(" and cao1.glcode = cao.majorcode AND wf.code='Approved' AND bd.status = wf.id")
+				.append(" GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2), cao.glcode||'-'||cao.name");
+
+		final Query qry = getSession().createSQLQuery(query.toString());
+		qry.setParameter("financialYearId", financialYear.getId());
+		qry.setParameter("budgetingType", budgetingType);
+
+		final List<Object[]> result = qry.list();
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Finished fetchGlCodeAndNameForReport");
+
+		return result;
+	}
+
+	// For Consolidated Budget Report
+	public List<Object[]> fetchActualsForReport(final CFinancialYear financialYear, final CFinancialYear prevFinYear,
+			final String fundType, final String budgetType) {
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Starting fetchActualsForReport................");
+		final String excludeDept = " and bd.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
+		final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
+		String condition = " SUM(gl.debitAmount)-SUM(gl.creditAmount) ";
+		if (budgetingType.contains("RECEIPT"))
+			condition = " SUM(gl.creditAmount)-SUM(gl.debitAmount) ";
+		final StringBuilder query = new StringBuilder();
+		final List<AppConfigValues> list = appConfigValuesService.getConfigValuesByModuleAndKey(Constants.EGF,
+				"exclude_status_forbudget_actual");
+		if (list.isEmpty())
+			throw new ValidationException("", "exclude_status_forbudget_actual is not defined in AppConfig");
+		final String voucherstatusExclude = list.get(0).getValue();
+		query.append("SELECT substr(gl.glcode,0,3)||'-'||substr(gl.glcode,4,2)||'-'||substr(gl.glcode,6,2)||'-'")
+				.append("||substr(gl.glcode,8,2),").append(condition)
+				.append(" FROM egf_budgetdetail bd, vouchermis vmis,")
+				.append(" (SELECT bg1.id AS id, bg1.accounttype AS accounttype, case when c1.glcode =  NULL then -1")
+				.append(" else to_number(c1.glcode,'999999999') end AS mincode, case when c2.glcode = null then  999999999")
+				.append(" else c2.glcode end AS maxcode, case when c3.glcode = null then -1 else to_number(c3.glcode,'999999999')")
+				.append(" end  AS majorcode")
+				.append(" FROM egf_budgetgroup bg1 LEFT OUTER JOIN chartofaccounts c1 ON c1.id=bg1.mincode")
+				.append(" LEFT OUTER JOIN chartofaccounts c2 ON c2.id=bg1.maxcode LEFT OUTER JOIN chartofaccounts c3")
+				.append(" ON c3.id=bg1.majorcode) bg ,")
+				.append(" egf_budget b, financialyear f, fiscalperiod p, voucherheader vh, generalledger gl, egw_status wf")
+				.append(" WHERE bd.budget =b.id AND b.isbere='RE' AND p.financialyearid=f.id AND f.id = :prevFinYearId")
+				.append(" AND vh.fiscalperiodid=p.id AND b.financialyearid = :financialYearId")
+				.append(" AND vmis.VOUCHERHEADERID=vh.id AND gl.VOUCHERHEADERID  =vh.id")
+				.append(" AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND vh.status NOT IN (:voucherstatusExclude) AND vh.fundId =bd.fund")
+				.append(" AND vmis.departmentid =bd.executing_department AND gl.functionid = bd.function ")
+				.append(" AND ((gl.glcode BETWEEN bg.mincode AND bg.maxcode) OR gl.glcode =bg.majorcode)")
+				.append(" AND bg.mincode!=bg.maxcode AND wf.code='Approved' AND bd.status = wf.id")
+				.append(" GROUP BY substr(gl.glcode,0,3)||'-'||substr(gl.glcode,4,2)||'-'")
+				.append("||substr(gl.glcode,6,2)||'-'||substr(gl.glcode,8,2)").append(" UNION ")
+				.append("SELECT substr(gl.glcode,0,3)||'-'||substr(gl.glcode,4,2)||'-'||substr(gl.glcode,6,2)")
+				.append("||'-'||substr(gl.glcode,8,2),").append(condition)
+				.append(" FROM egf_budgetdetail bd, vouchermis vmis, egf_budgetgroup bg, egf_budget b, financialyear f,")
+				.append(" fiscalperiod p, voucherheader vh, generalledger gl, egw_status wf")
+				.append(" WHERE bd.budget = b.id AND b.isbere='RE' AND p.financialyearid=f.id AND f.id = :prevFinYearId")
+				.append(" AND vh.fiscalperiodid=p.id AND b.financialyearid = :financialYearId")
+				.append(" AND vmis.VOUCHERHEADERID = vh.id AND gl.VOUCHERHEADERID = vh.id")
+				.append(" AND bd.budgetgroup = bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND vh.status NOT IN (:voucherstatusExclude) AND vh.fundId = bd.fund AND gl.functionid = bd.function ")
+				.append(" AND vmis.departmentid = bd.executing_department AND gl.glcodeid = bg.mincode")
+				.append(" AND gl.glcodeid = bg.maxcode AND bg.majorcode IS NULL AND wf.code='Approved'")
+				.append(" AND bd.status = wf.id GROUP BY substr(gl.glcode,0,3)||'-'||substr(gl.glcode,4,2)")
+				.append("||'-'||substr(gl.glcode,6,2)||'-'||substr(gl.glcode,8,2)");
+
+		final Query qry = getSession().createSQLQuery(query.toString())
+				.setParameter("prevFinYearId", prevFinYear.getId())
+				.setParameter("financialYearId", financialYear.getId()).setParameter("budgetingType", budgetingType)
+				.setParameter("voucherstatusExclude", voucherstatusExclude);
+
+		final List<Object[]> result = qry.list();
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Finished fetchActualsForReport");
+
+		return result;
+	}
+
+	// For Consolidated Budget Report
+	public List<Object[]> fetchGlCodeAndBEAmountForReport(final CFinancialYear financialYear, final String fundType,
+			final String budgetType) {
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Starting fetchGlCodeAndBEAmountForReport................");
+		final String excludeDept = " and bd2.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
+		final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
+		final StringBuilder query = new StringBuilder();
+
+		query.append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2), SUM(round(bd2.approvedamount/1000,0))")
+				.append(" FROM egf_budgetdetail bd1, egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2,")
+				.append(" chartofaccounts cao, financialyear f, egw_status wf")
+				.append(" WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE'")
+				.append(" AND f.id = :financialYearId").append(" AND b1.financialyearid = :financialYearId")
+				.append(" AND b2.financialyearid = :financialYearId")
+				.append(" AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode = bg.majorcode)")
+				.append(" AND bd1.uniqueno = bd2.uniqueno AND wf.code='Approved' AND bd1.status = wf.id")
+				.append(" GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2)").append(" UNION ")
+				.append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2), SUM(round(bd2.approvedamount/1000,0))")
+				.append(" FROM egf_budgetdetail bd1, egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1,")
+				.append(" egf_budget b2, chartofaccounts cao, financialyear f, egw_status wf")
+				.append(" WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE'")
+				.append(" AND f.id =:financialYearId AND b1.financialyearid = :financialYearId")
+				.append(" AND b2.financialyearid = :financialYearId")
+				.append("  AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL")
+				.append(" AND bd1.uniqueno = bd2.uniqueno AND wf.code='Approved' AND bd1.status = wf.id")
+				.append(" GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2)");
+
+		final Query qry = getSession().createSQLQuery(query.toString());
+		qry.setParameter("financialYearId", financialYear.getId()).setParameter("budgetingType", budgetingType);
+
+		final List<Object[]> result = qry.list();
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info(
+					"------------------------------------------------------------------------------------------------------");
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Finished fetchGlCodeAndBEAmountForReport" + query.toString());
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info(
+					"------------------------------------------------------------------------------------------------------");
+
+		return result;
+	}
 
     // For Consolidated Budget Report
-    public List<Object[]> fetchMajorCodeAndBENextYrApprovedForReport(final CFinancialYear financialYear,
-            final String fundType, final String budgetType) {
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Starting fetchMajorCodeAndBENextYrApproved................");
-        final String excludeDept = " and bd2.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
-        final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
-        StringBuffer query = new StringBuffer();
+	public List<Object[]> fetchGlCodeAndApprovedAmountForReport(final CFinancialYear financialYear,
+			final String fundType, final String budgetType) {
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Starting fetchGlCodeAndApprovedAmountForReport................");
+		final String excludeDept = " and bd.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
+		final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
+		final StringBuilder query = new StringBuilder();
 
-        query = query
-                .append("SELECT cao.majorcode, SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1, egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2, chartofaccounts cao, egw_status wf"
-                        + " WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE' AND b1.financialyearid="
-                        + financialYear.getId() + " AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType
-                        + "'" + excludeDept
-                        + " AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode   =bg.majorcode) AND bd1.uniqueno = bd2.uniqueno AND b2.reference_budget = b1.id AND wf.code='Approved' AND bd1.status = wf.id GROUP BY cao.majorcode");
+		query.append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2), SUM(round(bd.approvedamount/1000,0))")
+				.append(" FROM egf_budgetdetail bd, egf_budgetgroup bg, egf_budget b, chartofaccounts cao,")
+				.append(" financialyear f, egw_status wf")
+				.append(" WHERE bd.budget =b.id AND b.isbere='RE' AND f.id = :financialYearId")
+				.append(" AND b.financialyearid = :financialYearId")
+				.append(" AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode =bg.majorcode)")
+				.append(" AND bg.mincode! =bg.maxcode AND wf.code='Approved' AND bd.status = wf.id")
+				.append(" GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2)").append(" UNION ")
+				.append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2), SUM(round(bd.approvedamount/1000,0))")
+				.append(" FROM egf_budgetdetail bd, egf_budgetgroup bg, egf_budget b, chartofaccounts cao,")
+				.append(" financialyear f, egw_status wf")
+				.append(" WHERE bd.budget =b.id AND b.isbere='RE' AND f.id = :financialYearId")
+				.append(" AND b.financialyearid = :financialYearId")
+				.append(" AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL AND wf.code='Approved'")
+				.append(" AND bd.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)")
+				.append("||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2)");
 
-        query = query.append(" UNION ");
+		final Query qry = getSession().createSQLQuery(query.toString());
+		qry.setParameter("financialYearId", financialYear.getId()).setParameter("budgetingType", budgetingType);
 
-        query = query
-                .append("SELECT cao.majorcode, SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1, egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2, chartofaccounts cao, egw_status wf"
-                        + " WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE' AND b1.financialyearid="
-                        + financialYear.getId() + " AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType
-                        + "'" + excludeDept
-                        + " AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL AND bd1.uniqueno = bd2.uniqueno AND b2.reference_budget = b1.id AND wf.code='Approved' AND bd1.status = wf.id GROUP BY cao.majorcode");
-
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Finished fetchMajorCodeAndBENextYrApproved");
-
-        return result;
-    }
-
-    // For Consolidate Budget Report.
-    public List<Object[]> fetchGlCodeAndNameForReport(final CFinancialYear financialYear, final String fundType,
-            final String budgetType) {
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Starting fetchGlCodeAndNameForReport............");
-        final String excludeDept = " and bd.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
-        final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
-        StringBuffer query = new StringBuffer();
-        query = query
-                .append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), cao.glcode||'-'||cao.name FROM egf_budgetdetail bd, egf_budgetgroup bg, egf_budget b, chartofaccounts cao, chartofaccounts cao1, financialyear f, egw_status wf"
-                        + " WHERE bd.budget=b.id AND b.isbere='RE' AND f.id=" + financialYear.getId()
-                        + " AND b.financialyearid=" + financialYear.getId()
-                        + " AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode=bg.majorcode) AND bg.mincode!=bg.maxcode AND wf.code='Approved' AND bd.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), cao.glcode||'-'||cao.name");
-
-        query = query.append(" UNION ");
-
-        query = query
-                .append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), cao.glcode||'-'||cao.name FROM egf_budgetdetail bd, egf_budgetgroup bg, egf_budget b, chartofaccounts cao, chartofaccounts cao1, financialyear f, egw_status wf"
-                        + " WHERE bd.budget=b.id AND b.isbere='RE' AND f.id=" + financialYear.getId()
-                        + " AND b.financialyearid=" + financialYear.getId()
-                        + " AND bd.budgetgroup=bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND cao.id=bg.mincode AND cao.id=bg.maxcode AND bg.majorcode IS NULL and cao1.glcode = cao.majorcode AND wf.code='Approved' AND bd.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), cao.glcode||'-'||cao.name");
-
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Finished fetchGlCodeAndNameForReport");
+		final List<Object[]> result = qry.list();
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Finished fetchGlCodeAndApprovedAmountForReport");
 
         return result;
     }
 
-    // For Consolidated Budget Report
-    public List<Object[]> fetchActualsForReport(final CFinancialYear financialYear, final CFinancialYear prevFinYear,
-            final String fundType, final String budgetType) {
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Starting fetchActualsForReport................");
-        final String excludeDept = " and bd.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
-        final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
-        String condition = " SUM(gl.debitAmount)-SUM(gl.creditAmount) ";
-        if (budgetingType.contains("RECEIPT"))
-            condition = " SUM(gl.creditAmount)-SUM(gl.debitAmount) ";
-        StringBuffer query = new StringBuffer();
-        final List<AppConfigValues> list = appConfigValuesService.getConfigValuesByModuleAndKey(Constants.EGF,
-                "exclude_status_forbudget_actual");
-        if (list.isEmpty())
-            throw new ValidationException("", "exclude_status_forbudget_actual is not defined in AppConfig");
-        final String voucherstatusExclude = list.get(0).getValue();
-        query = query
-                .append("SELECT substr(gl.glcode,0,3)||'-'||substr(gl.glcode,4,2)||'-'||substr(gl.glcode,6,2)||'-'||substr(gl.glcode,8,2),"
-                        + condition + " FROM egf_budgetdetail bd, vouchermis vmis,"
-                        + " (SELECT bg1.id AS id, bg1.accounttype AS accounttype, case when c1.glcode =  NULL then -1 else to_number(c1.glcode,'999999999') end AS mincode, case when c2.glcode = null then  999999999 else c2.glcode end AS maxcode, case when c3.glcode = null then -1 else to_number(c3.glcode,'999999999') end  AS majorcode"
-                        + " FROM egf_budgetgroup bg1 LEFT OUTER JOIN chartofaccounts c1 ON c1.id=bg1.mincode LEFT OUTER JOIN chartofaccounts c2 ON c2.id=bg1.maxcode LEFT OUTER JOIN chartofaccounts c3 ON c3.id=bg1.majorcode) bg ,"
-                        + " egf_budget b, financialyear f, fiscalperiod p, voucherheader vh, generalledger gl, egw_status wf"
-                        + " WHERE bd.budget =b.id AND b.isbere='RE' AND p.financialyearid=f.id AND f.id ="
-                        + prevFinYear.getId() + " AND vh.fiscalperiodid=p.id AND b.financialyearid="
-                        + financialYear.getId() + " AND vmis.VOUCHERHEADERID=vh.id AND gl.VOUCHERHEADERID  =vh.id"
-                        + " AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND vh.status NOT IN (" + voucherstatusExclude
-                        + ") AND vh.fundId =bd.fund AND vmis.departmentid =bd.executing_department AND gl.functionid = bd.function "
-                        + " AND ((gl.glcode BETWEEN bg.mincode AND bg.maxcode) OR gl.glcode =bg.majorcode) AND bg.mincode!=bg.maxcode AND wf.code='Approved' AND bd.status = wf.id GROUP BY substr(gl.glcode,0,3)||'-'||substr(gl.glcode,4,2)||'-'||substr(gl.glcode,6,2)||'-'||substr(gl.glcode,8,2)");
+	// For Consolidated Budget Report
+	public List<Object[]> fetchGlCodeAndBENextYrApprovedForReport(final CFinancialYear financialYear,
+			final String fundType, final String budgetType) {
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Starting fetchGlCodeAndBENextYrApprovedForReport................");
+		final String excludeDept = " and bd2.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
+		final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
+		final StringBuilder query = new StringBuilder();
 
-        query = query.append(" UNION ");
+		query.append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)").append(
+				"||'-'||substr(cao.glcode,8,2), SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1,")
+				.append(" egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2,")
+				.append(" chartofaccounts cao, egw_status wf")
+				.append(" WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE'")
+				.append(" AND b1.financialyearid = :financialYearId")
+				.append(" AND bd2.budgetgroup = bg.id AND bg.ACCOUNTTYPE =:budgetingType").append(excludeDept)
+				.append(" AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode   =bg.majorcode)")
+				.append(" AND bd1.uniqueno = bd2.uniqueno AND b2.reference_budget = b1.id AND wf.code='Approved'")
+				.append(" AND bd1.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)")
+				.append("||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2)").append(" UNION ")
+				.append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)")
+				.append("||'-'||substr(cao.glcode,8,2), SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1,")
+				.append(" egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2, chartofaccounts cao, egw_status wf")
+				.append(" WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE'")
+				.append(" AND b1.financialyearid = :financialYearId")
+				.append(" AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE = :budgetingType").append(excludeDept)
+				.append(" AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL")
+				.append(" AND bd1.uniqueno = bd2.uniqueno AND b2.reference_budget = b1.id AND wf.code='Approved'")
+				.append(" AND bd1.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)")
+				.append("||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2)");
 
-        query = query
-                .append("SELECT substr(gl.glcode,0,3)||'-'||substr(gl.glcode,4,2)||'-'||substr(gl.glcode,6,2)||'-'||substr(gl.glcode,8,2),"
-                        + condition
-                        + " FROM egf_budgetdetail bd, vouchermis vmis, egf_budgetgroup bg, egf_budget b, financialyear f, fiscalperiod p, voucherheader vh, generalledger gl, egw_status wf"
-                        + " WHERE bd.budget      =b.id AND b.isbere='RE' AND p.financialyearid=f.id AND f.id ="
-                        + prevFinYear.getId() + " AND vh.fiscalperiodid=p.id AND b.financialyearid="
-                        + financialYear.getId() + " AND vmis.VOUCHERHEADERID=vh.id AND gl.VOUCHERHEADERID  =vh.id"
-                        + " AND bd.budgetgroup      =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND vh.status NOT      IN (" + voucherstatusExclude
-                        + ") AND vh.fundId           =bd.fund AND gl.functionid = bd.function "
-                        + " AND vmis.departmentid   =bd.executing_department AND gl.glcodeid  =bg.mincode AND gl.glcodeid =bg.maxcode AND bg.majorcode IS NULL AND wf.code='Approved' AND bd.status = wf.id GROUP BY substr(gl.glcode,0,3)||'-'||substr(gl.glcode,4,2)||'-'||substr(gl.glcode,6,2)||'-'||substr(gl.glcode,8,2)");
+		final Query qry = getSession().createSQLQuery(query.toString());
+		qry.setParameter("financialYearId", financialYear.getId()).setParameter("budgetingType", budgetingType);
 
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Finished fetchActualsForReport");
+		final List<Object[]> result = qry.list();
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Finished fetchGlCodeAndBENextYrApprovedForReport");
 
-        return result;
-    }
+		return result;
+	}
 
-    // For Consolidated Budget Report
-    public List<Object[]> fetchGlCodeAndBEAmountForReport(final CFinancialYear financialYear, final String fundType,
-            final String budgetType) {
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Starting fetchGlCodeAndBEAmountForReport................");
-        final String excludeDept = " and bd2.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
-        final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
-        StringBuffer query = new StringBuffer();
+	public List<Object[]> fetchActualsForBill(final String fromDate, final String toVoucherDate,
+			final List<String> mandatoryFields) {
+		final StringBuilder miscQuery = getMiscQuery(mandatoryFields, "bmis", "bdetail", "bmis");
+		final StringBuilder query = new StringBuilder();
+		query.append("select bd.id,SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end)")
+				.append("-SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end)")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,")
+				.append("egf_budgetgroup bg where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE') and br.billstatus != 'Cancelled'")
+				.append("  and bmis.voucherheaderid is null and br.billdate>=to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and ")
+				.append("((bdetail.glcodeid between bg.mincode and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id")
+				.append(" union ")
+				.append("select bd.id,SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end)-")
+				.append("SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end)")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,")
+				.append("egf_budgetgroup bg where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and ")
+				.append(" (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS')")
+				.append(" and br.billstatus != 'Cancelled' and bmis.voucherheaderid ")
+				.append("is null and br.billdate>= to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and ((bdetail.glcodeid between bg.mincode ")
+				.append("and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id");
+		final Query qry = getSession().createSQLQuery(query.toString());
+		qry.setParameter("fromDate", fromDate).setParameter("toVoucherDate", toVoucherDate);
+		final List<Object[]> result = qry.list();
+		return result;
+	}
 
-        query = query
-                .append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1, egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2, chartofaccounts cao, financialyear f, egw_status wf"
-                        + " WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE' AND f.id ="
-                        + financialYear.getId() + " AND b1.financialyearid=" + financialYear.getId()
-                        + " AND b2.financialyearid=" + financialYear.getId()
-                        + " AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode   =bg.majorcode) AND bd1.uniqueno = bd2.uniqueno AND wf.code='Approved' AND bd1.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2)");
+	public List<Object[]> fetchActualsForFYWithParams(final String fromDate, final String toVoucherDate,
+			final StringBuffer miscQuery) {
+		final List<AppConfigValues> list = appConfigValuesService.getConfigValuesByModuleAndKey(Constants.EGF,
+				"exclude_status_forbudget_actual");
+		if (list.isEmpty())
+			throw new ValidationException("", "exclude_status_forbudget_actual is not defined in AppConfig");
+		final StringBuilder budgetGroupQuery = new StringBuilder();
+		budgetGroupQuery.append(" (select bg1.id as id,bg1.accounttype as accounttype ,c1.glcode as mincode,")
+				.append(" c2.glcode as maxcode,c3.glcode as majorcode ")
+				.append("from egf_budgetgroup bg1 left outer join chartofaccounts c1 on c1.id=bg1.mincode")
+				.append(" left outer join chartofaccounts c2 on ")
+				.append("c2.id=bg1.maxcode left outer join chartofaccounts  c3 on c3.id=bg1.majorcode )  bg ");
+		final String voucherstatusExclude = list.get(0).getValue();
+		final StringBuilder query = new StringBuilder();
+		query.append("select bd.id as id,(SUM(gl.debitAmount)-SUM(gl.creditAmount)) as amount")
+				.append(" from egf_budgetdetail bd,generalledger gl,voucherheader vh,").append("vouchermis vmis,")
+				.append(budgetGroupQuery)
+				.append(",egf_budget b where bd.budget=b.id and vmis.VOUCHERHEADERID=vh.id and gl.VOUCHERHEADERID=vh.id")
+				.append(" and bd.budgetgroup=bg.id and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE')")
+				.append(" and vh.status not in (:voucherstatusExclude)")
+				.append(" and (vmis.budgetary_appnumber  != 'null' and vmis.budgetary_appnumber is not null) and ")
+				.append("vh.voucherDate>= to_date(:fromDate,'dd/MM/yyyy') and vh.voucherDate <= to_date(:toVoucherDate,'dd/MM/yyyy')")
+				.append(miscQuery)
+				.append(" and (gl.glcode =bg.mincode or gl.glcode=bg.majorcode ) group by bd.id union ")
+				.append("select bd.id as id,(SUM(gl.creditAmount)-SUM(gl.debitAmount)) as amount")
+				.append(" from egf_budgetdetail bd,generalledger gl,voucherheader vh,").append("vouchermis vmis,")
+				.append(budgetGroupQuery)
+				.append(",egf_budget b where bd.budget=b.id and vmis.VOUCHERHEADERID=vh.id and gl.VOUCHERHEADERID=vh.id")
+				.append(" and bd.budgetgroup=bg.id and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS')")
+				.append(" and vh.status not in (:voucherstatusExclude) and (vmis.budgetary_appnumber  != 'null'")
+				.append(" and vmis.budgetary_appnumber is not null) and ")
+				.append("vh.voucherDate>= to_date(:fromDate,'dd/MM/yyyy') and vh.voucherDate <= to_date(:toVoucherDate,'dd/MM/yyyy') ")
+				.append(miscQuery).append(" and (gl.glcode = bg.mincode  or gl.glcode=bg.majorcode ) group by bd.id");
 
-        query = query.append(" UNION ");
+		final Query qry = getSession().createSQLQuery(query.toString());
+		qry.setParameter("voucherstatusExclude", voucherstatusExclude).setParameter("fromDate", fromDate)
+				.setParameter("toVoucherDate", toVoucherDate);
+		final List<Object[]> result = qry.list();
 
-        query = query
-                .append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1, egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2, chartofaccounts cao, financialyear f, egw_status wf"
-                        + " WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE' AND f.id ="
-                        + financialYear.getId() + " AND b1.financialyearid=" + financialYear.getId()
-                        + " AND b2.financialyearid=" + financialYear.getId()
-                        + "  AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL AND bd1.uniqueno = bd2.uniqueno AND wf.code='Approved' AND bd1.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2)");
+		return result;
+	}
 
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info(
-                    "------------------------------------------------------------------------------------------------------");
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Finished fetchGlCodeAndBEAmountForReport" + query.toString());
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info(
-                    "------------------------------------------------------------------------------------------------------");
+	public List<Object[]> fetchActualsForBillWithParams(final String fromDate, final String toVoucherDate,
+			final StringBuffer miscQuery) {
+		final StringBuilder query = new StringBuilder();
+		query.append("select bud,sum(amt) from (").append(
+				"select bd.id as bud,SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end)")
+				.append("-SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end) as amt")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,")
+				.append("egf_budgetgroup bg where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE') and br.statusid not in")
+				.append(" (select id from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL',")
+				.append(" 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and ")
+				.append("bmis.voucherheaderid is null and br.billdate>=to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and ")
+				.append("((bdetail.glcodeid between bg.mincode and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id")
+				.append(" union ")
+				.append("select bd.id as bud,SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end)")
+				.append("-SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end) as amt")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,")
+				.append("egf_budgetgroup bg,voucherheader vh where bmis.billid=br.id and bdetail.billid=br.id")
+				.append(" and bd.budgetgroup=bg.id and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE')")
+				.append(" and br.statusid not in (select id from egw_status where description='Cancelled'")
+				.append(" and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))")
+				.append("  and bmis.voucherheaderid =vh.id and vh.status=4 and br.billdate>=to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and ")
+				.append("((bdetail.glcodeid between bg.mincode and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id")
+				.append(" union ")
+				.append("select bd.id as bud,SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end)")
+				.append("-SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end) as amt")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,")
+				.append("egf_budgetgroup bg,voucherheader vh where bmis.billid=br.id and bdetail.billid=br.id")
+				.append(" and bd.budgetgroup=bg.id and ")
+				.append(" (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS')")
+				.append(" and br.statusid not in (select id from egw_status where description='Cancelled'")
+				.append(" and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL',")
+				.append(" 'SBILL', 'CONTRACTORBILL'))  and ")
+				.append(" bmis.voucherheaderid =vh.id and vh.status=4 and br.billdate>= to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and ((bdetail.glcodeid between bg.mincode ")
+				.append("and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id union ")
+				.append("select bd.id as bud,SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end)")
+				.append("-SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end) as amt")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,")
+				.append("egf_budgetgroup bg where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and ")
+				.append(" (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS') and br.statusid not in")
+				.append(" (select id from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL',")
+				.append(" 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and bmis.voucherheaderid ")
+				.append("is null and br.billdate>= to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and ((bdetail.glcodeid between bg.mincode ")
+				.append("and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id) group by bud ");
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug(" Main Query :" + query);
 
-        return result;
-    }
+		final Query qry = getSession().createSQLQuery(query.toString());
+		qry.setParameter("fromDate", fromDate).setParameter("toVoucherDate", toVoucherDate);
 
-    // For Consolidated Budget Report
-    public List<Object[]> fetchGlCodeAndApprovedAmountForReport(final CFinancialYear financialYear,
-            final String fundType, final String budgetType) {
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Starting fetchGlCodeAndApprovedAmountForReport................");
-        final String excludeDept = " and bd.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
-        final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
-        StringBuffer query = new StringBuffer();
+		final List<Object[]> result = qry.list();
+		return result;
+	}
 
-        query = query
-                .append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), SUM(round(bd.approvedamount/1000,0)) FROM egf_budgetdetail bd, egf_budgetgroup bg, egf_budget b, chartofaccounts cao, financialyear f, egw_status wf"
-                        + " WHERE bd.budget =b.id AND b.isbere='RE' AND f.id =" + financialYear.getId()
-                        + " AND b.financialyearid=" + financialYear.getId()
-                        + " AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode =bg.majorcode) AND bg.mincode! =bg.maxcode AND wf.code='Approved' AND bd.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2)");
+	/*
+	 * Similar to fetchActualsForBillWithParams() except that this will only
+	 * consider bills for which vouchers are present and the vouchers are
+	 * uncancelled and BAN numbers are present for the bills and not vouchers
+	 */
+	public List<Object[]> fetchActualsForBillWithVouchersParams(final String fromDate, final String toVoucherDate,
+			final StringBuffer miscQuery) {
+		final StringBuilder query = new StringBuilder();
+		query.append(
+				"select bd.id as bud,SUM(case when bdetail.debitAmount is null then 0  else bdetail.debitAmount  end)")
+				.append("-SUM(case when bdetail.creditAmount is null then 0 else bdetail.creditAmount end)   as amt")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,")
+				.append("egf_budgetgroup bg,voucherheader vh, vouchermis vmis where bmis.billid=br.id and bdetail.billid=br.id")
+				.append(" and bd.budgetgroup=bg.id and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE')")
+				.append(" and br.statusid not in (select id from egw_status where description='Cancelled'")
+				.append(" and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))")
+				.append("  and bmis.voucherheaderid =vh.id and vh.status!=4 and br.billdate>=to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and vh.id = vmis.voucherheaderid")
+				.append(" and (bmis.budgetary_appnumber != 'null' and bmis.budgetary_appnumber is not null) ")
+				.append(" and ((bdetail.glcodeid between bg.mincode  and bg.maxcode ) or bdetail.glcodeid=bg.majorcode ) group by bd.id")
+				.append(" UNION ")
+				.append("select bd.id as bud,SUM(case when bdetail.creditAmount is null then 0 else bdetail.creditAmount end)")
+				.append("-SUM(case when bdetail.debitAmount is null then 0  else bdetail.debitAmount  end) as amt")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,")
+				.append("egf_budgetgroup bg,voucherheader vh, vouchermis vmis where bmis.billid=br.id and bdetail.billid=br.id")
+				.append(" and bd.budgetgroup=bg.id and ")
+				.append(" (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and vh.id = vmis.voucherheaderid")
+				.append(" and (bmis.budgetary_appnumber != 'null' and bmis.budgetary_appnumber is not null) ")
+				.append(" and (bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS') and br.statusid not in")
+				.append(" (select id as idd from egw_status where description='Cancelled' and moduletype in")
+				.append(" ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and ")
+				.append(" bmis.voucherheaderid =vh.id and vh.status!=4 and br.billdate>= to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and ((bdetail.glcodeid between bg.mincode and bg.maxcode ) or bdetail.glcodeid=bg.majorcode  ) group by bd.id")
+				.append(" UNION ")
+				.append(" select bd.id as bud,SUM(case when bdetail.debitAmount is null then 0  else bdetail.debitAmount  end)")
+				.append("-SUM(case when bdetail.creditAmount is null then 0 else bdetail.creditAmount end)   as amt ")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregister br,egf_budgetgroup bg,")
+				.append(" eg_billregistermis bmis left outer join voucherheader vh on vh.id=bmis.voucherheaderid ")
+				.append(" where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and ")
+				.append("(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE') and br.statusid not in")
+				.append(" (select id from egw_status where description='Cancelled' and moduletype in")
+				.append(" ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and ")
+				.append("(bmis.voucherheaderid is NULL or vh.status=4) and  br.billdate>=to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and (bmis.budgetary_appnumber != 'null' ")
+				.append("and bmis.budgetary_appnumber is not null) ")
+				.append(" and ((bdetail.glcodeid between bg.mincode  and bg.maxcode ) or bdetail.glcodeid=bg.majorcode ) group by bd.id")
+				.append(" UNION ")
+				.append("select bd.id as bud,SUM(case when bdetail.creditAmount is null then 0 else bdetail.creditAmount end)")
+				.append("-SUM(case when bdetail.debitAmount is null then 0  else bdetail.debitAmount  end) as amt")
+				.append(" from egf_budgetdetail bd,eg_billdetails bdetail, egf_budgetgroup bg, eg_billregister br,")
+				.append("eg_billregistermis bmis  left outer join voucherheader vh on vh.id=bmis.voucherheaderid ")
+				.append(" where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and ")
+				.append(" (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and (bmis.budgetary_appnumber != 'null'")
+				.append(" and bmis.budgetary_appnumber is not null) ")
+				.append(" and (bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS')")
+				.append(" and br.statusid not in (select id as idd from egw_status where description='Cancelled'")
+				.append(" and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))")
+				.append("  and (bmis.voucherheaderid is NULL or vh.status=4)  and  br.billdate>= to_date(:fromDate,'dd/MM/yyyy')")
+				.append(" and br.billdate <= to_date(:toVoucherDate,'dd/MM/yyyy') ").append(miscQuery)
+				.append(" and ((bdetail.glcodeid between bg.mincode and bg.maxcode ) or bdetail.glcodeid=bg.majorcode  ) group by bd.id");
 
-        query = query.append(" UNION ");
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug(" Main Query :" + query);
 
-        query = query
-                .append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), SUM(round(bd.approvedamount/1000,0)) FROM egf_budgetdetail bd, egf_budgetgroup bg, egf_budget b, chartofaccounts cao, financialyear f, egw_status wf"
-                        + " WHERE bd.budget =b.id AND b.isbere='RE' AND f.id =" + financialYear.getId()
-                        + " AND b.financialyearid=" + financialYear.getId()
-                        + " AND bd.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType + "'" + excludeDept
-                        + " AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL AND wf.code='Approved' AND bd.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2)");
+		final Query qry = getSession().createSQLQuery(query.toString());
+		qry.setParameter("fromDate", fromDate).setParameter("toVoucherDate", toVoucherDate);
 
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Finished fetchGlCodeAndApprovedAmountForReport");
-
-        return result;
-    }
-
-    // For Consolidated Budget Report
-    public List<Object[]> fetchGlCodeAndBENextYrApprovedForReport(final CFinancialYear financialYear,
-            final String fundType, final String budgetType) {
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Starting fetchGlCodeAndBENextYrApprovedForReport................");
-        final String excludeDept = " and bd2.executing_department!=(Select id_dept from eg_department where dept_code='Z') ";
-        final String budgetingType = fundType.toUpperCase() + "_" + budgetType.toUpperCase();
-        StringBuffer query = new StringBuffer();
-
-        query = query
-                .append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1, egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2, chartofaccounts cao, egw_status wf"
-                        + " WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE' AND b1.financialyearid="
-                        + financialYear.getId() + " AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType
-                        + "'" + excludeDept
-                        + " AND ((cao.id BETWEEN bg.mincode AND bg.maxcode) OR cao.majorcode   =bg.majorcode) AND bd1.uniqueno = bd2.uniqueno AND b2.reference_budget = b1.id AND wf.code='Approved' AND bd1.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2)");
-
-        query = query.append(" UNION ");
-
-        query = query
-                .append("SELECT substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2), SUM(round(bd2.approvedamount/1000,0)) FROM egf_budgetdetail bd1, egf_budgetdetail bd2, egf_budgetgroup bg, egf_budget b1, egf_budget b2, chartofaccounts cao, egw_status wf"
-                        + " WHERE bd1.budget =b1.id AND bd2.budget =b2.id AND b1.isbere='RE' AND b2.isbere='BE' AND b1.financialyearid="
-                        + financialYear.getId() + " AND bd2.budgetgroup =bg.id AND bg.ACCOUNTTYPE ='" + budgetingType
-                        + "'" + excludeDept
-                        + " AND cao.id =bg.mincode AND cao.id =bg.maxcode AND bg.majorcode IS NULL AND bd1.uniqueno = bd2.uniqueno AND b2.reference_budget = b1.id AND wf.code='Approved' AND bd1.status = wf.id GROUP BY substr(cao.glcode,0,3)||'-'||substr(cao.glcode,4,2)||'-'||substr(cao.glcode,6,2)||'-'||substr(cao.glcode,8,2)");
-
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Finished fetchGlCodeAndBENextYrApprovedForReport");
-
-        return result;
-    }
-
-    public List<Object[]> fetchActualsForBill(final String fromDate, final String toVoucherDate,
-            final List<String> mandatoryFields) {
-        final StringBuilder miscQuery = getMiscQuery(mandatoryFields, "bmis", "bdetail", "bmis");
-        StringBuffer query = new StringBuffer();
-        query = query
-                .append("select bd.id,SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end)-SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end) from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,"
-                        + "egf_budgetgroup bg where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                        + "(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE') and br.billstatus != 'Cancelled'  and "
-                        + "bmis.voucherheaderid is null and br.billdate>=to_date('" + fromDate
-                        + "','dd/MM/yyyy') and br.billdate <= to_date('" + toVoucherDate + "','dd/MM/yyyy') "
-                        + miscQuery + " and " + " (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and "
-                        + "((bdetail.glcodeid between bg.mincode and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id"
-                        + " union "
-                        + "select bd.id,SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end)-SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end) from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,"
-                        + "egf_budgetgroup bg where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                        + " (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and "
-                        + "(bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS') and br.billstatus != 'Cancelled' and bmis.voucherheaderid "
-                        + "is null and br.billdate>= to_date('" + fromDate
-                        + "','dd/MM/yyyy') and br.billdate <= to_date('" + toVoucherDate + "','dd/MM/yyyy') "
-                        + miscQuery + " and ((bdetail.glcodeid between bg.mincode "
-                        + "and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id");
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        return result;
-    }
-
-    public List<Object[]> fetchActualsForFYWithParams(final String fromDate, final String toVoucherDate,
-            final StringBuffer miscQuery) {
-        final List<AppConfigValues> list = appConfigValuesService.getConfigValuesByModuleAndKey(Constants.EGF,
-                "exclude_status_forbudget_actual");
-        if (list.isEmpty())
-            throw new ValidationException("", "exclude_status_forbudget_actual is not defined in AppConfig");
-        final StringBuffer budgetGroupQuery = new StringBuffer();
-        budgetGroupQuery
-                .append(" (select bg1.id as id,bg1.accounttype as accounttype ,c1.glcode as mincode, c2.glcode as maxcode,c3.glcode as majorcode "
-                        + "from egf_budgetgroup bg1 left outer join chartofaccounts c1 on c1.id=bg1.mincode left outer join chartofaccounts c2 on "
-                        + "c2.id=bg1.maxcode left outer join chartofaccounts  c3 on c3.id=bg1.majorcode )  bg ");
-        final String voucherstatusExclude = list.get(0).getValue();
-        StringBuffer query = new StringBuffer();
-        query = query
-                .append("select bd.id as id,(SUM(gl.debitAmount)-SUM(gl.creditAmount)) as amount from egf_budgetdetail bd,generalledger gl,voucherheader vh,"
-                        + "vouchermis vmis," + budgetGroupQuery
-                        + ",egf_budget b where bd.budget=b.id and vmis.VOUCHERHEADERID=vh.id and gl.VOUCHERHEADERID=vh.id and bd.budgetgroup=bg.id and "
-                        + "(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE') and vh.status not in ("
-                        + voucherstatusExclude
-                        + ") and (vmis.budgetary_appnumber  != 'null' and vmis.budgetary_appnumber is not null) and "
-                        + "vh.voucherDate>= to_date('" + fromDate + "','dd/MM/yyyy') and vh.voucherDate <= to_date("
-                        + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery
-                        + " and (gl.glcode =bg.mincode or gl.glcode=bg.majorcode ) group by bd.id" + " union "
-                        + "select bd.id as id,(SUM(gl.creditAmount)-SUM(gl.debitAmount)) as amount from egf_budgetdetail bd,generalledger gl,voucherheader vh,"
-                        + "vouchermis vmis," + budgetGroupQuery
-                        + ",egf_budget b where bd.budget=b.id and vmis.VOUCHERHEADERID=vh.id and gl.VOUCHERHEADERID=vh.id and bd.budgetgroup=bg.id and "
-                        + "(bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS') and vh.status not in ("
-                        + voucherstatusExclude
-                        + ") and (vmis.budgetary_appnumber  != 'null' and vmis.budgetary_appnumber is not null) and "
-                        + "vh.voucherDate>= to_date('" + fromDate + "','dd/MM/yyyy') and vh.voucherDate <= to_date("
-                        + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery
-                        + " and (gl.glcode = bg.mincode  or gl.glcode=bg.majorcode ) group by bd.id");
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-
-        return result;
-    }
-
-    public List<Object[]> fetchActualsForBillWithParams(final String fromDate, final String toVoucherDate,
-            final StringBuffer miscQuery) {
-        StringBuffer query = new StringBuffer();
-        query = query.append("select bud,sum(amt) from ("
-                + "select bd.id as bud,SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end)-SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end) as amt from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,"
-                + "egf_budgetgroup bg where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                + "(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE') and br.statusid not in (select id from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and "
-                + "bmis.voucherheaderid is null and br.billdate>=to_date('" + fromDate
-                + "','dd/MM/yyyy') and br.billdate <= to_date(" + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery
-                + " and " + " (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and "
-                + "((bdetail.glcodeid between bg.mincode and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id"
-                + " union "
-                + "select bd.id as bud,SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end)-SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end) as amt from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,"
-                + "egf_budgetgroup bg,voucherheader vh where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                + "(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE') and br.statusid not in (select id from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and "
-                + "bmis.voucherheaderid =vh.id and vh.status=4 and br.billdate>=to_date('" + fromDate
-                + "','dd/MM/yyyy') and br.billdate <= to_date(" + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery
-                + " and " + " (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and "
-                + "((bdetail.glcodeid between bg.mincode and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id"
-                + " union "
-                + "select bd.id as bud,SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end)-SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end) as amt from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,"
-                + "egf_budgetgroup bg,voucherheader vh where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                + " (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and "
-                + "(bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS') and br.statusid not in (select id from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and "
-                + " bmis.voucherheaderid =vh.id and vh.status=4 and br.billdate>= to_date('" + fromDate
-                + "','dd/MM/yyyy') and br.billdate <= to_date(" + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery
-                + " and ((bdetail.glcodeid between bg.mincode "
-                + "and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id" + " union "
-                + "select bd.id as bud,SUM(case when bdetail.creditAmount=null then 0 else bdetail.creditAmount end)-SUM(case when bdetail.debitAmount = null then 0  else bdetail.debitAmount  end) as amt from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,"
-                + "egf_budgetgroup bg where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                + " (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and "
-                + "(bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS') and br.statusid not in (select id from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and bmis.voucherheaderid "
-                + "is null and br.billdate>= to_date('" + fromDate + "','dd/MM/yyyy') and br.billdate <= to_date("
-                + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery + " and ((bdetail.glcodeid between bg.mincode "
-                + "and bg.maxcode) or bdetail.glcodeid=bg.majorcode) group by bd.id" + " ) group by bud ");
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug(" Main Query :" + query);
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        return result;
-    }
-
-    /*
-     * Similar to fetchActualsForBillWithParams() except that this will only consider bills for which vouchers are present and the
-     * vouchers are uncancelled and BAN numbers are present for the bills and not vouchers
-     */
-    public List<Object[]> fetchActualsForBillWithVouchersParams(final String fromDate, final String toVoucherDate,
-            final StringBuffer miscQuery) {
-        StringBuffer query = new StringBuffer();
-        query = query
-                .append("select bd.id as bud,SUM(case when bdetail.debitAmount is null then 0  else bdetail.debitAmount  end)   -SUM(case when bdetail.creditAmount is null then 0 else bdetail.creditAmount end)   as amt from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,"
-                        + "egf_budgetgroup bg,voucherheader vh, vouchermis vmis where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                        + "(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE') and br.statusid not in (select id from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and "
-                        + "bmis.voucherheaderid =vh.id and vh.status!=4 and br.billdate>=to_date('" + fromDate
-                        + "','dd/MM/yyyy') and br.billdate <= to_date(" + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery
-                        + " and (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and vh.id = vmis.voucherheaderid and (bmis.budgetary_appnumber != 'null' and bmis.budgetary_appnumber is not null) "
-                        + " and ((bdetail.glcodeid between bg.mincode  and bg.maxcode ) or bdetail.glcodeid=bg.majorcode ) group by bd.id"
-                        + " UNION "
-                        + "select bd.id as bud,SUM(case when bdetail.creditAmount is null then 0 else bdetail.creditAmount end)-SUM(case when bdetail.debitAmount is null then 0  else bdetail.debitAmount  end) as amt from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregistermis bmis, eg_billregister br,"
-                        + "egf_budgetgroup bg,voucherheader vh, vouchermis vmis where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                        + " (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and vh.id = vmis.voucherheaderid and (bmis.budgetary_appnumber != 'null' and bmis.budgetary_appnumber is not null) "
-                        + " and (bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS') and br.statusid not in (select id as idd from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and "
-                        + " bmis.voucherheaderid =vh.id and vh.status!=4 and br.billdate>= to_date('" + fromDate
-                        + "','dd/MM/yyyy') and br.billdate <= to_date(" + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery
-                        + " and ((bdetail.glcodeid between bg.mincode and bg.maxcode ) or bdetail.glcodeid=bg.majorcode  ) group by bd.id"
-                        + " UNION "
-                        + " select bd.id as bud,SUM(case when bdetail.debitAmount is null then 0  else bdetail.debitAmount  end)   -SUM(case when bdetail.creditAmount is null then 0 else bdetail.creditAmount end)   as amt "
-                        + " from egf_budgetdetail bd,eg_billdetails bdetail, eg_billregister br,egf_budgetgroup bg, eg_billregistermis bmis left outer join voucherheader vh on vh.id=bmis.voucherheaderid "
-                        + " where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                        + "(bg.ACCOUNTTYPE='REVENUE_EXPENDITURE' or bg.ACCOUNTTYPE='CAPITAL_EXPENDITURE') and br.statusid not in (select id from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and "
-                        + "(bmis.voucherheaderid is NULL or vh.status=4) and  br.billdate>=to_date('" + fromDate
-                        + "','dd/MM/yyyy') and br.billdate <= to_date(" + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery
-                        + " and (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and (bmis.budgetary_appnumber != 'null' and bmis.budgetary_appnumber is not null) "
-                        + " and ((bdetail.glcodeid between bg.mincode  and bg.maxcode ) or bdetail.glcodeid=bg.majorcode ) group by bd.id"
-                        + " UNION "
-                        + "select bd.id as bud,SUM(case when bdetail.creditAmount is null then 0 else bdetail.creditAmount end)-SUM(case when bdetail.debitAmount is null then 0  else bdetail.debitAmount  end) as amt"
-                        + " from egf_budgetdetail bd,eg_billdetails bdetail, egf_budgetgroup bg, eg_billregister br,eg_billregistermis bmis  left outer join voucherheader vh on vh.id=bmis.voucherheaderid "
-                        + " where bmis.billid=br.id and bdetail.billid=br.id and bd.budgetgroup=bg.id and "
-                        + " (bmis.budgetCheckReq is null or bmis.budgetCheckReq=true) and (bmis.budgetary_appnumber != 'null' and bmis.budgetary_appnumber is not null) "
-                        + " and (bg.ACCOUNTTYPE='REVENUE_RECEIPTS' or bg.ACCOUNTTYPE='CAPITAL_RECEIPTS') and br.statusid not in (select id as idd from egw_status where description='Cancelled' and moduletype in ('EXPENSEBILL', 'SALBILL', 'WORKSBILL', 'PURCHBILL', 'CBILL', 'SBILL', 'CONTRACTORBILL'))  and "
-                        + " (bmis.voucherheaderid is NULL or vh.status=4)  and  br.billdate>= to_date('" + fromDate
-                        + "','dd/MM/yyyy') and br.billdate <= to_date(" + toVoucherDate + ",'dd/MM/yyyy') " + miscQuery
-                        + " and ((bdetail.glcodeid between bg.mincode and bg.maxcode ) or bdetail.glcodeid=bg.majorcode  ) group by bd.id");
-
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug(" Main Query :" + query);
-        final List<Object[]> result = getSession().createSQLQuery(query.toString()).list();
-        return result;
-    }
+		final List<Object[]> result = qry.list();
+		return result;
+	}
 
     private StringBuilder getMiscQuery(final List<String> mandatoryFields, final String mis, final String gl,
             final String detail) {
@@ -2337,20 +2466,23 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         }
     }
 
-    public BudgetDetail getBudgetDetail(final Integer fundId, final Long functionId, final String deptCode,
-            final Long glCodeId, final CFinancialYear fYear, final String budgetType) {
-        return find(
-                "from BudgetDetail bd where bd.fund.id = ? and bd.function.id = ? and bd.executingDepartment = ? and bd.budgetGroup.maxCode.id = ? and bd.budget.financialYear.id = ? and bd.budget.isbere = ?",
-                fundId, functionId, deptCode, glCodeId, fYear.getId(), budgetType);
+	public BudgetDetail getBudgetDetail(final Integer fundId, final Long functionId, final String deptCode,
+			final Long glCodeId, final CFinancialYear fYear, final String budgetType) {
+		return find(
+				new StringBuilder("from BudgetDetail bd where bd.fund.id = ? and bd.function.id = ? ")
+						.append("and bd.executingDepartment = ? and bd.budgetGroup.maxCode.id = ?")
+						.append(" and bd.budget.financialYear.id = ? and bd.budget.isbere = ?").toString(),
+				fundId, functionId, deptCode, glCodeId, fYear.getId(), budgetType);
 
-    }
+	}
 
-    public BudgetDetail getBudgetDetail(final Integer fundId, final Long functionId, final String deptCode,
-            final Long budgetGroupId) {
-        return find(
-                "from BudgetDetail bd where bd.fund.id = ? and bd.function.id = ? and bd.executingDepartment = ? and bd.budgetGroup.id= ?",
-                fundId, functionId, deptCode, budgetGroupId);
-    }
+	public BudgetDetail getBudgetDetail(final Integer fundId, final Long functionId, final String deptCode,
+			final Long budgetGroupId) {
+		return find(
+				new StringBuilder("from BudgetDetail bd where bd.fund.id = ? and bd.function.id = ?")
+						.append(" and bd.executingDepartment = ? and bd.budgetGroup.id= ?").toString(),
+				fundId, functionId, deptCode, budgetGroupId);
+	}
 
     public List<String> getDepartmentFromBudgetDetailByFundId(final Integer fundId) {
 
@@ -2375,17 +2507,16 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
                 .addOrder(Order.asc("budgetGroup")).list();
     }
 
-    @Transactional
-    public void updateByMaterializedPath(final String materializedPath) {
-        final EgwStatus approvedStatus = egwStatusDAO.getStatusByModuleAndCode("BUDGETDETAIL", "Approved");
-        final EgwStatus createdStatus = egwStatusDAO.getStatusByModuleAndCode("BUDGETDETAIL", "Created");
-        persistenceService.getSession()
-                .createSQLQuery(
-                        "update egf_budgetdetail  set status = :approvedStatus where status =:createdStatus and  materializedPath like'"
-                                + materializedPath + "%'")
-                .setLong("approvedStatus", approvedStatus.getId()).setLong("createdStatus", createdStatus.getId())
-                .executeUpdate();
-    }
+	@Transactional
+	public void updateByMaterializedPath(final String materializedPath) {
+		final EgwStatus approvedStatus = egwStatusDAO.getStatusByModuleAndCode("BUDGETDETAIL", "Approved");
+		final EgwStatus createdStatus = egwStatusDAO.getStatusByModuleAndCode("BUDGETDETAIL", "Created");
+		persistenceService.getSession().createSQLQuery(
+				new StringBuilder("update egf_budgetdetail  set status = :approvedStatus where status =:createdStatus")
+						.append(" and  materializedPath like :materializedPath").toString())
+				.setLong("approvedStatus", approvedStatus.getId()).setLong("createdStatus", createdStatus.getId())
+				.setParameter("materializedPath", materializedPath + "%").executeUpdate();
+	}
 
     public List<BudgetDetail> sortByDepartmentName(final List<BudgetDetail> budgetDetails) {
         
@@ -2519,23 +2650,23 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         return budgetDetails;
     }
 
-    public List<Budget> getBudgetByStatusAndFinancialYearId(final Integer statusId,
-            final Long financialYearId) {
-        final Query qry = getCurrentSession()
-                .createQuery("select distinct budgetDetail.budget from BudgetDetail budgetDetail"
-                        + " where budgetDetail.status.id=:statusId and "
-                        + "budgetDetail.budget.id in(select id from Budget where financialYear.id=:financialYearId)");
+	public List<Budget> getBudgetByStatusAndFinancialYearId(final Integer statusId, final Long financialYearId) {
+		final Query qry = getCurrentSession()
+				.createQuery(new StringBuilder("select distinct budgetDetail.budget from BudgetDetail budgetDetail")
+						.append(" where budgetDetail.status.id=:statusId and ")
+						.append("budgetDetail.budget.id in(select id from Budget where financialYear.id=:financialYearId)")
+						.toString());
 
-        qry.setInteger("statusId", statusId);
-        qry.setLong("financialYearId", financialYearId);
-        List<Budget> budget;
-        if (!qry.list().isEmpty())
-            budget = qry.list();
-        else
-            budget = Collections.emptyList();
+		qry.setInteger("statusId", statusId);
+		qry.setLong("financialYearId", financialYearId);
+		List<Budget> budget;
+		if (!qry.list().isEmpty())
+			budget = qry.list();
+		else
+			budget = Collections.emptyList();
 
-        return budget;
-    }
+		return budget;
+	}
 
     public List<BudgetDetail> getBudgetDetails(final List<Long> budgetId) {
         return budgetDetailRepository.findByBudgetIdInAndStatusId(budgetId,

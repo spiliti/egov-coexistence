@@ -47,6 +47,15 @@
  */
 package org.egov.services.budget;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.script.ScriptContext;
+
 import org.apache.log4j.Logger;
 import org.egov.commons.CFinancialYear;
 import org.egov.commons.EgwStatus;
@@ -73,14 +82,6 @@ import org.egov.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.script.ScriptContext;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class BudgetReAppropriationService extends PersistenceService<BudgetReAppropriation, Long> {
 
@@ -455,33 +456,53 @@ public class BudgetReAppropriationService extends PersistenceService<BudgetReApp
         }
     }
 
-    public List<BudgetReAppropriation> getNonApprovedReAppByUser(final Long userId, final BudgetDetail budgetDetail,
-            final CFinancialYear financialYear) {
-        StringBuffer query = new StringBuffer();
-        query.append("from BudgetReAppropriation where state.value='NEW' and createdBy.id=" + userId
-                + " and budgetDetail.budget.financialYear.id=" + financialYear.getId());
-        if (budgetDetail.getExecutingDepartment() != null
-                && budgetDetail.getExecutingDepartment().equals(""))
-            query.append(" and budgetDetail.executingDepartment=" + budgetDetail.getExecutingDepartment());
-        if (budgetDetail.getFund() != null && budgetDetail.getFund().getId() != null && budgetDetail.getFund().getId() != 0)
-            query.append(" and budgetDetail.fund.id=" + budgetDetail.getFund().getId());
-        if (budgetDetail.getFunction() != null && budgetDetail.getFunction().getId() != null
-                && budgetDetail.getFunction().getId() != 0)
-            query.append(" and budgetDetail.function.id=" + budgetDetail.getFunction().getId());
-        if (budgetDetail.getFunctionary() != null && budgetDetail.getFunctionary().getId() != null
-                && budgetDetail.getFunctionary().getId() != 0)
-            query.append(" and budgetDetail.functionary.id=" + budgetDetail.getFunctionary().getId());
-        if (budgetDetail.getScheme() != null && budgetDetail.getScheme().getId() != null && budgetDetail.getScheme().getId() != 0)
-            query.append(" and budgetDetail.scheme.id=" + budgetDetail.getScheme().getId());
-        if (budgetDetail.getSubScheme() != null && budgetDetail.getSubScheme().getId() != null
-                && budgetDetail.getSubScheme().getId() != 0)
-            query.append(" and budgetDetail.subScheme.id=" + budgetDetail.getSubScheme().getId());
-        if (budgetDetail.getBoundary() != null && budgetDetail.getBoundary().getId() != null
-                && budgetDetail.getBoundary().getId() != 0)
-            query.append(" and budgetDetail.boundary.id=" + budgetDetail.getBoundary().getId());
-        query = query.append(" order by budgetDetail.budgetGroup ");
-        return findAllBy(query.toString());
-    }
+	public List<BudgetReAppropriation> getNonApprovedReAppByUser(final Long userId, final BudgetDetail budgetDetail,
+			final CFinancialYear financialYear) {
+		final StringBuilder query = new StringBuilder();
+		final List<Object> params = new ArrayList<>();
+		query.append("from BudgetReAppropriation where state.value='NEW' and createdBy.id=?")
+				.append(" and budgetDetail.budget.financialYear.id= ?");
+		params.add(userId);
+		params.add(financialYear.getId());
+		if (budgetDetail.getExecutingDepartment() != null && budgetDetail.getExecutingDepartment().equals("")) {
+			query.append(" and budgetDetail.executingDepartment = ?");
+			params.add(budgetDetail.getExecutingDepartment());
+		}
+		if (budgetDetail.getFund() != null && budgetDetail.getFund().getId() != null
+				&& budgetDetail.getFund().getId() != 0) {
+			query.append(" and budgetDetail.fund.id = ?");
+			params.add(budgetDetail.getFund().getId());
+		}
+		if (budgetDetail.getFunction() != null && budgetDetail.getFunction().getId() != null
+				&& budgetDetail.getFunction().getId() != 0) {
+			query.append(" and budgetDetail.function.id = ?");
+			params.add(budgetDetail.getFunction().getId());
+
+		}
+		if (budgetDetail.getFunctionary() != null && budgetDetail.getFunctionary().getId() != null
+				&& budgetDetail.getFunctionary().getId() != 0) {
+			query.append(" and budgetDetail.functionary.id = ?");
+			params.add(budgetDetail.getFunctionary().getId());
+		}
+		if (budgetDetail.getScheme() != null && budgetDetail.getScheme().getId() != null
+				&& budgetDetail.getScheme().getId() != 0) {
+			query.append(" and budgetDetail.scheme.id = ?");
+			params.add(budgetDetail.getScheme().getId());
+		}
+		if (budgetDetail.getSubScheme() != null && budgetDetail.getSubScheme().getId() != null
+				&& budgetDetail.getSubScheme().getId() != 0) {
+			query.append(" and budgetDetail.subScheme.id = ?");
+			params.add(budgetDetail.getSubScheme().getId());
+		}
+		if (budgetDetail.getBoundary() != null && budgetDetail.getBoundary().getId() != null
+				&& budgetDetail.getBoundary().getId() != 0) {
+			query.append(" and budgetDetail.boundary.id = ?");
+			params.add(budgetDetail.getBoundary().getId());
+		}
+
+		query.append(" order by budgetDetail.budgetGroup ");
+		return findAllBy(query.toString(), params);
+	}
 
     public void setBudgetDetailsDAO(final BudgetDetailsHibernateDAO budgetDetailsDAO) {
         this.budgetDetailsDAO = budgetDetailsDAO;
