@@ -139,7 +139,7 @@ public abstract class ScheduleService extends PersistenceService {
     }
 
     List<Object[]> amountPerFundQueryForAllSchedules(final String filterQuery, final Date toDate, final Date fromDate,
-            final String reportType) {
+            final String reportType, Map<String, Object> params) {
         final String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
         final Query query = getSession().createSQLQuery(
                 "select sum(debitamount)-sum(creditamount),v.fundid,substr(c.glcode,1," + minorCodeLength + ")," +
@@ -153,13 +153,13 @@ public abstract class ScheduleService extends PersistenceService {
                         + reportType + "') " + filterQuery +
                         " group by v.fundid,substr(c.glcode,1," + minorCodeLength + "),c.name order by substr(c.glcode,1,"
                         + minorCodeLength + ")");
-
+        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));	
         return query.list();
     }
 
     /* For view all schedules Detail */
     List<Object[]> amountPerFundQueryForAllSchedulesDetailed(final String filterQuery, final Date toDate, final Date fromDate,
-            final String reportType) {
+            final String reportType, Map<String, Object> params) {
         final String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
         final Query query = getSession().createSQLQuery(
                 "select sum(debitamount)-sum(creditamount),v.fundid,substr(c.glcode,1," + detailCodeLength + ")," +
@@ -174,7 +174,7 @@ public abstract class ScheduleService extends PersistenceService {
                         + reportType + "'))) " + filterQuery +
                         " group by v.fundid,substr(c.glcode,1," + detailCodeLength + "),c.name order by substr(c.glcode,1,"
                         + detailCodeLength + ")");
-
+        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
         return query.list();
     }
 
@@ -253,7 +253,7 @@ public abstract class ScheduleService extends PersistenceService {
 
     protected List<Object[]> getAllLedgerTransaction(final String majorcode, final Date toDate, final Date fromDate,
             final String fundId,
-            final String filterQuery) {
+            final String filterQuery, Map<String, Object> params) {
         if (LOGGER.isInfoEnabled())
             LOGGER.info("Getting ledger transactions details where >>>> EndDate=" + toDate + "from Date=" + fromDate);
         final String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
@@ -277,6 +277,7 @@ public abstract class ScheduleService extends PersistenceService {
                                 + " and g.glcodeid=coa.id  "
                                 +
                         "GROUP by g.glcode,coa.name,v.fundid ,coa.type ,coa.majorcode order by g.glcode,coa.name,coa.type");
+        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
         return query.list();
     }
 
@@ -350,7 +351,7 @@ public abstract class ScheduleService extends PersistenceService {
     }
 
     List<Object[]> currentYearAmountQuery(final String filterQuery, final Date toDate, final Date fromDate,
-            final String majorCode, final String reportType) {
+            final String majorCode, final String reportType, Map<String, Object> params) {
         final Query query = getSession().createSQLQuery(
                 "select sum(debitamount)-sum(creditamount),v.fundid,c.glcode " +
                         "from generalledger g,chartofaccounts c,voucherheader v,vouchermis mis  where " +
@@ -365,6 +366,7 @@ public abstract class ScheduleService extends PersistenceService {
                         + ") and coad.classification=4 and coad.majorcode='" + majorCode + "')  and c.majorcode='" + majorCode
                         + "' and c.classification=4 " + filterQuery +
                 " group by v.fundid,c.glcode order by c.glcode");
+        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
         return query.list();
     }
 

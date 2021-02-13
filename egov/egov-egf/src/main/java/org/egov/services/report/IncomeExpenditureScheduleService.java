@@ -83,9 +83,10 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
         minorCodeLength = Integer.valueOf(incomeExpenditureService.getAppConfigValueFor(Constants.EGF, "coa_minorcode_length"));
         final Date fromDate = incomeExpenditureService.getFromDate(statement);
         final Date toDate = incomeExpenditureService.getToDate(statement);
-        final String filterQuery = incomeExpenditureService.getFilterQuery(statement);
+        Map<String, Object> params = new HashMap<>();
+        final String filterQuery = incomeExpenditureService.getFilterQuery(statement, params);
         final CChartOfAccounts coa = (CChartOfAccounts) find("from CChartOfAccounts where glcode=?", majorCode);
-        populateCurrentYearAmountForDetail(statement, toDate, fromDate, majorCode, coa.getType(), filterQuery);
+        populateCurrentYearAmountForDetail(statement, toDate, fromDate, majorCode, coa.getType(), filterQuery, params);
         incomeExpenditureService.removeFundsWithNoDataIE(statement);
         computeAndAddScheduleTotals(statement);
     }
@@ -96,9 +97,11 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
         final Date fromDate = incomeExpenditureService.getFromDate(statement);
         final Date toDate = incomeExpenditureService.getToDate(statement);
         final List<Fund> fundList = statement.getFunds();
+        Map<String, Object> params = new HashMap<>();
         populateCurrentYearAmountForAllSchedules(statement, fundList,
-                amountPerFundQueryForAllSchedules(incomeExpenditureService.getFilterQuery(statement), toDate, fromDate, IE));
-        populatePreviousYearTotalsForAllSchedules(statement, incomeExpenditureService.getFilterQuery(statement), toDate, fromDate);
+                amountPerFundQueryForAllSchedules(incomeExpenditureService.getFilterQuery(statement, params), toDate, fromDate, IE, params));
+        params = new HashMap<>();
+        populatePreviousYearTotalsForAllSchedules(statement, incomeExpenditureService.getFilterQuery(statement, params), toDate, fromDate, params);
         incomeExpenditureService.removeFundsWithNoData(statement);
         incomeExpenditureService.computeCurrentYearTotals(statement, Constants.LIABILITIES, Constants.ASSETS);
         computeAndAddTotals(statement);
@@ -106,7 +109,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
 
     private Query populatePreviousYearTotals(final Statement statement, final Date toDate, final Date fromDate,
             final String majorCode,
-            final String filterQuery, final String fundId) {
+            final String filterQuery, final String fundId, Map<String, Object> params) {
         String formattedToDate = "";
         final String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
         String majorCodeQuery = "";
@@ -132,6 +135,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
                                 + "'" + majorCodeQuery +
                                 filterQuery
                                 + " group by c.glcode, v.fundid,c.name ,c.type ,c.majorcode order by c.glcode,v.fundid,c.type");
+        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
         if (LOGGER.isInfoEnabled())
             LOGGER.info("prevoius year to Date=" + formattedToDate + " and from Date="
                     + incomeExpenditureService.getPreviousYearFor(fromDate));
@@ -176,13 +180,14 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
 
         boolean addschedulerow = false;
         final String forAllCOA = "";
-        final String filterQuery = incomeExpenditureService.getFilterQuery(statement);
+        Map<String, Object> params = new HashMap<>();
+        final String filterQuery = incomeExpenditureService.getFilterQuery(statement, params);
         final String fundId = incomeExpenditureService.getfundList(statement.getFunds());
         majorCodeLength = Integer.valueOf(incomeExpenditureService.getAppConfigValueFor(Constants.EGF, "coa_majorcode_length"));
         final List<Object[]> previousLedgerBalance = populatePreviousYearTotals(statement, toDate, fromDate, forAllCOA,
                 filterQuery,
-                fundId).list();
-        final List<Object[]> CurrentYearLedgerDetail = getAllLedgerTransaction(forAllCOA, toDate, fromDate, fundId, filterQuery); // current
+                fundId, params).list();
+        final List<Object[]> CurrentYearLedgerDetail = getAllLedgerTransaction(forAllCOA, toDate, fromDate, fundId, filterQuery, params); // current
         // year
         // transaction
         // detail
@@ -342,7 +347,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
     @SuppressWarnings("unused")
     private void populateCurrentYearAmountForDetail(final Statement statement, final Date toDate, final Date fromDate,
             final String majorCode,
-            final Character type, final String filterQuery) {
+            final Character type, final String filterQuery, Map<String, Object> params) {
         boolean addrow = false;
         final BigDecimal divisor = statement.getDivisor();
         BigDecimal amount = BigDecimal.ZERO;
@@ -356,10 +361,10 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
                         + "' and coa.classification=4 and coa.type='" + type + "'  order by coa.glcode").list();
         final List<Object[]> previousLedgerBalance = populatePreviousYearTotals(statement, toDate, fromDate, majorCode,
                 filterQuery,
-                fundId).list();
+                fundId, params).list();
         final List<Object[]> allGlCodes = getAllGlCodesForSubSchedule(majorCode, type, IE); // for schedule name AND MINOR code
 
-        final List<Object[]> CurrentYearLedgerDetail = getAllLedgerTransaction(majorCode, toDate, fromDate, fundId, filterQuery); // current
+        final List<Object[]> CurrentYearLedgerDetail = getAllLedgerTransaction(majorCode, toDate, fromDate, fundId, filterQuery, params); // current
         // year
         // transaction
         // detail
@@ -477,7 +482,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
     }
 
     private void populatePreviousYearTotalsForAllSchedules(final Statement statement, final String filterQuery,
-            final Date toDate, final Date fromDate) {
+            final Date toDate, final Date fromDate, Map<String, Object> params) {
         Date formattedToDate = null;
         final BigDecimal divisor = statement.getDivisor();
         if ("Yearly".equalsIgnoreCase(statement.getPeriod()))
@@ -485,7 +490,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
         else
             formattedToDate = incomeExpenditureService.getPreviousYearFor(toDate);
         final List<Object[]> resultMap = amountPerFundQueryForAllSchedules(filterQuery, formattedToDate,
-                incomeExpenditureService.getPreviousYearFor(fromDate), IE);
+                incomeExpenditureService.getPreviousYearFor(fromDate), IE, params);
         final List<Object[]> allGlCodes = getAllGlCodesForAllSchedule(IE, "('I','E')");
         for (final Object[] obj : allGlCodes)
             for (final Object[] row : resultMap) {
