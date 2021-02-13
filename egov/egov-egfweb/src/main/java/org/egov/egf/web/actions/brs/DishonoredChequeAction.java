@@ -146,27 +146,30 @@ public class DishonoredChequeAction extends SearchFormAction {
         return SEARCH;
     }
 
-    @Override
-    public SearchQuery prepareQuery(final String sortField, final String sortOrder) {
+	@Override
+	public SearchQuery prepareQuery(final String sortField, final String sortOrder) {
 
-        Long bankId = null;
-        if (!bankBranchId.equals("-1") && bankBranchId != null && bankBranchId != "") {
-            final String id[] = bankBranchId.split("-");
-            bankId = Long.parseLong(id[0]);
-        }
-        final Map<String, List<Object>> queryWithParams = receiptService.getReceiptHeaderforDishonor(instrumentMode, accountCodes, bankId, chequeNo, chqDDDate.toString());
-        final Map.Entry<String, List<Object>> queryWithParamsEntry = queryWithParams.entrySet().iterator().next();
-        final String searchQuery = queryWithParamsEntry.getKey();
-        StringBuilder srchQry = new StringBuilder();
-        srchQry.append("select rpt.id as receiptheaderid,ih.id as instrumentheaderid,rpt.receiptnumber as receiptnumber,rpt.receiptdate as receiptdate,")
-                .append("ih.instrumentnumber as instrumentnumber, ih.instrumentdate as instrumentdate,ih.instrumentamount as instrumentamount,b.name as bankname,")
-                .append("ba.accountnumber as accountnumber,ih.payto as payto,status.description as description ")
-                .append(searchQuery)
-                .append(" ORDER BY rpt.receiptnumber, rpt.receiptdate ");
-        StringBuilder countQry = new StringBuilder("select count(distinct rpt) ").append(searchQuery);
-        return new SearchQuerySQL(srchQry.toString(), countQry.toString(), queryWithParamsEntry.getValue());
+		Long bankId = null;
+		if (!bankBranchId.equals("-1") && bankBranchId != null && bankBranchId != "") {
+			final String id[] = bankBranchId.split("-");
+			bankId = Long.parseLong(id[0]);
+		}
+		final Map<String, List<Object>> queryWithParams = receiptService.getReceiptHeaderforDishonor(instrumentMode,
+				accountCodes, bankId, chequeNo, chqDDDate.toString());
+		final Map.Entry<String, List<Object>> queryWithParamsEntry = queryWithParams.entrySet().iterator().next();
+		final String searchQuery = queryWithParamsEntry.getKey();
+		StringBuilder srchQry = new StringBuilder();
+		srchQry.append(
+				"select rpt.id as receiptheaderid,ih.id as instrumentheaderid,rpt.receiptnumber as receiptnumber,")
+				.append("rpt.receiptdate as receiptdate,")
+				.append("ih.instrumentnumber as instrumentnumber, ih.instrumentdate as instrumentdate,")
+				.append("ih.instrumentamount as instrumentamount,b.name as bankname,")
+				.append("ba.accountnumber as accountnumber,ih.payto as payto,status.description as description ")
+				.append(searchQuery).append(" ORDER BY rpt.receiptnumber, rpt.receiptdate ");
+		StringBuilder countQry = new StringBuilder("select count(distinct rpt) ").append(searchQuery);
+		return new SearchQuerySQL(srchQry.toString(), countQry.toString(), queryWithParamsEntry.getValue());
 
-    }
+	}
 
     @Action(value = "/brs/dishonoredCheque-dishonorCheque")
     public String dishonorCheque() throws Exception {

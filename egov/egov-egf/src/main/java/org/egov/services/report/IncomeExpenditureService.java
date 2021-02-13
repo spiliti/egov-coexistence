@@ -124,8 +124,9 @@ public class IncomeExpenditureService extends ReportService {
         coaType.add('E');
         Date  fromDate = getFromDate(ie);
         Date  toDate = getToDate(ie);
-        final String filterQuery = getFilterQuery(ie);
-        populateCurrentYearAmountPerFund(ie, filterQuery, toDate, fromDate, IE);
+        Map<String, Object> params = new HashMap<>();
+        final String filterQuery = getFilterQuery(ie, params);
+        populateCurrentYearAmountPerFund(ie, filterQuery, toDate, fromDate, IE, params);
         // populateSchedule(ie,IE);
         ie = addBudgetDetails(ie);
         removeFundsWithNoDataIE(ie);
@@ -174,7 +175,7 @@ public class IncomeExpenditureService extends ReportService {
     // add previous year amount and current year amount. Opening balance is not added for IE codes
     public void populateCurrentYearAmountPerFund(final Statement statement, final String filterQuery, final Date toDate,
             final Date fromDate,
-            final String scheduleReportType) {
+            final String scheduleReportType, Map<String, Object> params) {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug(" inside populateCurrentYearAmountPerFund ");
         final BigDecimal divisor = statement.getDivisor();
@@ -184,10 +185,10 @@ public class IncomeExpenditureService extends ReportService {
 
         // get all the net amount total fundwise for each major code
 
-        final List<StatementResultObject> results = getTransactionAmount(filterQuery, toDate, fromDate, "'I','E'", IE);
+        final List<StatementResultObject> results = getTransactionAmount(filterQuery, toDate, fromDate, "'I','E'", IE, params);
 
         final List<StatementResultObject> PreYearResults = getTransactionAmount(filterQuery, getPreviousYearFor(toDate),
-                getPreviousYearFor(fromDate), "'I','E'", scheduleReportType);
+                getPreviousYearFor(fromDate), "'I','E'", scheduleReportType, params);
 
         for (final StatementResultObject queryObject : allGlCodes) {
 

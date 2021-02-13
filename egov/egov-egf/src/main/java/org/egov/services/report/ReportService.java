@@ -131,35 +131,25 @@ public abstract class ReportService {
         return glCode;
     }
 
-    protected String getFilterQuery(final Statement balanceSheet) {
-        String query = "";
-        if (balanceSheet.getDepartment() != null
-                && balanceSheet.getDepartment().getId() != null
-                && balanceSheet.getDepartment().getId() != 0)
-            query = query + " and mis.departmentid="
-                    + balanceSheet.getDepartment().getId().toString();
-        if (balanceSheet.getFunction() != null
-                && balanceSheet.getFunction().getId() != null
-                && balanceSheet.getFunction().getId() != 0)
-            query = query + " and g.functionid="
-                    + balanceSheet.getFunction().getId().toString();
-        /*if (balanceSheet.getFunctionary() != null
-                && balanceSheet.getFunctionary().getId() != null
-                && balanceSheet.getFunctionary().getId() != 0)
-            query = query + " and mis.functionaryid="
-                    + balanceSheet.getFunctionary().getId().toString();
-        if (balanceSheet.getField() != null
-                && balanceSheet.getField().getId() != null
-                && balanceSheet.getField().getId() != 0)
-            query = query + " and mis.divisionid="
-                    + balanceSheet.getField().getId().toString();*/
-        if (balanceSheet.getFund() != null
-                && balanceSheet.getFund().getId() != null
-                && balanceSheet.getFund().getId() != 0)
-            query = query + " and v.fundid="
-                    + balanceSheet.getFund().getId().toString();
-        return query;
-    }
+	protected String getFilterQuery(final Statement balanceSheet, Map<String, Object> params) {
+		final StringBuilder query = new StringBuilder();
+		if (balanceSheet.getDepartment() != null && balanceSheet.getDepartment().getId() != null
+				&& balanceSheet.getDepartment().getId() != 0) {
+			query.append(" and mis.departmentid=:departmentid");
+			params.put("departmentid", balanceSheet.getDepartment().getId().toString());
+		}
+		if (balanceSheet.getFunction() != null && balanceSheet.getFunction().getId() != null
+				&& balanceSheet.getFunction().getId() != 0) {
+			query.append(" and g.functionid=:functionid");
+			params.put("functionid", balanceSheet.getFunction().getId().toString());
+		}
+		if (balanceSheet.getFund() != null && balanceSheet.getFund().getId() != null
+				&& balanceSheet.getFund().getId() != 0) {
+			query.append(" and v.fundid=:fundid");
+			params.put("fundid", balanceSheet.getFund().getId().toString());
+		}
+		return query.toString();
+	}
 
     public String getFundNameForId(final List<Fund> fundList, final Integer id) {
         for (final Fund fund : fundList)
@@ -183,35 +173,25 @@ public abstract class ReportService {
         return value;
     }
 
-    protected String getTransactionQuery(final Statement balanceSheet) {
-        String query = "";
-        if (balanceSheet.getDepartment() != null
-                && balanceSheet.getDepartment().getId() != null
-                && balanceSheet.getDepartment().getId() != 0)
-            query = query + " and ts.departmentid="
-                    + balanceSheet.getDepartment().getId().toString();
-        if (balanceSheet.getFunction() != null
-                && balanceSheet.getFunction().getId() != null
-                && balanceSheet.getFunction().getId() != 0)
-            query = query + " and ts.functionid="
-                    + balanceSheet.getFunction().getId().toString();
-/*        if (balanceSheet.getFunctionary() != null
-                && balanceSheet.getFunctionary().getId() != null
-                && balanceSheet.getFunctionary().getId() != 0)
-            query = query + " and ts.functionaryid="
-                    + balanceSheet.getFunctionary().getId().toString();
-        if (balanceSheet.getField() != null
-                && balanceSheet.getField().getId() != null
-                && balanceSheet.getField().getId() != 0)
-            query = query + " and ts.divisionid="
-                    + balanceSheet.getField().getId().toString();*/
-        if (balanceSheet.getFund() != null
-                && balanceSheet.getFund().getId() != null
-                && balanceSheet.getFund().getId() != 0)
-            query = query + " and ts.fundid="
-                    + balanceSheet.getFund().getId().toString();
-        return query;
-    }
+	protected String getTransactionQuery(final Statement balanceSheet, Map<String, Object> params) {
+		final StringBuilder query = new StringBuilder();
+		if (balanceSheet.getDepartment() != null && balanceSheet.getDepartment().getId() != null
+				&& balanceSheet.getDepartment().getId() != 0) {
+			query.append(" and ts.departmentid=:tsDepartmentid");
+			params.put("tsDepartmentid", balanceSheet.getDepartment().getId().toString());
+		}
+		if (balanceSheet.getFunction() != null && balanceSheet.getFunction().getId() != null
+				&& balanceSheet.getFunction().getId() != 0) {
+			query.append(" and ts.functionid=:tsFunctionid");
+			params.put("tsFunctionid", balanceSheet.getFunction().getId().toString());
+		}
+		if (balanceSheet.getFund() != null && balanceSheet.getFund().getId() != null
+				&& balanceSheet.getFund().getId() != 0) {
+			query.append(" and ts.fundid=:tsFundid");
+			params.put("tsFundid", balanceSheet.getFund().getId().toString());
+		}
+		return query.toString();
+	}
 
     public String getFormattedDate(final Date date) {
         final SimpleDateFormat formatter = Constants.DDMMYYYYFORMAT1;
@@ -289,7 +269,7 @@ public abstract class ReportService {
     }
 
     List<StatementResultObject> getTransactionAmount(final String filterQuery,
-            final Date toDate, final Date fromDate, final String coaType, final String subReportType) {
+            final Date toDate, final Date fromDate, final String coaType, final String subReportType, Map<String, Object> params) {
     	String    voucherStatusToExclude = getAppConfigValueFor("EGF",
                 "statusexcludeReport");
         
@@ -317,6 +297,7 @@ public abstract class ReportService {
                                 .addScalar("glCode").addScalar("fundId",BigDecimalType.INSTANCE).addScalar("type")
                                 .addScalar("amount",BigDecimalType.INSTANCE).setResultTransformer(
                                         Transformers.aliasToBean(StatementResultObject.class));
+        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
         return query.list();
     }
 
