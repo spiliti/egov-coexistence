@@ -510,11 +510,11 @@ public class ExpenseBillPrintAction extends BaseFormAction {
                         dataType = method.getReturnType().getSimpleName();
                         if (dataType.equals("Long"))
                             entity = (EntityType) persistenceService.find(
-                                    String.format("from %s where id=?1 order by name", detailTypeName), payeedetail.getAccountDetailKeyId()
+                                    String.format("from %s where id=? order by name", detailTypeName), payeedetail.getAccountDetailKeyId()
                                             .longValue());
                         else
                             entity = (EntityType) persistenceService.find(
-                                    String.format("from %s where id=?1 order by name", detailTypeName), payeedetail.getAccountDetailKeyId());
+                                    String.format("from %s where id=? order by name", detailTypeName), payeedetail.getAccountDetailKeyId());
                         
                         vd.setDetailKey(entity.getCode());
                         vd.setDetailName(entity.getName());
@@ -579,11 +579,11 @@ public class ExpenseBillPrintAction extends BaseFormAction {
                         dataType = method.getReturnType().getSimpleName();
                         if (dataType.equals("Long"))
                             entity = (EntityType) persistenceService.find(
-                                    String.format("from %s where id=?1 order by name", detailTypeName), payeedetail.getAccountDetailKeyId()
+                                    String.format("from %s where id=? order by name", detailTypeName), payeedetail.getAccountDetailKeyId()
                                             .longValue());
                         else
                             entity = (EntityType) persistenceService.find(
-                                    String.format("from %s where id=?1 order by name", detailTypeName), payeedetail.getAccountDetailKeyId());
+                                    String.format("from %s where id=? order by name", detailTypeName), payeedetail.getAccountDetailKeyId());
                         vd.setDetailKey(entity.getCode());
                         vd.setDetailName(entity.getName());
                     } catch (final Exception e) {

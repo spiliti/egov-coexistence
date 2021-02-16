@@ -329,13 +329,13 @@ public abstract class BaseBudgetDetailAction extends GenericWorkFlowAction {
     public void loadBudgets(final String bere) {
         budgetList = new ArrayList<Budget>();
         StringBuilder query1 = new StringBuilder("from Budget where id not in (select parent from Budget where parent is not null) ")
-                .append("and isactivebudget = true  and isbere=?1")
-                .append(" and status.code!='Approved' and financialYear.id = ?2")
+                .append("and isactivebudget = true  and isbere=?")
+                .append(" and status.code!='Approved' and financialYear.id = ?")
                 .append(" order by name");
 
         StringBuilder query2 = new StringBuilder("from Budget where id not in (select parent from Budget where parent is not null) ")
-                .append("and isactivebudget = true  and isbere=?1")
-                .append(" and financialYear.id = ?2")
+                .append("and isactivebudget = true  and isbere=?")
+                .append(" and financialYear.id = ?")
                 .append(" order by name");
         if (!addNewDetails)
             budgetList.addAll(persistenceService.findAllBy(query1.toString(), bere.toUpperCase(), getFinancialYear().getId()));
@@ -508,7 +508,7 @@ public abstract class BaseBudgetDetailAction extends GenericWorkFlowAction {
         if (addNewDetails) {
             if (getFinancialYear() != null && getFinancialYear().getId() != null) {
                 StringBuilder queryString = new StringBuilder("from Budget where id not in (select parent from Budget where parent is not null) ")
-                        .append("and isactivebudget = true and state.type='Budget' and isbere='RE' and financialYear.id = ?1")
+                        .append("and isactivebudget = true and state.type='Budget' and isbere='RE' and financialYear.id = ?")
                         .append(" order by name");
                 budgetList.addAll(persistenceService.findAllBy(queryString.toString(), getFinancialYear().getId()));
                 dropdownData.put(BUDGETLIST, budgetList);

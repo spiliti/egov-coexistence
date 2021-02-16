@@ -523,7 +523,7 @@ public class BudgetReAppropriationAction extends BaseFormAction {
 
     protected List getApprovedBudgetsForFY(final Long id, final String finalStatus) {
         StringBuilder queryString = new StringBuilder("from Budget where id not in (select parent from Budget where parent is not null) and isactivebudget = true")
-                .append(" and status.moduletype='BUDGET' and status.code=?1 and financialYear.id=?2 and isbere=?3 order by name");
+                .append(" and status.moduletype='BUDGET' and status.code=? and financialYear.id=? and isbere=? order by name");
         if (id != null && id != 0L)
             return budgetService.findAllBy(queryString.toString(), finalStatus, id, beRe);
         
