@@ -408,7 +408,7 @@ public class BudgetProposalAction extends GenericWorkFlowAction {
         if (LOGGER.isInfoEnabled())
             LOGGER.info("Starting budgetDetailApprove()..............");
 
-        final String query = new StringBuilder(" from BudgetDetail bd where bd.budget=?1 and (state.value='END' or state.ownerPosition=?2) and bd.function=?3")
+        final String query = new StringBuilder(" from BudgetDetail bd where bd.budget=? and (state.value='END' or state.ownerPosition=?) and bd.function=?")
                 .append(" order by bd.function.name,bd.budgetGroup.name").toString();
         savedbudgetDetailList = budgetDetailService.findAllBy(query, topBudget, getPosition(), budgetDetail.getFunction().getId());
 
