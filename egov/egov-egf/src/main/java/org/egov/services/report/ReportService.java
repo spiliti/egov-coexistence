@@ -48,6 +48,19 @@
 package org.egov.services.report;
 
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.log4j.Logger;
 import org.egov.commons.CFinancialYear;
 import org.egov.commons.CVoucherHeader;
@@ -70,19 +83,6 @@ import org.hibernate.transform.Transformers;
 import org.hibernate.type.BigDecimalType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public abstract class ReportService {
    
@@ -120,16 +120,15 @@ public abstract class ReportService {
     }
 
     //TODO- find the api for this in COA hibernate dao
-    public String getGlcodeForPurposeCode(final Integer purposeId) {
-        final Query query = persistenceService.getSession().createSQLQuery(
-                "select majorcode from chartofaccounts where purposeid="
-                        + purposeId);
-        final List list = query.list();
-        String glCode = "";
-        if (list.get(0) != null)
-            glCode = list.get(0).toString();
-        return glCode;
-    }
+	public String getGlcodeForPurposeCode(final Integer purposeId) {
+		final Query query = persistenceService.getSession()
+				.createSQLQuery("select majorcode from chartofaccounts where purposeid=:purposeId");
+		final List list = query.setParameter("purposeId", purposeId).list();
+		String glCode = "";
+		if (list.get(0) != null)
+			glCode = list.get(0).toString();
+		return glCode;
+	}
 
 	protected String getFilterQuery(final Statement balanceSheet, Map<String, Object> params) {
 		final StringBuilder query = new StringBuilder();
@@ -253,66 +252,58 @@ public abstract class ReportService {
     protected abstract void addRowsToStatement(Statement balanceSheet,
             Statement assets, Statement liabilities);
 
-    protected List<StatementResultObject> getAllGlCodesFor(
-            final String scheduleReportType) {
-        final Query query = persistenceService.getSession()
-                .createSQLQuery(
-                        "select distinct coa.majorcode as glCode,s.schedule as scheduleNumber,"
-                                + "s.schedulename as scheduleName,coa.type as type from chartofaccounts coa, schedulemapping s "
-                                + "where s.id=coa.scheduleid and coa.classification=2 and s.reporttype = '"
-                                + scheduleReportType
-                                + "' order by coa.majorcode").addScalar(
-                                        "glCode").addScalar("scheduleNumber").addScalar(
-                                                "scheduleName").addScalar("type").setResultTransformer(
-                                                        Transformers.aliasToBean(StatementResultObject.class));
-        return query.list();
-    }
+	protected List<StatementResultObject> getAllGlCodesFor(final String scheduleReportType) {
+		final Query query = persistenceService.getSession().createSQLQuery(
+				new StringBuilder("select distinct coa.majorcode as glCode,s.schedule as scheduleNumber,").append(
+						"s.schedulename as scheduleName,coa.type as type from chartofaccounts coa, schedulemapping s ")
+						.append("where s.id=coa.scheduleid and coa.classification=2 and s.reporttype = :reporttype")
+						.append(" order by coa.majorcode").toString())
+				.addScalar("glCode").addScalar("scheduleNumber").addScalar("scheduleName").addScalar("type")
+				.setResultTransformer(Transformers.aliasToBean(StatementResultObject.class));
+		return query.setParameter("reporttype", scheduleReportType).list();
+	}
 
-    List<StatementResultObject> getTransactionAmount(final String filterQuery,
-            final Date toDate, final Date fromDate, final String coaType, final String subReportType, Map<String, Object> params) {
-    	String    voucherStatusToExclude = getAppConfigValueFor("EGF",
-                "statusexcludeReport");
-        
-        final Query query = persistenceService.getSession()
-                .createSQLQuery(
-                        "select c.majorcode as glCode,v.fundid as fundId,c.type as type,sum(debitamount)-sum(creditamount) as amount"
-                                + " from generalledger g,chartofaccounts c,voucherheader v ,vouchermis mis where v.id=mis.voucherheaderid and "
-                                + "v.id=g.voucherheaderid and c.type in("
-                                + coaType
-                                + ") and c.id=g.glcodeid and v.status not in("
-                                + voucherStatusToExclude
-                                + ")  AND v.voucherdate <= '"
-                                + getFormattedDate(toDate)
-                                + "' and v.voucherdate >='"
-                                + getFormattedDate(fromDate)
-                                + "' and substr(c.glcode,1,"
-                                + minorCodeLength
-                                + ") in "
-                                + "(select distinct coa2.glcode from chartofaccounts coa2, schedulemapping s where s.id=coa2.scheduleid and "
-                                + "coa2.classification=2 and s.reporttype = '"
-                                + subReportType
-                                + "') "
-                                + filterQuery
-                                + " group by c.majorcode,v.fundid,c.type order by c.majorcode")
-                                .addScalar("glCode").addScalar("fundId",BigDecimalType.INSTANCE).addScalar("type")
-                                .addScalar("amount",BigDecimalType.INSTANCE).setResultTransformer(
-                                        Transformers.aliasToBean(StatementResultObject.class));
-        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
-        return query.list();
-    }
+	List<StatementResultObject> getTransactionAmount(final String filterQuery, final Date toDate, final Date fromDate,
+			final String coaType, final String subReportType, Map<String, Object> params) {
+		String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
 
-    protected Map<String, String> getSubSchedule(final String subReportType) {
-        final Map<String, String> scheduleNumberToName = new HashMap<String, String>();
-        final List<Object[]> rows = persistenceService.getSession()
-                .createSQLQuery(
-                        "select s.schedule,sub.subschedulename from egf_subschedule sub,schedulemapping s "
-                                + "where sub.reporttype='"
-                                + subReportType
-                                + "' and sub.SUBSCHNAME=s.REPSUBTYPE").list();
-        for (final Object[] row : rows)
-            scheduleNumberToName.put(row[0].toString(), row[1].toString());
-        return scheduleNumberToName;
-    }
+		final Query query = persistenceService.getSession().createSQLQuery(new StringBuilder(
+				"select c.majorcode as glCode,v.fundid as fundId,c.type as type,sum(debitamount)-sum(creditamount) as amount")
+						.append(" from generalledger g,chartofaccounts c,voucherheader v ,vouchermis mis")
+						.append(" where v.id=mis.voucherheaderid and ")
+						.append("v.id=g.voucherheaderid and c.type in (:coaType) and c.id=g.glcodeid")
+						.append(" and v.status not in (:voucherStatusToExclude)  AND v.voucherdate <= :voucherToDate")
+						.append(" and v.voucherdate >= :voucherFromDate")
+						.append(" and substr(c.glcode,1,:minorCodeLength) in ")
+						.append("(select distinct coa2.glcode from chartofaccounts coa2, schedulemapping s")
+						.append(" where s.id=coa2.scheduleid and ")
+						.append("coa2.classification=2 and s.reporttype = :reporttype) ").append(filterQuery)
+						.append(" group by c.majorcode,v.fundid,c.type order by c.majorcode").toString())
+				.addScalar("glCode").addScalar("fundId", BigDecimalType.INSTANCE).addScalar("type")
+				.addScalar("amount", BigDecimalType.INSTANCE)
+				.setResultTransformer(Transformers.aliasToBean(StatementResultObject.class));
+		params.put("coaType", coaType);
+		params.put("voucherStatusToExclude", voucherStatusToExclude);
+		params.put("voucherToDate", getFormattedDate(toDate));
+		params.put("voucherFromDate", getFormattedDate(fromDate));
+		params.put("minorCodeLength", minorCodeLength);
+		params.put("reporttype", subReportType);
+		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		return query.list();
+	}
+
+	protected Map<String, String> getSubSchedule(final String subReportType) {
+		final Map<String, String> scheduleNumberToName = new HashMap<String, String>();
+		final List<Object[]> rows = persistenceService.getSession()
+				.createSQLQuery(new StringBuilder("select s.schedule,sub.subschedulename")
+						.append(" from egf_subschedule sub,schedulemapping s ")
+						.append("where sub.reporttype=:reporttype and sub.SUBSCHNAME=s.REPSUBTYPE")
+						.toString())
+				.setParameter("reporttype", subReportType).list();
+		for (final Object[] row : rows)
+			scheduleNumberToName.put(row[0].toString(), row[1].toString());
+		return scheduleNumberToName;
+	}
 
     public Date getFromDate(final Statement statement) {
         CFinancialYear financialYear = null;
@@ -403,29 +394,28 @@ public abstract class ReportService {
         }
     }
 
-    protected void populateSchedule(final Statement statement, final String reportSubType) {
-        //TODO change the query parameter
-        final Query query = persistenceService.getSession()
-                .createSQLQuery(
-                        "select c.majorcode,s.schedulename,s.schedule from chartofaccounts c,schedulemapping s "
-                                + "where s.id=c.scheduleid and s.reporttype = '"
-                                + reportSubType
-                                + "' and c.type in('A','L') group by c.majorcode,s.schedulename,s.schedule ORDER BY c.majorcode");
-                              //  .setParameter("coaType", coaType);
-        //TODO- change the query
-        final List<Object[]> scheduleList = query.list();
-        for (final Object[] obj : scheduleList)
-            for (int index = 0; index < statement.size(); index++) {
-                if (obj[0] == null)
-                    obj[0] = "";
-                if (statement.get(index).getGlCode() != null
-                        && obj[0].toString().equals(
-                                statement.get(index).getGlCode())) {
-                    statement.get(index).setAccountName(obj[1].toString());
-                    statement.get(index).setScheduleNo(obj[2].toString());
-                }
-            }
-    }
+	protected void populateSchedule(final Statement statement, final String reportSubType) {
+		// TODO change the query parameter
+		final Query query = persistenceService.getSession().createSQLQuery(new StringBuilder(
+				"select c.majorcode,s.schedulename,s.schedule from chartofaccounts c,schedulemapping s ")
+						.append("where s.id=c.scheduleid and s.reporttype = :reporttype")
+						.append(" and c.type in('A','L') group by c.majorcode,s.schedulename,s.schedule ORDER BY c.majorcode")
+						.toString());
+		// .setParameter("coaType", coaType);
+		query.setParameter("reporttype", reportSubType);
+		// TODO- change the query
+		final List<Object[]> scheduleList = query.list();
+		for (final Object[] obj : scheduleList)
+			for (int index = 0; index < statement.size(); index++) {
+				if (obj[0] == null)
+					obj[0] = "";
+				if (statement.get(index).getGlCode() != null
+						&& obj[0].toString().equals(statement.get(index).getGlCode())) {
+					statement.get(index).setAccountName(obj[1].toString());
+					statement.get(index).setScheduleNo(obj[2].toString());
+				}
+			}
+	}
 
     protected BigDecimal zeroOrValue(final BigDecimal value) {
         return value == null ? BigDecimal.ZERO : value;

@@ -107,45 +107,48 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
         computeAndAddTotals(statement);
     }
 
-    private Query populatePreviousYearTotals(final Statement statement, final Date toDate, final Date fromDate,
-            final String majorCode,
-            final String filterQuery, final String fundId, Map<String, Object> params) {
-        String formattedToDate = "";
-        final String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
-        String majorCodeQuery = "";
-        if (!(majorCodeQuery.equals("") || majorCodeQuery.isEmpty()))
-            majorCodeQuery = " and c.majorcode = '" + majorCode + "' ";
+	private Query populatePreviousYearTotals(final Statement statement, final Date toDate, final Date fromDate,
+			final String majorCode, final String filterQuery, final String fundId, Map<String, Object> params) {
+		String formattedToDate = "";
+		final String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
+		String majorCodeQuery = "";
+		if (!(majorCodeQuery.equals("") || majorCodeQuery.isEmpty())) {
+			majorCodeQuery = " and c.majorcode = :majorCode ";
+			params.put("majorCode", majorCode);
+		}
 
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("Getting previous year Details");
-        if ("Yearly".equalsIgnoreCase(statement.getPeriod()))
-            formattedToDate = incomeExpenditureService.getFormattedDate(fromDate);
-        else
-            formattedToDate = incomeExpenditureService.getFormattedDate(incomeExpenditureService.getPreviousYearFor(toDate));
-        final Query query = persistenceService.getSession()
-                .createSQLQuery(
-                        "select c.glcode,c.name ,sum(g.debitamount)-sum(g.creditamount),v.fundid ,c.type ,c.majorcode  from "
-                                +
-                                "generalledger g,chartofaccounts c,voucherheader v ,vouchermis mis where v.id=mis.voucherheaderid and  v.fundid in"
-                                + fundId +
-                                " and v.id=g.voucherheaderid " +
-                                " and c.id=g.glcodeid and v.status not in(" + voucherStatusToExclude + ")  AND v.voucherdate < '"
-                                + formattedToDate + "' and v.voucherdate >='" +
-                                incomeExpenditureService.getFormattedDate(incomeExpenditureService.getPreviousYearFor(fromDate))
-                                + "'" + majorCodeQuery +
-                                filterQuery
-                                + " group by c.glcode, v.fundid,c.name ,c.type ,c.majorcode order by c.glcode,v.fundid,c.type");
-        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
-        if (LOGGER.isInfoEnabled())
-            LOGGER.info("prevoius year to Date=" + formattedToDate + " and from Date="
-                    + incomeExpenditureService.getPreviousYearFor(fromDate));
-        return query;
-    }
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Getting previous year Details");
+		if ("Yearly".equalsIgnoreCase(statement.getPeriod()))
+			formattedToDate = incomeExpenditureService.getFormattedDate(fromDate);
+		else
+			formattedToDate = incomeExpenditureService
+					.getFormattedDate(incomeExpenditureService.getPreviousYearFor(toDate));
+		final Query query = persistenceService.getSession().createSQLQuery(
+				new StringBuilder("select c.glcode,c.name ,sum(g.debitamount)-sum(g.creditamount),v.fundid ,c.type ,")
+						.append("c.majorcode  from generalledger g,chartofaccounts c,voucherheader v ,vouchermis mis")
+						.append(" where v.id=mis.voucherheaderid and  v.fundid in :fundId")
+						.append(" and v.id=g.voucherheaderid ")
+						.append(" and c.id=g.glcodeid and v.status not in(:voucherStatusToExclude)")
+						.append(" AND v.voucherdate < :formattedToDate and v.voucherdate >= :formattedFromDate")
+						.append(majorCodeQuery).append(filterQuery)
+						.append(" group by c.glcode, v.fundid,c.name ,c.type ,c.majorcode order by c.glcode,v.fundid,c.type")
+						.toString());
+		params.put("fundId", fundId);
+		params.put("voucherStatusToExclude", voucherStatusToExclude);
+		params.put("formattedToDate", formattedToDate);
+		params.put("formattedFromDate",
+				incomeExpenditureService.getFormattedDate(incomeExpenditureService.getPreviousYearFor(fromDate)));
+		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("prevoius year to Date=" + formattedToDate + " and from Date="
+					+ incomeExpenditureService.getPreviousYearFor(fromDate));
+		return query;
+	}
 
     public void populateDetailcode(final Statement statement) {
         final Date fromDate = incomeExpenditureService.getFromDate(statement);
         final Date toDate = incomeExpenditureService.getToDate(statement);
-        // List<Fund> fundList = statement.getFunds();
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("preparing list to load all detailcode");
         populateAmountForAllSchedules(statement, toDate, fromDate, "('I','E')");
@@ -355,10 +358,11 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
         final String fundId = incomeExpenditureService.getfundList(statement.getFunds());
         if (LOGGER.isInfoEnabled())
             LOGGER.info("Getting All ledger codes ..");
-        final List<Object[]> AllLedger = persistenceService.getSession()
-                .createSQLQuery(
-                        "select coa.glcode,coa.name from chartofaccounts coa where coa.majorcode='" + majorCode
-                        + "' and coa.classification=4 and coa.type='" + type + "'  order by coa.glcode").list();
+		final List<Object[]> AllLedger = persistenceService.getSession()
+				.createSQLQuery(new StringBuilder("select coa.glcode,coa.name from chartofaccounts coa")
+						.append(" where coa.majorcode=:majorCode and coa.classification=4 and coa.type=:type")
+						.append("  order by coa.glcode").toString())
+				.setParameter("majorCode", majorCode).setParameter("type", type).list();
         final List<Object[]> previousLedgerBalance = populatePreviousYearTotals(statement, toDate, fromDate, majorCode,
                 filterQuery,
                 fundId, params).list();
