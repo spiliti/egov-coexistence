@@ -270,15 +270,17 @@ public class BankAccountService extends PersistenceService<Bankaccount, Long> {
                 list();
     }
     
-    private List<Object[]> fetchAllBankAccounts(){
+    private List<Object[]> fetchAllBankAccounts() {
         /**
-         * This method used for Remittance report. 
+         * This method used for Remittance report.
          */
         String tenantId = ApplicationThreadLocals.getTenantID();
-        String query = "SELECT bankaccount.accountnumber,concat(concat(bankaccount.accountnumber,'-'),bank.name) from"
-                + " tenantId.Bankaccount bankaccount,tenantId.Bankbranch bankbranch,tenantId.Bank bank"
-                + " where bankaccount.branchid=bankbranch.id and bankbranch.bankid=bank.id";
-       query= StringUtils.replace(query, "tenantId", tenantId);
-        return getSession().createSQLQuery(query).list();    }
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT bankaccount.accountnumber,concat(concat(bankaccount.accountnumber,'-'),bank.name) from")
+                .append("tenantId.Bankaccount bankaccount,tenantId.Bankbranch bankbranch,tenantId.Bank bank")
+                .append(" where bankaccount.branchid=bankbranch.id and bankbranch.bankid=bank.id");
+        query = new StringBuilder(StringUtils.replace(query.toString(), "tenantId", tenantId));
+        return getSession().createSQLQuery(query.toString()).list();
+    }
 
 }
