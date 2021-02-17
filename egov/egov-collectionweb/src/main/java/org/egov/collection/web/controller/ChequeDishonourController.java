@@ -50,20 +50,13 @@ package org.egov.collection.web.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.egov.collection.constants.CollectionConstants;
 import org.egov.collection.entity.DishonoredChequeBean;
 import org.egov.collection.integration.services.DishonorChequeService;
-import org.egov.commons.CChartOfAccounts;
-import org.egov.commons.CGeneralLedger;
 import org.egov.commons.dao.BankBranchHibernateDAO;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.services.instrument.InstrumentService;
@@ -77,7 +70,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -87,11 +79,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping(value = { "/dishonour/cheque" })
 public class ChequeDishonourController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChequeDishonourController.class);
     
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChequeDishonourController.class);
+
     public ChequeDishonourController() {
         LOGGER.debug("ChequeDishonourController class initialized");
     }
+
     @Autowired
     private BankBranchHibernateDAO bankBranchHibernateDAO;
     @Autowired
@@ -102,78 +96,73 @@ public class ChequeDishonourController {
     @Autowired
     @Qualifier("persistenceService")
     protected transient PersistenceService persistenceService;
-    
-    @RequestMapping(method = {RequestMethod.POST,RequestMethod.GET}, value = "/form")
-    public String getDishonourChequeForm(final Model model, @ModelAttribute("errorMessage") String errorMessage){
-        if(errorMessage != null){
+
+    @RequestMapping(method = { RequestMethod.POST, RequestMethod.GET }, value = "/form")
+    public String getDishonourChequeForm(final Model model, @ModelAttribute("errorMessage") final String errorMessage) {
+        if (errorMessage != null)
             model.addAttribute("errorMessage", errorMessage);
-        }
-        model.addAttribute(CollectionConstants.DROPDOWN_DATA_BANKBRANCH_LIST, bankBranchHibernateDAO.getAllBankBranchs());
+        model.addAttribute(CollectionConstants.DROPDOWN_DATA_BANKBRANCH_LIST,
+                bankBranchHibernateDAO.getAllBankBranchs());
         model.addAttribute(CollectionConstants.DROPDOWN_DATA_ACCOUNT_NO_LIST, Collections.EMPTY_LIST);
-        model.addAttribute(CollectionConstants.DROPDOWN_DATA_DISHONOR_REASONS_LIST, persistenceService.getSession()
-                .createSQLQuery("select * from egf_instrument_dishonor_reason").list());
-        DishonoredChequeBean attributeValue = new DishonoredChequeBean();
+        model.addAttribute(CollectionConstants.DROPDOWN_DATA_DISHONOR_REASONS_LIST,
+                persistenceService.getSession().createSQLQuery("select * from egf_instrument_dishonor_reason").list());
+        final DishonoredChequeBean attributeValue = new DishonoredChequeBean();
         attributeValue.setDishonorDate(new Date());
         model.addAttribute("dishonoredChequeModel", attributeValue);
         model.addAttribute("instrumentModesMap", getInstrumentModeMap());
         return "dishonour-cheque-form";
     }
-    
+
     private TreeMap<String, String> getInstrumentModeMap() {
-        TreeMap<String, String> instMap = new TreeMap<>();
+        final TreeMap<String, String> instMap = new TreeMap<>();
         instMap.put("Cheque", "Cheque");
         instMap.put("DD", "DD");
         return instMap;
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, value = "/_search")
-    public @ResponseBody ResponseEntity getDishonorChequeSearch(@ModelAttribute DishonoredChequeBean model){
+    @RequestMapping(method = { RequestMethod.GET }, value = "/_search")
+    public @ResponseBody ResponseEntity getDishonorChequeSearch(@ModelAttribute final DishonoredChequeBean model) {
         try {
             return new ResponseEntity<>(getDishonorCheque(model), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-    
+
     @GetMapping("/bankAccount/_search")
-    public @ResponseBody List<Object[]> searchBankAccount(@RequestParam(name="fundId", required=false) int fundId, @RequestParam("branchId") int branchId){
+    public @ResponseBody List<Object[]> searchBankAccount(
+            @RequestParam(name = "fundId", required = false) final int fundId,
+            @RequestParam("branchId") final int branchId) {
         return instrumentService.getBankAccount(fundId, branchId);
     }
-    
-    @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, value = "/submit")
-    public String submit(@ModelAttribute DishonoredChequeBean chequeBean, final Model model, RedirectAttributes redAttribute){
-        String returnPage = "dishonor_cheque_success";
+
+    @RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/submit")
+    public String submit(@ModelAttribute final DishonoredChequeBean chequeBean, final Model model,
+            final RedirectAttributes redAttribute) {
+        final String returnPage = "dishonor_cheque_success";
         try {
-            dishonorChequeService.processDishonor(chequeBean);                
+            dishonorChequeService.processDishonor(chequeBean);
             model.addAttribute("dishonoredChequeModel", chequeBean);
-            return returnPage;       
-        } catch (Exception e) {
-            LOGGER.error("Error Occurred while doing dishonoring of Instrument Number : {}", chequeBean.getInstrumentNumber());
-            redAttribute.addFlashAttribute("errorMessage", "Error occurred while doing dishonoring of Instrument Number "+chequeBean.getInstrumentNumber()+". Please contact to Administration.");
+            return returnPage;
+        } catch (final Exception e) {
+            LOGGER.error("Error Occurred while doing dishonoring of Instrument Number : {}",
+                    chequeBean.getInstrumentNumber());
+            redAttribute.addFlashAttribute("errorMessage",
+                    "Error occurred while doing dishonoring of Instrument Number " + chequeBean.getInstrumentNumber()
+                            + ". Please contact to Administration.");
             return "redirect:/dishonour/cheque/form";
         }
     }
-    
-    private List<DishonoredChequeBean> getDishonorCheque(DishonoredChequeBean model) throws Exception {
+
+    private List<DishonoredChequeBean> getDishonorCheque(final DishonoredChequeBean model) throws Exception {
         List<DishonoredChequeBean> resultList = new ArrayList<>();
-        String bankBranch = model.getBankBranch();
+        final String bankBranch = model.getBankBranch();
         String bankId = null;
-        if(StringUtils.isNotBlank(bankBranch)){
+        if (StringUtils.isNotBlank(bankBranch))
             bankId = bankBranch.split("-")[0].trim();
-        }
-        resultList = dishonorChequeService.getCollectionListForDishonorInstrument(model.getInstrumentMode(), bankId, model.getAccountNumber(), model.getInstrumentNumber(), model.getTransactionDate());
+        resultList = dishonorChequeService.getCollectionListForDishonorInstrument(model.getInstrumentMode(), bankId,
+                model.getAccountNumber(), model.getInstrumentNumber(), model.getTransactionDate());
         return resultList;
     }
-    
-    private Map<String,String> getBankAccount(int fundId, int branchId){
-        Map<String,String> bankAccountMap = new HashMap();
-        List<Object[]> bankAccount = instrumentService.getBankAccount(fundId, branchId);
-        if(!bankAccount.isEmpty()){
-            for(Object[] obj:bankAccount){
-                bankAccountMap.put(obj[0].toString(), obj[2].toString()+"--"+obj[3].toString());
-            }
-        }
-        return bankAccountMap;
-    }
-    
+
 }

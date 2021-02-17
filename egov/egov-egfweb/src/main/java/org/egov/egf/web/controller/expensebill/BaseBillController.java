@@ -265,8 +265,9 @@ public abstract class BaseBillController extends BaseVoucherController {
     }
     
     private List<Object[]> getAccountDetails(Integer accountDetailKeyId, Integer accountDetailTypeId) {
-        String queryString = "select adk.detailname as detailkeyname,adt.name as detailtypename from accountdetailkey adk inner join accountdetailtype adt on adk.detailtypeid=adt.id where adk.detailtypeid=:detailtypeid and adk.detailkey=:detailkey";
-        SQLQuery sqlQuery = persistenceService.getSession().createSQLQuery(queryString);
+        StringBuilder queryString = new StringBuilder(); 
+        queryString.append("select adk.detailname as detailkeyname,adt.name as detailtypename from accountdetailkey adk inner join accountdetailtype adt on adk.detailtypeid=adt.id where adk.detailtypeid=:detailtypeid and adk.detailkey=:detailkey");
+        SQLQuery sqlQuery = persistenceService.getSession().createSQLQuery(queryString.toString());
         sqlQuery.setInteger("detailtypeid", accountDetailTypeId);
         sqlQuery.setInteger("detailkey", accountDetailKeyId);
         return sqlQuery.list();
