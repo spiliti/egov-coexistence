@@ -71,7 +71,6 @@ import org.egov.deduction.model.EgRemittance;
 import org.egov.deduction.model.EgRemittanceDetail;
 import org.egov.deduction.model.EgRemittanceGl;
 import org.egov.deduction.model.EgRemittanceGldtl;
-import org.egov.egf.dashboard.event.FinanceEventType;
 import org.egov.egf.dashboard.event.listener.FinanceDashboardService;
 import org.egov.eis.entity.Assignment;
 import org.egov.eis.service.AssignmentService;
@@ -374,9 +373,10 @@ public class PaymentActionHelper {
                 remitDetail.setLastmodifieddate(currDate);
                 egRemittanceDetail.add(remitDetail);
             } else if (rbean.getRemittance_gl_Id() != null) {
-                SQLQuery createSQLQuery = persistenceService.getSession()
-                        .createSQLQuery("select * from eg_remittance_gl where id=" + rbean.getRemittance_gl_Id());
-                List<EgRemittanceGl> list = createSQLQuery.addEntity(EgRemittanceGl.class).list();
+				SQLQuery createSQLQuery = persistenceService.getSession()
+						.createSQLQuery("select * from eg_remittance_gl where id=:remGlid");
+				List<EgRemittanceGl> list = createSQLQuery.addEntity(EgRemittanceGl.class)
+						.setParameter("remGlid", rbean.getRemittance_gl_Id()).list();
                 if (!list.isEmpty()) {
                     EgRemittanceGl remittancegl = list.get(0);
                     remittancegl.setRemittedamt(rbean.getPartialAmount());

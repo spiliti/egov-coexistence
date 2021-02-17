@@ -531,14 +531,17 @@ public class FinanceDashboardService {
             LOG.error("ERROR occurred while setting the payeeDetails for ID : {}",egBillregister.getId());
         }
     }
-    
-    private List<Object[]> getAccountDetails(Integer accountDetailKeyId, Integer accountDetailTypeId) {
-        String queryString = "select adk.detailname as detailkeyname,adt.name as detailtypename from accountdetailkey adk inner join accountdetailtype adt on adk.detailtypeid=adt.id where adk.detailtypeid=:detailtypeid and adk.detailkey=:detailkey";
-        SQLQuery sqlQuery = this.getSession().createSQLQuery(queryString);
-        sqlQuery.setInteger("detailtypeid", accountDetailTypeId);
-        sqlQuery.setInteger("detailkey", accountDetailKeyId);
-        return sqlQuery.list();
-    }
+
+	private List<Object[]> getAccountDetails(Integer accountDetailKeyId, Integer accountDetailTypeId) {
+		final StringBuilder queryString = new StringBuilder(
+				"select adk.detailname as detailkeyname,adt.name as detailtypename ")
+						.append("from accountdetailkey adk inner join accountdetailtype adt on adk.detailtypeid=adt.id")
+						.append(" where adk.detailtypeid=:detailtypeid and adk.detailkey=:detailkey");
+		SQLQuery sqlQuery = this.getSession().createSQLQuery(queryString.toString());
+		sqlQuery.setInteger("detailtypeid", accountDetailTypeId);
+		sqlQuery.setInteger("detailkey", accountDetailKeyId);
+		return sqlQuery.list();
+	}
     
     private void prepareThreadLocal(String tenant, String domainName) {
         ApplicationThreadLocals.setTenantID(tenant.split(Pattern.quote("."))[1]);
