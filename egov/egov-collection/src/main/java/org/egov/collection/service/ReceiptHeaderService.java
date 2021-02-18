@@ -1135,30 +1135,38 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
         return instrumentHeaderSet;
     }
 
-    public String getReceiptHeaderforDishonor(final Long mode, final Long bankAccId, final Long bankId,
-            final String chequeDDNo, final String chqueDDDate) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("FROM egcl_collectionheader rpt,egcl_collectioninstrument ci,egf_instrumentheader ih,egw_status status,bank b,"
-                + "bankbranch bb,bankaccount ba WHERE rpt.id = ci.collectionheader AND ci.instrumentheader = ih.id AND status.id = ih.id_status "
-                + "AND b.id = bb.bankid AND bb.id = ba.branchid AND ba.id = ih.bankaccountid AND ih.instrumenttype = '"
-                + mode
-                + "' AND ((ih.ispaycheque ='0' AND status.moduletype ='"
-                + CollectionConstants.MODULE_NAME_INSTRUMENTHEADER
-                + "'"
-                + "AND status.description = '"
-                + CollectionConstants.INSTRUMENT_DEPOSITED_STATUS + "'))");
+	public String getReceiptHeaderforDishonor(final Long mode, final Long bankAccId, final Long bankId,
+			final String chequeDDNo, final String chqueDDDate, List<Object> params) {
+		final StringBuilder sb = new StringBuilder();
+		sb.append(
+				"FROM egcl_collectionheader rpt,egcl_collectioninstrument ci,egf_instrumentheader ih,egw_status status,bank b,")
+				.append("bankbranch bb,bankaccount ba WHERE rpt.id = ci.collectionheader AND ci.instrumentheader = ih.id")
+				.append(" AND status.id = ih.id_status ")
+				.append("AND b.id = bb.bankid AND bb.id = ba.branchid AND ba.id = ih.bankaccountid AND ih.instrumenttype = ?")
+				.append(" AND ((ih.ispaycheque ='0' AND status.moduletype = ? AND status.description = ?))");
 
-        if (bankAccId != null && bankAccId != -1)
-            sb.append(" AND ih.bankaccountid=" + bankAccId + "");
-        if ((bankAccId == null || bankAccId == -1) && bankId != null && bankId != 0)
-            sb.append(" AND ih.bankid=" + bankId + "");
-        if (!"".equals(chequeDDNo) && chequeDDNo != null)
-            sb.append(" AND ih.instrumentnumber=trim('" + chequeDDNo + "') ");
-        if (!"".equals(chqueDDDate) && chqueDDDate != null)
-            sb.append(" AND ih.instrumentdate = '" + chqueDDDate + "' ");
+		params.add(mode);
+		params.add(CollectionConstants.MODULE_NAME_INSTRUMENTHEADER);
+		params.add(CollectionConstants.INSTRUMENT_DEPOSITED_STATUS);
 
-        return sb.toString();
-    }
+		if (bankAccId != null && bankAccId != -1) {
+			sb.append(" AND ih.bankaccountid=?");
+			params.add(bankAccId);
+		}
+		if ((bankAccId == null || bankAccId == -1) && bankId != null && bankId != 0) {
+			sb.append(" AND ih.bankid=?");
+			params.add(bankId);
+		}
+		if (!"".equals(chequeDDNo) && chequeDDNo != null) {
+			sb.append(" AND ih.instrumentnumber=trim(?) ");
+			params.add(chequeDDNo);
+		}
+		if (!"".equals(chqueDDDate) && chqueDDDate != null) {
+			sb.append(" AND ih.instrumentdate = ? ");
+			params.add(chqueDDDate);
+		}
+		return sb.toString();
+	}
 
     /**
      * This method performs the following for receipts to be newly created:

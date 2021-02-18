@@ -258,7 +258,8 @@ public class FinancialsUtil {
         if (purposeId != null)
             try {
                 final SQLQuery query = persistenceService.getSession().createSQLQuery(
-                        "SELECT NAME FROM EGF_ACCOUNTCODE_PURPOSE WHERE ID = " + purposeId);
+                        "SELECT NAME FROM EGF_ACCOUNTCODE_PURPOSE WHERE ID = :id");
+                query.setParameter("id", purposeId);
                 final List<String> purposeNames = query.list();
                 if (purposeNames != null && purposeNames.size() == 1) {
                     final String purposeName = purposeNames.get(0);

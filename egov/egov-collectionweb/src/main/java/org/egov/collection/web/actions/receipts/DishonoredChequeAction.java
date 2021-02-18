@@ -176,25 +176,28 @@ public class DishonoredChequeAction extends SearchFormAction {
         return SEARCH;
     }
 
-    @Override
-    public SearchQuery prepareQuery(final String sortField, final String sortOrder) {
+	@Override
+	public SearchQuery prepareQuery(final String sortField, final String sortOrder) {
 
-        Long bankId = null;
-        if (isNotBlank(bankBranchId) && !bankBranchId.equals("-1")) {
-            final String id[] = bankBranchId.split("-");
-            bankId = Long.parseLong(id[0]);
-        }
-        final InstrumentType instType = (InstrumentType) getPersistenceService().find(
-                "from InstrumentType where type=?", instrumentMode);
-        final String searchQuery = receiptHeaderService.getReceiptHeaderforDishonor(instType.getId(), accountNumber,
-                bankId, chequeNumber, chequeDate.toString());
-        final String srchQry = "select rpt.id as receiptheaderid,ih.id as instrumentheaderid,rpt.receiptnumber as receiptnumber,rpt.receiptdate as receiptdate,ih.instrumentnumber as instrumentnumber,"
-                + "ih.instrumentdate as instrumentdate,ih.instrumentamount as instrumentamount,b.name as bankname,ba.accountnumber as accountnumber,ih.payto as payto,status.description as description "
-                + searchQuery + " ORDER BY rpt.receiptnumber, rpt.receiptdate ";
-        final String countQry = "select count(distinct rpt) " + searchQuery + "";
-        return new SearchQuerySQL(srchQry, countQry, null);
-
-    }
+		Long bankId = null;
+		if (isNotBlank(bankBranchId) && !bankBranchId.equals("-1")) {
+			final String id[] = bankBranchId.split("-");
+			bankId = Long.parseLong(id[0]);
+		}
+		final InstrumentType instType = (InstrumentType) getPersistenceService()
+				.find("from InstrumentType where type=?", instrumentMode);
+		final List<Object> params = new ArrayList<>();
+		final String searchQuery = receiptHeaderService.getReceiptHeaderforDishonor(instType.getId(), accountNumber,
+				bankId, chequeNumber, chequeDate.toString(), params);
+		final StringBuilder srchQry = new StringBuilder(
+				"select rpt.id as receiptheaderid,ih.id as instrumentheaderid,rpt.receiptnumber as receiptnumber,")
+						.append("rpt.receiptdate as receiptdate,ih.instrumentnumber as instrumentnumber,")
+						.append("ih.instrumentdate as instrumentdate,ih.instrumentamount as instrumentamount,b.name as bankname,")
+						.append("ba.accountnumber as accountnumber,ih.payto as payto,status.description as description ")
+						.append(searchQuery).append(" ORDER BY rpt.receiptnumber, rpt.receiptdate ");
+		final StringBuilder countQry = new StringBuilder("select count(distinct rpt) ").append(searchQuery).append("");
+		return new SearchQuerySQL(srchQry.toString(), countQry.toString(), params);
+	}
 
     @ValidationErrorPage(value = "process")
     @Action(value = "/receipts/dishonoredCheque-create")
@@ -274,29 +277,31 @@ public class DishonoredChequeAction extends SearchFormAction {
      */
     @SuppressWarnings("unchecked")
     public void getReversalGlCodes() {
-        List<Object[]> glCodes = new ArrayList<Object[]>(0);
-        List<Object[]> glCodescredit = new ArrayList<Object[]>(0);
-        List<Object[]> remittanceDetailsCredit = new ArrayList<Object[]>(0);
-        List<Object[]> instrumentDetails = new ArrayList<Object[]>(0);
-        String selectQueryString = "select rh.id ,accounthead.id, accounthead.glcode,accounthead.name, sum(rd.cramount),sum(rd.dramount),function.id";
-        String fromQueryString = " from ReceiptDetail rd  inner join rd.accounthead as accounthead inner join rd.receiptHeader as rh inner join rd.function as function ";
-        String groupOrderString = " group by rh.id ,accounthead.id,accounthead.glcode,accounthead.name,function.id order by accounthead ";
-        StringBuilder queryString = new StringBuilder("");
-        queryString.append(selectQueryString).append(fromQueryString).append(" where rh.id in(").append(receiptHeaderIds)
-                .append(")");
-        reversalAmount = (BigDecimal) persistenceService
-                .find("select sum(instrumentAmount) from InstrumentHeader where id in (" + instHeaderIds + ")");
-        StringBuilder creditGlcodeQueryString = new StringBuilder(queryString).append(" and rd.dramount<>0 and rd.cramount=0 ")
-                .append(" and accounthead.glcode not in (select glcode from CChartOfAccounts where purposeId in (select id from AccountCodePurpose where name='Cheque In Hand')) ")
-                .append(groupOrderString);
-        glCodescredit = persistenceService
-                .findAllBy(creditGlcodeQueryString.toString());
+		List<Object[]> glCodes = new ArrayList<Object[]>(0);
+		List<Object[]> glCodescredit = new ArrayList<Object[]>(0);
+		List<Object[]> remittanceDetailsCredit = new ArrayList<Object[]>(0);
+		List<Object[]> instrumentDetails = new ArrayList<Object[]>(0);
+		String selectQueryString = "select rh.id ,accounthead.id, accounthead.glcode,accounthead.name, sum(rd.cramount),"
+				+ "sum(rd.dramount),function.id";
+		String fromQueryString = " from ReceiptDetail rd  inner join rd.accounthead as accounthead inner join"
+				+ " rd.receiptHeader as rh inner join rd.function as function ";
+		String groupOrderString = " group by rh.id ,accounthead.id,accounthead.glcode,accounthead.name,function.id"
+				+ " order by accounthead ";
+		StringBuilder queryString = new StringBuilder();
+		queryString.append(selectQueryString).append(fromQueryString).append(" where rh.id in(?)");
+		reversalAmount = (BigDecimal) persistenceService
+				.find("select sum(instrumentAmount) from InstrumentHeader where id in (?)", instHeaderIds);
+		StringBuilder creditGlcodeQueryString = new StringBuilder(queryString)
+				.append(" and rd.dramount<>0 and rd.cramount=0 ")
+				.append(" and accounthead.glcode not in (select glcode from CChartOfAccounts")
+				.append(" where purposeId in (select id from AccountCodePurpose where name='Cheque In Hand')) ")
+				.append(groupOrderString);
+		glCodescredit = persistenceService.findAllBy(creditGlcodeQueryString.toString(), receiptHeaderIds);
 
-        StringBuilder debitGlcodeQueryString = new StringBuilder(queryString).append("and rd.cramount<>0 and rd.dramount=0 ")
-                .append(groupOrderString);
-        glCodes = persistenceService
-                .findAllBy(debitGlcodeQueryString.toString());
-        glCodes.addAll(glCodescredit);
+		StringBuilder debitGlcodeQueryString = new StringBuilder(queryString)
+				.append("and rd.cramount<>0 and rd.dramount=0 ").append(groupOrderString);
+		glCodes = persistenceService.findAllBy(debitGlcodeQueryString.toString(), receiptHeaderIds);
+		glCodes.addAll(glCodescredit);
 
         StringBuilder reversalGlCodesStr = new StringBuilder("");
         for (final Object[] rd : glCodes) {
@@ -319,15 +324,18 @@ public class DishonoredChequeAction extends SearchFormAction {
                 reversalGlCodesStr.append(reversalGlCodesStr).append(",'").append(getStringValue(rd[2])).append("'");
         }
 
-        StringBuilder creditRemittanceDetails = new StringBuilder(
-                " select rh.id ,accounthead.id, accounthead.glcode,accounthead.name,")
-                        .append(" sum(rd.cramount),sum(rd.dramount),function.id  from ReceiptDetail rd  inner join rd.accounthead as accounthead ")
-                        .append(" inner join rd.receiptHeader as rh inner join rd.function as function inner join rh.receiptInstrument ri ")
-                        .append(" where ri.id in (")
-                        .append(instHeaderIds).append(") and rd.dramount<>0 and rd.cramount=0   ")
-                        .append(" and accounthead.glcode in (select glcode from CChartOfAccounts where purposeId in (select id from AccountCodePurpose where name='Cheque In Hand')) ")
-                        .append(" group by rh.id ,accounthead.id,accounthead.glcode,accounthead.name,function.id order by accounthead");
-        remittanceDetailsCredit = persistenceService.findAllBy(creditRemittanceDetails.toString());
+		StringBuilder creditRemittanceDetails = new StringBuilder(
+				" select rh.id ,accounthead.id, accounthead.glcode,accounthead.name,")
+						.append(" sum(rd.cramount),sum(rd.dramount),function.id  from ReceiptDetail rd ")
+						.append(" inner join rd.accounthead as accounthead ")
+						.append(" inner join rd.receiptHeader as rh inner join rd.function as function")
+						.append(" inner join rh.receiptInstrument ri ")
+						.append(" where ri.id in (?) and rd.dramount<>0 and rd.cramount=0   ")
+						.append(" and accounthead.glcode in (select glcode from CChartOfAccounts")
+						.append(" where purposeId in (select id from AccountCodePurpose where name='Cheque In Hand')) ")
+						.append(" group by rh.id ,accounthead.id,accounthead.glcode,accounthead.name,function.id")
+						.append(" order by accounthead");
+		remittanceDetailsCredit = persistenceService.findAllBy(creditRemittanceDetails.toString(), instHeaderIds);
         for (final Object[] rd : remittanceDetailsCredit) {
             final DishonoredChequeBean detail = new DishonoredChequeBean();
             final ReceiptVoucher receiptVoucher = (ReceiptVoucher) persistenceService.findByNamedQuery(
@@ -343,20 +351,22 @@ public class DishonoredChequeAction extends SearchFormAction {
             detail.setFunctionId(getStringValue(rd[6]));
             remittanceGeneralLedger.add(detail);
         }
-        StringBuilder instrumentDetailsQueryString = new StringBuilder(
-                "select rpt.id as receiptheaderid,ih.id as instrumentheaderid, ")
-                        .append(" rpt.receiptnumber as receiptnumber,rpt.receiptdate as receiptdate,ih.instrumentnumber as instrumentnumber,")
-                        .append(" ih.instrumentdate as instrumentdate,ih.instrumentamount as instrumentamount,b.name as bankname,ba.accountnumber as accountnumber,")
-                        .append(" ih.payto as payto,status.description as description ")
-                        .append(" from egcl_collectionheader rpt,egcl_collectioninstrument ci,egf_instrumentheader ih,egw_status status,bank b,")
-                        .append(" bankbranch bb,bankaccount ba where rpt.id = ci.collectionheader AND ci.instrumentheader = ih.id AND status.id = ih.id_status ")
-                        .append(" AND b.id = bb.bankid AND bb.id = ba.branchid AND ba.id = ih.bankaccountid and ih.id in  (")
-                        .append(instHeaderIds).append(")");
-        instrumentDetails = persistenceService
-                .getSession()
-                .createSQLQuery(instrumentDetailsQueryString.toString())
-                .list();
-        dishonoredChequeDisplayList = populateDishonorChequeBean(instrumentDetails);
+		StringBuilder instrumentDetailsQueryString = new StringBuilder(
+				"select rpt.id as receiptheaderid,ih.id as instrumentheaderid, ").append(
+						" rpt.receiptnumber as receiptnumber,rpt.receiptdate as receiptdate,ih.instrumentnumber")
+						.append(" as instrumentnumber,")
+						.append(" ih.instrumentdate as instrumentdate,ih.instrumentamount as instrumentamount,b.name as bankname,")
+						.append("ba.accountnumber as accountnumber,")
+						.append(" ih.payto as payto,status.description as description ")
+						.append(" from egcl_collectionheader rpt,egcl_collectioninstrument ci,egf_instrumentheader ih,")
+						.append("egw_status status,bank b,")
+						.append(" bankbranch bb,bankaccount ba where rpt.id = ci.collectionheader AND ci.instrumentheader = ih.id")
+						.append(" AND status.id = ih.id_status ")
+						.append(" AND b.id = bb.bankid AND bb.id = ba.branchid AND ba.id = ih.bankaccountid ")
+						.append(" and ih.id in  (:instHeaderIds)");
+		instrumentDetails = persistenceService.getSession().createSQLQuery(instrumentDetailsQueryString.toString())
+				.setParameter("instHeaderIds", instHeaderIds).list();
+		dishonoredChequeDisplayList = populateDishonorChequeBean(instrumentDetails);
     }
 
     protected String getStringValue(final Object object) {

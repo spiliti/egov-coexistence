@@ -746,8 +746,8 @@ public class CollectionsUtil {
      * @return last three online transaction for the consumerCode
      */
     public List<OnlinePayment> getOnlineTransactionHistory(final String consumerCode) {
-        final String hql = "select online from ReceiptHeader rh, org.egov.collection.entity.OnlinePayment online where rh.id = online.receiptHeader.id and rh.consumerCode =:consumercode  order by online.id desc";
-        final Query query = persistenceService.getSession().createQuery(hql);
+        final StringBuilder hql = new StringBuilder("select online from ReceiptHeader rh, org.egov.collection.entity.OnlinePayment online where rh.id = online.receiptHeader.id and rh.consumerCode =:consumercode  order by online.id desc");
+        final Query query = persistenceService.getSession().createQuery(hql.toString());
         query.setString("consumercode", consumerCode);
         query.setMaxResults(3);
         return query.list();

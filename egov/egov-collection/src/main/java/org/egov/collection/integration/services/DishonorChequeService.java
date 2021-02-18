@@ -63,7 +63,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.egov.billsaccounting.services.CreateVoucher;
 import org.egov.billsaccounting.services.VoucherConstant;
-import org.egov.collection.bean.ReceiptBean;
 import org.egov.collection.constants.CollectionConstants;
 import org.egov.collection.entity.AccountPayeeDetail;
 import org.egov.collection.entity.CollectionDishonorCheque;
@@ -90,9 +89,7 @@ import org.egov.infra.microservice.models.FinancialStatus;
 import org.egov.infra.microservice.models.Instrument;
 import org.egov.infra.microservice.models.InstrumentSearchContract;
 import org.egov.infra.microservice.models.InstrumentVoucher;
-import org.egov.infra.microservice.models.PaymentWorkflow;
 import org.egov.infra.microservice.models.Receipt;
-import org.egov.infra.microservice.models.ReceiptResponse;
 import org.egov.infra.microservice.models.ReceiptSearchCriteria;
 import org.egov.infra.microservice.models.TransactionType;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
@@ -122,7 +119,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
 
     private static final Logger LOGGER = Logger.getLogger(DishonorChequeService.class);
 
-    private static final String VOUCHER_SEARCH_QUERY = " from CVoucherHeader where voucherNumber=?";;
+    private static final String VOUCHER_SEARCH_QUERY = " from CVoucherHeader where voucherNumber=?";
 
     @Autowired
     private FinancialsUtil financialsUtil;
@@ -246,8 +243,9 @@ public class DishonorChequeService implements FinancialIntegrationService {
 
         for (final String gl : remittanceGeneralLedger) {
             final CVoucherHeader remittanceVoucher = voucherHeaderService
-                    .find("select gl.voucherHeaderId from CGeneralLedger gl ,InstrumentOtherDetails iod where gl.voucherHeaderId.id = iod.payinslipId.id and iod.instrumentHeaderId.id   in ("
-                            + chequeForm.getInstHeaderIds() + ") ");
+                    .find("select gl.voucherHeaderId from CGeneralLedger gl ,InstrumentOtherDetails iod"
+                    		+ " where gl.voucherHeaderId.id = iod.payinslipId.id "
+                    		+ "and iod.instrumentHeaderId.id   in (?) ", chequeForm.getInstHeaderIds());
             ledger = generalLedgerService.find("from CGeneralLedger where voucherHeaderId.id = ? and glcode = ?",
                     remittanceVoucher.getId(), gl.split("-")[0].trim());
             final List<CGeneralLedgerDetail> ledgerDetailSet = generalLedgerDetailService.findAllBy(
@@ -488,7 +486,8 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 .getReceiptStatusForCode(CollectionConstants.RECEIPT_STATUS_CODE_CANCELLED);
         final ReceiptHeader receiptHeader = (ReceiptHeader) persistenceService
                 .find("select DISTINCT (receipt) from ReceiptHeader receipt "
-                        + "join receipt.receiptInstrument as instruments where instruments.id=? and instruments.statusId.code not in (?,?)",
+                        + "join receipt.receiptInstrument as instruments where instruments.id=?"
+                        + " and instruments.statusId.code not in (?,?)",
                         Long.valueOf(instrumentHeaderId), receiptInstrumentBounceStatus.getCode(),
                         receiptCancellationStatus.getCode());
         final InstrumentHeader instrumentHeader = (InstrumentHeader) persistenceService.findByNamedQuery(
@@ -678,9 +677,6 @@ public class DishonorChequeService implements FinancialIntegrationService {
     }
 
     public void processDishonor(DishonoredChequeBean model) {
-        List<Receipt> receiptList = new ArrayList<>();
-        Set<String> paymentIdSet = new HashSet();
-        Set<String> receiptNumbers = new HashSet();     
         List<Instrument> instruments = microserviceUtils.getInstruments(model.getInstHeaderIds());
         FinancialStatus finStatus = new FinancialStatus();
         finStatus.setCode("Dishonored");
@@ -694,38 +690,8 @@ public class DishonorChequeService implements FinancialIntegrationService {
                     .instrument(ins.getId())
                     .build();
             ins.setDishonor(dishonorReasonContract);
-            ins.getInstrumentVouchers().stream().forEach(insVou -> {
-                receiptNumbers.add(insVou.getReceiptHeaderId());
-               });
-            
         });
         microserviceUtils.updateInstruments(instruments, null, finStatus );
-        // calling cancel receipt api
-        if (!receiptNumbers.isEmpty()) {
-            receiptList = microserviceUtils.getReceipts(StringUtils.join(receiptNumbers, ","));
-            for (Receipt receipts : receiptList) {
-                paymentIdSet.add(receipts.getPaymentId());
-                break;
-            }
-            switch (ApplicationThreadLocals.getCollectionVersion().toUpperCase()) {
-            case "V2":
-            case "VERSION2":
-                if (!paymentIdSet.isEmpty()) {
-                    microserviceUtils.performWorkflow(paymentIdSet, PaymentWorkflow.PaymentAction.DISHONOUR,
-                            model.getDishonorReason());
-                }
-                break;
-
-            default:
-                for (final Receipt receiptHeader : receiptList) {
-                    receiptHeader.getBill().get(0).getBillDetails().get(0).setStatus("Cancelled");
-                    receiptHeader.getInstrument().setTenantId(receiptHeader.getTenantId());
-                    receiptHeader.getBill().get(0).setPayerName(receiptHeader.getBill().get(0).getPaidBy());
-                }
-                ReceiptResponse response = microserviceUtils.updateReceipts(new ArrayList<>(receiptList));
-                break;
-            }
-        }
     }
     
     private void prepareDishonouredSearchCriteria(DishonoredChequeBean model, InstrumentSearchContract criteria) {
@@ -785,7 +751,6 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 Long dateVal=ins.getDishonor().getDishonorDate();
                 Date date=new Date(dateVal); 
                 chequeBean.setDishonorDate(date);
-                chequeBean.setDishonorReason(ins.getDishonor().getReason());
                 dishonoredChequeList.add(chequeBean);
             });
             return dishonoredChequeList;
