@@ -396,17 +396,17 @@ public class CancelVoucherAction extends BaseFormAction {
 			} else
 				filterQuerySql = filter;
 			// BPVs for which no Cheque is issued
-			noChequePaymentQry = noChequePaymentQry
-					.append("from CVoucherHeader vh where vh.status not in (:preApprovedStatus , :cancelledStatus )")
-					.append(filter)
-					.append("  and not Exists(select 'true' from InstrumentVoucher iv where iv.voucherHeaderId=vh.id) order by vh.voucherNumber ");
-			Query noChkPayQry = persistenceService.getSession().createQuery(noChequePaymentQry.toString())
-					.setParameter("preApprovedStatus", Long.valueOf(FinancialConstants.PREAPPROVEDVOUCHERSTATUS),
-							LongType.INSTANCE)
-					.setParameter("cancelledStatus", Long.valueOf(FinancialConstants.CANCELLEDVOUCHERSTATUS),
-							LongType.INSTANCE);
-			params.entrySet().forEach(entry -> noChkPayQry.setParameter(entry.getKey(), entry.getValue()));
-			voucherList.addAll(noChkPayQry.list());
+			noChequePaymentQry = new StringBuilder("from CVoucherHeader vh where vh.status not in (:vhStatus)  ").append(filter)
+					.append("  and not Exists(select 'true' from InstrumentVoucher iv where iv.voucherHeaderId=vh.id)")
+					.append(" order by vh.voucherNumber)").toString();
+
+			final Query noChequePaymentQuery = persistenceService.getSession().createQuery(noChequePaymentQry);
+			noChequePaymentQuery.setParameterList("vhStatus", Arrays.asList(FinancialConstants.PREAPPROVEDVOUCHERSTATUS,
+					FinancialConstants.CANCELLEDVOUCHERSTATUS));
+			persistenceService.populateQueryWithParams(noChequePaymentQuery, params);
+
+			voucherList.addAll(noChequePaymentQuery.list());
+
 			// Query for cancelling BPVs for which cheque is assigned and
 			// cancelled
 			filterQuerySql = filterQuerySql.replace(" and vh.fundId.id=:fundId", " and vh.fundId=:fundId");

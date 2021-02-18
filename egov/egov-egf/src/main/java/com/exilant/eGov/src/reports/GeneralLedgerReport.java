@@ -235,13 +235,13 @@ public class GeneralLedgerReport {
             LOGGER.info("**************QUERY: " + query);
         try {
 
-			try {
-				pstmt = persistenceService.getSession().createSQLQuery(entry.getKey());
-				persistenceService.populateQueryWithParams(pstmt, entry.getValue());
-			} catch (final HibernateException e) {
-				LOGGER.error("Exception in creating statement:" + pstmt, e);
-				throw taskExc;
-			}
+		try {
+			pstmt = persistenceService.getSession().createSQLQuery(entry.getKey());
+			persistenceService.populateQueryWithParams(pstmt, entry.getValue());
+		} catch (final HibernateException e) {
+			LOGGER.error("Exception in creating statement:" + pstmt, e);
+			throw taskExc;
+		}
 
             final List list = pstmt.list();
             resultset1 = list;
