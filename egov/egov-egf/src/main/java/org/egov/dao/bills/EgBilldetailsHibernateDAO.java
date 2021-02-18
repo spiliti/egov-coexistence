@@ -163,7 +163,7 @@ public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
 				return new BigDecimal(qry.uniqueResult().toString());
 			else
 				return result;
-		} catch (final Exception e) {
+		} catch (final ApplicationRuntimeException e) {
 			throw new ApplicationRuntimeException("Error occurred while getting other bill amount", e);
 		}
 	}
@@ -178,7 +178,7 @@ public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
             qry.setParameterList("glcodeIds", glcodeIdList);
             qry.setLong("billId", billId);
             return (EgBilldetails) qry.uniqueResult();
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             throw new ApplicationException(e.getMessage());
         }
     }
