@@ -169,9 +169,10 @@ public class ServiceTypeToBankAccountMappingAction extends BaseFormAction {
         for (BankAccountServiceMapping basm : mappings) {
             accountNumbers.add(basm.getBankAccount());
         }
-        final String serviceBankQueryString = "select distinct ba.bankbranch.bank from Bankaccount ba where ba.accountnumber in(:accountnumbers))";
+		final StringBuilder serviceBankQueryString = new StringBuilder(
+				"select distinct ba.bankbranch.bank from Bankaccount ba where ba.accountnumber in(:accountnumbers))");
 
-        final Query bankListQuery = persistenceService.getSession().createQuery(serviceBankQueryString);
+		final Query bankListQuery = persistenceService.getSession().createQuery(serviceBankQueryString.toString());
         if(!accountNumbers.isEmpty()){
             bankListQuery.setParameterList("accountnumbers", accountNumbers);
         }
@@ -187,9 +188,10 @@ public class ServiceTypeToBankAccountMappingAction extends BaseFormAction {
                 accountNumbers.add(basm.getBankAccount());
             }
         }
-        final String serviceBankQueryString = "select distinct ba from Bankaccount ba where ba.accountnumber in(:accountnumbers))";
+		final StringBuilder serviceBankQueryString = new StringBuilder(
+				"select distinct ba from Bankaccount ba where ba.accountnumber in(:accountnumbers))");
 
-        final Query bankAccListQuery = persistenceService.getSession().createQuery(serviceBankQueryString);
+		final Query bankAccListQuery = persistenceService.getSession().createQuery(serviceBankQueryString.toString());
         bankAccListQuery.setParameterList("accountnumbers", accountNumbers);
         return bankAccListQuery.list();
     }

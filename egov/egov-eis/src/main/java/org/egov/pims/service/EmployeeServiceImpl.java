@@ -706,8 +706,8 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
 
         try {
 
-            String mainStr = "select ev.employeeCode,ev.employeeName,ev.id,ev.desigId.designationId, ev.deptId.id ,ev.fromDate,ev.toDate from EmployeeView ev where ev.id = :empId";
-            Query qry = getCurrentSession().createQuery(mainStr);
+            StringBuilder mainStr = new StringBuilder("select ev.employeeCode,ev.employeeName,ev.id,ev.desigId.designationId, ev.deptId.id ,ev.fromDate,ev.toDate from EmployeeView ev where ev.id = :empId");
+            Query qry = getCurrentSession().createQuery(mainStr.toString());
 
             if (empId.intValue() != 0) {
                 qry.setInteger("empId", empId);
@@ -942,11 +942,11 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         PersonalInformation personalInformation = new PersonalInformation();
         try {
 
-            String mainStr = "";
-            mainStr = " select 	id  from EG_EIS_EMPLOYEEINFO ev  where ev.POS_ID = :pos and ((ev.to_Date is null and ev.from_Date <= SYSDATE ) OR (ev.from_Date <= SYSDATE AND ev.to_Date > SYSDATE))";
-            Query qry = getCurrentSession().createSQLQuery(mainStr).addScalar("id", IntegerType.INSTANCE);
-            ;
-
+			StringBuilder mainStr;
+			mainStr = new StringBuilder(
+					" select 	id  from EG_EIS_EMPLOYEEINFO ev  where ev.POS_ID = :pos and ((ev.to_Date is null and ev.from_Date <= SYSDATE ) OR (ev.from_Date <= SYSDATE AND ev.to_Date > SYSDATE))");
+			Query qry = getCurrentSession().createSQLQuery(mainStr.toString()).addScalar("id", IntegerType.INSTANCE);
+            
             if (pos != null) {
                 qry.setEntity("pos", pos);
             }
@@ -972,9 +972,11 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         List list = null;
         try {
 
-            String mainStr = "";
-            mainStr = " select 	POS_ID  from EG_EIS_EMPLOYEEINFO ev  where ev.ID = :empId and ((ev.to_Date is null and ev.from_Date <= SYSDATE ) OR (ev.from_Date <= SYSDATE AND ev.to_Date >= SYSDATE))";
-            Query qry = getCurrentSession().createSQLQuery(mainStr).addScalar("POS_ID", IntegerType.INSTANCE);
+			StringBuilder mainStr;
+			mainStr = new StringBuilder(
+					" select 	POS_ID  from EG_EIS_EMPLOYEEINFO ev  where ev.ID = :empId and ((ev.to_Date is null and ev.from_Date <= SYSDATE ) OR (ev.from_Date <= SYSDATE AND ev.to_Date >= SYSDATE))");
+			Query qry = getCurrentSession().createSQLQuery(mainStr.toString()).addScalar("POS_ID",
+					IntegerType.INSTANCE);
 
             if (empId != null) {
                 qry.setInteger("empId", empId);
@@ -1269,8 +1271,8 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
 
         Integer id = Integer.valueOf(0);
         try {
-            Query qry = getCurrentSession().createSQLQuery("SELECT SEQ_DIS_APP.nextval as id from dual").addScalar(
-                    "id", IntegerType.INSTANCE);
+			Query qry = getCurrentSession().createSQLQuery("SELECT SEQ_DIS_APP.nextval as id from dual").addScalar("id",
+					IntegerType.INSTANCE);
 
             if (qry.list() != null && !qry.list().isEmpty()) {
                 Integer obj = null;
@@ -1297,10 +1299,9 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
 
         Integer id = Integer.valueOf(0);
         try {
-            Query qry = getCurrentSession()
-                    .createSQLQuery(
-                            "SELECT CODE AS id FROM EG_EMPLOYEE emp  WHERE emp.CODE =(SELECT MAX(code) FROM EG_EMPLOYEE )  FOR UPDATE ")
-                    .addScalar("id", IntegerType.INSTANCE);
+			Query qry = getCurrentSession().createSQLQuery(
+					"SELECT CODE AS id FROM EG_EMPLOYEE emp  WHERE emp.CODE =(SELECT MAX(code) FROM EG_EMPLOYEE )  FOR UPDATE ")
+					.addScalar("id", IntegerType.INSTANCE);
             if (qry.list() != null && !qry.list().isEmpty()) {
                 Integer obj = null;
                 for (Iterator iter = qry.list().iterator(); iter.hasNext();) {
@@ -1493,9 +1494,9 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
     public Assignment getLastAssignmentByEmp(Integer empId) {
         Assignment assignment = null;
         try {
-            String mainStr = "";
-            mainStr = "select ev.assignment from EmployeeView ev  where ev.id = :empId and nvl(ev.toDate,sysdate) in(select max(nvl(ev1.toDate,sysdate)) from EmployeeView ev1 where ev1.id = :empId)";
-            Query qry = getCurrentSession().createQuery(mainStr);
+            StringBuilder mainStr;
+            mainStr = new StringBuilder("select ev.assignment from EmployeeView ev  where ev.id = :empId and nvl(ev.toDate,sysdate) in(select max(nvl(ev1.toDate,sysdate)) from EmployeeView ev1 where ev1.id = :empId)");
+            Query qry = getCurrentSession().createQuery(mainStr.toString());
             if (empId != null) {
                 qry.setInteger("empId", empId);
             }
@@ -1796,20 +1797,20 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         Query query = null;
         try {
 
-            StringBuffer stringbuffer = new StringBuffer(
-                    " select 	ASS_ID  from EG_EIS_EMPLOYEEINFO ev  where ev.ID = :empId");
+			StringBuffer stringbuffer = new StringBuffer(
+					" select 	ASS_ID  from EG_EIS_EMPLOYEEINFO ev  where ev.ID = :empId");
 
-            if (empId == null) {
-                throw new ApplicationException("EmployeeId  Not provided");
-            } else if (givenDate == null) {
-                stringbuffer
-                        .append(" and ((ev.to_Date is null and ev.from_Date <= SYSDATE ) OR (ev.from_Date <= SYSDATE AND ev.to_Date >= SYSDATE))");
+			if (empId == null) {
+				throw new ApplicationException("EmployeeId  Not provided");
+			} else if (givenDate == null) {
+				stringbuffer.append(
+						" and ((ev.to_Date is null and ev.from_Date <= SYSDATE ) OR (ev.from_Date <= SYSDATE AND ev.to_Date >= SYSDATE))");
 
-            } else {
-                stringbuffer.append(" and  ev.from_Date <= :givenDate AND ev.to_Date >= :givenDate");
-            }
-            query = getCurrentSession().createSQLQuery(stringbuffer.toString())
-                    .addScalar("ASS_ID", IntegerType.INSTANCE);
+			} else {
+				stringbuffer.append(" and  ev.from_Date <= :givenDate AND ev.to_Date >= :givenDate");
+			}
+			query = getCurrentSession().createSQLQuery(stringbuffer.toString()).addScalar("ASS_ID",
+					IntegerType.INSTANCE);
 
             if (query.getQueryString().contains(":givenDate")) {
                 query.setDate("givenDate", givenDate);
@@ -1843,16 +1844,17 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         List<Position> positionList = new ArrayList<Position>();
         Integer pos = null;
         try {
-            String mainStr = "";
+            StringBuilder mainStr;
 
-            mainStr = "select a.position.id from Assignment a where a.employee.userMaster.id =:userId";
-
+            mainStr = new StringBuilder("select a.position.id from Assignment a where a.employee.userMaster.id =:userId");
+           
+            
             if (date != null) {
-                mainStr += " and ((a.toDate is null and a.fromDate<= :date) or (a.fromDate <= :date and a.toDate >= :date))";
+            	mainStr.append(" and ((a.toDate is null and a.fromDate<= :date) or (a.fromDate <= :date and a.toDate >= :date))");
             } else {
-                mainStr += " and ((a.toDate is null and a.fromDate<= TO_DATE(SYSDATE,'dd-MM-yyy')) or (a.fromDate <= TO_DATE(SYSDATE,'dd-MM-yyy') and a.toDate >= TO_DATE(SYSDATE,'dd-MM-yyy')))";
+            	mainStr.append(" and ((a.toDate is null and a.fromDate<= TO_DATE(SYSDATE,'dd-MM-yyy')) or (a.fromDate <= TO_DATE(SYSDATE,'dd-MM-yyy') and a.toDate >= TO_DATE(SYSDATE,'dd-MM-yyy')))");
             }
-            Query qry = getCurrentSession().createQuery(mainStr);
+            Query qry = getCurrentSession().createQuery(mainStr.toString());
             if (user != null) {
                 qry.setLong("userId", user.getId());
             }
