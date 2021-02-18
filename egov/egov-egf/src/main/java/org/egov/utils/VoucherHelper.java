@@ -265,12 +265,11 @@ public class VoucherHelper {
 
 			if (null != billDateFrom && StringUtils.isNotEmpty(billDateFrom)) {
 				numDateQuery.append(" and br.billdate>=:billDateFrom");
-				params.put("billDateFrom",
-						Constants.DDMMYYYYFORMAT1.format(Constants.DDMMYYYYFORMAT2.parse(billDateFrom)));
+				params.put("billDateFrom", Constants.DDMMYYYYFORMAT2.parse(billDateFrom));
 			}
 			if (null != billDateTo && StringUtils.isNotEmpty(billDateTo)) {
 				numDateQuery.append(" and br.billdate<=:billDateTo");
-				params.put("billDateTo", Constants.DDMMYYYYFORMAT1.format(Constants.DDMMYYYYFORMAT2.parse(billDateTo)));
+				params.put("billDateTo", Constants.DDMMYYYYFORMAT2.parse(billDateTo));
 			}
 			queryMap.put(numDateQuery.toString(), params);
 		} catch (final ParseException e) {

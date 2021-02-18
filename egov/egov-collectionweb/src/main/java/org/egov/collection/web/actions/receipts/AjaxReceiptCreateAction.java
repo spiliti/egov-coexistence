@@ -130,8 +130,8 @@ public class AjaxReceiptCreateAction extends BaseFormAction {
     public String getAccountForService() {
         setValue(CollectionConstants.BLANK);
         final String serviceId = parameters.get(SERVICEID)[0];
-        final StringBuilder queryString = new StringBuilder("select sd.serviceAccount from ServiceDetails sd where sd.id='").append(serviceId).append("'");
-        final List<CChartOfAccounts> list = getPersistenceService().findAllBy(queryString.toString());
+        final StringBuilder queryString = new StringBuilder("select sd.serviceAccount from ServiceDetails sd where sd.id= ?");
+        final List<CChartOfAccounts> list = getPersistenceService().findAllBy(queryString.toString(), serviceId);
         for (final CChartOfAccounts accounts : list)
             value += accounts.getId().toString() + "~" + accounts.getGlcode() + "~" + accounts.getName() + "#";
 

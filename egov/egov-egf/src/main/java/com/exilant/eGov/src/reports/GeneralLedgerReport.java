@@ -56,6 +56,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -221,10 +222,6 @@ public class GeneralLedgerReport {
          */
         double txnDrSum = 0, txnCrSum = 0, openingBalance = 0, closingBalance = 0;
 
-        // String query = getQuery(glCode1,fundId, fundSourceId, startDate,
-        // endDate);
-
-        // engine.setAppConfigValuesService(appConfigValuesService);
         final ReportEngineBean reBean = engine.populateReportEngineBean(reportBean);
         final Entry<String, Map<String, Object>> queryWithParams = engine.getVouchersListQuery(reBean).entrySet().iterator().next(); 
 
@@ -238,7 +235,7 @@ public class GeneralLedgerReport {
 
 			try {
 				pstmt = persistenceService.getSession().createSQLQuery(entry.getKey());
-				entry.getValue().entrySet().forEach(rec -> pstmt.setParameter(rec.getKey(), rec.getValue()));
+				persistenceService.populateQueryWithParams(pstmt, entry.getValue());
 			} catch (final Exception e) {
 				LOGGER.error("Exception in creating statement:" + pstmt, e);
 				throw taskExc;
@@ -964,7 +961,7 @@ public class GeneralLedgerReport {
         /** opening balance of the Year **/
         if (!fundId.equalsIgnoreCase("")) {
             fundCondition = "fundId = :fundId AND ";
-            params.put("fundId", fundId);
+            params.put("fundId", Integer.parseInt(fundId));
         }
         if (deptCode != null && !deptCode.equalsIgnoreCase("")) {
             deptCondition = "DEPARTMENTCODE = :departmentCode AND ";
@@ -996,14 +993,14 @@ public class GeneralLedgerReport {
                 .append(deptCondition)
                 .append(" financialYearId = :financialYearId ")
                 .append("AND glCodeId = (SELECT id FROM chartOfAccounts WHERE glCode in (:glCode))");
-        params.put("financialYearId", fyId);
-        params.put("glCode", glCode);
+        params.put("financialYearId", Integer.parseInt(fyId));
+        params.put("glCode", Arrays.asList(glCode.split(",")));
         if (LOGGER.isInfoEnabled())
             LOGGER.info("**********************: OPBAL: " + queryYearOpBal);
         try {
             int i = 0;
             pstmt = persistenceService.getSession().createSQLQuery(queryYearOpBal.toString());
-            params.entrySet().forEach(rec -> pstmt.setParameter(rec.getKey(), rec.getValue()));
+            persistenceService.populateQueryWithParams(pstmt, params);
             resultset = pstmt.list();
             for (final Object[] element : resultset) {
                 opDebit = Double.parseDouble(element[0] != null ? element[0].toString() : "0");
@@ -1020,7 +1017,7 @@ public class GeneralLedgerReport {
         final String startDate = commnFunctions.getStartDate(Integer.parseInt(fyId));
         if (!fundId.equalsIgnoreCase("")) {
             fundCondition = "AND vh.fundId = :fundId ";
-            params.put("fundId", fundId);
+            params.put("fundId", Integer.parseInt(fundId));
         }
         if (!fundSourceId.equalsIgnoreCase("")) {
             fundSourceCondition = "AND vh.fundId = :fundSourceId ";
@@ -1087,15 +1084,17 @@ public class GeneralLedgerReport {
 					.append(" AND vh.voucherDate <to_date(:voucherToDate,'dd/MM/YYYY') AND vh.status not in (")
 					.append(defaultStatusExclude).append(")");
         }
-        params.put("departmentCode", deptCode);
+	    if (deptCode != null && !deptCode.equalsIgnoreCase("")) 
+	        params.put("departmentCode", deptCode);
         params.put("voucherFromDate", startDate);
         params.put("voucherToDate", tillDate);
-        params.put("glcode", glCode);
+        params.put("glcode", Arrays.asList(glCode.split(",")));
         if (LOGGER.isInfoEnabled())
             LOGGER.info("***********: OPBAL: " + queryTillDateOpBal);
         try {
             pstmt = persistenceService.getSession().createSQLQuery(queryTillDateOpBal.toString());
-            params.entrySet().forEach(rec -> pstmt.setParameter(rec.getKey(), rec.getValue()));
+            persistenceService.populateQueryWithParams(pstmt, params);
+            
             resultset = pstmt.list();
             if (!accEntityId.equalsIgnoreCase("") && !accEntityKey.equalsIgnoreCase(""))
                 for (final Object[] element : resultset) {

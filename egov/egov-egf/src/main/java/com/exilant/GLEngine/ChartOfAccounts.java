@@ -1226,7 +1226,7 @@ public class ChartOfAccounts {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(qry);
 				psmt1 = persistenceService.getSession().createSQLQuery(qry.toString());
-				psmt1.setParameter("date", date);
+				psmt1.setParameter("date", formatter.parse(date));
 				rs = psmt1.list();
 
 				if (!(rs != null && rs.size() > 0))

@@ -64,6 +64,7 @@ import org.egov.commons.Fund;
 import org.egov.egf.model.IEStatementEntry;
 import org.egov.egf.model.Statement;
 import org.egov.egf.model.StatementEntry;
+import org.egov.egf.utils.FinancialUtils;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.utils.Constants;
@@ -78,6 +79,10 @@ public abstract class ScheduleService extends PersistenceService {
     static final BigDecimal NEGATIVE = new BigDecimal("-1");
     @Autowired
     AppConfigValueService appConfigValuesService;
+    
+    @Autowired
+    private FinancialUtils financialUtils;
+    
     int minorCodeLength;
     int majorCodeLength;
     int detailCodeLength;
@@ -271,7 +276,7 @@ public abstract class ScheduleService extends PersistenceService {
 	}
 
 	protected List<Object[]> getAllLedgerTransaction(final String majorcode, final Date toDate, final Date fromDate,
-			final String fundId, final String filterQuery, Map<String, Object> params) {
+			final List<Integer> fundId, final String filterQuery, Map<String, Object> params) {
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Getting ledger transactions details where >>>> EndDate=" + toDate + "from Date=" + fromDate);
 		final String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
@@ -284,14 +289,14 @@ public abstract class ScheduleService extends PersistenceService {
 						.append("voucherheader v,vouchermis mis where v.id=mis.voucherheaderid and g.voucherheaderid=v.id")
 						.append(" and g.glcodeid=coa.id and v.voucherdate BETWEEN :voucherFromDate")
 						.append(" and :voucherToDate and v.status not in (:voucherStatusToExclude) and v.id=g.voucherheaderid")
-						.append(" and v.fundid in :fundId").append(filterQuery).append(" and g.glcodeid=coa.id  ")
+						.append(" and v.fundid in (:fundId)").append(filterQuery).append(" and g.glcodeid=coa.id  ")
 						.append("GROUP by g.glcode,coa.name,v.fundid ,coa.type ,coa.majorcode")
 						.append(" order by g.glcode,coa.name,coa.type").toString());
-		params.put("voucherFromDate", getFormattedDate(fromDate));
-		params.put("voucherToDate", getFormattedDate(toDate));
-		params.put("voucherStatusToExclude", voucherStatusToExclude);
+		params.put("voucherFromDate", fromDate);
+		params.put("voucherToDate", toDate);
+		params.put("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude));
 		params.put("fundId", fundId);
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		populateQueryWithParams(query, params);
 		return query.list();
 	}
 

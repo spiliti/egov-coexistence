@@ -68,6 +68,7 @@ import org.egov.commons.EgwStatus;
 import org.egov.commons.dao.ChartOfAccountsDAO;
 import org.egov.commons.dao.EgwStatusHibernateDAO;
 import org.egov.commons.utils.EntityType;
+import org.egov.egf.utils.FinancialUtils;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.exception.ApplicationException;
@@ -114,6 +115,9 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 
 	@Autowired
 	private EgwStatusHibernateDAO egwStatusDAO;
+	
+	@Autowired
+	private FinancialUtils financialUtils;
 
 	public ChequeAssignmentService() {
 		super(Paymentheader.class);
@@ -191,9 +195,10 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 				.addScalar("voucherid", LongType.INSTANCE).addScalar("voucherNumber").addScalar("voucherDate")
 				.addScalar("paidAmount", BigDecimalType.INSTANCE).addScalar("chequeDate")
 				.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
-		query.setParameter("status", approvedstatus).setParameter("statusId", statusId)
+		query.setParameter("status", Integer.valueOf(approvedstatus))
+				.setParameterList("statusId", financialUtils.getStatuses(statusId))
 				.setParameter("voucherType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT)
-				.setParameter("voucherName", Arrays.asList(FinancialConstants.PAYMENTVOUCHER_NAME_REMITTANCE,
+				.setParameterList("voucherName", Arrays.asList(FinancialConstants.PAYMENTVOUCHER_NAME_REMITTANCE,
 						FinancialConstants.PAYMENTVOUCHER_NAME_SALARY));
 		filterParams.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
 		if (LOGGER.isDebugEnabled())
@@ -272,17 +277,18 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 						.append(" ON (ih.ID=iv.INSTRUMENTHEADERID)  WHERE pvh.id=vh.id AND ih.ID_STATUS IN (:statusId)) ")
 						.append(" group by vh.id,vh.voucherNumber,vh.voucherDate,misbill.paidto order by paidto,voucherNumber ");
 
-		params.put("vhStatus", approvedstatus);
+		params.put("vhStatus", Integer.valueOf(approvedstatus));
 		params.putAll(filterParams);
 		params.put("glcodeId", ba.getChartofaccounts().getId());
-		params.put("statusId", statusId);
+		params.put("statusId", financialUtils.getStatuses(statusId));
 
 		query = getSession().createSQLQuery(supplierBillPaymentQuery.toString())
 				.addScalar("voucherid", LongType.INSTANCE).addScalar("voucherNumber").addScalar("voucherDate")
 				.addScalar("detailtypeid", LongType.INSTANCE).addScalar("detailkeyid", LongType.INSTANCE)
 				.addScalar("paidTo").addScalar("paidAmount", BigDecimalType.INSTANCE).addScalar("chequeDate")
 				.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+	
+		persistenceService.populateQueryWithParams(query, params);
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("CONTRACTOR/SUPLLIER BILL PAYMENT QUERY - " + supplierBillPaymentQuery);
@@ -338,9 +344,9 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 						.append("  group by vh.id,vh.voucherNumber,vh.voucherDate,misbill.paidto  ")
 						.append(" order by paidto,voucherNumber ");
 
-		params.put("vhStatus", approvedstatus);
+		params.put("vhStatus", Integer.valueOf(approvedstatus));
 		params.putAll(filterParams);
-		params.put("statusId", statusId);
+		params.put("statusId", financialUtils.getStatuses(statusId));
 
 		query = getSession().createSQLQuery(bankPaymentQuery.toString()).addScalar("voucherid", LongType.INSTANCE)
 				.addScalar("voucherNumber").addScalar("detailtypeid", LongType.INSTANCE)
@@ -348,7 +354,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 				.addScalar("paidAmount", BigDecimalType.INSTANCE).addScalar("chequeDate")
 				.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(query, params);
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("DIRECT BANK PAYMENT QUERY - " + bankPaymentQuery);
@@ -390,7 +396,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 						.append(" and br.expendituretype=:expendituretype").append(" and iv.id is null  ")
 						.append(" group by  misbill.billvhid,vh.id,vh.voucherNumber,vh.voucherDate,misbill.paidto ");
 
-		params.put("vhStatus", approvedstatus);
+		params.put("vhStatus", Integer.valueOf(approvedstatus));
 		params.putAll(filterParams);
 		params.put("expendituretype", FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT);
 
@@ -578,24 +584,25 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 						.append(" and gl.voucherheaderid =vh.id and gl.creditamount>0 and misbill.billvhid=billvh.id ")
 						.append(" and br.id=billmis.billid and billmis.voucherheaderid=billvh.id")
 						.append(" and br.expendituretype=:expendituretype")
-						.append(" and not exists(select 1 from egf_instrumentvoucher iv, egf_instrumentheader ih")
+						.append(" and not exists (select 1 from egf_instrumentvoucher iv, egf_instrumentheader ih")
 						.append(" where ih.id= iv.instrumentheaderid and iv.voucherheaderid=vh.id")
 						.append(" and ih.id_status not in (:ihStaus) )   ")
 						.append(" and exists (select 1 from egf_instrumentvoucher iv where  iv.voucherheaderid=vh.id)")
 						.append(" group by misbill.billvhid,vh.id,vh.voucherNumber,vh.voucherDate,misbill.paidto ");
 
-		params.put("vhStatus", approvedstatus);
+		params.put("vhStatus", Integer.valueOf(approvedstatus));
 		params.putAll(filterParams);
 		params.put("expendituretype", FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT);
-		params.put("ihStaus", statusId);
+		params.put("ihStaus", financialUtils.getStatuses(statusId));
 
 		final Query query = getSession().createSQLQuery(strQuery.toString()).addScalar("voucherid", LongType.INSTANCE)
 				.addScalar("voucherNumber").addScalar("voucherDate").addScalar("paidAmount", BigDecimalType.INSTANCE)
 				.addScalar("chequeDate").addScalar("paidTo").addScalar("billVHId", LongType.INSTANCE)
 				.addScalar("detailtypeid", LongType.INSTANCE).addScalar("detailkeyid", LongType.INSTANCE)
 				.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
-
+		
+		populateQueryWithParams(query, params);
+		
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("ALREADY ASSIGNED: No surrendered cheques - " + strQuery);
 		billChequeAssignmentList = query.list();
@@ -655,7 +662,8 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 
 					final List<Object> payTo = getSession().createSQLQuery(queryString.toString())
 							.setString("payTo", chqAssgn.getPaidTo())
-							.setParameter("voucherHeaderId", chqAssgn.getVoucherid()).setParameter("statusId", statusId)
+							.setParameter("voucherHeaderId", chqAssgn.getVoucherid())
+							.setParameterList("statusId", financialUtils.getStatuses(statusId))
 							.list();
 
 					if (payTo == null || payTo.size() == 0) {
@@ -682,7 +690,8 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 						List<Object> payTo = getSession().createSQLQuery(queryString.toString())
 								.setParameter("voucherHeaderId", chqAssgn.getVoucherid())
 								.setParameter("detailTypeId", detailTypeKeyAmtObj[0])
-								.setParameter("detailKeyId", detailTypeKeyAmtObj[1]).setParameter("statusId", statusId)
+								.setParameter("detailKeyId", detailTypeKeyAmtObj[1])
+								.setParameterList("statusId", financialUtils.getStatuses(statusId))
 								.list();
 						if (payTo == null || payTo.size() == 0) {
 							// this check will avoid already assigned by single
@@ -697,7 +706,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 							payTo = getSession().createSQLQuery(queryString.toString())
 									.setString("payTo", chqAssgn.getPaidTo())
 									.setParameter("voucherHeaderId", chqAssgn.getVoucherid())
-									.setParameter("statusId", statusId).list();
+									.setParameterList("statusId", financialUtils.getStatuses(statusId)).list();
 							if (payTo != null)
 								continue;
 							final ChequeAssignment ca = new ChequeAssignment();
@@ -729,13 +738,16 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 								? billVHIdAndGLDListForDebtitSideCCMap.get(chqAssgn.getBillVHId().longValue())
 								: new ArrayList<Object[]>();
 				if (detailTypeKeyAmtList == null || detailTypeKeyAmtList.size() == 0) {
-					final String queryString = " select distinct(ih.payTo) from egf_InstrumentHeader ih, egf_InstrumentVoucher iv where iv.instrumentHeaderId=ih.id and iv.voucherHeaderId="
-							+ chqAssgn.getVoucherid() + " and ih.payTo =:payTo and ih.id_status in (" + statusId
-							+ ")  ";
+					final String queryString = new StringBuilder(
+							" select distinct(ih.payTo) from egf_InstrumentHeader ih, egf_InstrumentVoucher iv")
+							.append(" where iv.instrumentHeaderId=ih.id and iv.voucherHeaderId=:voucherHeaderId")
+							.append(" and ih.payTo =:payTo and ih.id_status in (:statusId)  ").toString();
 					if (LOGGER.isDebugEnabled())
 						LOGGER.debug("ALREADY ASSIGNED: queryString" + queryString);
 					final List<Object> payTo = getSession().createSQLQuery(queryString)
-							.setString("payTo", chqAssgn.getPaidTo()).list();
+							.setString("payTo", chqAssgn.getPaidTo())
+							.setParameter("voucherHeaderId", chqAssgn.getVoucherid())
+							.setParameterList("statusId", financialUtils.getStatuses(statusId)).list();
 					if (payTo == null || payTo.size() == 0) {
 						if (LOGGER.isDebugEnabled())
 							LOGGER.debug(
@@ -757,7 +769,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 						List<Object> payTo = getSession().createSQLQuery(queryString.toString())
 								.setParameter("voucherHeaderId", chqAssgn.getVoucherid())
 								.setParameter("detailTypeId", obj[0]).setParameter("detailKeyId", obj[1])
-								.setParameter("statusId", statusId).list();
+								.setParameterList("statusId", financialUtils.getStatuses(statusId)).list();
 						if (payTo == null || payTo.size() == 0) {
 
 							// this check will avoid already assigned by single
@@ -772,7 +784,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 							payTo = getSession().createSQLQuery(queryString.toString())
 									.setString("payTo", chqAssgn.getPaidTo())
 									.setParameter("voucherHeaderId", chqAssgn.getVoucherid())
-									.setParameter("statusId", statusId).list();
+									.setParameterList("statusId", financialUtils.getStatuses(statusId)).list();
 							if (payTo != null)
 								continue;
 
@@ -837,17 +849,18 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 						.append(" where ih.id= iv.instrumentheaderid and iv.voucherheaderid=vh.id and ih.id_status not in (:statusId) ) ")
 						.append(" group by misbill.billvhid,vh.id,vh.voucherNumber,vh.voucherDate,misbill.paidto ");
 
-		params.put("vhStatus", approvedstatus);
+		params.put("vhStatus", Integer.valueOf(approvedstatus));
 		params.putAll(filterParams);
 		params.put("expendituretype", FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT);
-		params.put("statusId", statusId);
+		params.put("statusId", financialUtils.getStatuses(statusId));
 
 		final Query query = getSession().createSQLQuery(strQuery.toString()).addScalar("voucherid", LongType.INSTANCE)
 				.addScalar("voucherNumber").addScalar("voucherDate").addScalar("paidAmount", BigDecimalType.INSTANCE)
 				.addScalar("chequeDate").addScalar("paidTo").addScalar("billVHId", LongType.INSTANCE)
 				.addScalar("detailtypeid", LongType.INSTANCE).addScalar("detailkeyid", LongType.INSTANCE)
 				.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		
+		persistenceService.populateQueryWithParams(query, params);
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("ASSIGNED BUT SURRENDARD: With surrendered cheques - " + strQuery);
@@ -1075,11 +1088,11 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 		final Map<String, Object> params = new HashMap<>();
 		if (!"".equals(parameters.get("fromDate")[0])) {
 			sql.append(" and vh.voucherDate>=:voucherFromDate");
-			params.put("voucherFromDate", sdf.format(formatter.parse(parameters.get("fromDate")[0])));
+			params.put("voucherFromDate", formatter.parse(parameters.get("fromDate")[0]));
 		}
 		if (!"".equals(parameters.get("toDate")[0])) {
 			sql.append(" and vh.voucherDate<=:voucherToDate");
-			params.put("voucherToDate", sdf.format(formatter.parse(parameters.get("toDate")[0])));
+			params.put("voucherToDate", formatter.parse(parameters.get("toDate")[0]));
 		}
 		if (!StringUtils.isEmpty(voucherHeader.getVoucherNumber())) {
 			sql.append(" and vh.voucherNumber like :voucherNumber");
@@ -1117,7 +1130,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 		}
 		sql.append(" and ph.bankaccountnumberid = :bankAccountnumberId");
 		sql.append(" and lower(ph.type)=:paymentMode");
-		params.put("bankAccountnumberId", parameters.get("bankaccount")[0]);
+		params.put("bankAccountnumberId", Integer.valueOf(parameters.get("bankaccount")[0]));
 		params.put("paymentMode", parameters.get("paymentMode")[0].toLowerCase());
 
 		queryMap.put(sql.toString(), params);
