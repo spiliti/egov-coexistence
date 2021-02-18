@@ -276,7 +276,8 @@ public abstract class ScheduleService extends PersistenceService {
 	}
 
 	protected List<Object[]> getAllLedgerTransaction(final String majorcode, final Date toDate, final Date fromDate,
-			final List<Long> fundId, final String filterQuery, Map<String, Object> params) {
+		final List<Long> fundId, final String filterQuery, Map<String, Object> params) {
+
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Getting ledger transactions details where >>>> EndDate=" + toDate + "from Date=" + fromDate);
 		final String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");

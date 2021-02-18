@@ -125,9 +125,9 @@ public class CollectionReportHeadWiseService {
         StringBuilder whereQueryStr = new StringBuilder(" WHERE EGW_STATUS.DESCRIPTION != 'Cancelled' ");
         final Map<String, Object> whereQueryParams = new HashMap<>();
         StringBuilder creditWhereQueryStr = new StringBuilder("  AND EGCL_COLLECTIONDETAILS.CRAMOUNT>0 ");
-		StringBuilder debitWhereQueryStr = new StringBuilder(
-				"  AND EGCL_COLLECTIONDETAILS.DRAMOUNT>0 AND CAO.purposeid in (select id from EGF_ACCOUNTCODE_PURPOSE")
-						.append(" where name = :accountPurposeName)");
+	StringBuilder debitWhereQueryStr = new StringBuilder(
+			"  AND EGCL_COLLECTIONDETAILS.DRAMOUNT>0 AND CAO.purposeid in (select id from EGF_ACCOUNTCODE_PURPOSE")
+					.append(" where name = :accountPurposeName)");
         final StringBuilder queryStrGroup = new StringBuilder(" GROUP BY source,CAO.NAME,CAO.GLCODE,EGF_INSTRUMENTTYPE.TYPE ");
 		final StringBuilder finalSelectQueryStr = new StringBuilder(
 				"SELECT sum(cashCount) AS cashCount,sum(chequeddCount) AS chequeddCount,sum(onlineCount) AS onlineCount,")

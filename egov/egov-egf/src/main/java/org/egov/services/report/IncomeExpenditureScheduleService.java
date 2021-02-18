@@ -112,7 +112,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
     }
 
 	private Query populatePreviousYearTotals(final Statement statement, final Date toDate, final Date fromDate,
-			final String majorCode, final String filterQuery, final List<Long> fundId, Map<String, Object> params) {
+		final String majorCode, final String filterQuery, final List<Long> fundId, Map<String, Object> params) {
 		Date formattedToDate = null;
 		final String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
 		String majorCodeQuery = "";
