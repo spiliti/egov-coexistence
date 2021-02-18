@@ -2763,8 +2763,8 @@ public class CreateVoucher {
 					"SELECT to_char(startingDate, 'DD-Mon-YYYY') AS \"startingDate\",").append(
 							" to_char(endingDate, 'DD-Mon-YYYY') AS \"endingDate\" FROM financialYear WHERE startingDate <= ?")
 							.append(" AND endingDate >= ?");
-			pst = persistenceService.getSession().createQuery(query1.toString()).setParameter(0, vcDate).setParameter(1,
-					vcDate);
+			pst = persistenceService.getSession().createSQLQuery(query1.toString())
+					.setParameter(0, formatter.parse(vcDate)).setParameter(1, formatter.parse(vcDate));
 			rs = pst.list();
 			if (rs != null && rs.size() > 0)
 				for (final Object[] element : rs) {
@@ -2773,8 +2773,10 @@ public class CreateVoucher {
 				}
 			final StringBuilder query2 = new StringBuilder("SELECT id FROM voucherHeader WHERE voucherNumber = ? ")
 					.append(" AND voucherDate>= ? AND voucherDate<=? and status!=4");
-			pst = persistenceService.getSession().createQuery(query2.toString()).setParameter(0, vcNum)
-					.setParameter(1, fyStartDate).setParameter(2, fyEndDate);
+			pst = persistenceService.getSession().createSQLQuery(query2.toString())
+					.setParameter(0, vcNum)
+					.setParameter(1, formatter.parse(fyStartDate))
+					.setParameter(2, formatter.parse(fyEndDate));
 			rs = pst.list();
 			if (rs != null && rs.size() > 0) {
 				if (LOGGER.isDebugEnabled())
@@ -2791,10 +2793,11 @@ public class CreateVoucher {
 	}
 
 	public CFiscalPeriod getFiscalPeriod(final String vDate) throws TaskFailedException {
-	        CFiscalPeriod fiscalPeriod = null;
+		CFiscalPeriod fiscalPeriod = null;
 		final String sql = "select id from fiscalperiod  where ? between startingdate and endingdate";
 		try {
-			final Query pst = persistenceService.getSession().createSQLQuery(sql).addEntity(CFiscalPeriod.class).setParameter(0, vDate);
+			final Query pst = persistenceService.getSession().createSQLQuery(sql).addEntity(CFiscalPeriod.class)
+					.setParameter(0, formatter.parse(vDate));
 			final List<CFiscalPeriod> rset = pst.list();
 			fiscalPeriod = rset != null ? rset.get(0) : null;
 		} catch (final Exception e) {

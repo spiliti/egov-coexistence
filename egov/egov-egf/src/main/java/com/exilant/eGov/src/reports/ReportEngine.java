@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.egov.egf.utils.FinancialUtils;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.exception.ApplicationRuntimeException;
@@ -75,6 +76,9 @@ public class ReportEngine {
      */
     @Autowired
     private AppConfigValueService appConfigValuesService;
+    
+    @Autowired
+    private FinancialUtils financialUtils;
 
     public Map<String, Map<String, Object>> getVouchersListQuery(final ReportEngineBean reBean) throws ApplicationRuntimeException {
         boolean includeVouchermis = false;
@@ -124,7 +128,7 @@ public class ReportEngine {
              */
             if (checkNullandEmpty(reBean.getFundId())) {
                 reportEngineQry.append(firstParam).append(" voucher.fundId = :voucherFundId");
-                params.put("voucherFundId", reBean.getFundId());
+                params.put("voucherFundId", Integer.parseInt(reBean.getFundId()));
                 firstParam = andParam;
             }
             if (checkNullandEmpty(reBean.getFundsourceId())) {
@@ -192,29 +196,34 @@ public class ReportEngine {
 
             final List<AppConfigValues> listAppConfVal = appConfigValuesService.getConfigValuesByModuleAndKey("EGF",
                     "statusexcludeReport");
-            List<String> statusesToExclude = new ArrayList<>();
+            List<Integer> statusesToExclude = new ArrayList<>();
             if (null != listAppConfVal)
-            	statusesToExclude.add(listAppConfVal.get(0).getValue());
+            	statusesToExclude.addAll(financialUtils.getStatuses(listAppConfVal.get(0).getValue()));
             else
                 throw new ApplicationRuntimeException("Exlcude statusses not  are not defined for Reports");
             
-            if (reBean.getExcludeStatuses() != null && !reBean.getExcludeStatuses().isEmpty())
-            	statusesToExclude.addAll(reBean.getExcludeStatuses());
-            
+            if (reBean.getExcludeStatuses() != null && !reBean.getExcludeStatuses().isEmpty()) {
+            	for (String str : reBean.getExcludeStatuses()) {
+            		statusesToExclude.add(Integer.valueOf(str));
+            	}
+            }
             reportEngineQry.append(firstParam).append(" voucher.status not in (:voucherStatusToExclude)");
             params.put("voucherStatusToExclude", statusesToExclude);
 
             if (reBean.getIncludeStatuses() != null && !reBean.getIncludeStatuses().isEmpty()) {
                 reportEngineQry.append(firstParam).append(" voucher.status in (:voucherStatusToInclude)");
-                params.put("voucherStatusToInclude", reBean.getIncludeStatuses());
+                List<Integer> statusesToInclude = new ArrayList<>();
+                for (String str : reBean.getIncludeStatuses()) {
+                	statusesToInclude.add(Integer.valueOf(str));
+            	}
+                params.put("voucherStatusToInclude", statusesToInclude);
             }
 
         } catch (final Exception e) {
             LOGGER.error(e.getMessage());
             throw new ApplicationRuntimeException(e.getMessage());
         }
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug("-----------------------Engine Query-------------------");
+       
         if (LOGGER.isDebugEnabled())
             LOGGER.debug(reportEngineQry.toString());
         queryMap.put(reportEngineQry.toString(), params);

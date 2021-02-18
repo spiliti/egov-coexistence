@@ -84,43 +84,46 @@ public class CollectionReportHeadWiseService {
         StringBuilder rebateQueryStr = new StringBuilder("");
         StringBuilder revenueHeadQueryStr = new StringBuilder("");
 
-        final StringBuilder selectQueryStr = new StringBuilder(
-                "SELECT  (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cash' THEN count(distinct(EGCL_COLLECTIONHEADER.id)) END) AS cashCount,  "
-                        +
-                        " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cheque' THEN count(distinct(EGCL_COLLECTIONHEADER.id)) WHEN EGF_INSTRUMENTTYPE.TYPE='dd' THEN count(distinct(EGCL_COLLECTIONHEADER.id)) END) AS chequeddCount, "
-                        +
-                        " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE= 'online' THEN count(distinct(EGCL_COLLECTIONHEADER.id)) END) AS onlineCount, "
-                        +
-                        " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='card' THEN count(distinct(EGCL_COLLECTIONHEADER.id)) END) AS cardCount, "
-                        +
-                        " count(distinct(EGCL_COLLECTIONHEADER.id)) as totalReceiptCount, " +
-                        " EGCL_COLLECTIONHEADER.SOURCE AS source,CAO.NAME || '-' || CAO.GLCODE AS GLCODE,");
-        final StringBuilder revSelectQueryStr = new StringBuilder(selectQueryStr).append(
-                " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cash' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT) END) AS cashAmount, " +
-                        " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cheque' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT) WHEN EGF_INSTRUMENTTYPE.TYPE='dd' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT) END) AS chequeddAmount,"
-                        +
-                        " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='card' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT) END) AS cardAmount, "
-                        +
-                        " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE= 'online' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT) END) AS onlineAmount");
-        final StringBuilder rebateSelectQueryStr = new StringBuilder(selectQueryStr).append(
-                " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cash' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT) END) AS cashAmount, " +
-                        " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cheque' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT) WHEN EGF_INSTRUMENTTYPE.TYPE='dd' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT) END) AS chequeddAmount,"
-                        +
-                        " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='card' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT) END) AS cardAmount, "
-                        +
-                        " (CASE WHEN EGF_INSTRUMENTTYPE.TYPE= 'online' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT) END) AS onlineAmount");
-        final StringBuilder fromQueryStr = new StringBuilder(" FROM "
-                + " EGCL_COLLECTIONHEADER EGCL_COLLECTIONHEADER INNER JOIN EGCL_COLLECTIONINSTRUMENT EGCL_COLLECTIONINSTRUMENT ON EGCL_COLLECTIONHEADER.ID = EGCL_COLLECTIONINSTRUMENT.COLLECTIONHEADER "
-                + " INNER JOIN EGF_INSTRUMENTHEADER EGF_INSTRUMENTHEADER ON EGCL_COLLECTIONINSTRUMENT.INSTRUMENTHEADER = EGF_INSTRUMENTHEADER.ID "
-                + " INNER JOIN EGW_STATUS EGW_STATUS ON EGCL_COLLECTIONHEADER.STATUS = EGW_STATUS.ID"
-                + " INNER JOIN EGF_INSTRUMENTTYPE EGF_INSTRUMENTTYPE ON EGF_INSTRUMENTHEADER.INSTRUMENTTYPE = EGF_INSTRUMENTTYPE.ID"
-                + " INNER JOIN EGCL_COLLECTIONMIS EGCL_COLLECTIONMIS ON EGCL_COLLECTIONHEADER.ID = EGCL_COLLECTIONMIS.COLLECTIONHEADER "
-                + " INNER JOIN EGCL_COLLECTIONDETAILS EGCL_COLLECTIONDETAILS ON EGCL_COLLECTIONHEADER.ID = EGCL_COLLECTIONDETAILS.COLLECTIONHEADER "
-                + " INNER JOIN CHARTOFACCOUNTS CAO ON CAO.ID = EGCL_COLLECTIONDETAILS.CHARTOFACCOUNT ");
+		final StringBuilder selectQueryStr = new StringBuilder(
+				"SELECT  (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cash' THEN count(distinct(EGCL_COLLECTIONHEADER.id)) END) AS cashCount,  ")
+						.append(" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cheque' THEN count(distinct(EGCL_COLLECTIONHEADER.id))")
+						.append(" WHEN EGF_INSTRUMENTTYPE.TYPE='dd' THEN count(distinct(EGCL_COLLECTIONHEADER.id)) END) AS chequeddCount, ")
+						.append(" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE= 'online' THEN count(distinct(EGCL_COLLECTIONHEADER.id)) END)")
+						.append(" AS onlineCount, ")
+						.append(" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='card' THEN count(distinct(EGCL_COLLECTIONHEADER.id)) END)")
+						.append(" AS cardCount, ")
+						.append(" count(distinct(EGCL_COLLECTIONHEADER.id)) as totalReceiptCount, ")
+						.append(" EGCL_COLLECTIONHEADER.SOURCE AS source,CAO.NAME || '-' || CAO.GLCODE AS GLCODE,");
+		final StringBuilder revSelectQueryStr = new StringBuilder(selectQueryStr).append(
+				" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cash' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT) END) AS cashAmount, ")
+				.append(" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cheque' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT)")
+				.append(" WHEN EGF_INSTRUMENTTYPE.TYPE='dd' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT) END) AS chequeddAmount,")
+				.append(" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='card' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT) END) AS cardAmount, ")
+				.append(" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE= 'online' THEN SUM(EGCL_COLLECTIONDETAILS.CRAMOUNT) END) AS onlineAmount");
+		final StringBuilder rebateSelectQueryStr = new StringBuilder(selectQueryStr).append(
+				" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cash' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT) END) AS cashAmount, ")
+				.append(" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='cheque' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT)")
+				.append(" WHEN EGF_INSTRUMENTTYPE.TYPE='dd' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT) END) AS chequeddAmount,")
+				.append(" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE='card' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT) END) AS cardAmount, ")
+				.append(" (CASE WHEN EGF_INSTRUMENTTYPE.TYPE= 'online' THEN SUM(EGCL_COLLECTIONDETAILS.DRAMOUNT) END) AS onlineAmount");
+		final StringBuilder fromQueryStr = new StringBuilder(" FROM ").append(
+				" EGCL_COLLECTIONHEADER EGCL_COLLECTIONHEADER INNER JOIN EGCL_COLLECTIONINSTRUMENT EGCL_COLLECTIONINSTRUMENT")
+				.append(" ON EGCL_COLLECTIONHEADER.ID = EGCL_COLLECTIONINSTRUMENT.COLLECTIONHEADER ")
+				.append(" INNER JOIN EGF_INSTRUMENTHEADER EGF_INSTRUMENTHEADER ON EGCL_COLLECTIONINSTRUMENT.INSTRUMENTHEADER =")
+				.append(" EGF_INSTRUMENTHEADER.ID ")
+				.append(" INNER JOIN EGW_STATUS EGW_STATUS ON EGCL_COLLECTIONHEADER.STATUS = EGW_STATUS.ID")
+				.append(" INNER JOIN EGF_INSTRUMENTTYPE EGF_INSTRUMENTTYPE ON EGF_INSTRUMENTHEADER.INSTRUMENTTYPE =")
+				.append(" EGF_INSTRUMENTTYPE.ID")
+				.append(" INNER JOIN EGCL_COLLECTIONMIS EGCL_COLLECTIONMIS ON EGCL_COLLECTIONHEADER.ID =")
+				.append(" EGCL_COLLECTIONMIS.COLLECTIONHEADER ")
+				.append(" INNER JOIN EGCL_COLLECTIONDETAILS EGCL_COLLECTIONDETAILS ON EGCL_COLLECTIONHEADER.ID =")
+				.append(" EGCL_COLLECTIONDETAILS.COLLECTIONHEADER ")
+				.append(" INNER JOIN CHARTOFACCOUNTS CAO ON CAO.ID = EGCL_COLLECTIONDETAILS.CHARTOFACCOUNT ");
         StringBuilder whereQueryStr = new StringBuilder(" WHERE EGW_STATUS.DESCRIPTION != 'Cancelled' ");
         StringBuilder creditWhereQueryStr = new StringBuilder("  AND EGCL_COLLECTIONDETAILS.CRAMOUNT>0 ");
         StringBuilder debitWhereQueryStr = new StringBuilder(
-                "  AND EGCL_COLLECTIONDETAILS.DRAMOUNT>0 AND CAO.purposeid in (select id from EGF_ACCOUNTCODE_PURPOSE where name ='"
+                "  AND EGCL_COLLECTIONDETAILS.DRAMOUNT>0 AND CAO.purposeid in (select id from EGF_ACCOUNTCODE_PURPOSE")
+        		.append(" where name ='"
                         + CollectionConstants.PURPOSE_NAME_REBATE+ "')");    
         final StringBuilder queryStrGroup = new StringBuilder(" GROUP BY source,CAO.NAME,CAO.GLCODE,EGF_INSTRUMENTTYPE.TYPE ");
         final StringBuilder finalSelectQueryStr = new StringBuilder(

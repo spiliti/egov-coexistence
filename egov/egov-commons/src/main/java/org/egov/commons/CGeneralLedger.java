@@ -48,6 +48,7 @@
 package org.egov.commons;
 
 import javax.persistence.Transient;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -74,10 +75,10 @@ public class CGeneralLedger implements Serializable {
     @Length(max = 50)
     private String glcode;
     @NotNull
-    @Min(1)
+    @Digits(fraction = 2, integer = 10)
     private Double debitAmount;
     @NotNull
-    @Min(1)
+    @Digits(fraction = 2, integer = 10)
     private Double creditAmount;
     @SafeHtml
     private String description;

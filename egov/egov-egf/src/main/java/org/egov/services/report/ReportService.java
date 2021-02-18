@@ -70,6 +70,7 @@ import org.egov.egf.model.IEStatementEntry;
 import org.egov.egf.model.Statement;
 import org.egov.egf.model.StatementEntry;
 import org.egov.egf.model.StatementResultObject;
+import org.egov.egf.utils.FinancialUtils;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
@@ -97,6 +98,9 @@ public abstract class ReportService {
     List<Character> coaType = new ArrayList<Character>();
     @Autowired
     private FinancialYearHibernateDAO financialYearDAO;
+    
+    @Autowired
+    private FinancialUtils financialUtils;
   
     final static Logger LOGGER = Logger.getLogger(ReportService.class);
 
@@ -157,14 +161,11 @@ public abstract class ReportService {
         return "";
     }
 
-    public String getfundList(final List<Fund> fundList) {
-        final StringBuffer fundId = new StringBuffer();
-        fundId.append("(");
+    public List<Integer> getfundList(final List<Fund> fundList) {
+    	final List<Integer> funds = new ArrayList<>();
         for (final Fund fund : fundList)
-            fundId.append(fund.getId()).append(",");
-        fundId.setLength(fundId.length() - 1);
-        fundId.append(")");
-        return fundId.toString();
+            funds.add(fund.getId());
+        return funds;
     }
 
     public BigDecimal divideAndRound(BigDecimal value, final BigDecimal divisor) {
@@ -282,13 +283,13 @@ public abstract class ReportService {
 				.addScalar("glCode").addScalar("fundId", BigDecimalType.INSTANCE).addScalar("type")
 				.addScalar("amount", BigDecimalType.INSTANCE)
 				.setResultTransformer(Transformers.aliasToBean(StatementResultObject.class));
-		params.put("coaType", coaType);
-		params.put("voucherStatusToExclude", voucherStatusToExclude);
-		params.put("voucherToDate", getFormattedDate(toDate));
-		params.put("voucherFromDate", getFormattedDate(fromDate));
+		params.put("coaType", financialUtils.getCoaTypes(coaType));
+		params.put("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude));
+		params.put("voucherToDate", toDate);
+		params.put("voucherFromDate", fromDate);
 		params.put("minorCodeLength", minorCodeLength);
 		params.put("reporttype", subReportType);
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(query, params);
 		return query.list();
 	}
 

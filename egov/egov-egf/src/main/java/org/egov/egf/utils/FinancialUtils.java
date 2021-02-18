@@ -366,5 +366,21 @@ public class FinancialUtils {
         }
         return documentDetailsList;
     }
+    
+    public List<Integer> getStatuses(final String status) {
+		List<Integer> list = new ArrayList<>();
+		for (String s : status.split(",")) {
+			list.add(Integer.valueOf(s));
+		}
+		return list;
+	}
+    
+    public List<Character> getCoaTypes(final String coaType) {
+		List<Character> list = new ArrayList<>();
+		for (String s : coaType.split(",")) {
+			list.add(s.charAt(1));
+		}
+		return list;
+	}
 
 }

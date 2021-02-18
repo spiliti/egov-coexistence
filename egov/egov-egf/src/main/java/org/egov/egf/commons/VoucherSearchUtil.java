@@ -320,14 +320,14 @@ public class VoucherSearchUtil {
 		}
 		if (fromDate != null) {
 			sql.append(" and vh.voucherDate>=:voucherFromDate");
-			params.put("voucherFromDate", Constants.DDMMYYYYFORMAT1.format(fromDate));
+			params.put("voucherFromDate", fromDate);
 		}
 		if (toDate != null) {
 			sql.append(" and vh.voucherDate<=:voucherToDate");
-			params.put("voucherToDate", Constants.DDMMYYYYFORMAT1.format(toDate));
+			params.put("voucherToDate", toDate);
 		}
 		if (voucherHeader.getFundId() != null) {
-			sql.append(" and vh.fundId=:fundId");
+			sql.append(" and vh.fundId.id=:fundId");
 			params.put("fundId", voucherHeader.getFundId().getId());
 		}
 		if (voucherHeader.getVouchermis().getFundsource() != null) {
@@ -381,18 +381,22 @@ public class VoucherSearchUtil {
 			final String mode) {
 		final List<Query> queryList = new ArrayList<Query>();
 		final String statusExclude = excludeVoucherStatus();
+		List<Integer> list = new ArrayList<>();
+		for (String s : statusExclude.split(",")) {
+			list.add(Integer.valueOf(s));
+		}
 		final Map<String, Object> params = new HashMap<>();
 		final String sql = voucherFilterQuery(voucherHeader, fromDate, toDate, mode, params);
 		final String sqlQuery = new StringBuilder("from CVoucherHeader vh where vh.status not in (:statusExclude) ")
 				.append(sql).append(" order by vh.voucherNumber ,vh.voucherDate,vh.name ").toString();
 		final Query query1 = persistenceService.getSession().createQuery(sqlQuery);
 		params.entrySet().forEach(entry -> query1.setParameter(entry.getKey(), entry.getValue()));
-		query1.setParameterList("statusExclude", Arrays.asList(StringUtils.split(",")));
+		query1.setParameterList("statusExclude", list);
 		queryList.add(query1);
 		final Query query2 = persistenceService.getSession().createQuery(
 				"select count(*) from CVoucherHeader vh where vh.status not in (:statusExclude) " + sql);
 		params.entrySet().forEach(entry -> query2.setParameter(entry.getKey(), entry.getValue()));
-		query2.setParameterList("statusExclude", Arrays.asList(StringUtils.split(",")));
+		query2.setParameterList("statusExclude", list);
 		queryList.add(query2);
 		return queryList;
 	}

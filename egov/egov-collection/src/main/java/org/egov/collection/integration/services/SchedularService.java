@@ -171,9 +171,7 @@ public class SchedularService {
         StringBuilder queryString = new StringBuilder(200);
         queryString.append(
                 "select receipt from org.egov.collection.entity.OnlinePayment as receipt where receipt.status.code=:onlinestatuscode")
-                .append(" and receipt.service.code=:paymentservicecode and receipt.createdDate<:thirtyminslesssysdate  and MOD(receipt.id, ")
-                .append(CollectionConstants.QUARTZ_ATOM_RECONCILE_BULK_JOBS)
-                .append(") = :modulo  order by receipt.id asc");
+                .append(" and receipt.service.code=:paymentservicecode and receipt.createdDate<:thirtyminslesssysdate  and MOD(receipt.id, :bulkJobs ) = :modulo  order by receipt.id asc");
         final Query query = persistenceService
                 .getSession()
                 .createQuery(queryString.toString())
@@ -181,6 +179,7 @@ public class SchedularService {
         query.setString("onlinestatuscode", CollectionConstants.ONLINEPAYMENT_STATUS_CODE_PENDING);
         query.setString("paymentservicecode", CollectionConstants.SERVICECODE_ATOM);
         query.setParameter("thirtyminslesssysdate", new Date(cal.getTimeInMillis()));
+        query.setParameter("bulkJobs", CollectionConstants.QUARTZ_ATOM_RECONCILE_BULK_JOBS);
         query.setParameter("modulo", modulo);
         final List<OnlinePayment> reconcileList = query.list();
         LOGGER.debug("Thread ID = " + Thread.currentThread().getId() + ": got " + reconcileList.size() + " results.");
@@ -278,9 +277,7 @@ public class SchedularService {
         StringBuilder queryString = new StringBuilder(200);
         queryString.append(
                 "select receipt from org.egov.collection.entity.OnlinePayment as receipt where receipt.status.code=:onlinestatuscode")
-                .append(" and receipt.service.code=:paymentservicecode and receipt.createdDate<:thirtyminslesssysdate  and MOD(receipt.id, ")
-                .append(QUARTZ_SBIMOPS_RECONCILE_BULK_JOBS)
-                .append(") = :modulo  order by receipt.id asc");
+                .append(" and receipt.service.code=:paymentservicecode and receipt.createdDate<:thirtyminslesssysdate  and MOD(receipt.id, :bulkJobs ) = :modulo  order by receipt.id asc");
         final Query query = persistenceService
                 .getSession()
                 .createQuery(queryString.toString())
@@ -288,6 +285,7 @@ public class SchedularService {
         query.setString("onlinestatuscode", CollectionConstants.ONLINEPAYMENT_STATUS_CODE_PENDING);
         query.setString("paymentservicecode", paymentServiceCode);
         query.setParameter("thirtyminslesssysdate", new Date(cal.getTimeInMillis()));
+        query.setParameter("bulkJobs", QUARTZ_SBIMOPS_RECONCILE_BULK_JOBS);
         query.setParameter("modulo", modulo);
         return query.list();
     }
