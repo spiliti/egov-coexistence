@@ -48,8 +48,7 @@
 
 package org.egov.dao.bills;
 
-import org.egov.infra.exception.ApplicationException;
-import org.egov.infra.exception.ApplicationRuntimeException;
+import org.apache.log4j.Logger;
 import org.egov.model.bills.EgBilldetails;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -57,6 +56,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.util.List;
@@ -68,6 +68,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Repository
 @Transactional(readOnly = true)
 public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
+    
+    private static final Logger LOGGER = Logger.getLogger(EgBilldetailsHibernateDAO.class);
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -103,7 +106,7 @@ public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
 	@Override
 	public BigDecimal getOtherBillsAmount(final Long minGlCodeId, final Long maxGlCodeId, final Long majGlCodeId,
 			final String finYearID, final String functionId, final String schemeId, final String subSchemeId,
-			final String asOnDate, final String billType) throws Exception {
+			final String asOnDate, final String billType) {
 		final StringBuilder qryStr = new StringBuilder();
 		final BigDecimal result = new BigDecimal("0.00");
 		try {
@@ -163,13 +166,14 @@ public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
 				return new BigDecimal(qry.uniqueResult().toString());
 			else
 				return result;
-		} catch (final ApplicationRuntimeException e) {
-			throw new ApplicationRuntimeException("Error occurred while getting other bill amount", e);
+		} catch (final NoResultException e) {
+		    LOGGER.error("Error occurred while getting other bill amount", e);
+		    throw e;
 		}
 	}
 
     @Override
-    public EgBilldetails getBillDetails(final Long billId, final List glcodeIdList) throws Exception {
+    public EgBilldetails getBillDetails(final Long billId, final List glcodeIdList){
         
         try {
             StringBuilder qryStr = new StringBuilder();
@@ -178,8 +182,9 @@ public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
             qry.setParameterList("glcodeIds", glcodeIdList);
             qry.setLong("billId", billId);
             return (EgBilldetails) qry.uniqueResult();
-        } catch (final ApplicationRuntimeException e) {
-            throw new ApplicationException(e.getMessage());
+        } catch (final NoResultException e) {
+            LOGGER.error("Error occurred while getting other billId", e);
+            throw e;
         }
     }
 }
