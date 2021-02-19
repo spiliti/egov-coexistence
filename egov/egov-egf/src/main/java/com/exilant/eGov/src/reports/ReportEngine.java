@@ -185,7 +185,7 @@ public class ReportEngine {
             }
             if (checkNullandEmpty(reBean.getFunctionId())) {
                 reportEngineQry.append(firstParam).append(" ledger.functionid=:ledgerFunctionid");
-                params.put("ledgerFunctionid", reBean.getFunctionId());
+                params.put("ledgerFunctionid", Integer.valueOf(reBean.getFunctionId()));
                 firstParam = andParam;
             }
 

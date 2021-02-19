@@ -48,21 +48,6 @@
 package org.egov.services.report;
 
 
-import org.egov.commons.CFinancialYear;
-import org.egov.commons.Fund;
-import org.egov.commons.dao.FinancialYearHibernateDAO;
-import org.egov.egf.model.Statement;
-import org.egov.egf.model.StatementEntry;
-import org.egov.egf.model.StatementResultObject;
-import org.egov.infra.admin.master.entity.AppConfigValues;
-import org.egov.infra.exception.ApplicationRuntimeException;
-import org.egov.infstr.services.PersistenceService;
-import org.egov.utils.Constants;
-import org.egov.utils.FinancialConstants;
-import org.hibernate.Query;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -75,6 +60,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.egov.commons.CFinancialYear;
+import org.egov.commons.Fund;
+import org.egov.commons.dao.FinancialYearHibernateDAO;
+import org.egov.egf.model.Statement;
+import org.egov.egf.model.StatementEntry;
+import org.egov.egf.model.StatementResultObject;
+import org.egov.egf.utils.FinancialUtils;
+import org.egov.infra.admin.master.entity.AppConfigValues;
+import org.egov.infra.exception.ApplicationRuntimeException;
+import org.egov.infstr.services.PersistenceService;
+import org.egov.utils.Constants;
+import org.egov.utils.FinancialConstants;
+import org.hibernate.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 public class BalanceSheetService extends ReportService {
     private static final String BS = "BS";
     private static final String L = "L";
@@ -84,8 +85,12 @@ public class BalanceSheetService extends ReportService {
 	@Autowired
 	@Qualifier("persistenceService")
 	private PersistenceService persistenceService;
+	
 	@Autowired
 	private  FinancialYearHibernateDAO financialYearDAO;
+	
+	@Autowired
+	private FinancialUtils financialUtils;
 
     @Override
     protected void addRowsToStatement(final Statement balanceSheet, final Statement assets, final Statement liabilities) {
@@ -109,7 +114,7 @@ public class BalanceSheetService extends ReportService {
 						.append("coa.type FROM transactionsummary ts,chartofaccounts coa  WHERE ts.glcodeid = coa.ID ")
 						.append(" AND ts.financialyearid = :financialyearid").append(transactionQuery)
 						.append(" GROUP BY ts.fundid,coa.majorcode,coa.type").toString());
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(query, params);
 		final List<Object[]> openingBalanceAmountList = query
 				.setParameter("financialyearid", balanceSheet.getFinancialYear().getId()).list();
         for (final Object[] obj : openingBalanceAmountList)
@@ -147,9 +152,9 @@ public class BalanceSheetService extends ReportService {
 							.append("coa.majorcode,coa.type FROM transactionsummary ts,chartofaccounts coa ")
 							.append(" WHERE ts.glcodeid = coa.ID  AND ts.financialyearid=:financialyearid")
 							.append(transactionQuery).append(" GROUP BY coa.majorcode,coa.type").toString());
-			params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
-			final List<Object[]> openingBalanceAmountList = query.setParameter("financialyearid", prevFinancialYearId)
-					.list();
+			persistenceService.populateQueryWithParams(query, params);
+			final List<Object[]> openingBalanceAmountList = query
+					.setParameter("financialyearid", Integer.valueOf(prevFinancialYearId)).list();
             for (final Object[] obj : openingBalanceAmountList)
                 if (obj[0] != null && obj[1] != null) {
                   BigDecimal total =(BigDecimal) obj[0];
@@ -174,26 +179,26 @@ public class BalanceSheetService extends ReportService {
 		final BigDecimal divisor = balanceSheet.getDivisor();
 		String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
 		final StringBuilder qry = new StringBuilder();
+		final Map<String, Object> sqlParams = new HashMap<>();
 		// TODO- We are only grouping by fund here. Instead here grouping should happen
 		// based on the filter like -department and Function also
 		qry.append("select sum(g.creditamount)-sum(g.debitamount),v.fundid from voucherheader v,");
 		if (balanceSheet.getDepartment() != null && !"null".equals(balanceSheet.getDepartment().getCode()))
 			qry.append("VoucherMis mis ,");
 		qry.append("generalledger g, chartofaccounts coa where  v.ID=g.VOUCHERHEADERID")
-				.append(" and v.status not in(:voucherStatusToExclude)")
-				.append(" and  v.voucherdate>=vFromDate and v.voucherdate<=:vToDate");
+				.append(" and v.status not in (:voucherStatusToExclude)")
+				.append(" and  v.voucherdate>=:vFromDate and v.voucherdate<=:vToDate");
 		if (balanceSheet.getDepartment() != null && !"null".equals(balanceSheet.getDepartment().getCode())) {
 			qry.append(" and v.id= mis.voucherheaderid  and mis.departmentcode= :departmentcode");
-			params.put("departmentcode", balanceSheet.getDepartment().getCode());
+			sqlParams.put("departmentcode", balanceSheet.getDepartment().getCode());
 		}
 		qry.append(" and coa.ID=g.glcodeid and coa.type in ('I','E') ").append(filterQuery)
 				.append(" group by v.fundid");
 		final Query query = persistenceService.getSession().createSQLQuery(qry.toString());
-		query.setParameter("voucherStatusToExclude", voucherStatusToExclude)
-				.setParameter("vFromDate", getFormattedDate(fromDate))
-				.setParameter("vToDate", getFormattedDate(toDate));
-
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		query.setParameterList("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude))
+				.setParameter("vFromDate", fromDate).setParameter("vToDate", toDate);
+		sqlParams.putAll(params);
+		persistenceService.populateQueryWithParams(query, sqlParams);
 
 		final List<Object[]> excessieAmountList = query.list();
 
@@ -217,33 +222,34 @@ public class BalanceSheetService extends ReportService {
             final String filterQuery, final Date toDate, final Date fromDate, Map<String, Object> params) {
 		final BigDecimal divisor = balanceSheet.getDivisor();
 		BigDecimal sum = BigDecimal.ZERO;
-		String formattedToDate = "";
+		Date formattedToDate = null;
 		String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
         if ("Yearly".equalsIgnoreCase(balanceSheet.getPeriod()))
         {
             final Calendar cal = Calendar.getInstance();
             cal.setTime(fromDate);
             cal.add(Calendar.DATE, -1);
-            formattedToDate = getFormattedDate(cal.getTime());
+            formattedToDate = cal.getTime();
         }
         else 
-            formattedToDate = getFormattedDate(getPreviousYearFor(toDate));
+            formattedToDate = getPreviousYearFor(toDate);
         final StringBuilder qry = new StringBuilder();
         qry.append("select sum(g.creditamount)-sum(g.debitamount),v.fundid  from voucherheader v,generalledger g, ");
 		if (balanceSheet.getDepartment() != null && !"null".equals(balanceSheet.getDepartment().getCode()))
 			qry.append("  VoucherMis mis ,");
-		qry.append(" chartofaccounts coa   where  v.ID=g.VOUCHERHEADERID and v.status not in(:voucherStatusToExclude)")
+		qry.append(" chartofaccounts coa   where  v.ID=g.VOUCHERHEADERID and v.status not in (:voucherStatusToExclude)")
 				.append(" and v.voucherdate>=:vFromDate and v.voucherdate<=:vToDate and coa.ID=g.glcodeid ");
 		if (balanceSheet.getDepartment() != null && !"null".equals(balanceSheet.getDepartment().getCode()))
 			qry.append(" and v.id= mis.voucherheaderid");
 
-		qry.append(" and coa.type in ('I','E') " + filterQuery + " group by v.fundid,g.functionid");
+		qry.append(" and coa.type in ('I','E') ").append(filterQuery).append(" group by v.fundid,g.functionid");
 		final Query query = persistenceService.getSession().createSQLQuery(qry.toString());
-		query.setParameter("voucherStatusToExclude", voucherStatusToExclude)
-				.setParameter("vFromDate", getFormattedDate(getPreviousYearFor(fromDate)))
+		query.setParameterList("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude))
+				.setParameter("vFromDate", getPreviousYearFor(fromDate))
 				.setParameter("vToDate", formattedToDate);
 
-        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(query, params);
+		
         final List<Object[]> excessieAmountList = query.list();
         for (final Object[] obj : excessieAmountList)
             sum = sum.add((BigDecimal) obj[0]);
@@ -274,17 +280,17 @@ public class BalanceSheetService extends ReportService {
         final Date toDate = getToDate(balanceSheet);
         String   voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
         final List<Fund> fundList = balanceSheet.getFunds();
+        Map<String, Object> filterQueryParams = new HashMap<>();
+        final String filterQuery = getFilterQuery(balanceSheet, filterQueryParams);
+        populateCurrentYearAmountPerFund(balanceSheet, fundList, filterQuery, toDate, fromDate, BS, filterQueryParams);
+        populatePreviousYearTotals(balanceSheet, filterQuery, toDate, fromDate, BS, "'L','A'", filterQueryParams);
         Map<String, Object> params = new HashMap<>();
-        final String filterQuery = getFilterQuery(balanceSheet, params);
-        populateCurrentYearAmountPerFund(balanceSheet, fundList, filterQuery, toDate, fromDate, BS, params);
-        populatePreviousYearTotals(balanceSheet, filterQuery, toDate, fromDate, BS, "'L','A'", params);
-        params = new HashMap<>();
         addCurrentOpeningBalancePerFund(balanceSheet, fundList, getTransactionQuery(balanceSheet, params), params);
         params = new HashMap<>();
         addOpeningBalancePrevYear(balanceSheet, getTransactionQuery(balanceSheet, params), fromDate, params);
         final String glCodeForExcessIE = getGlcodeForPurposeCode(7);//purpose is ExcessIE
-        addExcessIEForCurrentYear(balanceSheet, fundList, glCodeForExcessIE, filterQuery, toDate, fromDate, params);
-        addExcessIEForPreviousYear(balanceSheet, fundList, glCodeForExcessIE, filterQuery, toDate, fromDate, params);
+        addExcessIEForCurrentYear(balanceSheet, fundList, glCodeForExcessIE, filterQuery, toDate, fromDate, filterQueryParams);
+        addExcessIEForPreviousYear(balanceSheet, fundList, glCodeForExcessIE, filterQuery, toDate, fromDate, filterQueryParams);
         computeCurrentYearTotals(balanceSheet, Constants.LIABILITIES, Constants.ASSETS);
         populateSchedule(balanceSheet, BS);
         removeFundsWithNoData(balanceSheet);

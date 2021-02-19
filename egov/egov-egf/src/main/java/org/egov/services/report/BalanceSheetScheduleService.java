@@ -55,6 +55,7 @@ import org.egov.commons.Fund;
 import org.egov.commons.dao.FinancialYearHibernateDAO;
 import org.egov.egf.model.Statement;
 import org.egov.egf.model.StatementEntry;
+import org.egov.egf.utils.FinancialUtils;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infstr.services.PersistenceService;
@@ -79,12 +80,15 @@ public class BalanceSheetScheduleService extends ScheduleService {
     private String removeEntrysWithZeroAmount = "";
     private static final Logger LOGGER = Logger.getLogger(BalanceSheetScheduleService.class);
 
+    @Autowired
+    private FinancialUtils financialUtils;
    
- @Autowired
- @Qualifier("persistenceService")
- private PersistenceService persistenceService;
- @Autowired
-    private  FinancialYearHibernateDAO financialYearDAO;
+	@Autowired
+	@Qualifier("persistenceService")
+	private PersistenceService persistenceService;
+	
+	@Autowired
+	private FinancialYearHibernateDAO financialYearDAO;
     
    
     public void setBalanceSheetService(final BalanceSheetService balanceSheetService) {
@@ -180,7 +184,8 @@ public class BalanceSheetScheduleService extends ScheduleService {
 						.append(" AND ts.financialyearid=:financialyearid").append(transactionQuery)
 						.append(" GROUP BY coa.glcode,coa.type").toString());
 		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
-		final List<Object[]> openingBalanceAmountList = query.setParameter("financialyearid", prevFinancialYrId).list();
+		final List<Object[]> openingBalanceAmountList = query
+				.setParameter("financialyearid", Integer.valueOf(prevFinancialYrId)).list();
         for (final Object[] obj : openingBalanceAmountList)
             if (obj[0] != null && obj[1] != null) {
 
@@ -234,24 +239,24 @@ public class BalanceSheetScheduleService extends ScheduleService {
     private void populatePreviousYearTotalsForSchedule(final Statement balanceSheet, final String filterQuery, final Date toDate,
             final Date fromDate,
             final String majorCode, final Character type, Map<String, Object> filterParams) {
-        String formattedToDate = "";
+        Date formattedToDate = null;
         if ("Yearly".equalsIgnoreCase(balanceSheet.getPeriod()))
         {
             final Calendar cal = Calendar.getInstance();
             cal.setTime(fromDate);
             cal.add(Calendar.DATE, -1);
-            formattedToDate = balanceSheetService.getFormattedDate(cal.getTime());
+            formattedToDate = cal.getTime();
         }
         else
-            formattedToDate = balanceSheetService.getFormattedDate(balanceSheetService.getPreviousYearFor(toDate));
+            formattedToDate = balanceSheetService.getPreviousYearFor(toDate);
         final StringBuilder qry = new StringBuilder();
 		final Map<String, Object> params = new HashMap<>();
 		qry.append("select sum(debitamount)-sum(creditamount),c.glcode")
 				.append(" from generalledger g,chartofaccounts c,voucherheader v   ");
 		if (balanceSheet.getDepartment() != null && balanceSheet.getDepartment().getCode() != null)
 			qry.append(", VoucherMis mis ");
-		qry.append(" where  v.id=g.voucherheaderid and c.id=g.glcodeid and v.status not in(:voucherStatusToExclude) ");
-		params.put("voucherStatusToExclude", voucherStatusToExclude);
+		qry.append(" where  v.id=g.voucherheaderid and c.id=g.glcodeid and v.status not in (:voucherStatusToExclude) ");
+		params.put("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude));
 		if (balanceSheet.getDepartment() != null && balanceSheet.getDepartment().getCode() != null)
 			qry.append(" and v.id= mis.voucherheaderid ");
 		qry.append(" AND v.voucherdate <= :formattedToDate and v.voucherdate >=:formattedFromDate")
@@ -262,14 +267,14 @@ public class BalanceSheetScheduleService extends ScheduleService {
 				.append(filterQuery).append(" group by c.glcode");
 
 		params.put("formattedToDate", formattedToDate);
-		params.put("formattedFromDate",
-				balanceSheetService.getFormattedDate(balanceSheetService.getPreviousYearFor(fromDate)));
+		params.put("formattedFromDate", balanceSheetService.getPreviousYearFor(fromDate));
 		params.put("minorCodeLength", minorCodeLength);
 		params.put("majorCode", majorCode);
 		params.putAll(filterParams);
 
 		final Query query = persistenceService.getSession().createSQLQuery(qry.toString());
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(query, params);
+		
 		final List<Object[]> result = query.list();
         for (final Object[] row : result)
             for (int index = 0; index < balanceSheet.size(); index++)
@@ -498,7 +503,7 @@ public class BalanceSheetScheduleService extends ScheduleService {
     private void populateCurrentYearAmountForAllSchedules(final Statement balanceSheet, final List<Fund> fundList,
             final List<Object[]> currentYearAmounts) {
         final BigDecimal divisor = balanceSheet.getDivisor();
-        final Map<String, Schedules> scheduleToGlCodeMap = getScheduleToGlCodeMap(BS, "('A','L')");
+        final Map<String, Schedules> scheduleToGlCodeMap = getScheduleToGlCodeMap(BS, "'A','L'");
         for (final Entry<String, Schedules> entry : scheduleToGlCodeMap.entrySet()) {
             final String scheduleNumber = entry.getValue().scheduleNumber;
             final String scheduleName = entry.getValue().scheduleName;
@@ -555,7 +560,7 @@ public class BalanceSheetScheduleService extends ScheduleService {
     private void populateCurrentYearAmountForAllSchedulesDetailed(final Statement balanceSheet, final List<Fund> fundList,
             final List<Object[]> currentYearAmounts) {
         final BigDecimal divisor = balanceSheet.getDivisor();
-        final Map<String, Schedules> scheduleToGlCodeMap = getScheduleToGlCodeMapDetailed(BS, "('A','L')");
+        final Map<String, Schedules> scheduleToGlCodeMap = getScheduleToGlCodeMapDetailed(BS, "'A','L'");
         for (final Entry<String, Schedules> entry : scheduleToGlCodeMap.entrySet()) {
             final String scheduleNumber = entry.getValue().scheduleNumber;
             final String scheduleName = entry.getValue().scheduleName;

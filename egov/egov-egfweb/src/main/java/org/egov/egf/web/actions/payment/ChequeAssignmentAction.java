@@ -844,9 +844,10 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                         && !voucherHeader.getVouchermis().getDepartmentcode().equalsIgnoreCase("-1")) {
                 	StringBuilder queryString = new StringBuilder("select ac.serialNo ,fs.finYearRange from  AccountCheques ac,CFinancialYear fs,ChequeDeptMapping cd ")
                             .append(" where ac.serialNo = fs.id and  ac.bankAccountId.id=?")
-                            .append(" and ac.id=cd.accountCheque and cd.allotedTo=(select id from Department where id =? ) ")
+                            .append(" and ac.id=cd.accountCheque and cd.allotedTo=? ")
                             .append(" order by serialNo desc ");
-                    final List<Object[]> yearCodeList = persistenceService.findAllBy(queryString.toString(),bankaccount,voucherHeader.getVouchermis().getDepartmentcode());
+					final List<Object[]> yearCodeList = persistenceService.findAllBy(queryString.toString(),
+							Long.valueOf(bankaccount), voucherHeader.getVouchermis().getDepartmentcode());
                     if (yearCodeList != null) {
                         for (final Object[] s : yearCodeList)
                             chequeSlNoMap.put(s[0], s[1]);
@@ -855,7 +856,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                 	StringBuilder query1 = new StringBuilder("select ac.serialNo ,fs.finYearRange from  AccountCheques ac,CFinancialYear fs,ChequeDeptMapping cd ")
                             .append(" where ac.serialNo = fs.id and  bankAccountId=?")
                             .append(" and ac.id=cd.accountCheque order by serialNo desc ");
-                    final List<Object[]> yearCodeList = persistenceService.findAllBy(query1.toString(),bankaccount);
+                    final List<Object[]> yearCodeList = persistenceService.findAllBy(query1.toString(), Long.valueOf(bankaccount));
                     if (yearCodeList != null) {
                         for (final Object[] s : yearCodeList)
                             chequeSlNoMap.put(s[0], s[1]);

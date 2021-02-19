@@ -78,6 +78,7 @@ import org.egov.commons.dao.FinancialYearHibernateDAO;
 import org.egov.commons.dao.FundHibernateDAO;
 import org.egov.commons.service.EntityTypeService;
 import org.egov.commons.utils.EntityType;
+import org.egov.egf.utils.FinancialUtils;
 import org.egov.eis.entity.Employee;
 import org.egov.eis.service.EisCommonService;
 import org.egov.infra.admin.master.entity.AppConfigValues;
@@ -135,6 +136,9 @@ public class EgovCommon {
 
     @Autowired
     private ApplicationContext context;
+    
+    @Autowired
+    private FinancialUtils financialUtils;
 
     public FundFlowService getFundFlowService() {
         return fundFlowService;
@@ -1048,8 +1052,8 @@ public class EgovCommon {
 				.append(" where financialyear.id = ( select id from CFinancialYear where startingDate <= :startDate")
 				.append(" AND endingDate >= :endDate) and glcodeid.glcode = :glCode ").append(fundConidtion)
 				.append(deptCondition);
-		params.put("startDate", Constants.DDMMYYYYFORMAT1.format(asondate));
-		params.put("endDate", Constants.DDMMYYYYFORMAT1.format(asondate));
+		params.put("startDate", asondate);
+		params.put("endDate", asondate);
 		params.put("glCode", glcode);
 		if (null != accountdetailType) {
 			opBalncQuery.append(" and accountdetailtype.id=:accountdetailType");
@@ -1164,12 +1168,11 @@ public class EgovCommon {
 					.append(" and vh.status not in (:statusExclude)");
 
 			final Query query = getPersistenceService().getSession().createQuery(glCodeBalQry.toString());
-			query.setParameter("glCode", glcode).setParameter("startDate", Constants.DDMMYYYYFORMAT1.format(asondate))
-					.setParameter("endDate", Constants.DDMMYYYYFORMAT1.format(asondate))
-					.setParameter("voucherDate", Constants.DDMMYYYYFORMAT1.format(asondate))
-					.setParameter("statusExclude", statusExclude);
-
-			params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+			query.setParameter("glCode", glcode).setParameter("startDate", asondate)
+					.setParameter("endDate", asondate)
+					.setParameter("voucherDate", asondate)
+					.setParameterList("statusExclude", financialUtils.getStatuses(statusExclude));
+			persistenceService.populateQueryWithParams(query, params);
 			final List<Object> list = query.list();
 			glCodeBalance = BigDecimal.valueOf((Integer) list.get(0));
         } else {

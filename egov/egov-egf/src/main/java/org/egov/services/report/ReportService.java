@@ -144,12 +144,12 @@ public abstract class ReportService {
 		if (balanceSheet.getFunction() != null && balanceSheet.getFunction().getId() != null
 				&& balanceSheet.getFunction().getId() != 0) {
 			query.append(" and g.functionid=:functionid");
-			params.put("functionid", balanceSheet.getFunction().getId().toString());
+			params.put("functionid", balanceSheet.getFunction().getId());
 		}
 		if (balanceSheet.getFund() != null && balanceSheet.getFund().getId() != null
 				&& balanceSheet.getFund().getId() != 0) {
 			query.append(" and v.fundid=:fundid");
-			params.put("fundid", balanceSheet.getFund().getId().toString());
+			params.put("fundid", balanceSheet.getFund().getId());
 		}
 		return query.toString();
 	}
@@ -183,12 +183,12 @@ public abstract class ReportService {
 		if (balanceSheet.getFunction() != null && balanceSheet.getFunction().getId() != null
 				&& balanceSheet.getFunction().getId() != 0) {
 			query.append(" and ts.functionid=:tsFunctionid");
-			params.put("tsFunctionid", balanceSheet.getFunction().getId().toString());
+			params.put("tsFunctionid", balanceSheet.getFunction().getId());
 		}
 		if (balanceSheet.getFund() != null && balanceSheet.getFund().getId() != null
 				&& balanceSheet.getFund().getId() != 0) {
 			query.append(" and ts.fundid=:tsFundid");
-			params.put("tsFundid", balanceSheet.getFund().getId().toString());
+			params.put("tsFundid", balanceSheet.getFund().getId());
 		}
 		return query.toString();
 	}
@@ -267,7 +267,7 @@ public abstract class ReportService {
 	List<StatementResultObject> getTransactionAmount(final String filterQuery, final Date toDate, final Date fromDate,
 			final String coaType, final String subReportType, Map<String, Object> params) {
 		String voucherStatusToExclude = getAppConfigValueFor("EGF", "statusexcludeReport");
-
+		final Map<String, Object> sqlParams = new HashMap<>();
 		final Query query = persistenceService.getSession().createSQLQuery(new StringBuilder(
 				"select c.majorcode as glCode,v.fundid as fundId,c.type as type,sum(debitamount)-sum(creditamount) as amount")
 						.append(" from generalledger g,chartofaccounts c,voucherheader v ,vouchermis mis")
@@ -283,13 +283,14 @@ public abstract class ReportService {
 				.addScalar("glCode").addScalar("fundId", BigDecimalType.INSTANCE).addScalar("type")
 				.addScalar("amount", BigDecimalType.INSTANCE)
 				.setResultTransformer(Transformers.aliasToBean(StatementResultObject.class));
-		params.put("coaType", financialUtils.getCoaTypes(coaType));
-		params.put("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude));
-		params.put("voucherToDate", toDate);
-		params.put("voucherFromDate", fromDate);
-		params.put("minorCodeLength", minorCodeLength);
-		params.put("reporttype", subReportType);
-		persistenceService.populateQueryWithParams(query, params);
+		sqlParams.put("coaType", financialUtils.getCoaTypes(coaType));
+		sqlParams.put("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude));
+		sqlParams.put("voucherToDate", toDate);
+		sqlParams.put("voucherFromDate", fromDate);
+		sqlParams.put("minorCodeLength", minorCodeLength);
+		sqlParams.put("reporttype", subReportType);
+		sqlParams.putAll(params);
+		persistenceService.populateQueryWithParams(query, sqlParams);
 		return query.list();
 	}
 

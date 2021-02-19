@@ -494,8 +494,8 @@ public class IncomeExpenditureService extends ReportService {
 		budgteQuery.addScalar("glCode").addScalar("amount")
 				.setResultTransformer(Transformers.aliasToBean(StatementResultObject.class));
 		params.entrySet().forEach(entry -> budgteQuery.setParameter(entry.getKey(), entry.getValue()));
-		budgteQuery.setLong("finYearId", incomeExpenditureStatement.getFinancialYear().getId()).setString("isBeRe",
-				"RE");
+		budgteQuery.setLong("finYearId", incomeExpenditureStatement.getFinancialYear().getId())
+		.setString("isBeRe","RE");
 		final List<StatementResultObject> list = budgteQuery.list();
 		return list;
 

@@ -83,6 +83,7 @@ import org.egov.commons.service.ChartOfAccountDetailService;
 import org.egov.commons.service.ObjectTypeService;
 import org.egov.commons.utils.EntityType;
 import org.egov.egf.commons.EgovCommon;
+import org.egov.egf.utils.FinancialUtils;
 import org.egov.eis.entity.Assignment;
 import org.egov.eis.entity.Employee;
 import org.egov.eis.service.AssignmentService;
@@ -153,6 +154,9 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
     private FinancialYearDAO financialYearDAO;
     @Autowired
     private VoucherTypeForULB voucherTypeForULB;
+    
+    @Autowired
+    private FinancialUtils financialUtils;
 
     @Autowired
     private MicroserviceUtils microserviceUtils;
@@ -2120,11 +2124,11 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
             final Map<String, Object> sqlParams = new HashMap<>();
             if (!"".equals(parameters.get("fromDate")[0])) {
                 sql.append(" and vh.voucherDate>=:vhFromDate");
-                sqlParams.put("vhFromDate", sdf.format(formatter.parse(parameters.get("fromDate")[0])));
+                sqlParams.put("vhFromDate", formatter.parse(parameters.get("fromDate")[0]));
             }
             if (!"".equals(parameters.get("toDate")[0])) {
                 sql.append(" and vh.voucherDate<=:vhToDate");
-                sqlParams.put("vhToDate", sdf.format(formatter.parse(parameters.get("toDate")[0])));
+                sqlParams.put("vhToDate", formatter.parse(parameters.get("toDate")[0]));
             }
             if (!StringUtils.isEmpty(voucherHeader.getVoucherNumber())) {
                 sql.append(" and vh.voucherNumber like :voucherNumber");
@@ -2161,7 +2165,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
                 sqlParams.put("divisionid", voucherHeader.getVouchermis().getDivisionid().getId());
             }
             sql.append(" and ph.bankaccountnumberid=:bankaccountnumberid");
-            sqlParams.put("bankaccountnumberid", parameters.get("bankaccount")[0]);
+            sqlParams.put("bankaccountnumberid", Integer.valueOf(parameters.get("bankaccount")[0]));
             sql.append(" and lower(ph.type)=lower(:paymentMode)");
             sqlParams.put("paymentMode", parameters.get("paymentMode")[0]);
 
@@ -2457,7 +2461,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				String recoveryId = parameters.get("recoveryId")[0];
 				if (!recoveryId.isEmpty()) {
 					tempquery1.append(" and rem.tdsid = :remTdsId");
-					params.put("remTdsId", parameters.get("recoveryId")[0]);
+					params.put("remTdsId", Integer.valueOf(parameters.get("recoveryId")[0]));
 				}
 				tempquery1.append(
 						"  and ph.voucherheaderid=vh.id and vmis.voucherheaderid= vh.id and vh.status = :vhStatus")
@@ -2465,7 +2469,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 						.append(" and vh.name =:vhName")
 						.append(" group by vh.id,vh.voucherNumber,vh.voucherDate,misbill.paidto order by vh.voucherNumber ");
 
-				params.put("vhStatus", approvedstatus);
+				params.put("vhStatus", Integer.valueOf(approvedstatus));
 				params.putAll(sqlParams);
 				params.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
 				params.put("vhName", FinancialConstants.PAYMENTVOUCHER_NAME_REMITTANCE);
@@ -2500,7 +2504,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 
 				if (!recoveryId1.isEmpty()) {
 					tempquery.append(" and rem.tdsid = :remTdsId");
-					params.put("remTdsId", parameters.get("recoveryId")[0]);
+					params.put("remTdsId", Integer.valueOf(parameters.get("recoveryId")[0]));
 				}
 				tempquery.append(
 						"  and ph.voucherheaderid=vh.id and vmis.voucherheaderid= vh.id and vh.status =:vhStatus")
@@ -2510,9 +2514,9 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 						.append(" and vh.name = :vhName")
 						.append(" group by vh.id,vh.voucherNumber,vh.voucherDate,misbill.paidto order by vh.voucherNumber ");
 
-				params.put("vhStatus", approvedstatus);
+				params.put("vhStatus", Integer.valueOf(approvedstatus));
 				params.putAll(sqlParams);
-				params.put("ihStatus", statusId);
+				params.put("ihStatus",  financialUtils.getStatuses(statusId));
 				params.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
 				params.put("vhName", FinancialConstants.PAYMENTVOUCHER_NAME_REMITTANCE);
 
@@ -2521,7 +2525,8 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 						.addScalar("paidAmount", BigDecimalType.INSTANCE).addScalar("chequeDate").addScalar("paidTo")
 						.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
-				params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(qry, params);
+				
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" for salary and remittance" + qry);
 				chequeAssignmentList.addAll(qry.list());
