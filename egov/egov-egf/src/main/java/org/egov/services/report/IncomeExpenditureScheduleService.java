@@ -420,7 +420,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
     private void populateCurrentYearAmountForAllSchedules(final Statement statement, final List<Fund> fundList,
             final List<Object[]> currentYearAmounts) {
         final BigDecimal divisor = statement.getDivisor();
-        final Map<String, Schedules> scheduleToGlCodeMap = getScheduleToGlCodeMap(IE, "('I','E')");
+        final Map<String, Schedules> scheduleToGlCodeMap = getScheduleToGlCodeMap(IE, "'I','E'");
         for (final Entry<String, Schedules> entry : scheduleToGlCodeMap.entrySet()) {
             final String scheduleNumber = entry.getValue().scheduleNumber;
             final String scheduleName = entry.getValue().scheduleName;

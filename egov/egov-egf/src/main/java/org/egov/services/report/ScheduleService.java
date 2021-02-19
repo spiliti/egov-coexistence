@@ -103,12 +103,10 @@ public abstract class ScheduleService extends PersistenceService {
 						" FROM chartofaccounts coa1, chartofaccounts coa2, chartofaccounts coa3, schedulemapping s")
 						.append(" WHERE coa3.scheduleid  = s.id AND coa3.id = coa2.parentid AND coa2.id = coa1.parentid")
 						.append(" AND  coa2.classification=2 AND coa1.classification=4")
-						.append(" AND coa3.type IN :coaType AND coa2.type IN :coaType AND coa1.type IN :coaType")
+						.append(" AND coa3.type IN (:coaType) AND coa2.type IN (:coaType) AND coa1.type IN (:coaType)")
 						.append(" AND s.reporttype = :reportType ORDER BY coa1.glcode").toString());
-        final List<Object[]> results = query
-        		.setParameter("coaType", coaType)
-        		.setParameter("reportType", reportType)
-        		.list();
+		final List<Object[]> results = query.setParameterList("coaType", financialUtils.getCoaTypes(coaType))
+				.setParameter("reportType", reportType).list();
         final Map<String, Schedules> scheduleMap = new LinkedHashMap<String, Schedules>();
         for (final Object[] row : results) {
             if (!scheduleMap.containsKey(row[1].toString()))
@@ -123,10 +121,10 @@ public abstract class ScheduleService extends PersistenceService {
 		final Query query = getSession()
 				.createSQLQuery(new StringBuilder("select distinct coa.glcode,s.schedule,s.schedulename,").append(
 						"coa.type,coa.name from chartofaccounts coa, schedulemapping s where s.id=coa.scheduleid and ")
-						.append("coa.classification=2 and s.reporttype = :reportType and coa.type in :coaType ")
+						.append("coa.classification=2 and s.reporttype = :reportType and coa.type in (:coaType) ")
 						.append("order by coa.glcode").toString());
-		final List<Object[]> results = query.setParameter("reportType", reportType).setParameter("coaType", coaType)
-				.list();
+		final List<Object[]> results = query.setParameter("reportType", reportType)
+				.setParameterList("coaType", financialUtils.getCoaTypes(coaType)).list();
         final Map<String, Schedules> scheduleMap = new LinkedHashMap<String, Schedules>();
         for (final Object[] row : results) {
             if (!scheduleMap.containsKey(row[1].toString()))
@@ -141,10 +139,12 @@ public abstract class ScheduleService extends PersistenceService {
 		final Query query = getSession()
 				.createSQLQuery(new StringBuilder("select distinct coa.majorcode,s.schedule,s.schedulename,")
 						.append("coa.type from chartofaccounts coa, schedulemapping s where s.id=coa.scheduleid and ")
-						.append("coa.classification=2 and s.reporttype = :reportType and coa.type in :coaType "
-								+ "group by coa.majorcode,s.schedule,s.schedulename,coa.type order by coa.majorcode")
+						.append("coa.classification=2 and s.reporttype = :reportType and coa.type in (:coaType) ")
+						.append("group by coa.majorcode,s.schedule,s.schedulename,coa.type order by coa.majorcode")
 						.toString());
-		return query.setParameter("reportType", reportType).setParameter("coaType", reportType).list();
+		return query.setParameter("reportType", reportType)
+				.setParameterList("coaType", financialUtils.getCoaTypes(coaType))
+						.list();
 	}
 
     List<Object[]> amountPerFundQueryForAllSchedules(final String filterQuery, final Date toDate, final Date fromDate,
@@ -164,11 +164,11 @@ public abstract class ScheduleService extends PersistenceService {
 						.append(" group by v.fundid,substr(c.glcode,1," + minorCodeLength + "),c.name")
 						.append(String.format(" order by substr(c.glcode,1,%d", minorCodeLength)).append(")")
 						.toString());
-		params.put("voucherStatusToExclude", voucherStatusToExclude);
-		params.put("voucherToDate", getFormattedDate(toDate));
-		params.put("voucherFromDate", getFormattedDate(fromDate));
+		params.put("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude));
+		params.put("voucherToDate", toDate);
+		params.put("voucherFromDate", fromDate);
 		params.put("reportType", reportType);
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		populateQueryWithParams(query, params);
 		return query.list();
     }
 
@@ -181,7 +181,7 @@ public abstract class ScheduleService extends PersistenceService {
 						.append(String.format("substr(c.glcode,1,%d", detailCodeLength)).append("),")
 						.append("c.name from generalledger g,chartofaccounts c,voucherheader v ,vouchermis mis where  ")
 						.append(" v.id=g.voucherheaderid and c.id=g.glcodeid and v.id=mis.voucherheaderid")
-						.append(" and v.status not in(:voucherStatusToExclude)  AND v.voucherdate <= :voucherToDate")
+						.append(" and v.status not in (:voucherStatusToExclude)  AND v.voucherdate <= :voucherToDate")
 						.append(" and v.voucherdate >= :voucherFromDate")
 						.append(String.format(" and substr(c.glcode,1,%d", detailCodeLength))
 						.append(") not in (select DISTINCT coa4.glcode from chartofaccounts coa4 where coa4.parentid in (SELECT coa3.id")
@@ -191,11 +191,11 @@ public abstract class ScheduleService extends PersistenceService {
 						.append(String.format(" group by v.fundid,substr(c.glcode,1,%d", detailCodeLength))
 						.append(String.format("),c.name order by substr(c.glcode,1,%d", detailCodeLength)).append(")")
 						.toString());
-		params.put("voucherStatusToExclude", voucherStatusToExclude);
-		params.put("voucherToDate", getFormattedDate(toDate));
-		params.put("voucherFromDate", getFormattedDate(fromDate));
+		params.put("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude));
+		params.put("voucherToDate", toDate);
+		params.put("voucherFromDate", fromDate);
 		params.put("reportType", reportType);
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		populateQueryWithParams(query, params);
 		return query.list();
     }
 
@@ -244,10 +244,10 @@ public abstract class ScheduleService extends PersistenceService {
 						" FROM chartofaccounts coa1, chartofaccounts coa2, chartofaccounts coa3, schedulemapping s")
 						.append(" WHERE coa3.scheduleid  = s.id AND coa3.id = coa2.parentid AND coa2.id = coa1.parentid")
 						.append(" AND coa2.classification=2 AND coa1.classification=4")
-						.append(" AND coa3.type   IN :reportType AND coa2.type IN :reportType")
-						.append(" AND coa1.type IN :reportType AND s.reporttype = 'IE' ORDER BY coa1.glcode")
+						.append(" AND coa3.type   IN (:reportType) AND coa2.type in (:reportType)")
+						.append(" AND coa1.type IN (:reportType) AND s.reporttype = 'IE' ORDER BY coa1.glcode")
 						.toString());
-		return query.setParameter("reportType", reportType).list();
+		return query.setParameterList("reportType", financialUtils.getCoaTypes(reportType)).list();
 	}
 
 	protected List<Object[]> getAllDetailGlCodesForSubSchedule(final String majorCode, final Character type,
@@ -374,7 +374,7 @@ public abstract class ScheduleService extends PersistenceService {
 		final Query query = getSession()
 				.createSQLQuery(new StringBuilder("select sum(debitamount)-sum(creditamount),v.fundid,c.glcode ")
 						.append("from generalledger g,chartofaccounts c,voucherheader v,vouchermis mis  where ")
-						.append(" v.id=g.voucherheaderid and c.id=g.glcodeid and v.status not in(:voucherStatusToExclude) ")
+						.append(" v.id=g.voucherheaderid and c.id=g.glcodeid and v.status not in (:voucherStatusToExclude) ")
 						.append(" AND v.voucherdate <= :voucherToDate and v.id=mis.voucherheaderid")
 						.append(" and v.voucherdate >= :voucherFromDate and c.glcode in (select distinct coad.glcode")
 						.append(" from chartofaccounts coa2, schedulemapping s ")
@@ -384,13 +384,13 @@ public abstract class ScheduleService extends PersistenceService {
 						.append(") and coad.classification=4 and coad.majorcode=:majorCode) and c.majorcode=:majorCode")
 						.append(" and c.classification=4 ").append(filterQuery)
 						.append(" group by v.fundid,c.glcode order by c.glcode").toString());
-		params.put("voucherStatusToExclude", voucherStatusToExclude);
-		params.put("voucherToDate", getFormattedDate(toDate));
-		params.put("voucherFromDate", getFormattedDate(fromDate));
+		params.put("voucherStatusToExclude", financialUtils.getStatuses(voucherStatusToExclude));
+		params.put("voucherToDate", toDate);
+		params.put("voucherFromDate", fromDate);
 		params.put("reportType", reportType);
 		params.put("majorCode", majorCode);
 
-		params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+		populateQueryWithParams(query, params);
 		return query.list();
 	}
 

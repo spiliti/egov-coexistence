@@ -864,15 +864,15 @@ public class GeneralLedgerReport {
 		if (!accEntityId.equalsIgnoreCase("") && !accEntityKey.equalsIgnoreCase("")) {
 			entityCondition.append(" AND gl.id = gldet.generalledgerid  AND gldet.detailtypeid = :accEntityId")
 					.append(" AND cdet.detailtypeid = :accEntityId AND gldet.detailkeyid = :accEntityKey");
-			params.put("accEntityId", accEntityId);
-			params.put("accEntityKey", accEntityKey);
+			params.put("accEntityId", Integer.valueOf(accEntityId));
+			params.put("accEntityKey", Integer.valueOf(accEntityKey));
 		}
 
 		if (addTableToQuery.trim().equals("") && null != fieldId && !fieldId.trim().equals(""))
 			addTableToQuery = ", vouchermis vmis ";
 		if (!StringUtils.isEmpty(functionId)) {
-			functionCondition = " and gl.functionid = :functionId" + functionId;
-			params.put("functionId", functionId);
+			functionCondition = " and gl.functionid = :functionId";
+			params.put("functionId", Integer.valueOf(functionId));
 		}
 		if (!accEntityKey.equals("")) {
 			queryString.append(
@@ -975,12 +975,12 @@ public class GeneralLedgerReport {
         }
         if (!accEntityId.equalsIgnoreCase("")) {
             accEntityCondition = "accountDetailTypeid = :accountDetailTypeid AND accountDetailKey = :accountDetailKey AND ";
-            params.put("accountDetailTypeid", accEntityId);
-            params.put("accountDetailKey", accEntityKey);
+            params.put("accountDetailTypeid", Integer.valueOf(accEntityId));
+            params.put("accountDetailKey", Integer.valueOf(accEntityKey));
         }
         if (!StringUtils.isEmpty(functionId)) {
             functionCondition = " functionid = :functionid AND ";
-            params.put("functionid", functionId);
+            params.put("functionid", Integer.valueOf(functionId));
         }
         final StringBuilder queryYearOpBal = new  StringBuilder(
         		"SELECT CASE WHEN sum(openingDebitBalance) is null THEN 0 ELSE sum(openingDebitBalance) END AS \"openingDebitBalance\", ")
@@ -1025,7 +1025,7 @@ public class GeneralLedgerReport {
         }
         if (!StringUtils.isEmpty(functionId)) {
             functionCondition = " and gl.functionid = :functionId ";
-            params.put("functionId", functionId);
+            params.put("functionId", Integer.valueOf(functionId));
         }
         final StringBuilder queryTillDateOpBal = new StringBuilder();
         String defaultStatusExclude = null;
@@ -1040,8 +1040,8 @@ public class GeneralLedgerReport {
             // addGldtlTableToQuery=", generalledgerdetail gldet ";
             accEntityCondition = " AND gl.id = gldet.generalledgerid  AND gldet.detailtypeid = :detailtypeid"
             		+ " AND gldet.detailkeyid = :detailkeyid ";
-            params.put("detailtypeid", accEntityId);
-            params.put("detailkeyid", accEntityKey);
+            params.put("detailtypeid", Integer.valueOf(accEntityId));
+            params.put("detailkeyid", Integer.valueOf(accEntityKey));
 
 			queryTillDateOpBal.append("SELECT coa.glcode,(SELECT SUM(gldet.amount) FROM generalLedger gl, voucherHeader vh ")
 			.append(deptFromCondition)

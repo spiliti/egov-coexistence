@@ -116,8 +116,8 @@ public class RequiredValidator {
 				.append("groupID as \"groupID\",ID as \"ID\" from accountdetailkey where detailTypeId=:detailTypeId")
 				.append(" and detailKey = :detailKey");
 		final Query qry = persistenceService.getSession().createSQLQuery(sql.toString());
-		qry.setParameter("detailTypeId", String.valueOf(detailId)).setParameter("detailKey",
-				String.valueOf(keyToValidate));
+		qry.setParameter("detailTypeId", Integer.valueOf(detailId)).setParameter("detailKey",
+				Integer.valueOf(keyToValidate));
 
 		final List list = qry.list();
 		if (list != null && list.size() > 0)

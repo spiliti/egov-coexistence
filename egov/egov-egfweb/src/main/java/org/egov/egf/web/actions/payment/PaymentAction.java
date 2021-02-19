@@ -445,7 +445,7 @@ public class PaymentAction extends BasePaymentAction {
             sql.append(" and bill.egBillregistermis.fund.id=:fundId");
             sqlParams.put("fundId", voucherHeader.getFundId().getId());
         }
-        if (voucherHeader.getVouchermis().getFundsource() != null) {departmentid
+        if (voucherHeader.getVouchermis().getFundsource() != null) {
             sql.append(" and bill.egBillregistermis.fundsource.id=:fundSourceId");
             sqlParams.put("fundSourceId", voucherHeader.getVouchermis().getFundsource().getId());
         }

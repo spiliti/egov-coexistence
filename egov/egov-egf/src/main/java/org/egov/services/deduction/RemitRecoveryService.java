@@ -67,6 +67,7 @@ import org.egov.commons.utils.EntityType;
 import org.egov.dao.recoveries.TdsHibernateDAO;
 import org.egov.dao.voucher.VoucherHibernateDAO;
 import org.egov.egf.model.AutoRemittanceBeanReport;
+import org.egov.egf.utils.FinancialUtils;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infstr.services.PersistenceService;
@@ -94,6 +95,9 @@ public class RemitRecoveryService {
     private VoucherHibernateDAO voucherHibDAO;
     @Autowired
     private TdsHibernateDAO tdsHibernateDAO;
+    
+    @Autowired
+    private FinancialUtils financialUtils;
 
 	public List<RemittanceBean> getPendingRecoveryDetails(final RemittanceBean remittanceBean,
 			final CVoucherHeader voucherHeader, final Integer detailKeyId) throws ValidationException {
@@ -201,11 +205,11 @@ public class RemitRecoveryService {
 		final StringBuilder dateQry = new StringBuilder();
 		if (remittanceBean.getFromVhDate() != null && voucherHeader.getVoucherDate() != null) {
 			dateQry.append(" and vh.VOUCHERDATE >= :fromVhDate and vh.VOUCHERDATE <= :voucherDate");
-			params.put("fromVhDate", Constants.DDMMYYYYFORMAT1.format(remittanceBean.getFromVhDate()));
-			params.put("voucherDate", Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()));
+			params.put("fromVhDate", remittanceBean.getFromVhDate());
+			params.put("voucherDate", voucherHeader.getVoucherDate());
 		} else {
 			dateQry.append(" and vh.VOUCHERDATE <= :voucherDate ");
-			params.put("voucherDate", Constants.DDMMYYYYFORMAT1.format(voucherHeader.getVoucherDate()));
+			params.put("voucherDate", voucherHeader.getVoucherDate());
 		}
 		query2.append("SELECT vh.NAME,  vh.VOUCHERNUMBER,  vh.VOUCHERDATE, egr.glamt, egr.ID, ")
 				.append("(select  case when sum(egd.remittedamt) is null then 0 else sum(egd.remittedamt) end")
@@ -251,7 +255,7 @@ public class RemitRecoveryService {
 				.append(" where vh.status not in (1,2,4) and  eg.PAYMENTVHID=vh.id and egd.remittanceid=eg.id")
 				.append(" and egd.REMITTANCEGLID=egr1.id and egr1.id=egr.id) <>0 ")
 				.append("ORDER BY vh.VOUCHERNUMBER,  vh.VOUCHERDATE");
-		params.put("selectedRows", selectedRows);
+		params.put("selectedRows", financialUtils.getStatuses(selectedRows));
 		populateNonConrolledTdsDataBySQL(null, listRemitBean, query, params);
 		return listRemitBean;
 	}
@@ -493,7 +497,7 @@ public class RemitRecoveryService {
             final StringBuilder query, Map<String, Object> params) {
         RemittanceBean remitBean;
 		final SQLQuery searchSQLQuery = persistenceService.getSession().createSQLQuery(query.toString());
-		params.entrySet().forEach(entry -> searchSQLQuery.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(searchSQLQuery, params);
 		final List<Object[]> list = searchSQLQuery.list();
         for (final Object[] element : list) {
             remitBean = new RemittanceBean();
