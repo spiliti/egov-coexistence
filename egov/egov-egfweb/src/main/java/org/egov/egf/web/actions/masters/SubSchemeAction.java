@@ -232,24 +232,23 @@ public class SubSchemeAction extends BaseFormAction {
     @SkipValidation
     @Action(value = "/masters/subScheme-search")
     public String search() {
-        final StringBuffer query = new StringBuffer(500);
-        new StringBuffer(100);
+    	final StringBuffer query = new StringBuffer(500);
+        final List params = new ArrayList();
         query.append("From SubScheme s ");
         if (fundId != 0) {
-            query.append("where s.scheme.fund.id= " + fundId);
-            // params.append(""+fundId);
-
+            query.append("where s.scheme.fund.id=?");
+            params.add(fundId);
             if (schemeId != -1) {
-                query.append("and  s.scheme.id= " + schemeId);
-                // params.append(","+schemeId);
-
-                if (subScheme.getId() != -1)
-                    query.append("and s.id=" + subScheme.getId());
-                // params.append(","+subSchemeId);
+                query.append(" and  s.scheme.id=?");
+                params.add(schemeId);
+                if (subScheme.getId() != -1) {
+                    query.append(" and s.id=?");
+                    params.add(subScheme.getId());
+                }
             }
         }
         loadDropDowns();
-        subSchemeList = persistenceService.findAllBy(query.toString());
+        subSchemeList = persistenceService.findAllBy(query.toString(), params.toArray());
         return SEARCH;
     }
 
@@ -262,27 +261,21 @@ public class SubSchemeAction extends BaseFormAction {
     }
 
     private void loadDropDowns() {
+    	 dropdownData.put("fundList", persistenceService
+                 .findAllBy("from Fund where isActive=true order by name"));
+         final StringBuffer st = new StringBuffer();
 
-        dropdownData.put("fundList", persistenceService
-                .findAllBy("from Fund where isActive=true order by name"));
-        final StringBuffer st = new StringBuffer();
-
-        if (fundId != 0) {
-
-            st.append("from Scheme where isactive=true and fund.id=");
-            st.append(fundId);
-            dropdownData.put("schemeList", persistenceService.findAllBy(st
-                    .toString()));
-            st.delete(0, st.length() - 1);
-
-        } else
-            dropdownData.put("schemeList", Collections.emptyList());
-        if (schemeId != -1)
-            dropdownData.put("subSchemeList",
-                    persistenceService.findAllBy("from SubScheme where isactive=true and scheme.id=?", schemeId));
-        else
-            dropdownData.put("subSchemeList", Collections.emptyList());
-
+         if (fundId != 0) {
+             st.append("from Scheme where isactive=true and fund.id=?");
+             dropdownData.put("schemeList", persistenceService.findAllBy(st.toString(), fundId));
+             st.delete(0, st.length() - 1);
+         } else
+             dropdownData.put("schemeList", Collections.emptyList());
+         if (schemeId != -1)
+             dropdownData.put("subSchemeList",
+                     persistenceService.findAllBy("from SubScheme where isactive=true and scheme.id=?", schemeId));
+         else
+             dropdownData.put("subSchemeList", Collections.emptyList());
     }
     
     

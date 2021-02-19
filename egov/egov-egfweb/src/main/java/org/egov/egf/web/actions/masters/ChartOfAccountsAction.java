@@ -79,7 +79,10 @@ import org.egov.infstr.services.PersistenceService;
 import org.egov.model.masters.AccountCodePurpose;
 import org.egov.services.voucher.GeneralLedgerService;
 import org.egov.utils.Constants;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -323,10 +326,13 @@ public class ChartOfAccountsAction extends BaseFormAction {
     }
 
     boolean hasReference(final Integer id, final String glCode) {
-        final SQLQuery query = persistenceService.getSession().createSQLQuery(
-                "select * from chartofaccounts c,generalledger gl,generalledgerdetail gd " +
-                        "where c.glcode='" + glCode + "' and gl.glcodeid=c.id and gd.generalledgerid=gl.id and gd.DETAILTYPEID="
-                        + id);
+    	
+    	StringBuilder queryString = new StringBuilder("select * from chartofaccounts c,generalledger gl,generalledgerdetail gd ")
+                .append("where c.glcode=:glCode")
+                .append(" and gl.glcodeid=c.id and gd.generalledgerid=gl.id and gd.DETAILTYPEID=:id");
+        final Query query = persistenceService.getSession().createSQLQuery(queryString.toString())
+                .setParameter("glCode", glCode, StringType.INSTANCE)
+                .setParameter("id", id, IntegerType.INSTANCE);
         final List list = query.list();
         if (list != null && list.size() > 0)
             return true;
@@ -335,13 +341,15 @@ public class ChartOfAccountsAction extends BaseFormAction {
 
     boolean validAddtition(final String glCode) {
         boolean flag=true;
+        
         final StringBuffer strQuery = new StringBuffer();
-        strQuery.append("select bd.billid from  eg_billdetails bd, chartofaccounts coa,  eg_billregistermis brm where coa.glcode = '"
-                + glCode + "' and bd.glcodeid = coa.id and brm.billid = bd.billid and brm.voucherheaderid is null ");
-        strQuery.append(" intersect SELECT br.id FROM eg_billregister br, eg_billdetails bd, chartofaccounts coa,egw_status  sts WHERE coa.glcode = '"
-                + glCode + "' AND bd.glcodeid = coa.id AND br.id= bd.billid AND br.statusid=sts.id ");
+        strQuery.append("select bd.billid from  eg_billdetails bd, chartofaccounts coa,  eg_billregistermis brm where coa.glcode =:glCode")
+                .append(" and bd.glcodeid = coa.id and brm.billid = bd.billid and brm.voucherheaderid is null ")
+                .append(" intersect SELECT br.id FROM eg_billregister br, eg_billdetails bd, chartofaccounts coa,egw_status  sts WHERE coa.glcode =:glCode")
+                .append(" AND bd.glcodeid = coa.id AND br.id= bd.billid AND br.statusid=sts.id ");
         strQuery.append(" and sts.id not in (select id from egw_status where upper(moduletype) like '%BILL%' and upper(description) like '%CANCELLED%') ");
-        final SQLQuery query = persistenceService.getSession().createSQLQuery(strQuery.toString());
+        final Query query = persistenceService.getSession().createSQLQuery(strQuery.toString())
+                .setParameter("glCode", glCode, StringType.INSTANCE);
         final List list = query.list();
         if (!list.isEmpty())
             flag = false;
