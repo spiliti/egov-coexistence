@@ -155,7 +155,7 @@ public class SchemeUtilizationReportAction extends LoanGrantBaseAction {
 
         // used to identify subschemes
         String temp = "";
-        final String pcQryStr = "from " + table + " where  id=?";
+        final String pcQryStr = String.format("from %s where  id=?", table);
         BigDecimal grandTotal = BigDecimal.ZERO;
         // sub scheme wise total
         final Map<String, BigDecimal> ssTotalMap = new LinkedHashMap<String, BigDecimal>();

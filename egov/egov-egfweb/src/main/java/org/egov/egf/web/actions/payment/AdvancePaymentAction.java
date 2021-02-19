@@ -558,8 +558,8 @@ public class AdvancePaymentAction extends BasePaymentAction {
         addDropdownData("designationList", (List<Designation>) map.get("designationList"));
 
         if (bDefaultDeptId && !dName.equals("")) {
-            final Department dept = (Department) persistenceService.find("from Department where deptName like '%"
-                    + dName + "' ");
+            final Department dept = (Department) persistenceService.find("from Department where deptName like ?",
+                    "%".concat(dName));
             departmentId = dept.getId().intValue();
         }
         wfitemstate = map.get("wfitemstate") != null ? map.get("wfitemstate").toString() : "";

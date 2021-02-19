@@ -140,33 +140,38 @@ public class BillVoucherAction extends BaseVoucherAction {
         final StringBuffer query = new StringBuffer(300);
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Expenditure Type selected :=" + expType);
-
+        final List<Object> params = new ArrayList<>();
         try {
+
             final String statusid = getApprovalStatusForBills();
-            query.append("from EgBillregister br where br.status.id in(").append(statusid).append(
-                    ")and ( br.egBillregistermis.voucherHeader is null or br.egBillregistermis.voucherHeader in (from CVoucherHeader vh where vh.status =? ))");
-            if (null != billNumber && StringUtils.isNotEmpty(billNumber))
-                query.append(" and br.billnumber='").append(billNumber).append("'");
+            query.append("from EgBillregister br where br.status.id in (?)")
+                    .append(" and ( br.egBillregistermis.voucherHeader is null or br.egBillregistermis.voucherHeader in (from CVoucherHeader vh where vh.status =? ))");
+            params.add(Integer.valueOf(statusid));
+            params.add(4);
+            if (null != billNumber && StringUtils.isNotEmpty(billNumber)) {
+                query.append(" and br.billnumber=?");
+                params.add(billNumber);
+            }
             if (null != voucherHeader.getVouchermis().getDepartmentcode()
-                    && !voucherHeader.getVouchermis().getDepartmentcode().equals("-1"))
-                query.append(" and br.egBillregistermis.departmentcode='")
-                        .append(voucherHeader.getVouchermis().getDepartmentcode() + "'");
-            if (null != voucherTypeBean.getVoucherDateFrom()
-                    && StringUtils.isNotEmpty(voucherTypeBean.getVoucherDateFrom()))
-                query.append(" and br.billdate>='")
-                        .append(Constants.DDMMYYYYFORMAT1
-                                .format(Constants.DDMMYYYYFORMAT2.parse(voucherTypeBean.getVoucherDateFrom())))
-                        .append("'");
-            if (null != voucherTypeBean.getVoucherDateTo()
-                    && StringUtils.isNotEmpty(voucherTypeBean.getVoucherDateTo()))
-                query.append(" and br.billdate<='")
-                        .append(Constants.DDMMYYYYFORMAT1
-                                .format(Constants.DDMMYYYYFORMAT2.parse(voucherTypeBean.getVoucherDateTo())))
-                        .append("'");
-            preApprovedVoucherList = persistenceService.findAllBy(query.toString(), 4);
+                    && !voucherHeader.getVouchermis().getDepartmentcode().equals("-1")) {
+                query.append(" and br.egBillregistermis.departmentcode=?");
+                params.add(voucherHeader.getVouchermis().getDepartmentcode());
+            }
+            if (null != voucherTypeBean.getVoucherDateFrom() && StringUtils.isNotEmpty(voucherTypeBean.getVoucherDateFrom())) {
+                query.append(" and br.billdate>=?");
+                params.add(Constants.DDMMYYYYFORMAT1
+                        .format(Constants.DDMMYYYYFORMAT2.parse(voucherTypeBean.getVoucherDateFrom())));
+            }
+            if (null != voucherTypeBean.getVoucherDateTo() && StringUtils.isNotEmpty(voucherTypeBean.getVoucherDateTo())) {
+                query.append(" and br.billdate<=?");
+                params.add(Constants.DDMMYYYYFORMAT1
+                        .format(Constants.DDMMYYYYFORMAT2.parse(voucherTypeBean.getVoucherDateTo())));
+            }
+            preApprovedVoucherList = persistenceService.findAllBy(query.toString(), params.toArray());
             populateDepartmentNames();
-            if (preApprovedVoucherList.size() == 0) {
-                addActionError("No records found.");
+            if(preApprovedVoucherList.size()==0)
+            {
+            	addActionError("No records found.");
             }
         } catch (final ValidationException e) {
 

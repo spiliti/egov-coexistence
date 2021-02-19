@@ -138,9 +138,9 @@ public class FunctionwiseIEAction extends ReportAction
         persistenceService.getSession().setFlushMode(FlushMode.MANUAL);
         super.prepare();
         if (reportSearch.getStartDate() == null || reportSearch.getStartDate().equals(""))
-            reportSearch.setStartDate(sdf.format(((CFinancialYear) persistenceService
-                    .find(" from CFinancialYear where startingDate <= '" + formatter.format(new Date()) + "' and endingDate >= '"
-                            + formatter.format(new Date()) + "'")).getStartingDate()));
+        	reportSearch.setStartDate(sdf.format(((CFinancialYear) persistenceService
+                    .find(" from CFinancialYear where startingDate <= ? and endingDate >= ?",
+                            formatter.format(new Date()), formatter.format(new Date()))).getStartingDate()));
         if (reportSearch.getEndDate() == null || reportSearch.getEndDate().equals(""))
             reportSearch.setEndDate(sdf.format(new Date()));
         setTodayDate(new Date());

@@ -208,17 +208,22 @@ public class PartyTypeAction extends BaseFormAction {
     @Action(value = "/masters/partyType-search")
     public String search() {
         final StringBuffer query = new StringBuffer();
-
+        final List params = new ArrayList();
         query.append("From EgPartytype where createdBy is not null ");
-        if (!partyType.getCode().isEmpty())
-            query.append(" and upper(code) like upper('%" + partyType.getCode() + "%')");
-        if (!partyType.getDescription().isEmpty())
-            query.append(" and upper(description) like upper('%" + partyType.getDescription() + "%')");
-        if (partyType.getEgPartytype() != null && partyType.getEgPartytype().getId() != null)
-            query.append(" and egPartytype =" + partyType.getEgPartytype());
-        partySearchList = persistenceService.findAllBy(query.toString());
+        if (!partyType.getCode().isEmpty()) {
+            query.append(" and upper(code) like upper(?)");
+            params.add(new StringBuilder("%").append(partyType.getCode()).append("%").toString());
+        }
+        if (!partyType.getDescription().isEmpty()) {
+            query.append(" and upper(description) like upper(?)");
+            params.add(new StringBuilder("%").append(partyType.getDescription()).append("%").toString());
 
-        // this.partySearchList = masterDataCache.get(query.toString());
+        }
+        if (partyType.getEgPartytype() != null && partyType.getEgPartytype().getId() != null) {
+            query.append(" and egPartytype = ?");
+            params.add(partyType.getEgPartytype());
+        }
+        partySearchList = persistenceService.findAllBy(query.toString(), params.toArray());
         return "search";
     }
 

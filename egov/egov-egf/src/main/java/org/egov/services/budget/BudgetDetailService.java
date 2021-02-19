@@ -1799,7 +1799,7 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 	}
 
 	public List<Object[]> fetchActualsForFYWithParams(final String fromDate, final String toVoucherDate,
-			final StringBuffer miscQuery) {
+			final StringBuffer miscQuery, final Map<String, Object> miscQueryParams) {
 		final List<AppConfigValues> list = appConfigValuesService.getConfigValuesByModuleAndKey(Constants.EGF,
 				"exclude_status_forbudget_actual");
 		if (list.isEmpty())
@@ -1837,6 +1837,7 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 		final Query qry = getSession().createSQLQuery(query.toString());
 		qry.setParameter("voucherstatusExclude", voucherstatusExclude).setParameter("fromDate", fromDate)
 				.setParameter("toVoucherDate", toVoucherDate);
+		miscQueryParams.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
 		final List<Object[]> result = qry.list();
 
 		return result;
@@ -1913,7 +1914,7 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 	 * uncancelled and BAN numbers are present for the bills and not vouchers
 	 */
 	public List<Object[]> fetchActualsForBillWithVouchersParams(final String fromDate, final String toVoucherDate,
-			final StringBuffer miscQuery) {
+			final StringBuffer miscQuery, final Map<String, Object> miscQueryParams) {
 		final StringBuilder query = new StringBuilder();
 		query.append(
 				"select bd.id as bud,SUM(case when bdetail.debitAmount is null then 0  else bdetail.debitAmount  end)")
@@ -1977,6 +1978,7 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 
 		final Query qry = getSession().createSQLQuery(query.toString());
 		qry.setParameter("fromDate", fromDate).setParameter("toVoucherDate", toVoucherDate);
+		miscQueryParams.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
 
 		final List<Object[]> result = qry.list();
 		return result;
