@@ -248,27 +248,10 @@ public class EGovernCommon extends AbstractTask {
 		return new SimpleDateFormat("dd-Mon-yyyy HH:mm:ss").format(new Date());
 	}
 
-
-
-
-
-
-
 	public String getBillNumber() throws TaskFailedException, Exception
 	{
 		throw new TaskFailedException("Method Not Supported Exception");
 	}
-
-
-
-
-
-
-
-
-
-
-
 
 	/**
 	 * This API returns the fiscialperiodid for the date passed

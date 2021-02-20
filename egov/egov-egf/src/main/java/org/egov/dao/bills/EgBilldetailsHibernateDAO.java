@@ -48,7 +48,6 @@
 
 package org.egov.dao.bills;
 
-import org.apache.log4j.Logger;
 import org.egov.model.bills.EgBilldetails;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -56,9 +55,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -68,9 +67,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Repository
 @Transactional(readOnly = true)
 public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
-    
-    private static final Logger LOGGER = Logger.getLogger(EgBilldetailsHibernateDAO.class);
-
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -106,85 +102,75 @@ public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
 	@Override
 	public BigDecimal getOtherBillsAmount(final Long minGlCodeId, final Long maxGlCodeId, final Long majGlCodeId,
 			final String finYearID, final String functionId, final String schemeId, final String subSchemeId,
-			final String asOnDate, final String billType) {
+			final String asOnDate, final String billType) throws SQLException {
 		final StringBuilder qryStr = new StringBuilder();
 		final BigDecimal result = new BigDecimal("0.00");
-		try {
-			String dateCond = "";
-			String funcStr = "";
-			String schStr = "";
-			String glcodeStr = "";
+		String dateCond = "";
+        String funcStr = "";
+        String schStr = "";
+        String glcodeStr = "";
 
-			qryStr.append("select sum(bd.debitamount) from EgBilldetails bd, EgBillregister br, EgBillregistermis brm")
-					.append(" where br.id=bd.egBillregister.id and br.id=brm.egBillregister.id")
-					.append(" and bd.egBillregister.id=brm.egBillregister.id and brm.financialyear.id =:finYearID")
-					.append(" and br.expendituretype not in ( :billType)  and br.status.id not in (SELECT es.id FROM EgwStatus es")
-					.append("  WHERE  UPPER(es.description) LIKE '%CANCELLED%') ");
+        qryStr.append("select sum(bd.debitamount) from EgBilldetails bd, EgBillregister br, EgBillregistermis brm")
+        		.append(" where br.id=bd.egBillregister.id and br.id=brm.egBillregister.id")
+        		.append(" and bd.egBillregister.id=brm.egBillregister.id and brm.financialyear.id =:finYearID")
+        		.append(" and br.expendituretype not in ( :billType)  and br.status.id not in (SELECT es.id FROM EgwStatus es")
+        		.append("  WHERE  UPPER(es.description) LIKE '%CANCELLED%') ");
 
-			if (isNotBlank(asOnDate))
-				dateCond = " and br.billdate <=:asOnDate";
+        if (isNotBlank(asOnDate))
+        	dateCond = " and br.billdate <=:asOnDate";
 
-			if (isNotBlank(functionId))
-				funcStr = " and bd.functionid =:functionId";
+        if (isNotBlank(functionId))
+        	funcStr = " and bd.functionid =:functionId";
 
-			if (isNotBlank(schemeId) && isBlank(subSchemeId))
-				schStr = "  and brm.scheme =:schemeId";
+        if (isNotBlank(schemeId) && isBlank(subSchemeId))
+        	schStr = "  and brm.scheme =:schemeId";
 
-			if (isNotBlank(schemeId) && isNotBlank(subSchemeId))
-				schStr = "  and brm.scheme =:schemeId and brm.subScheme =:subSchemeId";
+        if (isNotBlank(schemeId) && isNotBlank(subSchemeId))
+        	schStr = "  and brm.scheme =:schemeId and brm.subScheme =:subSchemeId";
 
-			if (minGlCodeId != 0 && maxGlCodeId != 0)
-				glcodeStr = " and bd.glcodeid between :minGlCodeId and :maxGlCodeId";
-			else if (maxGlCodeId != 0)
-				glcodeStr = " and bd.glcodeid =:maxGlCodeId";
-			else if (majGlCodeId != 0)
-				glcodeStr = " and bd.glcodeid =:majGlCodeId";
+        if (minGlCodeId != 0 && maxGlCodeId != 0)
+        	glcodeStr = " and bd.glcodeid between :minGlCodeId and :maxGlCodeId";
+        else if (maxGlCodeId != 0)
+        	glcodeStr = " and bd.glcodeid =:maxGlCodeId";
+        else if (majGlCodeId != 0)
+        	glcodeStr = " and bd.glcodeid =:majGlCodeId";
 
-			qryStr.append(dateCond).append(funcStr).append(schStr).append(glcodeStr);
-			Query qry = getCurrentSession().createQuery(qryStr.toString());
-			if (isNotBlank(functionId))
-				qry.setString("functionId", functionId);
-			if (isNotBlank(schemeId) && isBlank(subSchemeId))
-				qry.setString("schemeId", schemeId);
-			if (isNotBlank(schemeId) && isNotBlank(subSchemeId)) {
-				qry.setString("schemeId", schemeId);
-				qry.setString("subSchemeId", subSchemeId);
-			}
-			if (isNotBlank(asOnDate))
-				qry.setString("asOnDate", asOnDate);
-			if (minGlCodeId != 0 && maxGlCodeId != 0) {
-				qry.setLong("minGlCodeId", minGlCodeId);
-				qry.setLong("maxGlCodeId", maxGlCodeId);
-			} else if (maxGlCodeId != 0)
-				qry.setLong("maxGlCodeId", maxGlCodeId);
-			else if (majGlCodeId != 0)
-				qry.setLong("majGlCodeId", majGlCodeId);
-			qry.setString("finYearID", finYearID);
-			qry.setString("billType", billType);
+        qryStr.append(dateCond).append(funcStr).append(schStr).append(glcodeStr);
+        Query qry = getCurrentSession().createQuery(qryStr.toString());
+        if (isNotBlank(functionId))
+        	qry.setString("functionId", functionId);
+        if (isNotBlank(schemeId) && isBlank(subSchemeId))
+        	qry.setString("schemeId", schemeId);
+        if (isNotBlank(schemeId) && isNotBlank(subSchemeId)) {
+        	qry.setString("schemeId", schemeId);
+        	qry.setString("subSchemeId", subSchemeId);
+        }
+        if (isNotBlank(asOnDate))
+        	qry.setString("asOnDate", asOnDate);
+        if (minGlCodeId != 0 && maxGlCodeId != 0) {
+        	qry.setLong("minGlCodeId", minGlCodeId);
+        	qry.setLong("maxGlCodeId", maxGlCodeId);
+        } else if (maxGlCodeId != 0)
+        	qry.setLong("maxGlCodeId", maxGlCodeId);
+        else if (majGlCodeId != 0)
+        	qry.setLong("majGlCodeId", majGlCodeId);
+        qry.setString("finYearID", finYearID);
+        qry.setString("billType", billType);
 
-			if (qry.uniqueResult() != null)
-				return new BigDecimal(qry.uniqueResult().toString());
-			else
-				return result;
-		} catch (final NoResultException e) {
-		    LOGGER.error("Error occurred while getting other bill amount", e);
-		    throw e;
-		}
+        if (qry.uniqueResult() != null)
+        	return new BigDecimal(qry.uniqueResult().toString());
+        else
+        	return result;
 	}
 
     @Override
-    public EgBilldetails getBillDetails(final Long billId, final List glcodeIdList){
+    public EgBilldetails getBillDetails(final Long billId, final List glcodeIdList) throws SQLException {
         
-        try {
-            StringBuilder qryStr = new StringBuilder();
-            qryStr.append("from EgBilldetails bd where bd.creditamount>0 AND bd.glcodeid IN (:glcodeIds) AND billid=:billId ");
-            Query qry = getCurrentSession().createQuery(qryStr.toString());
-            qry.setParameterList("glcodeIds", glcodeIdList);
-            qry.setLong("billId", billId);
-            return (EgBilldetails) qry.uniqueResult();
-        } catch (final NoResultException e) {
-            LOGGER.error("Error occurred while getting other billId", e);
-            throw e;
-        }
+        StringBuilder qryStr = new StringBuilder();
+        qryStr.append("from EgBilldetails bd where bd.creditamount>0 AND bd.glcodeid IN (:glcodeIds) AND billid=:billId ");
+        Query qry = getCurrentSession().createQuery(qryStr.toString());
+        qry.setParameterList("glcodeIds", glcodeIdList);
+        qry.setLong("billId", billId);
+        return (EgBilldetails) qry.uniqueResult();
     }
 }
