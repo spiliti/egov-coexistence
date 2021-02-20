@@ -57,11 +57,15 @@ import org.egov.infra.microservice.utils.MicroserviceUtils;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.model.brs.BrsEntries;
 import org.egov.model.instrument.InstrumentHeader;
+import org.hibernate.HibernateException;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import com.google.zxing.NotFoundException;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -184,7 +188,7 @@ public class BankReconciliationSummary {
 		+"/"+(debitTotal!= null ? debitTotal : "0") +"/"+( debitOtherTotal!= null ? debitOtherTotal : "0")+""+
 		"/"+(creditTotalBrsEntry!= null ? creditTotalBrsEntry : "0") +"/"+( debitTotalBrsEntry!= null ? debitTotalBrsEntry : "0")+"";
 		}
-		catch(Exception e)
+		catch(HibernateException e)
 		{
 			LOGGER.error("Exp in getUnReconciledDrCr"+e.getMessage());
 			throw e;
@@ -199,7 +203,7 @@ public class BankReconciliationSummary {
 	        for(Instrument ins : list){
 	            recDepositedAmount = recDepositedAmount.add(ins.getAmount());
 	        }
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 LOGGER.error("Error occurred while fetching Deposited Instruments : ",e);
             }
 	    return recDepositedAmount;
@@ -215,7 +219,7 @@ public class BankReconciliationSummary {
             List<Instrument> list = new ArrayList<Instrument>();
             try {
                 list = microserviceUtils.getInstrumentsBySearchCriteria(insSearchContra);
-            } catch (Exception e) {
+            } catch (ObjectNotFoundException e) {
                 LOGGER.error("Error occurred while fetching Deposited Instruments : ",e);
             }
             return list;
@@ -247,7 +251,7 @@ public class BankReconciliationSummary {
 			sqlQuery.setDate("toDate", toDate);
 			sqlQuery.addEntity(InstrumentHeader.class);
 			return sqlQuery.list();
-		} catch (Exception e) {
+		} catch (HibernateException e) {
 			LOGGER.error("ERROR occurred while fetching the details of getIssuedInstrumentsNotPresentInBank : ", e);
 		}
 	    return Collections.EMPTY_LIST;
@@ -265,7 +269,7 @@ public class BankReconciliationSummary {
 			sqlQuery.setString("type", type);
 			sqlQuery.addEntity(BrsEntries.class);
 			return sqlQuery.list();
-		} catch (Exception e) {
+		} catch (HibernateException e) {
 			LOGGER.error("ERROR occurred while fetching the details of getBrsEntriesList : ", e);
 		}
 	    return Collections.EMPTY_LIST;
