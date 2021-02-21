@@ -183,11 +183,9 @@ public class CancelBillAction extends BaseFormAction {
 				persistenceService.findAllBy("from Fund where isactive=true and isnotleaf=false order by name"));
 		// Important - Remove the like part of the query below to generalize the
 		// bill cancellation screen
-		addDropdownData("expenditureList", persistenceService
-				.findAllBy("select distinct bill.expendituretype from EgBillregister bill where bill.expendituretype='"
-						+ FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT + "' or bill.expendituretype='"
-						+ FinancialConstants.STANDARD_EXPENDITURETYPE_WORKS + "' or bill.expendituretype='"
-						+ FinancialConstants.STANDARD_EXPENDITURETYPE_PURCHASE + "' order by bill.expendituretype"));
+		addDropdownData("expenditureList", persistenceService.findAllBy(
+				"select distinct bill.expendituretype from EgBillregister bill where bill.expendituretype=? or bill.expendituretype=? or bill.expendituretype=? order by bill.expendituretype", 
+				FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT, FinancialConstants.STANDARD_EXPENDITURETYPE_WORKS, FinancialConstants.STANDARD_EXPENDITURETYPE_PURCHASE));
 	}
 
 	public void prepareBeforeSearch() {
