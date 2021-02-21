@@ -134,6 +134,7 @@ public class VoucherStatusReportAction extends BaseFormAction {
 	private Integer pageSize = 30;
 	private EgovPaginatedList pagedResults;
 	private String countQry;
+	private List<Object> countParams;
 	private String modeOfPayment;
 	@Autowired
 	private AppConfigValueService appConfigValueService;
@@ -330,9 +331,8 @@ public class VoucherStatusReportAction extends BaseFormAction {
 		if (headerFields.contains("scheme"))
 			if (voucherHeader.getFundId() != null && voucherHeader.getFundId().getId() != -1) {
 				final StringBuffer st = new StringBuffer();
-				st.append("from Scheme where isactive=true and fund.id=");
-				st.append(voucherHeader.getFundId().getId());
-				dropdownData.put("schemeList", persistenceService.findAllBy(st.toString()));
+				st.append("from Scheme where isactive=true and fund.id=? ");
+				dropdownData.put("schemeList", persistenceService.findAllBy(st.toString(), voucherHeader.getFundId().getId()));
 				st.delete(0, st.length() - 1);
 
 			} else
@@ -356,48 +356,73 @@ public class VoucherStatusReportAction extends BaseFormAction {
 			nameMap.put((String) voucherName, (String) voucherName);
 		return nameMap;
 	}
-
+	
 	private Query voucherSearchQuery() {
-		String sql = "";
+        StringBuilder sql = new StringBuilder(500);
+        Map<String, Object> params = new HashMap<>();
+        if (modeOfPayment.equals("-1"))
+            sql.append(" from CVoucherHeader vh where ");
+        else
+            sql.append(" from CVoucherHeader vh,Paymentheader ph where vh.id = ph.voucherheader.id and");
 
-		if (!modeOfPayment.equals("-1"))
-			sql = sql + " from CVoucherHeader vh,Paymentheader ph where vh.id = ph.voucherheader.id and";
-		else
-			sql = sql + " from CVoucherHeader vh where ";
+        if (voucherHeader.getFundId() != null && voucherHeader.getFundId().getId() != -1) {
+            sql.append("  vh.fundId=:fundId");
+            params.put("fundId", voucherHeader.getFundId());
+        }
+        if (voucherHeader.getType() != null && !voucherHeader.getType().equals("-1")) {
+            sql.append(" and vh.type=:type");
+            params.put("type",voucherHeader.getType());
+        }
+        if (voucherHeader.getName() != null && !voucherHeader.getName().equalsIgnoreCase("-1")
+                && !voucherHeader.getName().equalsIgnoreCase("0")) {
+            sql.append(" and vh.name=:name");
+            params.put("name",voucherHeader.getName());
+        }
+        if (fromDate != null) {
+            sql.append(" and vh.voucherDate>=:fromDate");
+            params.put("fromDate",Constants.DDMMYYYYFORMAT1.format(fromDate));
+        }
+        if (toDate != null) {
+            sql.append(" and vh.voucherDate<=:toDate");
+            params.put("toDate",Constants.DDMMYYYYFORMAT1.format(toDate));
+        }
+        if (voucherHeader.getStatus() != -1) {
+            sql.append(" and vh.status=:status");
+            params.put("status",voucherHeader.getStatus());
 
-		if (voucherHeader.getFundId() != null && voucherHeader.getFundId().getId() != -1)
-			sql = sql + "  vh.fundId=" + voucherHeader.getFundId().getId();
+        }
+        if (deptImpl.getCode() != null && !deptImpl.getCode().equals("-1")) {
+            sql.append(" and vh.vouchermis.departmentcode=:deptCode");
+            params.put("deptCode",deptImpl.getCode());
+        }
 
-		if (voucherHeader.getType() != null && !voucherHeader.getType().equals("-1"))
-			sql = sql + " and vh.type='" + voucherHeader.getType() + "'";
-		if (voucherHeader.getName() != null && !voucherHeader.getName().equalsIgnoreCase("-1")
-				&& !voucherHeader.getName().equalsIgnoreCase("0"))
-			sql = sql + " and vh.name='" + voucherHeader.getName() + "'";
-		if (fromDate != null)
-			sql = sql + " and vh.voucherDate>='" + Constants.DDMMYYYYFORMAT1.format(fromDate) + "'";
-		if (toDate != null)
-			sql = sql + " and vh.voucherDate<='" + Constants.DDMMYYYYFORMAT1.format(toDate) + "'";
-		if (voucherHeader.getStatus() != -1)
-			sql = sql + " and vh.status=" + voucherHeader.getStatus();
-
-		if (deptImpl.getCode() != null && !deptImpl.getCode().equals("-1"))
-			sql = sql + " and vh.vouchermis.departmentcode='" + deptImpl.getCode() + "'";
-
-		if (voucherHeader.getVouchermis().getSchemeid() != null)
-			sql = sql + " and vh.vouchermis.schemeid=" + voucherHeader.getVouchermis().getSchemeid().getId();
-		if (voucherHeader.getVouchermis().getSubschemeid() != null)
-			sql = sql + " and vh.vouchermis.subschemeid=" + voucherHeader.getVouchermis().getSubschemeid().getId();
-		if (voucherHeader.getVouchermis().getFunctionary() != null)
-			sql = sql + " and vh.vouchermis.functionary=" + voucherHeader.getVouchermis().getFunctionary().getId();
-		if (voucherHeader.getVouchermis().getDivisionid() != null)
-			sql = sql + " and vh.vouchermis.divisionid=" + voucherHeader.getVouchermis().getDivisionid().getId();
-		if (!modeOfPayment.equals("-1"))
-			sql = sql + " and upper(ph.type) ='" + getModeOfPayment() + "'";
-		countQry = "select count(*) " + sql;
-		sql = "select vh " + sql + " order by vh.vouchermis.departmentcode ,vh.voucherDate, vh.voucherNumber";
-		final Query query = persistenceService.getSession().createQuery(sql);
-		return query;
-	}
+        if (voucherHeader.getVouchermis().getSchemeid() != null) {
+            sql.append(" and vh.vouchermis.schemeid=:schemeId");
+            params.put("schemeId",voucherHeader.getVouchermis().getSchemeid());
+        }
+        if (voucherHeader.getVouchermis().getSubschemeid() != null) {
+            sql.append(" and vh.vouchermis.subschemeid=:subSchemeId");
+            params.put("subSchemeId",voucherHeader.getVouchermis().getSubschemeid());
+        }
+        if (voucherHeader.getVouchermis().getFunctionary() != null) {
+            sql.append(" and vh.vouchermis.functionary=:functionary");
+            params.put("functionary",voucherHeader.getVouchermis().getFunctionary());
+        }
+        if (voucherHeader.getVouchermis().getDivisionid() != null) {
+            sql.append(" and vh.vouchermis.divisionid=:division");
+            params.put("division",voucherHeader.getVouchermis().getDivisionid());
+        }
+        if (!modeOfPayment.equals("-1")) {
+            sql.append(" and upper(ph.type) =:paymentMode");
+            params.put("paymentMode", getModeOfPayment());
+        }
+        countQry = "select count(*) " + sql;
+        final Query query = persistenceService.getSession()
+                .createQuery(new StringBuilder().append("select vh ").append(sql)
+                        .append(" order by vh.vouchermis.departmentid.name ,vh.voucherDate, vh.voucherNumber").toString());
+        params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+        return query;
+    }
 
 	private String getVoucherModule(final Integer vchrModuleId) throws ApplicationException {
 		if (vchrModuleId == null)
