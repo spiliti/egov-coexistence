@@ -66,6 +66,7 @@ import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.microservice.contract.AccountCodeTemplate;
 import org.egov.infra.microservice.models.ChartOfAccounts;
 import org.egov.infstr.services.PersistenceService;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -227,7 +228,7 @@ public class ChartOfAccountsService extends PersistenceService<CChartOfAccounts,
         }
     }
     
-    public List<CChartOfAccounts> getAccountCodeByPurpose(final Integer purposeId) {
+    public List<CChartOfAccounts> getAccountCodeByPurpose(final Integer purposeId) throws ApplicationException {
         final List<CChartOfAccounts> accountCodeList = new ArrayList<CChartOfAccounts>();
         try {
             if (purposeId == null || purposeId.intValue() == 0)
@@ -256,7 +257,7 @@ public class ChartOfAccountsService extends PersistenceService<CChartOfAccounts,
                             " FROM CChartOfAccounts WHERE purposeid=:purposeId AND classification=4 AND isActiveForPosting=true ");
             query.setLong(PURPOSE_ID, purposeId);
             accountCodeList.addAll(query.list());
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             throw new ApplicationRuntimeException("Error occurred while getting Account Code by purpose", e);
         }
         return accountCodeList;

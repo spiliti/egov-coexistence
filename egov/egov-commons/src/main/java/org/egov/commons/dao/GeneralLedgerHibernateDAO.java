@@ -63,6 +63,7 @@ import javax.persistence.PersistenceContext;
 
 import org.egov.commons.CGeneralLedger;
 import org.egov.infra.exception.ApplicationException;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -191,7 +192,7 @@ public class GeneralLedgerHibernateDAO  implements GeneralLedgerDAO {
 			final Query query = getCurrentSession().createQuery(hqlQuery.toString());
 			params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
 			list = (ArrayList) query.list();
-		} catch (final Exception e) {
+		} catch (final HibernateException e) {
 			LOG.error("Error occurred while getting Actuals Prev", e);
 			throw new ApplicationException("Error occurred while getting Actuals Prev", e);
 		}
@@ -317,7 +318,7 @@ public class GeneralLedgerHibernateDAO  implements GeneralLedgerDAO {
 			final Query query = getCurrentSession().createQuery(hqlQuery.toString());
 			params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
 			list = (ArrayList) query.list();
-		} catch (final Exception e) {
+		} catch (final HibernateException e) {
 			LOG.error("getActualsDecCurr Exception", e.getMessage());
 			throw new ApplicationException("Error occurred while getting Actuals upto december", e);
 		}
@@ -443,7 +444,7 @@ public class GeneralLedgerHibernateDAO  implements GeneralLedgerDAO {
 			} else {
 				return result;
 			}
-		} catch (final Exception e) {
+		} catch (final NumberFormatException e) {
 			LOG.error("Error occurred getGlAmountForBudgetingType ", e.getMessage());
 			throw new ApplicationException("Error occurred while getting Amount for Budgetting Type", e);
 		}
@@ -479,7 +480,7 @@ public class GeneralLedgerHibernateDAO  implements GeneralLedgerDAO {
 
             }
 
-        } catch (final Exception e) {
+        } catch (final NumberFormatException e) {
             LOG.error("Error occurred while getGlAmountbyGlcodeList ", e.getMessage());
             throw new ApplicationException("Error occurred while getting GL Amount By GLCode", e);
         }

@@ -74,6 +74,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -121,10 +122,10 @@ public class ChequeDishonourController {
     }
 
     @RequestMapping(method = { RequestMethod.GET }, value = "/_search")
-    public @ResponseBody ResponseEntity getDishonorChequeSearch(@ModelAttribute final DishonoredChequeBean model) {
+    public @ResponseBody ResponseEntity getDishonorChequeSearch(@ModelAttribute final DishonoredChequeBean model) throws Exception {
         try {
             return new ResponseEntity<>(getDishonorCheque(model), HttpStatus.OK);
-        } catch (final Exception e) {
+        } catch (final HttpClientErrorException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Controller
 @RequestMapping("/report/dishonouredcheque")
@@ -78,7 +79,7 @@ public class ChequeDishonouredReportController {
             List<BankAccountServiceMapping> bankAcntServiceMappings = microserviceUtils
                     .getBankAcntServiceMappings(accountNumber, null);
             return new ResponseEntity<>(bankAcntServiceMappings, HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (HttpClientErrorException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

@@ -67,7 +67,7 @@ public class BankaccountDAO {
         try {
             getSession().save(bankaccount);
         } catch (HibernateException e) {
-            throw new RuntimeException("Exception occurred while creating Bank Account", e);
+            throw new ApplicationRuntimeException("Exception occurred while creating Bank Account", e);
         }
     }
 
@@ -75,7 +75,7 @@ public class BankaccountDAO {
         try {
             getSession().saveOrUpdate(bankaccount);
         } catch (final HibernateException e) {
-            throw new RuntimeException("Exception occurred while updating Bank Account", e);
+            throw new ApplicationRuntimeException("Exception occurred while updating Bank Account", e);
         }
     }
 
@@ -83,7 +83,7 @@ public class BankaccountDAO {
         try {
             getSession().delete(bankaccount);
         } catch (final HibernateException e) {
-            throw new RuntimeException("Exception occurred while deleting Bank Account", e);
+            throw new ApplicationRuntimeException("Exception occurred while deleting Bank Account", e);
         }
     }
 
@@ -91,7 +91,7 @@ public class BankaccountDAO {
         try {
             return (Bankaccount) getSession().get(Bankaccount.class, bankaccount);
         } catch (final HibernateException e) {
-            throw new RuntimeException("Exception occurred while getting Bank Account by Id", e);
+            throw new ApplicationRuntimeException("Exception occurred while getting Bank Account by Id", e);
         }
     }
 
