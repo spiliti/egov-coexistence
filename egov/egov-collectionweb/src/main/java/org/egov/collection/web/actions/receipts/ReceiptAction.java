@@ -47,6 +47,7 @@
  */
 package org.egov.collection.web.actions.receipts;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -67,6 +68,9 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.apache.struts2.json.JSONException;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.egov.collection.constants.CollectionConstants;
 import org.egov.collection.entity.AccountPayeeDetail;
@@ -1165,8 +1169,8 @@ public class ReceiptAction extends BaseFormAction {
                         if (null != jsonNode)
                             additional = (BillDetailAdditional) new ObjectMapper().readValue(jsonNode.toString(),
                                     BillDetailAdditional.class);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (IOException e) {
+                        LOG.error("Error occurred while processing Json Node", e);
                     }
 
                     if (null != additional) {

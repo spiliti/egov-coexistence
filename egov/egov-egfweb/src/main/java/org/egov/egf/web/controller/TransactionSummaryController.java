@@ -84,6 +84,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -178,7 +179,7 @@ public class TransactionSummaryController {
 					transactionSummary = transactionSummaryService.create(transactionSummary);
 				}
 			}
-		} catch (Exception e) {
+		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<String>(HttpStatus.OK);

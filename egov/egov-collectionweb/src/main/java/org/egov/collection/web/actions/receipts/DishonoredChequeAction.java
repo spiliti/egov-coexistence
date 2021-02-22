@@ -80,6 +80,7 @@ import org.egov.infra.web.utils.EgovPaginatedList;
 import org.egov.infstr.search.SearchQuery;
 import org.egov.infstr.search.SearchQuerySQL;
 import org.egov.model.instrument.InstrumentType;
+import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Results({ @Result(name = DishonoredChequeAction.SEARCH, location = "dishonoredCheque-search.jsp"),
@@ -153,7 +154,7 @@ public class DishonoredChequeAction extends SearchFormAction {
                 accountNumberList = Collections.emptyList();
             else
                 accountNumberList = bankaccountHibernateDAO.getBankAccountByBankBranch(branchId.intValue());
-        } catch (final Exception ex) {
+        } catch (final ObjectNotFoundException ex) {
             LOGGER.error("Exception Encountered!!!" + ex.getMessage(), ex);
         }
         return "accountList";
