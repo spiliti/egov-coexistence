@@ -196,7 +196,7 @@ public class ExpenseBillPrintAction extends BaseFormAction {
 
     @SkipValidation
     @Action(value = "/bill/expenseBillPrint-ajaxPrint")
-    public String ajaxPrint() {
+    public String ajaxPrint() throws NoSuchMethodException, SecurityException, ClassNotFoundException {
         return exportHtml();
     }
 
@@ -210,7 +210,7 @@ public class ExpenseBillPrintAction extends BaseFormAction {
         return PRINT;
     }
 
-    private void populateBill() {
+    private void populateBill() throws NoSuchMethodException, SecurityException, ClassNotFoundException {
         if (parameters.get("id") != null && !parameters.get("id")[0].isEmpty()) {
             cbill = (EgBillregister) persistenceService.find("from EgBillregister where id=?",
                     Long.valueOf(parameters.get("id")[0]));
@@ -221,25 +221,25 @@ public class ExpenseBillPrintAction extends BaseFormAction {
 
     }
 
-    private void generateVoucherReportList() {
+    private void generateVoucherReportList() throws NoSuchMethodException, SecurityException, ClassNotFoundException {
         prepareForPrint();
     }
 
     @Action(value = "/bill/expenseBillPrint-exportPdf")
-    public String exportPdf() throws JRException, IOException {
+    public String exportPdf() throws JRException, IOException, NoSuchMethodException, SecurityException, ClassNotFoundException {
         populateBill();
         inputStream = reportHelper.exportPdf(inputStream, jasperpath, getParamMap(), billReportList);
         return "PDF";
     }
 
-    public String exportHtml() {
+    public String exportHtml() throws NoSuchMethodException, SecurityException, ClassNotFoundException {
         populateBill();
         inputStream = reportHelper.exportHtml(inputStream, jasperpath, getParamMap(), billReportList, "px");
         return "HTML";
     }
 
     @Action(value = "/bill/expenseBillPrint-exportXls")
-    public String exportXls() throws JRException, IOException {
+    public String exportXls() throws JRException, IOException, NoSuchMethodException, SecurityException, ClassNotFoundException {
         populateBill();
         inputStream = reportHelper.exportXls(inputStream, jasperpath, getParamMap(), billReportList);
         return "XLS";
@@ -450,7 +450,7 @@ public class ExpenseBillPrintAction extends BaseFormAction {
 
     }
 
-    private void prepareForPrint() {
+    private void prepareForPrint() throws NoSuchMethodException, SecurityException, ClassNotFoundException {
 
         final Set<EgBilldetails> egBilldetailes = cbill.getEgBilldetailes();
         boolean budgetcheck = false;
@@ -518,7 +518,7 @@ public class ExpenseBillPrintAction extends BaseFormAction {
                         
                         vd.setDetailKey(entity.getCode());
                         vd.setDetailName(entity.getName());
-                    } catch (final Exception e) {
+                    } catch (final ValidationException e) {
                         final List<ValidationError> errors = new ArrayList<>();
                         errors.add(new ValidationError("exp", e.getMessage()));
                         throw new ValidationException(errors);

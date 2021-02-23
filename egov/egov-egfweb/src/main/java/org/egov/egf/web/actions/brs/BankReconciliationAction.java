@@ -240,7 +240,7 @@ public class BankReconciliationAction extends BaseFormAction {
 					+ accountBalance.doubleValue();
 			netTotal = subTotal - ( unReconciledDr + unReconciledDrOthers + unReconciledDrBrsEntry);
 
-		} catch (Exception e) {
+		} catch (ParseException e) {
 
 		}
 

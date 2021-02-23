@@ -77,6 +77,8 @@ import org.egov.model.instrument.InstrumentHeader;
 import org.egov.services.instrument.InstrumentHeaderService;
 import org.egov.services.instrument.InstrumentOtherDetailsService;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.HibernateException;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
@@ -242,7 +244,7 @@ public class ManualReconcileHelper {
 		+",Cheque/DD/Cash Receipts:"+(debitTotal!= null ? debitTotal : "0") +",Other Receipts:"+( debitOtherTotal!= null ? debitOtherTotal : "0")+""+
 		"/"+(creditTotalBrsEntry!= null ? creditTotalBrsEntry : "0") +",Net:"+( debitTotalBrsEntry!= null ? debitTotalBrsEntry : "0")+"";*/
 		}
-		catch(Exception e)
+		catch(HibernateException e)
 		{
 			LOGGER.error("Exp in getUnReconciledDrCr"+e.getMessage());
 			
@@ -341,11 +343,11 @@ public class ManualReconcileHelper {
 	        
 	        try {
 	            this.getUnreconsiledReceiptInstruments(reconBean,list);
-                } catch (Exception e) {
+                } catch (ObjectNotFoundException e) {
                     LOGGER.error("ERROR occurred while fetching the unrconciled receipt instruments : "+e.getMessage());
                 }
 		}
-		catch(Exception e)
+		catch(ApplicationRuntimeException e)
 		{
 			LOGGER.error("Exp in getUnReconciledCheques:"+e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());

@@ -84,6 +84,7 @@ import org.egov.services.budget.BudgetService;
 import org.egov.utils.BudgetDetailConfig;
 import org.egov.utils.BudgetDetailHelper;
 import org.egov.utils.Constants;
+import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -372,7 +373,7 @@ public class BudgetSearchAction extends BaseFormAction {
                 if(dept.getCode().equals(deptCode))
                     return dept.getName();
             }
-        }catch(Exception excep){
+        }catch(ObjectNotFoundException excep){
             excep.printStackTrace();
         }
         return "";

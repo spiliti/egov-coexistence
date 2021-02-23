@@ -252,7 +252,7 @@ public class ContraBTBAction extends BaseVoucherAction {
 	 */
 	@ValidationErrorPage(value = NEW)
 	@Action(value = "/contra/contraBTB-create")
-	public String create() throws ValidationException {
+	public String create() {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Starting Bank to Bank Transfer ...");
 		try {
@@ -272,10 +272,11 @@ public class ContraBTBAction extends BaseVoucherAction {
 			LoadAjaxedDropDowns();
 			throw new ValidationException(Arrays
 					.asList(new ValidationError(e.getErrors().get(0).getMessage(), e.getErrors().get(0).getMessage())));
-		} catch (final Exception e) {
-			LoadAjaxedDropDowns();
-			throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-		}
+        } /*
+           * catch (final Exception e) { LoadAjaxedDropDowns(); throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
 		return SUCCESS;
 	}
 
@@ -485,11 +486,12 @@ public class ContraBTBAction extends BaseVoucherAction {
 			throw new ValidationException(
 					Arrays.asList(new ValidationError(EXCEPTION_WHILE_SAVING_DATA, TRANSACTION_FAILED)));
 
-		} catch (final Exception e) {
-			// handle engine exception
-			LOGGER.error(e.getMessage());
-			throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-		}
+        } /*
+           * catch (final Exception e) { // handle engine exception
+           * LOGGER.error(e.getMessage()); throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Posted to Ledger ");
 		return voucher;

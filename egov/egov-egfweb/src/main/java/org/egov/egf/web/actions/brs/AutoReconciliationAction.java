@@ -355,7 +355,7 @@ public class AutoReconciliationAction extends BaseFormAction {
     }
 
     @Action(value = "/brs/autoReconciliation-generatePDF")
-    public String generatePDF() throws Exception {
+    public String generatePDF() throws JRException, IOException {
         final List<Object> dataSource = new ArrayList<Object>();
         final AutoReconcileBean AutoReconcileObj = new AutoReconcileBean();
 
