@@ -90,8 +90,10 @@ import org.egov.commons.utils.EntityType;
 import org.egov.dao.voucher.VoucherHibernateDAO;
 import org.egov.deduction.model.EgRemittance;
 import org.egov.deduction.model.EgRemittanceDetail;
+import org.egov.egf.commons.CommonsUtil;
 import org.egov.egf.commons.EgovCommon;
 import org.egov.egf.web.actions.payment.BasePaymentAction;
+import org.egov.egf.web.actions.payment.PaymentAction;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.entity.Boundary;
 import org.egov.infra.admin.master.entity.Department;
@@ -99,6 +101,7 @@ import org.egov.infra.admin.master.service.DepartmentService;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
 import org.egov.infra.script.entity.Script;
 import org.egov.infra.script.service.ScriptService;
+import org.egov.infra.security.utils.SecurityUtils;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infra.web.struts.annotation.ValidationErrorPage;
@@ -135,9 +138,12 @@ import com.opensymphony.xwork2.validator.annotations.Validation;
 @Results({ @Result(name = RemitRecoveryAction.NEW, location = "remitRecovery-" + RemitRecoveryAction.NEW + ".jsp"),
         @Result(name = "messages", location = "remitRecovery-messages.jsp"),
         @Result(name = "view", location = "remitRecovery-view.jsp"),
-        @Result(name = "remitDetail", location = "remitRecovery-remitDetail.jsp") })
+        @Result(name = "remitDetail", location = "remitRecovery-remitDetail.jsp"),
+        @Result(name = RemitRecoveryAction.UNAUTHORIZED, location = "../workflow/unauthorized.jsp")})
 public class RemitRecoveryAction extends BasePaymentAction {
 
+	protected static final String UNAUTHORIZED = "unuthorized";
+    private static final String INVALID_APPROVER = "invalid.approver";
     private static final String DESIGNATION_ID = "designationId";
     private static final String DESIGNATION_NAME = "designationName";
     private static final String DESIGNATION_LIST = "designationList";
@@ -217,6 +223,12 @@ public class RemitRecoveryAction extends BasePaymentAction {
     private Boolean isPartialPaymentEnabled = false;
     private boolean isNonControlledCodeTds = false;
     private String defaultPaymentMode = null;
+    
+    @Autowired
+    private SecurityUtils securityUtils;
+    
+    @Autowired
+    private CommonsUtil commonsUtil;
     
     public BigDecimal getBalance() {
         return balance;
@@ -395,6 +407,13 @@ public class RemitRecoveryAction extends BasePaymentAction {
             final HashMap<String, Object> headerDetails = createHeaderAndMisDetails();
             recovery = (Recovery) persistenceService.find("from Recovery where id=?", remittanceBean.getRecoveryId());
             populateWorkflowBean();
+            if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workflowBean.getWorkFlowAction())) {
+                if (!commonsUtil.isValidApprover(paymentheader, workflowBean.getApproverPositionId())) {
+                    addActionError(getText(INVALID_APPROVER));
+                    loadAjaxedDropDowns();
+                    return "remitDetail";
+                }
+            }
             paymentheader = paymentActionHelper.createRemittancePayment(paymentheader, voucherHeader,
                     Integer.valueOf(commonBean.getAccountNumberId()), getModeOfPayment(),
                     remittanceBean.getTotalAmount(), listRemitBean, recovery, remittanceBean, remittedTo, workflowBean,

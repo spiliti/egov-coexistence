@@ -159,13 +159,11 @@ public class BillVoucherAction extends BaseVoucherAction {
             }
             if (null != voucherTypeBean.getVoucherDateFrom() && StringUtils.isNotEmpty(voucherTypeBean.getVoucherDateFrom())) {
                 query.append(" and br.billdate>=?");
-                params.add(Constants.DDMMYYYYFORMAT1
-                        .format(Constants.DDMMYYYYFORMAT2.parse(voucherTypeBean.getVoucherDateFrom())));
+                params.add(Constants.DDMMYYYYFORMAT2.parse(voucherTypeBean.getVoucherDateFrom()));
             }
             if (null != voucherTypeBean.getVoucherDateTo() && StringUtils.isNotEmpty(voucherTypeBean.getVoucherDateTo())) {
                 query.append(" and br.billdate<=?");
-                params.add(Constants.DDMMYYYYFORMAT1
-                        .format(Constants.DDMMYYYYFORMAT2.parse(voucherTypeBean.getVoucherDateTo())));
+                params.add(Constants.DDMMYYYYFORMAT2.parse(voucherTypeBean.getVoucherDateTo()));
             }
             preApprovedVoucherList = persistenceService.findAllBy(query.toString(), params.toArray());
             populateDepartmentNames();

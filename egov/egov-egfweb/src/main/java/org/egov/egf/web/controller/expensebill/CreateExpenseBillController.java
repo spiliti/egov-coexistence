@@ -70,6 +70,7 @@ import org.apache.struts2.dispatcher.multipart.MultiPartRequestWrapper;
 import org.apache.struts2.dispatcher.multipart.UploadedFile;
 import org.egov.egf.budget.model.BudgetControlType;
 import org.egov.egf.budget.service.BudgetControlTypeService;
+import org.egov.egf.commons.CommonsUtil;
 import org.egov.egf.expensebill.service.ExpenseBillService;
 import org.egov.egf.utils.FinancialUtils;
 import org.egov.eis.web.contract.WorkflowContainer;
@@ -99,6 +100,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class CreateExpenseBillController extends BaseBillController {
 
     private static final Logger LOGGER = Logger.getLogger(CreateExpenseBillController.class);
+    
+    private static final String INVALID_APPROVER = "invalid.approver";
 
     private static final String DESIGNATION = "designation";
 
@@ -123,6 +126,8 @@ public class CreateExpenseBillController extends BaseBillController {
     @Autowired
     private FinancialUtils financialUtils;
     
+    @Autowired
+    private CommonsUtil commonsUtil;
     
 
     public CreateExpenseBillController(final AppConfigValueService appConfigValuesService) {
@@ -162,9 +167,13 @@ public class CreateExpenseBillController extends BaseBillController {
     public String create(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
                          final BindingResult resultBinder, final HttpServletRequest request, @RequestParam final String workFlowAction)
             throws IOException {
-        LOGGER.info("ExpenseBill is creating with user ::"+ApplicationThreadLocals.getUserId());
-      //User createdBy = new User();
-     // createdBy.setId(ApplicationThreadLocals.getUserId());
+		LOGGER.info("ExpenseBill is creating with user ::" + ApplicationThreadLocals.getUserId());
+		if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction) && !commonsUtil
+				.isValidApprover(egBillregister, Long.valueOf(request.getParameter(APPROVAL_POSITION)))) {
+			populateDataOnErrors(egBillregister, model, request);
+			model.addAttribute("message", getLocalizedMessage(INVALID_APPROVER, null, null));
+			return EXPENSEBILL_FORM;
+		}
       egBillregister.setCreatedBy(ApplicationThreadLocals.getUserId());
       if (StringUtils.isBlank(egBillregister.getExpendituretype()))
           egBillregister.setExpendituretype(FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT);
@@ -191,17 +200,7 @@ public class CreateExpenseBillController extends BaseBillController {
         validateLedgerAndSubledger(egBillregister, resultBinder);
 
         if (resultBinder.hasErrors()) {
-            setDropDownValues(model);
-            model.addAttribute(STATE_TYPE, egBillregister.getClass().getSimpleName());
-            prepareWorkflow(model, egBillregister, new WorkflowContainer());
-            model.addAttribute(NET_PAYABLE_ID, request.getParameter(NET_PAYABLE_ID));
-            model.addAttribute(APPROVAL_DESIGNATION, request.getParameter(APPROVAL_DESIGNATION));
-            model.addAttribute(APPROVAL_POSITION, request.getParameter(APPROVAL_POSITION));
-            model.addAttribute(DESIGNATION, request.getParameter(DESIGNATION));
-            egBillregister.getBillPayeedetails().clear();
-            prepareBillDetailsForView(egBillregister);
-            prepareValidActionListByCutOffDate(model);
-
+            populateDataOnErrors(egBillregister, model, request);
             return EXPENSEBILL_FORM;
         } else {
             Long approvalPosition = 0l;
@@ -247,6 +246,20 @@ public class CreateExpenseBillController extends BaseBillController {
 
         }
     }
+
+	private void populateDataOnErrors(final EgBillregister egBillregister, final Model model,
+			final HttpServletRequest request) {
+		setDropDownValues(model);
+		model.addAttribute(STATE_TYPE, egBillregister.getClass().getSimpleName());
+		prepareWorkflow(model, egBillregister, new WorkflowContainer());
+		model.addAttribute(NET_PAYABLE_ID, request.getParameter(NET_PAYABLE_ID));
+		model.addAttribute(APPROVAL_DESIGNATION, request.getParameter(APPROVAL_DESIGNATION));
+		model.addAttribute(APPROVAL_POSITION, request.getParameter(APPROVAL_POSITION));
+		model.addAttribute(DESIGNATION, request.getParameter(DESIGNATION));
+		egBillregister.getBillPayeedetails().clear();
+		prepareBillDetailsForView(egBillregister);
+		prepareValidActionListByCutOffDate(model);
+	}
 
     @RequestMapping(value = "/success", method = RequestMethod.GET)
     public String showSuccessPage(@RequestParam("billNumber") final String billNumber, final Model model,

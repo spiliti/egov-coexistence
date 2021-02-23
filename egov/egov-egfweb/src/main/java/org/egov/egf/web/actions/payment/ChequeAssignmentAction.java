@@ -1566,7 +1566,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
             }
             if (department != null) {
                 sql.append(" and  iv.voucherHeaderId.vouchermis.departmentcode=?");
-                params.add(Long.valueOf(department));
+                params.add(department);
             }
             if (isNotBlank(voucherHeader.getVoucherNumber())) {
                 sql.append(" and  iv.voucherHeaderId.voucherNumber=?");

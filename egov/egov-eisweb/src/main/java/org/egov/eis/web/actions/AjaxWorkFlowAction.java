@@ -51,7 +51,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
@@ -61,6 +64,7 @@ import org.apache.struts2.convention.annotation.ResultPath;
 import org.apache.struts2.convention.annotation.Results;
 import org.egov.infra.microservice.models.Designation;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
+import org.egov.infra.utils.StringUtils;
 import org.egov.infra.web.struts.actions.BaseFormAction;
 import org.egov.infra.workflow.matrix.entity.WorkFlowMatrix;
 import org.egov.infra.workflow.matrix.service.CustomizedWorkFlowService;
@@ -121,6 +125,24 @@ public class AjaxWorkFlowAction extends BaseFormAction {
             designationList = microserviceUtils.getDesignations();
         return WF_DESIGNATIONS;
     }
+    
+    @Action(value = "/workflow/ajaxWorkFlow-findDesignationsByObjectType")
+	public String findDesignationsByObjectType() {
+		final List<String> workflowDesignations = new ArrayList<>();
+		if ("END".equals(currentState))
+			currentState = "";
+		if (StringUtils.isNotBlank(designation))
+			workflowDesignations.addAll(customizedWorkFlowService.getNextDesignations(type, departmentRule, amountRule,
+					additionalRule, currentState, pendingAction, new Date(), designation));
+		else
+			workflowDesignations.addAll(customizedWorkFlowService.getNextDesignations(type, departmentRule, amountRule,
+					additionalRule, currentState, pendingAction, new Date()));
+
+		designationList = microserviceUtils.getDesignations().stream()
+				.filter(desig -> workflowDesignations.contains(desig.getName())).collect(Collectors.toList());
+
+		return WF_DESIGNATIONS;
+	}
 
     public void getAjaxValidButtonsAndNextAction() throws IOException {
         final StringBuilder actionString = new StringBuilder();

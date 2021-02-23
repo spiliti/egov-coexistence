@@ -80,8 +80,10 @@ import org.egov.commons.dao.EgwStatusHibernateDAO;
 import org.egov.commons.dao.FinancialYearHibernateDAO;
 import org.egov.commons.service.FunctionService;
 import org.egov.commons.utils.BankAccountType;
+import org.egov.egf.commons.CommonsUtil;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.entity.Department;
+import org.egov.infra.admin.master.entity.User;
 import org.egov.infra.admin.master.service.DepartmentService;
 import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.exception.ApplicationException;
@@ -90,6 +92,7 @@ import org.egov.infra.microservice.models.EmployeeInfo;
 import org.egov.infra.persistence.utils.Page;
 import org.egov.infra.script.entity.Script;
 import org.egov.infra.script.service.ScriptService;
+import org.egov.infra.security.utils.SecurityUtils;
 import org.egov.infra.utils.DateUtils;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
@@ -128,8 +131,11 @@ import com.opensymphony.xwork2.validator.annotations.Validation;
         @Result(name = "balance", location = "payment-balance.jsp"),
         @Result(name = "modify", location = "payment-modify.jsp"),
         @Result(name = "form", location = "payment-form.jsp"), @Result(name = "view", location = "payment-view.jsp"),
-        @Result(name = "list", location = "payment-list.jsp") })
+        @Result(name = "list", location = "payment-list.jsp"),
+        @Result(name = PaymentAction.UNAUTHORIZED, location = "../workflow/unauthorized.jsp")})
 public class PaymentAction extends BasePaymentAction {
+	protected static final String UNAUTHORIZED = "unuthorized";
+    private static final String INVALID_APPROVER = "invalid.approver";
     private final static String FORWARD = "Forward";
     private static final long serialVersionUID = 1L;
     private String expType, fromDate, toDate, mode, voucherdate, paymentMode, contractorIds = "", supplierIds = "",
@@ -159,6 +165,10 @@ public class PaymentAction extends BasePaymentAction {
     private DepartmentService departmentService;
     @Autowired
     private FunctionService functionService;
+    @Autowired
+    private SecurityUtils securityUtils;
+    @Autowired
+    private CommonsUtil commonsUtil;
 
     private Integer bankaccount, bankbranch;
     private Integer departmentId;
@@ -435,11 +445,11 @@ public class PaymentAction extends BasePaymentAction {
         }
         if (!"".equals(fromDate)) {
             sql.append(" and bill.billdate>=:billFromDate ");
-            sqlParams.put("billFromDate", sdf.format(formatter.parse(fromDate)));
+            sqlParams.put("billFromDate", formatter.parse(fromDate));
         }
         if (!"".equals(toDate)) {
             sql.append(" and bill.billdate<=:billToDate");
-            sqlParams.put("billToDate", sdf.format(formatter.parse(toDate)));
+            sqlParams.put("billToDate", formatter.parse(toDate));
         }
         if (voucherHeader.getFundId() != null) {
             sql.append(" and bill.egBillregistermis.fund.id=:fundId");
@@ -531,17 +541,21 @@ public class PaymentAction extends BasePaymentAction {
             mainQueryParams.put("expenditureType", FinancialConstants.STANDARD_EXPENDITURETYPE_PURCHASE);
             mainQuery1Params.put("expenditureType", FinancialConstants.STANDARD_EXPENDITURETYPE_PURCHASE);
 
-            final Query supplierBillQuery = getPersistenceService().getSession().createQuery(supplierBillSql);
-            mainQueryParams.entrySet().forEach(entry -> supplierBillQuery.setParameter(entry.getKey(), entry.getValue()));
-            statusCheckParams.entrySet().forEach(entry -> supplierBillQuery.setParameter(entry.getKey(), entry.getValue()));
-            sqlParams.entrySet().forEach(entry -> supplierBillQuery.setParameter(entry.getKey(), entry.getValue()));
-            supplierBillList = new Page(supplierBillQuery, 1, 500).getList();
+			final Query supplierBillQuery = getPersistenceService().getSession().createQuery(supplierBillSql);
+			Map<String, Object> params = new HashMap<>();
+			params.putAll(mainQueryParams);
+			params.putAll(statusCheckParams);
+			params.putAll(sqlParams);
+			persistenceService.populateQueryWithParams(supplierBillQuery, params);
+			supplierBillList = new Page(supplierBillQuery, 1, 500).getList();
 
             final Query supplierBillQuery1 = getPersistenceService().getSession().createQuery(supplierBillSql1);
-            mainQuery1Params.entrySet().forEach(entry -> supplierBillQuery1.setParameter(entry.getKey(), entry.getValue()));
-            statusCheckParams.entrySet().forEach(entry -> supplierBillQuery1.setParameter(entry.getKey(), entry.getValue()));
-            sqlParams.entrySet().forEach(entry -> supplierBillQuery1.setParameter(entry.getKey(), entry.getValue()));
-
+            params = new HashMap<>();
+			params.putAll(mainQuery1Params);
+			params.putAll(statusCheckParams);
+			params.putAll(sqlParams);
+            persistenceService.populateQueryWithParams(supplierBillQuery1, params);
+			
             if (supplierBillList != null)
                 supplierBillList.addAll(new Page(supplierBillQuery1, 1, 500).getList());
             else
@@ -582,15 +596,19 @@ public class PaymentAction extends BasePaymentAction {
             mainQuery1Params.put("expenditureType", FinancialConstants.STANDARD_EXPENDITURETYPE_WORKS);
 
             final Query contractorBillQuery = getPersistenceService().getSession().createQuery(contractorBillSql);
-            mainQueryParams.entrySet().forEach(entry -> contractorBillQuery.setParameter(entry.getKey(), entry.getValue()));
-            statusCheckParams.entrySet().forEach(entry -> contractorBillQuery.setParameter(entry.getKey(), entry.getValue()));
-            sqlParams.entrySet().forEach(entry -> contractorBillQuery.setParameter(entry.getKey(), entry.getValue()));
+            Map<String, Object> params = new HashMap<>();
+			params.putAll(mainQueryParams);
+			params.putAll(statusCheckParams);
+			params.putAll(sqlParams);
+            persistenceService.populateQueryWithParams(contractorBillQuery, params);
             contractorBillList = new Page(contractorBillQuery, 1, 500).getList();
 
             final Query contractorBillQuery1 = getPersistenceService().getSession().createQuery(contractorBillSql1);
-            mainQuery1Params.entrySet().forEach(entry -> contractorBillQuery1.setParameter(entry.getKey(), entry.getValue()));
-            statusCheckParams.entrySet().forEach(entry -> contractorBillQuery1.setParameter(entry.getKey(), entry.getValue()));
-            sqlParams.entrySet().forEach(entry -> contractorBillQuery1.setParameter(entry.getKey(), entry.getValue()));
+            params = new HashMap<>();
+			params.putAll(mainQuery1Params);
+			params.putAll(statusCheckParams);
+			params.putAll(sqlParams);
+            persistenceService.populateQueryWithParams(contractorBillQuery1, params);
             
             if (contractorBillList != null)
                 contractorBillList.addAll(new Page(contractorBillQuery1, 1, 500).getList());
@@ -611,7 +629,8 @@ public class PaymentAction extends BasePaymentAction {
         if (expType == null || expType.equals("-1")
                 || expType.equals(FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT)) {
         	
-        	final StringBuilder cBillmainquery = new StringBuilder("from EgBillregister bill left join fetch bill.egBillregistermis.egBillSubType egBillSubType")
+        	final StringBuilder cBillmainquery = new StringBuilder("from EgBillregister bill left join fetch")
+        			.append(" bill.egBillregistermis.egBillSubType egBillSubType")
                     .append(" where (egBillSubType is null or egBillSubType.name not in (:billSubType)) ")
                     .append("and bill.expendituretype=:expenditureType and bill.egBillregistermis.voucherHeader.status=0 ")
                     .append(" and bill.passedamount > (select SUM(misc.paidamount) from Miscbilldetail misc where ")
@@ -622,10 +641,12 @@ public class PaymentAction extends BasePaymentAction {
             cBillmainQueryParams.put("billSubType", FinancialConstants.BILLSUBTYPE_TNEBBILL);
             cBillmainQueryParams.put("expenditureType", FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT);
 
-            final StringBuilder cBillmainquery1 = new StringBuilder("from EgBillregister bill left join fetch bill.egBillregistermis.egBillSubType egBillSubType ")
+            final StringBuilder cBillmainquery1 = new StringBuilder("from EgBillregister bill left join fetch")
+            		.append(" bill.egBillregistermis.egBillSubType egBillSubType ")
                     .append(" where (egBillSubType is null or egBillSubType.name not in (:billSubType))")
                     .append(" and bill.expendituretype=:expenditureType and bill.egBillregistermis.voucherHeader.status=0 ")
-                    .append(" and bill.egBillregistermis.voucherHeader NOT IN (select misc.billVoucherHeader from Miscbilldetail misc where ")
+                    .append(" and bill.egBillregistermis.voucherHeader NOT IN (select misc.billVoucherHeader")
+                    .append(" from Miscbilldetail misc where ")
                     .append(" misc.billVoucherHeader is not null and misc.payVoucherHeader.status <> 4)");
 
             final Map<String, Object> cBillmainQuery1Params = new HashMap<>();
@@ -636,22 +657,28 @@ public class PaymentAction extends BasePaymentAction {
                                                                                                    // financial
                                                                                                    // expense
                                                                                                    // bills
-            final String cBillSql = new StringBuilder(cBillmainquery.toString()).append(" and bill.status in (:billStatus) ").append(sql.toString())
+            final String cBillSql = new StringBuilder(cBillmainquery.toString()).append(" and bill.status in (:billStatus) ")
+            		.append(sql.toString())
                     .append(" order by bill.billdate desc").toString();
             cBillmainQueryParams.put("billStatus", egwStatus);
 
-            final String cBillSql1 = new StringBuilder(cBillmainquery1.toString()).append(" and bill.status in (:billStatus) ").append(sql.toString())
+            final String cBillSql1 = new StringBuilder(cBillmainquery1.toString()).append(" and bill.status in (:billStatus) ")
+            		.append(sql.toString())
                     .append(" order by bill.billdate desc").toString();
             cBillmainQuery1Params.put("billStatus", egwStatus);
             
             final Query cBillQuery = getPersistenceService().getSession().createQuery(cBillSql);
-            cBillmainQueryParams.entrySet().forEach(entry -> cBillQuery.setParameter(entry.getKey(), entry.getValue()));
-            sqlParams.entrySet().forEach(entry -> cBillQuery.setParameter(entry.getKey(), entry.getValue()));
+            Map<String, Object>  params = new HashMap<>();
+            params.putAll(cBillmainQueryParams);
+            params.putAll(sqlParams);
+            persistenceService.populateQueryWithParams(cBillQuery, params);
             contingentBillList = new Page(cBillQuery, 1, 500).getList();
 
             final Query cBillQuery1 = getPersistenceService().getSession().createQuery(cBillSql1);
-            cBillmainQuery1Params.entrySet().forEach(entry -> cBillQuery1.setParameter(entry.getKey(), entry.getValue()));
-            sqlParams.entrySet().forEach(entry -> cBillQuery1.setParameter(entry.getKey(), entry.getValue()));
+            params = new HashMap<>();
+            params.putAll(cBillmainQuery1Params);
+            params.putAll(sqlParams);
+            persistenceService.populateQueryWithParams(cBillQuery1, params);
 
             if (contingentBillList != null)
                 contingentBillList.addAll(new Page(cBillQuery1, 1, 500).getList());
@@ -745,14 +772,18 @@ public class PaymentAction extends BasePaymentAction {
                     .append(" order by bill.billdate desc");
 
         final Query sBillQuery = getPersistenceService().getSession().createQuery(sBillSql.toString());
-        mainQueryParams.entrySet().forEach(entry -> sBillQuery.setParameter(entry.getKey(), entry.getValue()));
-        sqlParams.entrySet().forEach(entry -> sBillQuery.setParameter(entry.getKey(), entry.getValue()));
+        Map<String, Object> params = new HashMap<>();
+        params.putAll(sqlParams);
+        params.putAll(mainQueryParams);
+        persistenceService.populateQueryWithParams(sBillQuery, params);
         sBillQuery.setParameterList("billStatus", Arrays.asList(egwStatus, egwStatus1));
         salaryBillList = sBillQuery.list();
 
         final Query sBillQuery1 = getPersistenceService().getSession().createQuery(sBillSql1.toString());
-        mainQuery1Params.entrySet().forEach(entry -> sBillQuery1.setParameter(entry.getKey(), entry.getValue()));
-        sqlParams.entrySet().forEach(entry -> sBillQuery1.setParameter(entry.getKey(), entry.getValue()));
+        params = new HashMap<>();
+        params.putAll(sqlParams);
+        params.putAll(mainQuery1Params);
+        persistenceService.populateQueryWithParams(sBillQuery1, params);
         sBillQuery1.setParameterList("billStatus", Arrays.asList(egwStatus, egwStatus1));
 
         if (salaryBillList != null)
@@ -793,14 +824,18 @@ public class PaymentAction extends BasePaymentAction {
                     .append(" order by bill.billdate desc");
 
         final Query pBillQuery = getPersistenceService().getSession().createQuery(pBillSql.toString());
-        mainQueryParams.entrySet().forEach(entry -> pBillQuery.setParameter(entry.getKey(), entry.getValue()));
-        sqlParams.entrySet().forEach(entry -> pBillQuery.setParameter(entry.getKey(), entry.getValue()));
+        Map<String, Object> params = new HashMap<>();
+        params.putAll(mainQueryParams);
+        params.putAll(sqlParams);
+        persistenceService.populateQueryWithParams(pBillQuery, params);
         pBillQuery.setParameterList("billStatus", Arrays.asList(egwStatus));
         pensionBillList = pBillQuery.list();
 
         final Query pBillQuery1 = getPersistenceService().getSession().createQuery(pBillSql1.toString());
-        mainQuery1Params.entrySet().forEach(entry -> pBillQuery1.setParameter(entry.getKey(), entry.getValue()));
-        sqlParams.entrySet().forEach(entry -> pBillQuery1.setParameter(entry.getKey(), entry.getValue()));
+        params = new HashMap<>();
+        params.putAll(mainQuery1Params);
+        params.putAll(sqlParams);
+        persistenceService.populateQueryWithParams(pBillQuery1, params);
         pBillQuery1.setParameterList("billStatus", Arrays.asList(egwStatus));
 
         if (pensionBillList != null)
@@ -897,13 +932,13 @@ public class PaymentAction extends BasePaymentAction {
         final Query tnebBillQuery = getPersistenceService().getSession().createQuery(tnebBillSql.toString());
         tnebBillQuery.setParameter("expenditureType", FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT, StringType.INSTANCE)
                 .setParameterList("billStatus", Arrays.asList(egwStatus, egwStatus1));
-        sqlParams.entrySet().forEach(entry -> tnebBillQuery.setParameter(entry.getKey(), entry.getValue()));
+        persistenceService.populateQueryWithParams(tnebBillQuery, sqlParams);
         contingentBillList = new Page(tnebBillQuery, 1, 500).getList();
 
         final Query tnebBillQuery1 = getPersistenceService().getSession().createQuery(tnebBillSql1.toString());
         tnebBillQuery1.setParameter("expenditureType", FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT, StringType.INSTANCE)
                 .setParameterList("billStatus", Arrays.asList(egwStatus, egwStatus1));
-        sqlParams.entrySet().forEach(entry -> tnebBillQuery1.setParameter(entry.getKey(), entry.getValue()));
+        persistenceService.populateQueryWithParams(tnebBillQuery1, sqlParams);
         
         if (contingentBillList != null)
             contingentBillList.addAll(new Page(tnebBillQuery1, 1, 500).getList());
@@ -1154,6 +1189,7 @@ public class PaymentAction extends BasePaymentAction {
     @Action(value = "/payment/payment-create")
     public String create() {
         try {
+        	populateWorkflowBean();
             contingentList = prepareBillTypeList(contingentList,selectedContingentRows);
             contractorList = prepareBillTypeList(contractorList,selectedContractorRows);
             supplierList = prepareBillTypeList(supplierList,selectedSupplierRows);
@@ -1175,11 +1211,17 @@ public class PaymentAction extends BasePaymentAction {
             final Date paymentVoucherDate = DateUtils.parseDate(vdate, "dd/MM/yyyy");
             final String voucherDate = formatter1.format(paymentVoucherDate);
             String cutOffDate1 = null;
+            if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workflowBean.getWorkFlowAction())) {
+                if (!commonsUtil.isValidApprover(paymentheader, workflowBean.getApproverPositionId())) {
+                    addActionError(getText(INVALID_APPROVER));
+                    loadbankBranch(billregister.getEgBillregistermis().getFund());
+                    return "form";
+                }
+            }
             validateBillVoucherDate(billList, paymentVoucherDate);
             paymentActionHelper.setbillRegisterFunction(billregister, cFunctionobj);
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("Starting createPayment...");
-            populateWorkflowBean();
             if (parameters.get("department") != null)
                 billregister.getEgBillregistermis().setDepartmentcode(parameters.get("department")[0]);
             if (parameters.get("function") != null)
@@ -1253,8 +1295,16 @@ public class PaymentAction extends BasePaymentAction {
             paymentheader = getPayment();
         // this is to check if is not the create mode
         populateWorkflowBean();
+        if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workflowBean.getWorkFlowAction())) {
+            if (!commonsUtil.isValidApprover(paymentheader, workflowBean.getApproverPositionId())) {
+                addActionError(getText(INVALID_APPROVER));
+                miscBillList = paymentActionHelper.getPaymentBills(paymentheader);
+                getChequeInfo(paymentheader);
+                return VIEW;
+            }
+        }
         paymentheader = paymentActionHelper.sendForApproval(paymentheader, workflowBean);
-        paymentActionHelper.getPaymentBills(paymentheader);
+        miscBillList = paymentActionHelper.getPaymentBills(paymentheader);
         EmployeeInfo employee = microserviceUtils.getEmployeeByPositionId(paymentheader.getState().getOwnerPosition());
         if (FinancialConstants.BUTTONREJECT.equalsIgnoreCase(workflowBean.getWorkFlowAction()))
             addActionMessage(getText("payment.voucher.rejected", new String[] {
@@ -1291,6 +1341,11 @@ public class PaymentAction extends BasePaymentAction {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting view...");
         paymentheader = getPayment();
+        
+		final User loggedInUser = new User();
+		loggedInUser.setId(ApplicationThreadLocals.getUserId());
+		if (!commonsUtil.isApplicationOwner(loggedInUser, paymentheader))
+			return UNAUTHORIZED;
         /*
          * if (paymentheader.getState().getValue() != null && !paymentheader.getState().getValue().isEmpty() &&
          * paymentheader.getState().getValue().contains("Rejected")) { if (LOGGER.isDebugEnabled()) LOGGER.debug("Completed view."
@@ -1457,11 +1512,11 @@ public class PaymentAction extends BasePaymentAction {
         final StringBuffer sql = new StringBuffer();
         if (!StringUtils.isBlank(fromDate)) {
             sql.append(" and ph.voucherheader.voucherDate>=?");
-            params.add(sdf.format(formatter.parse(fromDate)));
+            params.add(formatter.parse(fromDate));
         }
         if (!StringUtils.isBlank(toDate)) {
             sql.append(" and ph.voucherheader.voucherDate<=?");
-            params.add(sdf.format(formatter.parse(toDate)));
+            params.add(formatter.parse(toDate));
         }
         if (!StringUtils.isBlank(voucherHeader.getVoucherNumber())) {
             sql.append(" and ph.voucherheader.voucherNumber like ?");
@@ -1845,7 +1900,7 @@ public class PaymentAction extends BasePaymentAction {
         final List<AppConfigValues> cutOffDateconfigValue = appConfigValuesService.getConfigValuesByModuleAndKey("EGF",
                 "DataEntryCutOffDate");
         if (cutOffDateconfigValue != null && !cutOffDateconfigValue.isEmpty()) {
-            if (null == paymentheader || null == paymentheader.getId()
+            if (null == paymentheader || null == paymentheader.getId() || null == paymentheader.getCurrentState()
                     || paymentheader.getCurrentState().getValue().endsWith("NEW"))
                 validActions = Arrays.asList(FORWARD, FinancialConstants.CREATEANDAPPROVE);
             else if (paymentheader.getCurrentState() != null)

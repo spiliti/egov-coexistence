@@ -75,6 +75,7 @@ import org.egov.commons.service.AccountdetailtypeService;
 import org.egov.commons.service.ChartOfAccountsService;
 import org.egov.egf.budget.model.BudgetControlType;
 import org.egov.egf.budget.service.BudgetControlTypeService;
+import org.egov.egf.commons.CommonsUtil;
 import org.egov.egf.masters.services.PurchaseOrderService;
 import org.egov.egf.masters.services.SupplierService;
 import org.egov.egf.supplierbill.service.SupplierBillService;
@@ -109,6 +110,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(value = "/supplierbill")
 public class CreateSupplierBillController extends BaseBillController {
 
+	private static final String INVALID_APPROVER = "invalid.approver";
+	
     private static final String NET_PAYABLE_CODES = "netPayableCodes";
 
     private static final String SUPPLIERS = "suppliers";
@@ -169,6 +172,9 @@ public class CreateSupplierBillController extends BaseBillController {
     @Autowired
     private PurchaseOrderService purchaseOrderService;
 
+    @Autowired
+    private CommonsUtil commonsUtil;
+    
     public CreateSupplierBillController(final AppConfigValueService appConfigValuesService) {
         super(appConfigValuesService);
     }
@@ -200,6 +206,12 @@ public class CreateSupplierBillController extends BaseBillController {
             final BindingResult resultBinder, final HttpServletRequest request, @RequestParam final String workFlowAction)
             throws IOException {
 
+    	if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction) && !commonsUtil
+				.isValidApprover(egBillregister, Long.valueOf(request.getParameter(APPROVAL_POSITION)))) {
+			populateDataOnErrors(egBillregister, model, request);
+			model.addAttribute("errorMessage", getLocalizedMessage(INVALID_APPROVER, null, null));
+			return SUPPLIERBILL_FORM;
+		}
         egBillregister.setCreatedBy(ApplicationThreadLocals.getUserId());
         if (StringUtils.isBlank(egBillregister.getExpendituretype()))
             egBillregister.setExpendituretype(FinancialConstants.STANDARD_EXPENDITURETYPE_PURCHASE);
@@ -227,19 +239,7 @@ public class CreateSupplierBillController extends BaseBillController {
         validateLedgerAndSubledger(egBillregister, resultBinder);
 
         if (resultBinder.hasErrors()) {
-            setDropDownValues(model);
-            model.addAttribute(STATE_TYPE, egBillregister.getClass().getSimpleName());
-            prepareWorkflow(model, egBillregister, new WorkflowContainer());
-            model.addAttribute(NET_PAYABLE_ID, request.getParameter(NET_PAYABLE_ID));
-            model.addAttribute(APPROVAL_DESIGNATION, request.getParameter(APPROVAL_DESIGNATION));
-            model.addAttribute(APPROVAL_POSITION, request.getParameter(APPROVAL_POSITION));
-            model.addAttribute(DESIGNATION, request.getParameter(DESIGNATION));
-            egBillregister.getBillPayeedetails().clear();
-            prepareBillDetailsForView(egBillregister);
-            prepareValidActionListByCutOffDate(model);
-            model.addAttribute(SUPPLIER_ID,
-                    purchaseOrderService.getByOrderNumber(egBillregister.getWorkordernumber()).getSupplier().getId());
-            return SUPPLIERBILL_FORM;
+            return populateDataOnErrors(egBillregister, model, request);
         } else {
             Long approvalPosition = 0l;
             String approvalComment = "";
@@ -283,6 +283,23 @@ public class CreateSupplierBillController extends BaseBillController {
 
         }
     }
+
+	private String populateDataOnErrors(final EgBillregister egBillregister, final Model model,
+			final HttpServletRequest request) {
+		setDropDownValues(model);
+		model.addAttribute(STATE_TYPE, egBillregister.getClass().getSimpleName());
+		prepareWorkflow(model, egBillregister, new WorkflowContainer());
+		model.addAttribute(NET_PAYABLE_ID, request.getParameter(NET_PAYABLE_ID));
+		model.addAttribute(APPROVAL_DESIGNATION, request.getParameter(APPROVAL_DESIGNATION));
+		model.addAttribute(APPROVAL_POSITION, request.getParameter(APPROVAL_POSITION));
+		model.addAttribute(DESIGNATION, request.getParameter(DESIGNATION));
+		egBillregister.getBillPayeedetails().clear();
+		prepareBillDetailsForView(egBillregister);
+		prepareValidActionListByCutOffDate(model);
+		model.addAttribute(SUPPLIER_ID,
+		        purchaseOrderService.getByOrderNumber(egBillregister.getWorkordernumber()).getSupplier().getId());
+		return SUPPLIERBILL_FORM;
+	}
 
     void removeEmptyRows(EgBillregister egBillregister) {
         Set<EgBilldetails> billDetails = new HashSet<>();

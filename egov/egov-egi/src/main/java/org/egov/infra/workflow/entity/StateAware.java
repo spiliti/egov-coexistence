@@ -79,7 +79,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public abstract class StateAware extends AbstractAuditable {
     private static final long serialVersionUID = 5776408218810221246L;
 
-    @ManyToOne(targetEntity = State.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = State.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "STATE_ID")
     private State state;
 

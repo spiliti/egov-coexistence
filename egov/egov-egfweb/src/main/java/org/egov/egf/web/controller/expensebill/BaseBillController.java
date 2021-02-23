@@ -219,7 +219,6 @@ public abstract class BaseBillController extends BaseVoucherController {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void populateBillDetails(final EgBillregister egBillregister) {
         egBillregister.getEgBilldetailes().clear();
 
@@ -227,7 +226,10 @@ public abstract class BaseBillController extends BaseVoucherController {
             egBillregister.getEgBilldetailes().addAll(egBillregister.getBillDetails());
         } else {
             egBillregister.getEgBilldetailes().addAll(egBillregister.getDebitDetails());
-            egBillregister.getEgBilldetailes().addAll(egBillregister.getCreditDetails());
+            egBillregister.getCreditDetails().forEach(billDetails -> {
+            	if (billDetails.getGlcodeid() != null)
+            		egBillregister.getEgBilldetailes().add(billDetails);
+            });
             egBillregister.getEgBilldetailes().addAll(egBillregister.getNetPayableDetails());
         }
 
