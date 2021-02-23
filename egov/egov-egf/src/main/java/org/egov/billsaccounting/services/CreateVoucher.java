@@ -1158,10 +1158,10 @@ public class CreateVoucher {
 				LOGGER.error(ERR, e);
 				throw e;
 			}
-			 catch (final Exception e) {
-					LOGGER.error(ERR, e);
-					throw new ApplicationRuntimeException(e.getMessage());
-				}
+            /*
+             * catch (final Exception e) { LOGGER.error(ERR, e); throw new
+             * ApplicationRuntimeException(e.getMessage()); }
+             */
 			voucherService.applyAuditing(vh);
 			if (LOGGER.isInfoEnabled())
 				LOGGER.info("++++++++++++++++++" + vh.toString());
@@ -1198,14 +1198,15 @@ public class CreateVoucher {
 			finDashboardService.publishEvent(FinanceEventType.voucherCreateOrUpdate, vh);
 		}
 
-		catch (final ValidationException ve) {
-			final List<ValidationError> errors = new ArrayList<ValidationError>();
-			errors.add(new ValidationError("exp", ve.getErrors().get(0).getMessage()));
-			throw new ValidationException(errors);
-		} catch (final Exception e) {
-			LOGGER.error(ERR, e);
-			throw new ApplicationRuntimeException(e.getMessage());
-		}
+        catch (final ValidationException ve) {
+            final List<ValidationError> errors = new ArrayList<ValidationError>();
+            errors.add(new ValidationError("exp", ve.getErrors().get(0).getMessage()));
+            throw new ValidationException(errors);
+        } catch (final TaskFailedException e) {
+            LOGGER.error(ERR, e);
+            throw new ApplicationRuntimeException(e.getMessage());
+        }
+           
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("End | createVoucher API");
 		return vh;
@@ -1553,8 +1554,7 @@ public class CreateVoucher {
 
 	@Transactional
 	@SuppressWarnings("deprecation")
-	public CVoucherHeader createVoucherHeader(final HashMap<String, Object> headerdetails)
-			throws ApplicationRuntimeException, Exception {
+	public CVoucherHeader createVoucherHeader(final HashMap<String, Object> headerdetails) {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("START | createVoucherHeader");
 		// Connection con = null;
@@ -1686,11 +1686,10 @@ public class CreateVoucher {
 		} catch (final ValidationException e) {
 			LOGGER.error(e.getMessage());
 			throw e;
-		} catch (final Exception e) {
-			LOGGER.error(e);
-			throw new Exception(e.getMessage());
-
-		}
+        } /*
+           * catch (final Exception e) { LOGGER.error(e); throw new
+           * Exception(e.getMessage()); }
+           */
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("END | createVoucherHeader");
 		return cVoucherHeader;
@@ -1875,7 +1874,7 @@ public class CreateVoucher {
 	}
 
 	public void validateTransaction(final List<HashMap<String, Object>> accountcodedetails,
-			final List<HashMap<String, Object>> subledgerdetails) throws ApplicationRuntimeException, Exception {
+			final List<HashMap<String, Object>> subledgerdetails) throws ApplicationRuntimeException {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("START | validateTransaction");
 		// List<Transaxtion> transaxtionList = new ArrayList<Transaxtion>();
@@ -2752,7 +2751,7 @@ public class CreateVoucher {
 		this.appConfigValuesService = appConfigValuesService;
 	}
 
-	public boolean isUniqueVN(String vcNum, final String vcDate) throws Exception, TaskFailedException {
+	public boolean isUniqueVN(String vcNum, final String vcDate) {
 		boolean isUnique = false;
 		String fyStartDate = "", fyEndDate = "";
 		vcNum = vcNum.toUpperCase();
@@ -2783,7 +2782,7 @@ public class CreateVoucher {
 					LOGGER.debug("Duplicate Voucher Number");
 			} else
 				isUnique = true;
-		} catch (final Exception ex) {
+		} catch (final ParseException ex) {
 			LOGGER.error("error in finding unique VoucherNumber");
 			throw new ApplicationRuntimeException("error in finding unique VoucherNumber");
 		} finally {

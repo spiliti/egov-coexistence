@@ -289,7 +289,7 @@ public class ChartOfAccounts {
 		return true;
 	}
 
-	public boolean validateGLCode(final Transaxtion txn) throws Exception {
+	public boolean validateGLCode(final Transaxtion txn) throws TaskFailedException {
 		// validate each gl code
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Inside the ValidateGLCode1");
@@ -359,7 +359,7 @@ public class ChartOfAccounts {
 		return true;
 	}
 
-	private boolean isRequiredPresent(final Transaxtion txn, final GLAccount glAcc) throws Exception {
+	private boolean isRequiredPresent(final Transaxtion txn, final GLAccount glAcc) throws TaskFailedException{
 		int requiredCount = 0;
 		int foundCount = 0;
 		final ArrayList glParamList = glAcc.getGLParameters();
@@ -421,7 +421,7 @@ public class ChartOfAccounts {
 		return true;
 	}
 
-	private boolean validateTxns(final Transaxtion txnList[]) throws Exception {
+	private boolean validateTxns(final Transaxtion txnList[]) throws TaskFailedException   {
 		// validate the array list for the total number of txns
 		if (txnList.length < 2)
 			return false;
@@ -435,12 +435,6 @@ public class ChartOfAccounts {
 				dbAmt += Double.parseDouble(txn.getDrAmount());
 				crAmt += Double.parseDouble(txn.getCrAmount());
 			}
-		} catch (final TaskFailedException e) {
-			throw new TaskFailedException(e.getMessage());
-		} catch (final Exception e) {
-			LOGGER.error(e.getMessage());
-
-			return false;
 		} finally {
 			RequiredValidator.clearEmployeeMap();
 		}
@@ -456,7 +450,7 @@ public class ChartOfAccounts {
 	}
 
 	@Transactional(readOnly = true)
-	private boolean checkBudget(final Transaxtion txnList[]) throws Exception, ValidationException {
+	private boolean checkBudget(final Transaxtion txnList[]) {
 		Map<String, Object> paramMap = null;
 		Transaxtion txnObj = null;
 
@@ -507,8 +501,7 @@ public class ChartOfAccounts {
 	}
 
 	@Transactional
-	public boolean postTransaxtions(final Transaxtion txnList[], final String vDate)
-			throws Exception, ValidationException {
+	public boolean postTransaxtions(final Transaxtion txnList[], final String vDate) throws TaskFailedException {
 
 		if (!checkBudget(txnList))
 			throw new TaskFailedException(FinancialConstants.BUDGET_CHECK_ERROR_MESSAGE);
@@ -520,7 +513,7 @@ public class ChartOfAccounts {
 						"Voucher Date is not within an open period. Please use an open period for posting");
 			if (!validateTxns(txnList))
 				return false;
-		} catch (final Exception e) {
+		} catch (final TaskFailedException e) {
 			LOGGER.error(e.getMessage(), e);
 			throw new TaskFailedException(e.getMessage());
 		}
@@ -714,7 +707,7 @@ public class ChartOfAccounts {
 	}
 
 	@Transactional
-	private boolean postInGL(final Transaxtion txnList[]) throws Exception {
+	private boolean postInGL(final Transaxtion txnList[]) throws TaskFailedException {
 
 		CGeneralLedger gLedger = null;
 		CGeneralLedgerDetail gLedgerDet = null;
@@ -776,7 +769,7 @@ public class ChartOfAccounts {
 					generalLedgerPersistenceService.persist(gLedger);
 					//populating the data related to non controlled remitted code
 					populateDataForNonControlledRemittedCode(gLedger);
-				} catch (final Exception e) {
+				} catch (final TaskFailedException e) {
 					LOGGER.error("error in the gl++++++++++" + e, e);
 					return false;
 				}
@@ -794,66 +787,62 @@ public class ChartOfAccounts {
 				String detKeyName = "";
 				if (LOGGER.isInfoEnabled())
 					LOGGER.info("glParamList size :" + glParamList.size());
-				for (int a = 0; a < glParamList.size(); a++)
-					try {
-						// post the defaults set for details
-						final GLParameter glPrm = (GLParameter) glParamList.get(a);
+				for (int a = 0; a < glParamList.size(); a++) {
+                    // post the defaults set for details
+                    final GLParameter glPrm = (GLParameter) glParamList.get(a);
 
-						{ // Post the details sent apart from defaults
-							for (int z = 0; z < txnPrm.size(); z++) {
-								final TransaxtionParameter tParam = (TransaxtionParameter) txnPrm.get(z);
-								if (LOGGER.isInfoEnabled())
-									LOGGER.info("tParam.getGlcodeId():" + tParam.getGlcodeId());
-								if (LOGGER.isInfoEnabled())
-									LOGGER.info("gLedger.getglCodeId():" + gLedger.getGlcodeId());
-								if (tParam.getDetailName().equalsIgnoreCase(glPrm.getDetailName())
-										&& tParam.getGlcodeId().equals(gLedger.getGlcodeId().getId().toString())) {
-									gLedgerDet = new CGeneralLedgerDetail();
-									detKeyName = tParam.getDetailName();
-									detKeyId = tParam.getDetailKey();
-									gLedgerDet.setGeneralLedgerId(gLedger);
-									Accountdetailtype acctype = (Accountdetailtype) persistenceService.getSession()
-											.load(Accountdetailtype.class, glPrm.getDetailId());
-									gLedgerDet.setDetailTypeId(acctype);
-									gLedgerDet.setDetailKeyId(Integer.parseInt(detKeyId));
-									gLedgerDet.setDetailKeyName(detKeyName);
-									gLedgerDet.setAmount(new BigDecimal(tParam.getDetailAmt()));
-									generalLedgerDetPersistenceService.persist(gLedgerDet);
-									try {
-										if (validRecoveryGlcode(String.valueOf(gLedger.getGlcodeId().getId()))
-												&& gLedger.getCreditAmount() > 0) {
-											egRemitGldtl = new EgRemittanceGldtl();
-											// if(LOGGER.isInfoEnabled())
-											// LOGGER.info("----------"+gLedger.getGlCodeId());
-											egRemitGldtl.setGeneralledgerdetail(gLedgerDet);
-											egRemitGldtl.setGldtlamt(gLedgerDet.getAmount());
-											Recovery tdsentry = null;
-											if (tParam.getTdsId() != null)
-												tdsentry = (Recovery) persistenceService.find(
-														"from Recovery where id=?", Long.parseLong(tParam.getTdsId()));
-											if (tdsentry != null) {
-												egRemitGldtl.setRecovery(tdsentry);
-											}
-											remitanceDetPersistenceService.persist(egRemitGldtl);
-										}
-									} catch (final Exception e) {
-										LOGGER.error("Error while inserting to eg_remittance_gldtl " + e, e);
-										return false;
-									}
-									if(gLedger.getGeneralLedgerDetails() == null){
-									    Set<CGeneralLedgerDetail> gldSet = new HashSet<>();
-									    gldSet.add(gLedgerDet);
-									    gLedger.setGeneralLedgerDetails(gldSet);
-									}else{
-									    gLedger.getGeneralLedgerDetails().add(gLedgerDet);
-									}
-								}
-							}
-						}
-					} catch (final Exception e) {
-						LOGGER.error("inside postInGL" + e.getMessage(), e);
-						throw new TaskFailedException();
-					}
+                    { // Post the details sent apart from defaults
+                    	for (int z = 0; z < txnPrm.size(); z++) {
+                    		final TransaxtionParameter tParam = (TransaxtionParameter) txnPrm.get(z);
+                    		if (LOGGER.isInfoEnabled())
+                    			LOGGER.info("tParam.getGlcodeId():" + tParam.getGlcodeId());
+                    		if (LOGGER.isInfoEnabled())
+                    			LOGGER.info("gLedger.getglCodeId():" + gLedger.getGlcodeId());
+                    		if (tParam.getDetailName().equalsIgnoreCase(glPrm.getDetailName())
+                    				&& tParam.getGlcodeId().equals(gLedger.getGlcodeId().getId().toString())) {
+                    			gLedgerDet = new CGeneralLedgerDetail();
+                    			detKeyName = tParam.getDetailName();
+                    			detKeyId = tParam.getDetailKey();
+                    			gLedgerDet.setGeneralLedgerId(gLedger);
+                    			Accountdetailtype acctype = (Accountdetailtype) persistenceService.getSession()
+                    					.load(Accountdetailtype.class, glPrm.getDetailId());
+                    			gLedgerDet.setDetailTypeId(acctype);
+                    			gLedgerDet.setDetailKeyId(Integer.parseInt(detKeyId));
+                    			gLedgerDet.setDetailKeyName(detKeyName);
+                    			gLedgerDet.setAmount(new BigDecimal(tParam.getDetailAmt()));
+                    			generalLedgerDetPersistenceService.persist(gLedgerDet);
+                    			try {
+                    				if (validRecoveryGlcode(String.valueOf(gLedger.getGlcodeId().getId()))
+                    						&& gLedger.getCreditAmount() > 0) {
+                    					egRemitGldtl = new EgRemittanceGldtl();
+                    					// if(LOGGER.isInfoEnabled())
+                    					// LOGGER.info("----------"+gLedger.getGlCodeId());
+                    					egRemitGldtl.setGeneralledgerdetail(gLedgerDet);
+                    					egRemitGldtl.setGldtlamt(gLedgerDet.getAmount());
+                    					Recovery tdsentry = null;
+                    					if (tParam.getTdsId() != null)
+                    						tdsentry = (Recovery) persistenceService.find(
+                    								"from Recovery where id=?", Long.parseLong(tParam.getTdsId()));
+                    					if (tdsentry != null) {
+                    						egRemitGldtl.setRecovery(tdsentry);
+                    					}
+                    					remitanceDetPersistenceService.persist(egRemitGldtl);
+                    				}
+                    			} catch (final TaskFailedException e) {
+                    				LOGGER.error("Error while inserting to eg_remittance_gldtl " + e, e);
+                    				return false;
+                    			}
+                    			if(gLedger.getGeneralLedgerDetails() == null){
+                    			    Set<CGeneralLedgerDetail> gldSet = new HashSet<>();
+                    			    gldSet.add(gLedgerDet);
+                    			    gLedger.setGeneralLedgerDetails(gldSet);
+                    			}else{
+                    			    gLedger.getGeneralLedgerDetails().add(gLedgerDet);
+                    			}
+                    		}
+                    	}
+                    }
+                }
 			}
 		}
 		return true;
