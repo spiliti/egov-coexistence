@@ -231,9 +231,10 @@ public class ContingentBillAction extends BaseBillAction {
                         .valueOf(configValuesByModuleAndKey.get(i).getValue()));
             } catch (final NumberFormatException e) {
                 LOGGER.error("Inside getNetPayableCodes" + e.getMessage(), e);
-            } catch (final Exception e) {
-                LOGGER.error("inside getNetPayableCodes" + e.getMessage());
-            }
+            } /*
+               * catch (final Exception e) {
+               * LOGGER.error("inside getNetPayableCodes" + e.getMessage()); }
+               */
             for (final CChartOfAccounts coa : accountCodeByPurpose)
                 // defaultNetPayCode=coa;
                 detailTypeIdandName = coa.getGlcode() + "~" + getDetailTypesForCoaId(coa.getId()) + "^" + detailTypeIdandName;

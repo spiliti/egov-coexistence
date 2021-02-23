@@ -335,11 +335,12 @@ public class AutoReconcileHelper{
             LOGGER.error("ERROR occurred while doing upload for bank reconciliation : ",npe);
             throw new ValidationException(Arrays.asList(new ValidationError(bankStatementFormat,
                     bankStatementFormat)));
-        } catch (final Exception e) {
-            LOGGER.error("ERROR occurred while doing upload for bank reconciliation : ",e);
-            throw new ValidationException(Arrays.asList(new ValidationError(bankStatementFormat,
-                    bankStatementFormat)));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("ERROR occurred while doing upload for bank reconciliation : "
+           * ,e); throw new ValidationException(Arrays.asList(new
+           * ValidationError(bankStatementFormat, bankStatementFormat))); }
+           */
 
         return "upload";
     }
@@ -1133,11 +1134,12 @@ public class AutoReconcileHelper{
                 backupdateFailureQuery.setLong("id", bean.getId());
                 backupdateFailureQuery.executeUpdate();
 
-            } catch (final Exception e) {
-                backupdateFailureQuery.setLong("id", bean.getId());
-                backupdateFailureQuery.setString("e", e.getMessage());
-                backupdateFailureQuery.executeUpdate();
-            }
+            } /*
+               * catch (final Exception e) {
+               * backupdateFailureQuery.setLong("id", bean.getId());
+               * backupdateFailureQuery.setString("e", e.getMessage());
+               * backupdateFailureQuery.executeUpdate(); }
+               */
 
         }
 

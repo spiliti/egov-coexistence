@@ -94,7 +94,7 @@ public class BankReconciliationSummary {
 	
 	
 	
-	public String getUnReconciledDrCr(Integer bankAccId,Date fromDate,Date toDate) throws Exception
+	public String getUnReconciledDrCr(Integer bankAccId,Date fromDate,Date toDate)
 	{
 		final StringBuilder totalQuery= new StringBuilder(
 				"SELECT (sum(case when ih.ispaycheque='1' then ih.instrumentAmount else 0 end))  AS \"brs_creditTotal\", ")
