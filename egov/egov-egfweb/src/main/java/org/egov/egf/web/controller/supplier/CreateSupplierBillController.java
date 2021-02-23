@@ -208,13 +208,12 @@ public class CreateSupplierBillController extends BaseBillController {
     public String create(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
             final BindingResult resultBinder, final HttpServletRequest request, @RequestParam final String workFlowAction)
             throws IOException, ParseException {
-
     	if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction) && !commonsUtil
-				.isValidApprover(egBillregister, Long.valueOf(request.getParameter(APPROVAL_POSITION)))) {
-			populateDataOnErrors(egBillregister, model, request);
-			model.addAttribute("errorMessage", getLocalizedMessage(INVALID_APPROVER, null, null));
-			return SUPPLIERBILL_FORM;
-		}
+			.isValidApprover(egBillregister, Long.valueOf(request.getParameter(APPROVAL_POSITION)))) {
+		populateDataOnErrors(egBillregister, model, request);
+		model.addAttribute("errorMessage", getLocalizedMessage(INVALID_APPROVER, null, null));
+		return SUPPLIERBILL_FORM;
+	}
         egBillregister.setCreatedBy(ApplicationThreadLocals.getUserId());
         if (StringUtils.isBlank(egBillregister.getExpendituretype()))
             egBillregister.setExpendituretype(FinancialConstants.STANDARD_EXPENDITURETYPE_PURCHASE);

@@ -63,16 +63,11 @@
 				<div class="errorcontent2">
 					<table border="0" cellspacing="0" cellpadding="0" style="position:relative;top:50px;left:50px;">
 						 <tr>
-							 <td width="10%">
-							 <img src="/services/egi/resources/erp2/images/error.png"
-									width="128" height="128" alt="Error" /> 
-								<span class="bold">
-										<br /> You are not authorized to view this page.
-								</span>
-	
+							<td width="10%">
+							    <img width="100px" alt="Error" src="/egi/resources/erp2/images/error.png">
 							</td>
-	                        <td>
-							    <span class="bold"></span>
+                            <td>
+							    <span class="bold">You are not authorized to view this page.</span>
 							</td>
 						</tr>
 					</table>

@@ -172,13 +172,13 @@ public class CreateExpenseBillController extends BaseBillController {
     public String create(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
                          final BindingResult resultBinder, final HttpServletRequest request, @RequestParam final String workFlowAction)
             throws IOException, ParseException {
-		LOGGER.info("ExpenseBill is creating with user ::" + ApplicationThreadLocals.getUserId());
-		if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction) && !commonsUtil
-				.isValidApprover(egBillregister, Long.valueOf(request.getParameter(APPROVAL_POSITION)))) {
-			populateDataOnErrors(egBillregister, model, request);
-			model.addAttribute("message", getLocalizedMessage(INVALID_APPROVER, null, null));
-			return EXPENSEBILL_FORM;
-		}
+	LOGGER.info("ExpenseBill is creating with user ::" + ApplicationThreadLocals.getUserId());
+	if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction) && !commonsUtil
+			.isValidApprover(egBillregister, Long.valueOf(request.getParameter(APPROVAL_POSITION)))) {
+		populateDataOnErrors(egBillregister, model, request);
+		model.addAttribute("message", getLocalizedMessage(INVALID_APPROVER, null, null));
+		return EXPENSEBILL_FORM;
+	}
       egBillregister.setCreatedBy(ApplicationThreadLocals.getUserId());
       if (StringUtils.isBlank(egBillregister.getExpendituretype()))
           egBillregister.setExpendituretype(FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT);
