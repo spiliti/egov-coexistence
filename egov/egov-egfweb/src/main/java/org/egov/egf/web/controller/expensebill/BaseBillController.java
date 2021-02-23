@@ -67,6 +67,7 @@ import org.egov.model.bills.EgBillSubType;
 import org.egov.model.bills.EgBilldetails;
 import org.egov.model.bills.EgBillregister;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.SQLQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -298,7 +299,7 @@ public abstract class BaseBillController extends BaseVoucherController {
                 else
                     entity = (EntityType) persistenceService.find("from " + tableName + " where id=? order by name",
                             payeeDetails.getAccountDetailKeyId());
-            } catch (final Exception e) {
+            } catch (final ClassNotFoundException | NoSuchMethodException | SecurityException e) {
                 throw new ApplicationRuntimeException(e.getMessage());
             }
             payeeDetails.setDetailTypeName(detailType.getName());

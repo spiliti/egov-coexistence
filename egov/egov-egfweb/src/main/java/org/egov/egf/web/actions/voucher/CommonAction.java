@@ -119,6 +119,7 @@ import org.egov.services.voucher.VoucherService;
 import org.egov.utils.Constants;
 import org.egov.utils.FinancialConstants;
 import org.hibernate.HibernateException;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
@@ -435,10 +436,11 @@ public class CommonAction extends BaseFormAction {
             LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
                     new HibernateException(e.getMessage()));
 
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
-                    new Exception(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting the data for bank dropdown "
+           * + e.getMessage(), new Exception(e.getMessage())); }
+           */
 
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadBanks.");
@@ -484,10 +486,11 @@ public class CommonAction extends BaseFormAction {
             LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
                     new HibernateException(e.getMessage()));
 
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
-                    new Exception(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting the data for bank dropdown "
+           * + e.getMessage(), new Exception(e.getMessage())); }
+           */
 
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadAllBanks.");
@@ -516,9 +519,11 @@ public class CommonAction extends BaseFormAction {
                 LOGGER.debug("Bank list size =  " + bankList.size());
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank  " + e.getMessage(), new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank  " + e.getMessage(), new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception occured while getting bank  " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadAllBanksByFund.");
         return "bankByFund";
@@ -578,10 +583,11 @@ public class CommonAction extends BaseFormAction {
             LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
                     new HibernateException(e.getMessage()));
 
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
-                    new Exception(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting the data for bank dropdown "
+           * + e.getMessage(), new Exception(e.getMessage())); }
+           */
 
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadBanksByFundAndType.");
@@ -608,10 +614,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank account numbers " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank account numbers " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting bank account numbers " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadAccNum.");
         return "bankAccNum";
@@ -634,10 +641,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank account numbers " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank account numbers " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting bank account numbers " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadAccNum.");
         return "bankAccountByBranch";
@@ -666,9 +674,11 @@ public class CommonAction extends BaseFormAction {
                 LOGGER.debug("Bank Branch Number list size =  " + branchList.size());
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank branch " + e.getMessage(), new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank branch " + e.getMessage(), new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception occured while getting bank branch " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadBankBranchFromBank.");
         return "branch";
@@ -697,10 +707,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank account " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank account " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception occured while getting bank account " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadBankAccFromBranch.");
         return "bankAccNum";
@@ -756,10 +767,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank account " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank account " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception occured while getting bank account " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadRTGSChequeFromBankAcc.");
         return "instrument";
@@ -787,10 +799,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank account numbers " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank account numbers " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting bank account numbers " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadAccountNumbers.");
         return "bankAccNum";
@@ -814,10 +827,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting Drawing officers " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting Drawing officers " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception occured while getting Drawing officers " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadDrawingOfficers.");
         return "drawingOffcer";
@@ -872,10 +886,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank account numbers " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank account numbers " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting bank account numbers " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadAccNumAndType.");
         return "bankAccNumAndType";
@@ -900,10 +915,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank account narration " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank account narration " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting bank account narration " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed loadAccNumNarration.");
         return "result";
@@ -927,10 +943,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting bank account narration " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting bank account narration " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting bank account narration " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed loadAccNumNarrationAndFund.");
         return "result";
@@ -976,7 +993,7 @@ public class CommonAction extends BaseFormAction {
                     .findAllBy(
                             "from Bankbranch br where br.id in (select bankbranch.id from Bankaccount where fund.id=? ) and br.isactive=true order by br.bank.name asc",
                             fundId);
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             LOGGER.error("Exception while loading ajaxLoadBankBranch=" + e.getMessage());
         }
         if (LOGGER.isDebugEnabled())
@@ -993,7 +1010,7 @@ public class CommonAction extends BaseFormAction {
                     .findAllBy(
                             "select distinct bb from Bankbranch bb,Bankaccount ba where bb.bank.id=? and ba.bankbranch=bb and bb.isactive=true",
                             bankId);
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             LOGGER.error("Exception while loading ajaxLoadBankBranch=" + e.getMessage());
         }
         if (LOGGER.isDebugEnabled())
@@ -1017,7 +1034,7 @@ public class CommonAction extends BaseFormAction {
 
                     for (final AppConfigValues appConfigVal : configValues)
                         bankAccount = appConfigVal.getValue();
-                } catch (final Exception e) {
+                } catch (final ObjectNotFoundException e) {
                     throw new ApplicationRuntimeException(
                             "Appconfig value for EB Voucher propartys is not defined in the system");
                 }
@@ -1059,7 +1076,7 @@ public class CommonAction extends BaseFormAction {
                 accNumList = persistenceService.findAllBy(
                         " from Bankaccount where  bankbranch.id=? and isactive=true order by chartofaccounts.glcode",
                         fundId, branchId);
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             LOGGER.error("Exception while loading ajaxLoadBankAccounts=" + e.getMessage());
         }
         if (LOGGER.isDebugEnabled())
@@ -1134,11 +1151,11 @@ public class CommonAction extends BaseFormAction {
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("Exception occuerd while getting detail code " + e.getMessage());
             value = index + "~" + ERROR;
-        } catch (final Exception e) {
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("Exception occuerd while getting detail code " + e.getMessage());
-            value = index + "~" + ERROR;
-        }
+        } /*
+           * catch (final Exception e) { if (LOGGER.isDebugEnabled())
+           * LOGGER.debug("Exception occuerd while getting detail code " +
+           * e.getMessage()); value = index + "~" + ERROR; }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxValidateDetailCode.");
         return "result";
@@ -1213,7 +1230,7 @@ public class CommonAction extends BaseFormAction {
                     for (final AccountEntity rel : accountEntity)
                         detailCodes.add(rel.getId() + "-" + rel.getCode());
             }
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("Exception occuerd while getting detail code " + e.getMessage());
             value = index + "~" + ERROR;
@@ -1570,10 +1587,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
-                    new Exception(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting the data for bank dropdown "
+           * + e.getMessage(), new Exception(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadBanksWithAssignedCheques.");
         return "bank";
@@ -1628,10 +1646,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
-                    new Exception(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting the data for bank dropdown "
+           * + e.getMessage(), new Exception(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadBanksAccountsWithAssignedCheques.");
         return "bankAccNum";
@@ -1695,10 +1714,11 @@ public class CommonAction extends BaseFormAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting the data for bank dropdown " + e.getMessage(),
-                    new Exception(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exception occured while getting the data for bank dropdown "
+           * + e.getMessage(), new Exception(e.getMessage())); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed ajaxLoadBanksAccountsWithAssignedCheques.");
         return "bankAccNum";

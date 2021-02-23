@@ -301,9 +301,9 @@ public class SchemeUtilizationReportAction extends LoanGrantBaseAction {
         } catch (final ValidationException e)
         {
             return NEW;
-        } catch (final Exception e) {
-            LOGGER.error(e);
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.error(e); }
+           */
 
         return "HTML";
     }

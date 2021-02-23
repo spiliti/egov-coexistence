@@ -234,7 +234,7 @@ public class AjaxCommonController {
 
             final EntityTypeService entityService = (EntityTypeService) applicationContext.getBean(simpleName);
             entitiesList = (List<EntityType>) entityService.filterActiveEntities(name, 20, detailType.getId());
-        } catch (final Exception e) {
+        } catch (final ClassNotFoundException e) {
             e.printStackTrace();
             entitiesList = new ArrayList<>();
         }

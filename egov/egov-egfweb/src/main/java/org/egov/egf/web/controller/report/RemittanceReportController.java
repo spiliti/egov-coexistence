@@ -77,6 +77,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Controller
 @RequestMapping("/report/remittance")
@@ -116,17 +117,17 @@ public class RemittanceReportController {
     public @ResponseBody ResponseEntity getRemittanceSearch(@ModelAttribute RemittanceReportModel remittanceReportModel){
         try {
             return new ResponseEntity<>(getRemittenceCollections(remittanceReportModel), HttpStatus.OK);            
-        } catch (Exception e) {
+        } catch (HttpClientErrorException e) {
             LOGGER.error(e.getMessage());
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
     
     @RequestMapping(method = {RequestMethod.GET}, value = "/pending/_search")
-    public @ResponseBody ResponseEntity getRemittancePendingSearch(@ModelAttribute RemittanceReportModel remittanceReportModel){
+    public @ResponseBody ResponseEntity getRemittancePendingSearch(@ModelAttribute RemittanceReportModel remittanceReportModel) throws Exception{
         try {
             return new ResponseEntity<>(remittanceService.getPendingRemittance(remittanceReportModel), HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (HttpClientErrorException e) {
             LOGGER.error(e.getMessage());
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
@@ -137,12 +138,12 @@ public class RemittanceReportController {
         try {
             List<BankAccountServiceMapping> bankAcntServiceMappings = microserviceUtils.getBankAcntServiceMappings(accountNumber, null);
             return new ResponseEntity<>(bankAcntServiceMappings, HttpStatus.OK);            
-        } catch (Exception e) {
+        } catch (HttpClientErrorException e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
     
-    private List<RemittanceReportModel> getRemittenceCollections(RemittanceReportModel model) throws Exception {
+    private List<RemittanceReportModel> getRemittenceCollections(RemittanceReportModel model) {
         List<RemittanceReportModel> resultList = new ArrayList<>();
         resultList = remittanceService.getRemittanceColectionsReports(model);
         return resultList;

@@ -171,7 +171,7 @@ public class GeneralLedgerReportAction extends BaseFormAction {
 	@SkipValidation
 	@Action(value = "/report/generalLedgerReport-ajaxSearch")
 	@ReadOnly
-	public String ajaxSearch() throws TaskFailedException {
+	public String ajaxSearch() {
 
 		persistenceService.getSession().setDefaultReadOnly(true);
 		persistenceService.getSession().setFlushMode(FlushMode.MANUAL);
@@ -179,7 +179,8 @@ public class GeneralLedgerReportAction extends BaseFormAction {
 			LOGGER.debug("GeneralLedgerAction | Search | start");
 		try {
 			generalLedgerDisplayList = generalLedgerReport.getGeneralLedgerList(generalLedgerReportBean);
-		} catch (final Exception e) {
+		} catch (final TaskFailedException e) {
+                    LOGGER.error("GeneralLedgerAction | list | End",e);
 
 		}
 		if (LOGGER.isDebugEnabled())
@@ -199,7 +200,8 @@ public class GeneralLedgerReportAction extends BaseFormAction {
 			LOGGER.debug("GeneralLedgerAction | Search | start");
 		try {
 			generalLedgerDisplayList = generalLedgerReport.getGeneralLedgerList(generalLedgerReportBean);
-		} catch (final Exception e) {
+		} catch (final TaskFailedException e) {
+                    LOGGER.error("GeneralLedgerAction | list | End",e);
 
 		}
 		if (LOGGER.isDebugEnabled())

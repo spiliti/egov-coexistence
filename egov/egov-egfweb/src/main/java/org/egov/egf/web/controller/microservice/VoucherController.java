@@ -1,5 +1,6 @@
 package org.egov.egf.web.controller.microservice;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
 public class VoucherController {
@@ -57,7 +59,7 @@ public class VoucherController {
 					HttpStatus.SC_OK, null));
 			
 			return response;
-		} catch (Exception e) {
+		} catch (HttpClientErrorException e) {
 			LOGGER.error(e.getMessage(), e);
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
@@ -69,7 +71,7 @@ public class VoucherController {
         public AppConfigValues getManualReceiptDateConsiderationForVoucher() {
                 try {
                     return voucherService.isManualReceiptDateEnabledForVoucher();
-                } catch (Exception e) {
+                } catch (HttpClientErrorException e) {
                         LOGGER.error(e.getMessage(), e);
                         throw new ApplicationRuntimeException(e.getMessage());
                 }
@@ -80,7 +82,7 @@ public class VoucherController {
         public EgModules getEgModuleIdByName(@Param("moduleName") String moduleName) {
                 try {
                         return voucherService.getModulesIdByName(moduleName);
-                } catch (Exception e) {
+                } catch (HttpClientErrorException e) {
                         LOGGER.error(e.getMessage(), e);
                         throw new ApplicationRuntimeException(e.getMessage());
                 }
@@ -185,7 +187,7 @@ public class VoucherController {
 					HttpStatus.SC_OK, null));
 			
 			return response;
-		} catch (Exception e) {
+		} catch (HttpClientErrorException e) {
 			LOGGER.error(e.getMessage(), e);
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
@@ -206,7 +208,7 @@ public class VoucherController {
                             res.setVouchers(cVoucherHeaders.stream().map(cv -> new Voucher(cv)).collect(Collectors.toList()));
                         }
                         return res;
-                } catch (Exception e) {
+                } catch (UnsupportedEncodingException e) {
                         LOGGER.error(e.getMessage(), e);
                         throw new ApplicationRuntimeException(e.getMessage());
                 }
@@ -220,7 +222,7 @@ public class VoucherController {
                                         HttpStatus.SC_OK, null));
                         
                         return new ResponseEntity<>(response, org.springframework.http.HttpStatus.OK);
-                } catch (Exception e) {
+                } catch (HttpClientErrorException e) {
                         LOGGER.error(e.getMessage(), e);
                         throw new ApplicationRuntimeException(e.getMessage());
                 }

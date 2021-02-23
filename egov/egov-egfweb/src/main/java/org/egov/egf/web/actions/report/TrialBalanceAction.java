@@ -90,6 +90,7 @@ import org.egov.utils.Constants;
 import org.egov.utils.FinancialConstants;
 import org.egov.utils.ReportHelper;
 import org.hibernate.FlushMode;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
@@ -216,9 +217,9 @@ public class TrialBalanceAction extends BaseFormAction {
 			LOGGER.error(e, e);
 		} catch (final IOException e) {
 			LOGGER.error(e, e);
-		} catch (final Exception e) {
-			LOGGER.error(e, e);
-		}
+        } /*
+           * catch (final Exception e) { LOGGER.error(e, e); }
+           */
 		return "new";
 	}
 
@@ -477,7 +478,7 @@ public class TrialBalanceAction extends BaseFormAction {
                 LOGGER.info("query ---->" + sqlQuery);
             forAllFunds = sqlQuery.list();
 
-        } catch (final Exception e)
+        } catch (final HibernateException e)
         {
             LOGGER.error("Error in getReport" , e);
 

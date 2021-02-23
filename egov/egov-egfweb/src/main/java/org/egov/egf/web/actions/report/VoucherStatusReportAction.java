@@ -47,6 +47,7 @@
  */
 package org.egov.egf.web.actions.report;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -101,6 +102,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import com.opensymphony.xwork2.validator.annotations.Validation;
+
+import net.sf.jasperreports.engine.JRException;
 
 @Results(value = {
 		@Result(name = "PDF", type = "stream", location = "inputStream", params = { "inputName", "inputStream",
@@ -612,7 +615,7 @@ public class VoucherStatusReportAction extends BaseFormAction {
 
 	@SkipValidation
 	@Action(value = "/report/voucherStatusReport-generateXls")
-	public String generateXls() throws Exception {
+	public String generateXls() throws ParseException, ApplicationException, JRException, IOException {
 		populateData();
 		inputStream = reportHelper.exportXls(inputStream, JASPERPATH, getParamMap(), voucherReportList);
 		return "XLS";
