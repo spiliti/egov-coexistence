@@ -421,7 +421,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                     value = appConfigVal.getValue();
                     propartyAppConfigResultList.put(key, value);
                 }
-            } catch (final Exception e) {
+            } catch (final ApplicationRuntimeException e) {
                 throw new ApplicationRuntimeException("Appconfig value for EB Voucher propartys is not defined in the system");
             }
         }
@@ -866,10 +866,11 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting year code " + e.getMessage(),
                     new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting year code " + e.getMessage(),
-                    new HibernateException(e.getMessage()));
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception occured while getting year code " +
+           * e.getMessage(), new HibernateException(e.getMessage())); }
+           */
         return chequeSlNoMap;
     }
 
@@ -1069,7 +1070,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
     @ValidationErrorPage(value = "searchpayment")
     @SkipValidation
     @Action(value = "/payment/chequeAssignment-create")
-    public String create() throws ApplicationException
+    public String create()
 
     {
 
@@ -1123,11 +1124,10 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
+        } catch (final ParseException e) {
+            throw new ApplicationRuntimeException("while parsing the date" );
         }
+
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed createInstrument.");
 
@@ -1199,7 +1199,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
         }
         return rtgsList;
     }
-    private void createRtgsAssignment(final Map<String, List<ChequeAssignment>> resultMap) throws Exception {
+    private void createRtgsAssignment(final Map<String, List<ChequeAssignment>> resultMap) throws ApplicationRuntimeException, ParseException {
         instVoucherList = new ArrayList<InstrumentVoucher>();
         // InstrumentHeader instHeaderObj=new InstrumentHeader();
         // InstrumentVoucher instVoucherObj=new InstrumentVoucher();
@@ -1367,8 +1367,6 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                 return "searchsalpayment";
             }
         } catch (final ValidationException e) {
-            throw new ValidationException(e.getErrors());
-        } catch (final Exception e) {
             LOGGER.error(e.getMessage());
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getMessage()));

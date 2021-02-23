@@ -96,7 +96,7 @@ public class PreApprovedActionHelper {
     SecurityUtils securityUtils;
     @Transactional
     public CVoucherHeader createVoucherFromBill(CVoucherHeader voucherHeader, WorkflowBean workflowBean, Long billId,
-            String voucherNumber, Date voucherDate) throws ApplicationRuntimeException, SQLException, TaskFailedException {
+            String voucherNumber, Date voucherDate) {
         try {
             Long voucherHeaderId = createVoucher.createVoucherFromBill(billId.intValue(), null,
                     voucherNumber, voucherDate);
@@ -108,7 +108,7 @@ public class PreApprovedActionHelper {
             else
                 throw new ValidationException("Voucher creation failed", "Voucher creation failed");
 
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException | SQLException |TaskFailedException e) {
 
             final List<ValidationError> errors = new ArrayList<>();
             errors.add(new ValidationError("exp", e.getMessage()));

@@ -199,7 +199,7 @@ public class EGovernCommon extends AbstractTask {
 	 * @return
 	 * @throws TaskFailedException,Exception
 	 */
-	public String getEg_Voucher(final String vouType, final String fiscalPeriodIdStr) throws TaskFailedException, Exception
+	public String getEg_Voucher(final String vouType, final String fiscalPeriodIdStr) throws TaskFailedException
 	{
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug(" In EGovernCommon :getEg_Voucher method ");
@@ -220,11 +220,11 @@ public class EGovernCommon extends AbstractTask {
 			cgvn = (BigInteger) databaseSequenceProvider.getNextSequence(sequenceName);
 			LOGGER.error("Error in generating CGVN" + e);
 			throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-		} catch (final Exception e)
-		{
-			LOGGER.error("Error in generating CGVN" + e);
-			throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-		}
+        } /*
+           * catch (final Exception e) { LOGGER.error("Error in generating CGVN"
+           * + e); throw new ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
 		return cgvn.toString();
 
 	}
@@ -282,40 +282,34 @@ public class EGovernCommon extends AbstractTask {
      * @param conn
      * @return
      */
-    public boolean isUniqueVN(String vcNum, final String vcDate, final DataCollection datacol) throws TaskFailedException,
-            Exception {
+    public boolean isUniqueVN(String vcNum, final String vcDate, final DataCollection datacol) throws TaskFailedException {
         boolean isUnique = false;
         vcNum = vcNum.toUpperCase();
         Query pst = null;
         List<Object[]> rs = null;
         String fyEndDate = "";
-        try {
-            final StringBuilder query1 = new StringBuilder("SELECT to_char(startingDate, 'DD-Mon-YYYY') AS \"startingDate\",")
-            		.append(" to_char(endingDate, 'DD-Mon-YYYY') AS \"endingDate\" FROM financialYear")
-            		.append(" WHERE startingDate <= :startingDate AND endingDate >= :endingDate");
-            pst = persistenceService.getSession().createSQLQuery(query1.toString());
-            pst.setParameter("startingDate", vcDate);
-            pst.setParameter("endingDate", vcDate);
-            rs = pst.list();
-            for (final Object[] element : rs) {
-                element[0].toString();
-                fyEndDate = element[1].toString();
-            }
-			final StringBuilder query2 = new StringBuilder("SELECT id FROM voucherHeader")
-					.append(" WHERE voucherNumber = :voucherNumber AND voucherDate>=:voucherFromDate")
-					.append(" AND voucherDate<=:voucherToDate and status!=4");
-			pst = persistenceService.getSession().createSQLQuery(query2.toString());
-			pst.setParameter("voucherNumber", vcNum).setParameter("voucherFromDate", vcDate)
-					.setParameter("voucherToDate", fyEndDate);
-			rs = pst.list();
-            for (final Object[] element : rs)
-                datacol.addMessage(EXILRPERROR, "duplicate voucher number");
-            if (rs == null || rs.size() == 0)
-                isUnique = true;
-        } catch (final Exception ex) {
-            datacol.addMessage(EXILRPERROR, "DataBase Error(isUniqueVN) : " + ex.toString());
-            throw new TaskFailedException();
+        final StringBuilder query1 = new StringBuilder("SELECT to_char(startingDate, 'DD-Mon-YYYY') AS \"startingDate\",")
+        		.append(" to_char(endingDate, 'DD-Mon-YYYY') AS \"endingDate\" FROM financialYear")
+        		.append(" WHERE startingDate <= :startingDate AND endingDate >= :endingDate");
+        pst = persistenceService.getSession().createSQLQuery(query1.toString());
+        pst.setParameter("startingDate", vcDate);
+        pst.setParameter("endingDate", vcDate);
+        rs = pst.list();
+        for (final Object[] element : rs) {
+            element[0].toString();
+            fyEndDate = element[1].toString();
         }
+        final StringBuilder query2 = new StringBuilder("SELECT id FROM voucherHeader")
+        		.append(" WHERE voucherNumber = :voucherNumber AND voucherDate>=:voucherFromDate")
+        		.append(" AND voucherDate<=:voucherToDate and status!=4");
+        pst = persistenceService.getSession().createSQLQuery(query2.toString());
+        pst.setParameter("voucherNumber", vcNum).setParameter("voucherFromDate", vcDate)
+        		.setParameter("voucherToDate", fyEndDate);
+        rs = pst.list();
+        for (final Object[] element : rs)
+            datacol.addMessage(EXILRPERROR, "duplicate voucher number");
+        if (rs == null || rs.size() == 0)
+            isUnique = true;
         return isUnique;
     }
 	   
@@ -326,7 +320,7 @@ public class EGovernCommon extends AbstractTask {
     * @return
     * @throws TaskFailedException,Exception
     */
-   public boolean isUniqueVN(String vcNum, final String vcDate) throws Exception, TaskFailedException {
+   public boolean isUniqueVN(String vcNum, final String vcDate) throws TaskFailedException {
        boolean isUnique = false;
        String fyStartDate = "", fyEndDate = "";
        vcNum = vcNum.toUpperCase();
@@ -357,14 +351,7 @@ public class EGovernCommon extends AbstractTask {
                    LOGGER.debug("Duplicate Voucher Number");
            } else
                isUnique = true;
-       } catch (final Exception ex) {
-           LOGGER.error("error in finding unique VoucherNumber");
-           throw taskExc;
        } finally {
-           try {
-           } catch (final Exception e) {
-               LOGGER.error("isUniqueVN....");
-           }
        }
        return isUnique;
    }

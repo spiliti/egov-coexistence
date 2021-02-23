@@ -233,13 +233,16 @@ public class SchemeAction extends BaseFormAction {
         	scheme.setCreatedBy(ApplicationThreadLocals.getUserId());
             schemeService.persist(scheme);
         } catch (final ValidationException e) {
-            LOGGER.error("ValidationException in create Scheme" + e.getMessage());
-            throw e;
-        } catch (final Exception e) {
             LOGGER.error("Exception while creating Scheme" + e.getMessage());
             throw new ValidationException(Arrays.asList(new ValidationError("An error occured contact Administrator",
                     "An error occured contact Administrator")));
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception while creating Scheme" + e.getMessage());
+           * throw new ValidationException(Arrays.asList(new
+           * ValidationError("An error occured contact Administrator",
+           * "An error occured contact Administrator"))); }
+           */
 
         addActionMessage(getText("Scheme Created Successfully"));
         if (LOGGER.isDebugEnabled())

@@ -67,6 +67,7 @@ import org.egov.infra.web.struts.annotation.ValidationErrorPage;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.infstr.utils.EgovMasterDataCaching;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -169,7 +170,7 @@ public class ContractTypeAction extends BaseFormAction {
             persistenceService.getSession().flush();
             persistenceService.getSession().clear();
             setSuccess("yes");
-        } catch (final Exception e) {
+        } catch (final ObjectNotFoundException e) {
             setSuccess("no");
             LOGGER.error("Exception occurred in ContractTypeAction-create ", e);
 
@@ -222,7 +223,7 @@ public class ContractTypeAction extends BaseFormAction {
             persistenceService.persist(typeOfWork);
             showMode = "view";
             setSuccess("yes");
-        } catch (final Exception e) {
+        } catch (final ObjectNotFoundException e) {
             setSuccess("no");
             LOGGER.error("Exception occurred in ContractTypeAction-edit ", e);
 

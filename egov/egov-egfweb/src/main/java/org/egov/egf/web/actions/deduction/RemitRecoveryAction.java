@@ -51,6 +51,7 @@
 package org.egov.egf.web.actions.deduction;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -98,6 +99,7 @@ import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.entity.Boundary;
 import org.egov.infra.admin.master.entity.Department;
 import org.egov.infra.admin.master.service.DepartmentService;
+import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
 import org.egov.infra.script.entity.Script;
 import org.egov.infra.script.service.ScriptService;
@@ -131,6 +133,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.exilant.GLEngine.ChartOfAccounts;
 import com.exilant.GLEngine.Transaxtion;
+import com.exilant.exility.common.TaskFailedException;
 import com.opensymphony.xwork2.validator.annotations.Validation;
 
 @ParentPackage("egov")
@@ -363,13 +366,11 @@ public class RemitRecoveryAction extends BasePaymentAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            search();
-            LOGGER.error(e.getMessage());
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
-
-        
+        } /*
+           * catch (final Exception e) { search(); LOGGER.error(e.getMessage());
+           * throw new ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         return "remitDetail";
     }
 
@@ -443,11 +444,11 @@ public class RemitRecoveryAction extends BasePaymentAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
+        } catch (final ParseException e) {
             loadAjaxedDropDowns();
             LOGGER.error(e.getMessage());
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+            throw new ApplicationRuntimeException("while parsing voucher date");
+            }
         return MESSAGES;
     }
 
@@ -640,10 +641,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
 
     }
 
-    /**
-     *
-     *
-     */
+   
     private void reCreateLedger() {
 
         try {
@@ -679,7 +677,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
                 throw new ValidationException(
                         Arrays.asList(new ValidationError("Exception While Saving Data", "Transaction Failed")));
 
-        } catch (final Exception e) {
+        } catch (final ValidationException |TaskFailedException | ApplicationRuntimeException| SQLException e) {
             LOGGER.error(e.getMessage(), e);
             throw new ValidationException(Arrays.asList(new ValidationError(SAVE_EXCEPTION, FAILED)));
         }
@@ -831,7 +829,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
                         paymentheader.getBankaccount().getChartofaccounts().getId()));
                 balance = commonBean.getAvailableBalance();
                 return true;
-            } catch (final Exception e) {
+            } catch (final ValidationException e) {
                 balance = BigDecimal.valueOf(-1);
 
                 return true;

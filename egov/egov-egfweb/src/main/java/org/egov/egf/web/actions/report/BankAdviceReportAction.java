@@ -335,7 +335,7 @@ public class BankAdviceReportAction extends BaseFormAction {
 
             } catch (final ClassCastException e) {
                 LOGGER.error(e);
-            } catch (final Exception e)
+            } catch (final ClassNotFoundException |NoSuchMethodException|  SecurityException e)
             {
                 LOGGER.error("Exception to get EntityType=" + e.getMessage());
             }

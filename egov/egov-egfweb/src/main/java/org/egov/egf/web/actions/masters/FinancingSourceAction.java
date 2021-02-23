@@ -223,7 +223,7 @@ public class FinancingSourceAction extends BaseFormAction {
                     financingSourceService.persist(fundsource);
                 }
             addActionMessage(getText("masters.finsrc.saved.sucess"));
-        } catch (final Exception e) {
+        } catch (final ValidationException e) {
             LOGGER.error("error occured while creating financial source" + e.getMessage(), e);
             clearMessages();
             final List<ValidationError> errors = new ArrayList<ValidationError>();

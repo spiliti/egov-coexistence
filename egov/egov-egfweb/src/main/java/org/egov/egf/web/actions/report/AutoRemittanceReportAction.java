@@ -158,7 +158,7 @@ public class AutoRemittanceReportAction extends BaseFormAction {
     }
 
     @Action(value = "/report/autoRemittanceReport-newform")
-    public String newform() throws Exception {
+    public String newform() {
         return "reportForm";
     }
 

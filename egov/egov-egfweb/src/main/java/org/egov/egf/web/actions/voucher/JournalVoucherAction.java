@@ -203,7 +203,7 @@ public class JournalVoucherAction extends BaseVoucherAction
      */
     @SkipValidation
     @Action(value = "/voucher/journalVoucher-create")
-    public String create() throws Exception {
+    public String create() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("VoucherAction | create Method | Start");
         populateWorkflowBean();
@@ -319,16 +319,16 @@ public class JournalVoucherAction extends BaseVoucherAction
                 else
                     throw new ValidationException("Voucher creation failed", "Voucher creation failed");
 
-            } catch (final Exception e) {
-
-                clearMessages();
-                if (subLedgerlist.size() == 0)
-                    subLedgerlist.add(new VoucherDetails());
-                voucherHeader.setVoucherNumber(voucherNumber);
-                final List<ValidationError> errors = new ArrayList<ValidationError>();
-                errors.add(new ValidationError("exp", e.getMessage()));
-                throw new ValidationException(errors);
-            } finally {
+            } /*
+               * catch (final Exception e) { clearMessages(); if
+               * (subLedgerlist.size() == 0) subLedgerlist.add(new
+               * VoucherDetails());
+               * voucherHeader.setVoucherNumber(voucherNumber); final
+               * List<ValidationError> errors = new
+               * ArrayList<ValidationError>(); errors.add(new
+               * ValidationError("exp", e.getMessage())); throw new
+               * ValidationException(errors); }
+               */ finally {
             }
         else if (subLedgerlist.size() == 0)
             subLedgerlist.add(new VoucherDetails());

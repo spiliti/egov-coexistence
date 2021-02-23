@@ -118,14 +118,17 @@ public class FundingAgencyAction extends BaseFormAction {
             persistenceService.persist(ac);
             //persistenceService.setType(FundingAgency.class);
         } catch (final ValidationException e) {
-            throw e;
+            throw new ValidationException(Arrays.asList(new ValidationError("An error occured contact Administrator",
+                    "An error occured contact Administrator")));
         } catch (final ConstraintViolationException e) {
             throw new ValidationException(
                     Arrays.asList(new ValidationError("Duplicate FundingAgency", "Duplicate FundingAgency")));
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError("An error occured contact Administrator",
-                    "An error occured contact Administrator")));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError("An error occured contact Administrator",
+           * "An error occured contact Administrator"))); }
+           */
         addActionMessage(getText("Funding Agency Created Successfully"));
         clearValues = true;
         return NEW;

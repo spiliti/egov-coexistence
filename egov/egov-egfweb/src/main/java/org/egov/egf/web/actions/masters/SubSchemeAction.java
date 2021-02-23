@@ -152,13 +152,10 @@ public class SubSchemeAction extends BaseFormAction {
             subSchemeService.persist(subScheme);
             subSchemeService.getSession().flush();
         } catch (final ValidationException e) {
-            throw e;
-        } catch (final ConstraintViolationException e) {
+            throw new ValidationException(Arrays.asList(new ValidationError("An error occured contact Administrator",
+                    "An error occured contact Administrator")));        } catch (final ConstraintViolationException e) {
             addActionError(getText("duplicate.subscheme"));
             return NEW;
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError("An error occured contact Administrator",
-                    "An error occured contact Administrator")));
         }
         clearValues = true;
         addActionMessage(getText("subscheme.saved.successfully"));
@@ -182,13 +179,15 @@ public class SubSchemeAction extends BaseFormAction {
             subSchemeService.persist(subScheme);
             subSchemeService.getSession().flush();
         } catch (final ValidationException e) {
-            throw e;
-        } catch (final ConstraintViolationException e) {
-            throw new ValidationException(Arrays.asList(new ValidationError("duplicate.subscheme", "duplicate.subscheme")));
-        } catch (final Exception e) {
             throw new ValidationException(Arrays.asList(new ValidationError("An error occured contact Administrator",
-                    "An error occured contact Administrator")));
-        }
+                    "An error occured contact Administrator")));        } catch (final ConstraintViolationException e) {
+            throw new ValidationException(Arrays.asList(new ValidationError("duplicate.subscheme", "duplicate.subscheme")));
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError("An error occured contact Administrator",
+           * "An error occured contact Administrator"))); }
+           */
         clearValues = true;
         addActionMessage(getText("subscheme.modified.successfully"));
         showMode = "";
