@@ -47,6 +47,7 @@
  */
 package org.egov.collection.utils;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,18 +151,22 @@ public class FinancialsUtil {
      *
      * @param paramList
      * @return CVoucherHeader
+     * @throws ParseException 
      */
-    public CVoucherHeader getReversalVoucher(final List<HashMap<String, Object>> paramList) {
+    public CVoucherHeader getReversalVoucher(final List<HashMap<String, Object>> paramList) throws ParseException {
         CVoucherHeader voucherHeaders = null;
         try {
             voucherHeaders = createVoucher.reverseVoucher(paramList);
         } catch (final ApplicationRuntimeException re) {
             LOGGER.error("Runtime Exception while creating reversal voucher!", re);
             throw re;
-        } catch (final Exception e) {
-            LOGGER.error("Exception while creating reversal voucher!", e);
-            throw new ApplicationRuntimeException("Exception while creating reversal voucher!", e);
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception while creating reversal voucher!", e);
+           * throw new
+           * ApplicationRuntimeException("Exception while creating reversal voucher!"
+           * , e); }
+           */
         return voucherHeaders;
     }
 
@@ -272,7 +277,7 @@ public class FinancialsUtil {
                             || purposeName.equals(CollectionConstants.PURPOSE_NAME_THIRD_PARTY_COLLECTION))
                         return true;
                 }
-            } catch (final Exception e) {
+            } catch (final NullPointerException e) {
                 throw new ApplicationRuntimeException("Exception in fetching purpose name for id [" + purposeId + "]",
                         e);
             }

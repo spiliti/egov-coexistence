@@ -107,6 +107,7 @@ import org.egov.services.voucher.GeneralLedgerDetailService;
 import org.egov.services.voucher.GeneralLedgerService;
 import org.egov.services.voucher.VoucherHeaderService;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,7 +169,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
     private MicroserviceUtils microserviceUtils;
 
     @Transactional
-    public DishonorCheque createDishonorCheque(final DishonoredChequeBean chequeForm) throws Exception {
+    public DishonorCheque createDishonorCheque(final DishonoredChequeBean chequeForm) {
         final DishonorCheque dishonorChq = new DishonorCheque();
 
         try {
@@ -187,18 +188,19 @@ public class DishonorChequeService implements FinancialIntegrationService {
             final List<ValidationError> errors = new ArrayList<>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            LOGGER.error("Error in DishonorCheque >>>>" + e);
-            final List<ValidationError> errors = new ArrayList<>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Error in DishonorCheque >>>>" + e); final
+           * List<ValidationError> errors = new ArrayList<>(); errors.add(new
+           * ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
         return dishonorChq;
     }
 
     @Transactional
     public void createDishonorChequeForVoucher(final DishonoredChequeBean chequeForm, final DishonorCheque dishonorChq,
-            final CVoucherHeader originalVoucher, final InstrumentHeader instrumentHeader) throws Exception {
+            final CVoucherHeader originalVoucher, final InstrumentHeader instrumentHeader) {
         DishonorChequeSubLedgerDetails dishonourChqSLDetails = new DishonorChequeSubLedgerDetails();
         dishonorChq.setStatus(egwStatusDAO.getStatusByModuleAndCode(FinancialConstants.STATUS_MODULE_DISHONORCHEQUE,
                 FinancialConstants.DISHONORCHEQUE_APPROVED_STATUS));
@@ -282,7 +284,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
 
     @Transactional
     public CollectionDishonorCheque populateAndPersistDishonorCheque(final DishonoredChequeBean chequeForm)
-            throws Exception {
+             {
         final CollectionDishonorCheque dishonorChq = new CollectionDishonorCheque();
 
         try {
@@ -312,12 +314,13 @@ public class DishonorChequeService implements FinancialIntegrationService {
             final List<ValidationError> errors = new ArrayList<>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            LOGGER.error("Error in DishonorCheque >>>>" + e.getMessage());
-            final List<ValidationError> errors = new ArrayList<>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Error in DishonorCheque >>>>" + e.getMessage());
+           * final List<ValidationError> errors = new ArrayList<>();
+           * errors.add(new ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
         return dishonorChq;
     }
 
@@ -355,7 +358,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
 
     @Transactional
     public void createDishonorChequeWithoutVoucher(final DishonoredChequeBean chequeForm,
-            final InstrumentHeader instrumentHeader) throws Exception {
+            final InstrumentHeader instrumentHeader) {
         instrumentHeader.setSurrendarReason(chequeForm.getDishonorReason());
         persistenceService.update(instrumentHeader);
         populateAndPersistDishonorCheque(chequeForm);
@@ -383,12 +386,13 @@ public class DishonorChequeService implements FinancialIntegrationService {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            LOGGER.error("Error in DishonorCheque >>>>" + e);
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Error in DishonorCheque >>>>" + e); final
+           * List<ValidationError> errors = new ArrayList<ValidationError>();
+           * errors.add(new ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
     }
 
     @Transactional
@@ -432,12 +436,13 @@ public class DishonorChequeService implements FinancialIntegrationService {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            LOGGER.error("Error in DishonorCheque >>>>" + e);
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Error in DishonorCheque >>>>" + e); final
+           * List<ValidationError> errors = new ArrayList<ValidationError>();
+           * errors.add(new ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
         return reversalVoucher;
     }
 
@@ -580,7 +585,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 dishonoredChequeList.add(chequeBean);
             });
             return dishonoredChequeList;
-        } catch (Exception e) {
+        } catch (ObjectNotFoundException e) {
             LOGGER.error("Error in Cheques Dishonoring Listing :: ",e);
             throw e;
         }
@@ -619,7 +624,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 }
             });
             
-        } catch (Exception e) {
+        } catch (ObjectNotFoundException e) {
             LOGGER.error("Error occurred in populateReversalVoucherAccountDetails : ",e);
             throw e;
         }
@@ -650,7 +655,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 DishonoredChequeBean.AccountCode accountCode = new DishonoredChequeBean.AccountCode (ac.getGlcode(), coaMap.get(ac.getGlcode()).getName(), ac.getDebitAmount() == null ? 0 : ac.getDebitAmount() , ac.getCreditAmount() == null ? 0 : ac.getCreditAmount());
                 chequeBean.getReceiptVoucherGLDetails().add(accountCode);
             });
-        } catch (Exception e) {
+        } catch (ObjectNotFoundException e) {
             LOGGER.error("Error occurred in populateReceiptVoucherAccountDetails : ",e);
             throw e;
         }
@@ -789,7 +794,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 dishonoredChequeList.add(chequeBean);
             });
             return dishonoredChequeList;
-        } catch (Exception e) {
+        } catch (ObjectNotFoundException e) {
             LOGGER.error("Error in report Cheques Dishonoring Listing :: ",e);
             throw e;
         }
