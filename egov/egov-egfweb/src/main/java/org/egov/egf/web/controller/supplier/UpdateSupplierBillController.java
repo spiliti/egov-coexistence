@@ -64,6 +64,7 @@ import org.egov.commons.CChartOfAccounts;
 import org.egov.commons.service.AccountdetailtypeService;
 import org.egov.commons.service.ChartOfAccountsService;
 import org.egov.commons.service.CheckListService;
+import org.egov.egf.commons.CommonsUtil;
 import org.egov.egf.expensebill.repository.DocumentUploadRepository;
 import org.egov.egf.masters.services.PurchaseOrderService;
 import org.egov.egf.masters.services.SupplierService;
@@ -75,8 +76,10 @@ import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.microservice.models.Department;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
+import org.egov.infra.security.utils.SecurityUtils;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infstr.models.EgChecklists;
+import org.egov.model.bills.BillType;
 import org.egov.model.bills.DocumentUpload;
 import org.egov.model.bills.EgBillPayeedetails;
 import org.egov.model.bills.EgBilldetails;
@@ -98,6 +101,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping(value = "/supplierbill")
 public class UpdateSupplierBillController extends BaseBillController {
 
+	protected static final String UNAUTHORIZED = "unuthorized";
+	
+	private static final String INVALID_APPROVER = "invalid.approver";
+	
+	private static final String BILL_TYPES = "billTypes";
+	
     private static final String APPROVER_NAME = "approverName";
 
     private static final String DESIGNATION = "designation";
@@ -150,6 +159,10 @@ public class UpdateSupplierBillController extends BaseBillController {
     private PurchaseOrderService purchaseOrderService;
     @Autowired
     private AccountdetailtypeService accountdetailtypeService;
+    @Autowired
+    private SecurityUtils securityUtils;
+    @Autowired
+    private CommonsUtil commonsUtil;
 
     public UpdateSupplierBillController(final AppConfigValueService appConfigValuesService) {
         super(appConfigValuesService);
@@ -158,6 +171,7 @@ public class UpdateSupplierBillController extends BaseBillController {
     @Override
     protected void setDropDownValues(final Model model) {
         super.setDropDownValues(model);
+        model.addAttribute(BILL_TYPES, BillType.values());
         model.addAttribute(SUPPLIERS, supplierService.getAllActiveSuppliers());
         model.addAttribute(NET_PAYABLE_CODES, chartOfAccountsService.getSupplierNetPayableAccountCodes());
     }
@@ -175,6 +189,8 @@ public class UpdateSupplierBillController extends BaseBillController {
     public String updateForm(final Model model, @PathVariable final String billId,
             final HttpServletRequest request) throws ApplicationException {
         final EgBillregister egBillregister = supplierBillService.getById(Long.parseLong(billId));
+        if (!commonsUtil.isApplicationOwner(securityUtils.getCurrentUser(), egBillregister))
+            return UNAUTHORIZED;
         final List<DocumentUpload> documents = documentUploadRepository.findByObjectId(Long.valueOf(billId));
         egBillregister.setDocumentDetail(documents);
         List<Map<String, Object>> budgetDetails = null;
@@ -351,6 +367,15 @@ public class UpdateSupplierBillController extends BaseBillController {
             approvalPosition = Long.valueOf(request.getParameter(APPROVAL_POSITION));
         if (request.getParameter(APPROVAL_DESIGNATION) != null && !request.getParameter(APPROVAL_DESIGNATION).isEmpty())
             apporverDesignation = String.valueOf(request.getParameter(APPROVAL_DESIGNATION));
+        
+        if (workFlowAction != null && FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction)) {
+            if (!commonsUtil.isValidApprover(egBillregister, approvalPosition)) {
+                model.addAttribute("errorMessage", getLocalizedMessage(INVALID_APPROVER, null, null));
+                prepareBillDetailsForView(egBillregister);
+                supplierBillService.validateSubledgeDetails(egBillregister);
+                return populateOnException(egBillregister, model, request);
+            }
+        }
 
         if (egBillregister.getState() != null
                 && (FinancialConstants.WORKFLOW_STATE_REJECTED.equals(egBillregister.getState().getValue())
@@ -364,26 +389,7 @@ public class UpdateSupplierBillController extends BaseBillController {
                 purchaseOrderService.getByOrderNumber(egBillregister.getWorkordernumber()).getSupplier().getId());
 
         if (resultBinder.hasErrors()) {
-            setDropDownValues(model);
-            model.addAttribute(SUPPLIER_ID,
-                    purchaseOrderService.getByOrderNumber(egBillregister.getWorkordernumber()).getSupplier().getId());
-            model.addAttribute(STATE_TYPE, egBillregister.getClass().getSimpleName());
-            prepareWorkflow(model, egBillregister, new WorkflowContainer());
-            model.addAttribute(APPROVAL_DESIGNATION, request.getParameter(APPROVAL_DESIGNATION));
-            model.addAttribute(APPROVAL_POSITION, request.getParameter(APPROVAL_POSITION));
-            model.addAttribute(NET_PAYABLE_ID, request.getParameter(NET_PAYABLE_ID));
-            model.addAttribute(NET_PAYABLE_AMOUNT, request.getParameter(NET_PAYABLE_AMOUNT));
-            model.addAttribute(DESIGNATION, request.getParameter(DESIGNATION));
-            if (egBillregister.getState() != null
-                    && (FinancialConstants.WORKFLOW_STATE_REJECTED.equals(egBillregister.getState().getValue())
-                            || financialUtils.isBillEditable(egBillregister.getState()))) {
-                prepareValidActionListByCutOffDate(model);
-                model.addAttribute("mode", "edit");
-                return "supplierbill-update";
-            } else {
-                model.addAttribute("mode", "view");
-                return SUPPLIERBILL_VIEW;
-            }
+            return populateOnException(egBillregister, model, request);
         } else {
             try {
                 if (null != workFlowAction)
@@ -425,6 +431,30 @@ public class UpdateSupplierBillController extends BaseBillController {
                     + updatedEgBillregister.getBillnumber();
         }
     }
+
+	private String populateOnException(final EgBillregister egBillregister, final Model model,
+			final HttpServletRequest request) {
+		setDropDownValues(model);
+		model.addAttribute(SUPPLIER_ID,
+		        purchaseOrderService.getByOrderNumber(egBillregister.getWorkordernumber()).getSupplier().getId());
+		model.addAttribute(STATE_TYPE, egBillregister.getClass().getSimpleName());
+		prepareWorkflow(model, egBillregister, new WorkflowContainer());
+		model.addAttribute(APPROVAL_DESIGNATION, request.getParameter(APPROVAL_DESIGNATION));
+		model.addAttribute(APPROVAL_POSITION, request.getParameter(APPROVAL_POSITION));
+		model.addAttribute(NET_PAYABLE_ID, request.getParameter(NET_PAYABLE_ID));
+		model.addAttribute(NET_PAYABLE_AMOUNT, request.getParameter(NET_PAYABLE_AMOUNT));
+		model.addAttribute(DESIGNATION, request.getParameter(DESIGNATION));
+		if (egBillregister.getState() != null
+		        && (FinancialConstants.WORKFLOW_STATE_REJECTED.equals(egBillregister.getState().getValue())
+		                || financialUtils.isBillEditable(egBillregister.getState()))) {
+		    prepareValidActionListByCutOffDate(model);
+		    model.addAttribute("mode", "edit");
+		    return "supplierbill-update";
+		} else {
+		    model.addAttribute("mode", "view");
+		    return SUPPLIERBILL_VIEW;
+		}
+	}
 
     @RequestMapping(value = "/view/{billId}", method = RequestMethod.GET)
     public String view(final Model model, @PathVariable String billId,

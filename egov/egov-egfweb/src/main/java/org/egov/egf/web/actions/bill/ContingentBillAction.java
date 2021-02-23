@@ -66,6 +66,7 @@ import org.egov.commons.CFunction;
 import org.egov.commons.EgwStatus;
 import org.egov.commons.utils.EntityType;
 import org.egov.egf.autonumber.ExpenseBillNumberGenerator;
+import org.egov.egf.commons.CommonsUtil;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.entity.Department;
 import org.egov.infra.config.core.ApplicationThreadLocals;
@@ -125,6 +126,7 @@ import java.util.Set;
         @Result(name = ContingentBillAction.VIEW, location = "contingentBill-view.jsp")
 })
 public class ContingentBillAction extends BaseBillAction {
+	private static final String INVALID_APPROVER = "invalid.approver";
     public class COAcomparator implements Comparator<CChartOfAccounts> {
         @Override
         public int compare(final CChartOfAccounts o1, final CChartOfAccounts o2) {
@@ -134,7 +136,7 @@ public class ContingentBillAction extends BaseBillAction {
 
     }
 
-    private final static String FORWARD = "Forward";
+    private static final  String FORWARD = "Forward";
     private static final String ACCOUNT_DETAIL_TYPE_LIST = "accountDetailTypeList";
     private static final String BILL_SUB_TYPE_LIST = "billSubTypeList";
     private static final String USER_LIST = "userList";
@@ -168,6 +170,9 @@ public class ContingentBillAction extends BaseBillAction {
     @Autowired
     private AutonumberServiceBeanResolver beanResolver;
 
+    @Autowired
+    private CommonsUtil commonsUtil;
+    
     @Override
     public StateAware getModel() {
         return super.getModel();
@@ -354,6 +359,13 @@ public class ContingentBillAction extends BaseBillAction {
             LOGGER.info(billDetailsTableCreditFinal);
         System.out.println("*********** ExpenseBill creation started*********************");
         try {
+        	populateWorkflowBean();
+            if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workflowBean.getWorkFlowAction())) {
+                if (!commonsUtil.isValidApprover(bill, workflowBean.getApproverPositionId())) {
+                    addActionError(getText(INVALID_APPROVER));
+                    return NEW;
+                }
+            }
             voucherHeader.setVoucherDate(commonBean.getBillDate());
             voucherHeader.setVoucherNumber(commonBean.getBillNumber());
             String voucherDate = formatter1.format(voucherHeader.getVoucherDate());
@@ -379,7 +391,6 @@ public class ContingentBillAction extends BaseBillAction {
                 if (!isBillNumUnique(commonBean.getBillNumber()))
                     throw new ValidationException(Arrays.asList(new ValidationError("bill number", "Duplicate Bill Number : "
                             + commonBean.getBillNumber())));
-            populateWorkflowBean();
             bill = egBillRegisterService.createBill(bill, workflowBean, checkListsTable);
             addActionMessage(getText("cbill.transaction.succesful") + bill.getBillnumber());
             billRegisterId = bill.getId();

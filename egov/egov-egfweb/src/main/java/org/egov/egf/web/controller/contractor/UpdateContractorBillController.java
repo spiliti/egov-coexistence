@@ -64,6 +64,7 @@ import org.egov.commons.CChartOfAccounts;
 import org.egov.commons.service.AccountdetailtypeService;
 import org.egov.commons.service.ChartOfAccountsService;
 import org.egov.commons.service.CheckListService;
+import org.egov.egf.commons.CommonsUtil;
 import org.egov.egf.contractorbill.service.ContractorBillService;
 import org.egov.egf.expensebill.repository.DocumentUploadRepository;
 import org.egov.egf.masters.services.ContractorService;
@@ -75,8 +76,10 @@ import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.microservice.models.Department;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
+import org.egov.infra.security.utils.SecurityUtils;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infstr.models.EgChecklists;
+import org.egov.model.bills.BillType;
 import org.egov.model.bills.DocumentUpload;
 import org.egov.model.bills.EgBillPayeedetails;
 import org.egov.model.bills.EgBilldetails;
@@ -98,6 +101,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping(value = "/contractorbill")
 public class UpdateContractorBillController extends BaseBillController {
 
+	private static final String BILL_TYPES = "billTypes";
+	
+	protected static final String UNAUTHORIZED = "unuthorized";
+	
+	private static final String INVALID_APPROVER = "invalid.approver";
+	
     private static final String APPROVER_NAME = "approverName";
 
     private static final String DESIGNATION = "designation";
@@ -150,6 +159,10 @@ public class UpdateContractorBillController extends BaseBillController {
     private WorkOrderService workOrderService;
     @Autowired
     private AccountdetailtypeService accountdetailtypeService;
+    @Autowired
+    private SecurityUtils securityUtils;
+    @Autowired
+    private CommonsUtil commonsUtil;
 
     public UpdateContractorBillController(final AppConfigValueService appConfigValuesService) {
         super(appConfigValuesService);
@@ -158,6 +171,7 @@ public class UpdateContractorBillController extends BaseBillController {
     @Override
     protected void setDropDownValues(final Model model) {
         super.setDropDownValues(model);
+        model.addAttribute(BILL_TYPES, BillType.values());
         model.addAttribute(CONTRACTORS, contractorService.getAllActiveContractors());
         model.addAttribute(NET_PAYABLE_CODES, chartOfAccountsService.getContractorNetPayableAccountCodes());
     }
@@ -174,7 +188,9 @@ public class UpdateContractorBillController extends BaseBillController {
     @RequestMapping(value = "/update/{billId}", method = RequestMethod.GET)
     public String updateForm(final Model model, @PathVariable final String billId,
             final HttpServletRequest request) throws ApplicationException {
-        final EgBillregister egBillregister = contractorBillService.getById(Long.parseLong(billId));
+    	final EgBillregister egBillregister = contractorBillService.getById(Long.parseLong(billId));
+    	if (!commonsUtil.isApplicationOwner(securityUtils.getCurrentUser(), egBillregister))
+            return UNAUTHORIZED;
         final List<DocumentUpload> documents = documentUploadRepository.findByObjectId(Long.valueOf(billId));
         egBillregister.setDocumentDetail(documents);
         List<Map<String, Object>> budgetDetails = null;
@@ -246,8 +262,8 @@ public class UpdateContractorBillController extends BaseBillController {
             check = false;
             woExist = false;
             contractorExist = false;
-            if (details.getChartOfAccounts().getChartOfAccountDetails() != null
-                    && !details.getChartOfAccounts().getChartOfAccountDetails().isEmpty()) {
+			if (details.getChartOfAccounts() != null && details.getChartOfAccounts().getChartOfAccountDetails() != null
+					&& !details.getChartOfAccounts().getChartOfAccountDetails().isEmpty()) {
                 for (CChartOfAccountDetail cad : details.getChartOfAccounts().getChartOfAccountDetails()) {
                     if (cad.getDetailTypeId() != null) {
                         if (cad.getDetailTypeId().getName().equalsIgnoreCase(WORK_ORDER)) {
@@ -338,7 +354,7 @@ public class UpdateContractorBillController extends BaseBillController {
         Long approvalPosition = 0l;
         String approvalComment = "";
         String apporverDesignation = "";
-
+        
         if (request.getParameter(APPROVAL_COMENT) != null)
             approvalComment = request.getParameter(APPROVAL_COMENT);
 
@@ -351,6 +367,15 @@ public class UpdateContractorBillController extends BaseBillController {
             approvalPosition = Long.valueOf(request.getParameter(APPROVAL_POSITION));
         if (request.getParameter(APPROVAL_DESIGNATION) != null && !request.getParameter(APPROVAL_DESIGNATION).isEmpty())
             apporverDesignation = String.valueOf(request.getParameter(APPROVAL_DESIGNATION));
+        
+        if (workFlowAction != null && FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction)) {
+            if (!commonsUtil.isValidApprover(egBillregister, approvalPosition)) {
+                model.addAttribute("errorMessage", getLocalizedMessage(INVALID_APPROVER, null, null));
+                prepareBillDetailsForView(egBillregister);
+                contractorBillService.validateSubledgeDetails(egBillregister);
+                return populateOnException(egBillregister, model, request);
+            }
+        }
 
         if (egBillregister.getState() != null
                 && (FinancialConstants.WORKFLOW_STATE_REJECTED.equals(egBillregister.getState().getValue())
@@ -364,26 +389,7 @@ public class UpdateContractorBillController extends BaseBillController {
                 workOrderService.getByOrderNumber(egBillregister.getWorkordernumber()).getContractor().getId());
 
         if (resultBinder.hasErrors()) {
-            setDropDownValues(model);
-            model.addAttribute(CONTRACTOR_ID,
-                    workOrderService.getByOrderNumber(egBillregister.getWorkordernumber()).getContractor().getId());
-            model.addAttribute(STATE_TYPE, egBillregister.getClass().getSimpleName());
-            prepareWorkflow(model, egBillregister, new WorkflowContainer());
-            model.addAttribute(APPROVAL_DESIGNATION, request.getParameter(APPROVAL_DESIGNATION));
-            model.addAttribute(APPROVAL_POSITION, request.getParameter(APPROVAL_POSITION));
-            model.addAttribute(NET_PAYABLE_ID, request.getParameter(NET_PAYABLE_ID));
-            model.addAttribute(NET_PAYABLE_AMOUNT, request.getParameter(NET_PAYABLE_AMOUNT));
-            model.addAttribute(DESIGNATION, request.getParameter(DESIGNATION));
-            if (egBillregister.getState() != null
-                    && (FinancialConstants.WORKFLOW_STATE_REJECTED.equals(egBillregister.getState().getValue())
-                            || financialUtils.isBillEditable(egBillregister.getState()))) {
-                prepareValidActionListByCutOffDate(model);
-                model.addAttribute("mode", "edit");
-                return "contractorbill-update";
-            } else {
-                model.addAttribute("mode", "view");
-                return CONTRACTORBILL_VIEW;
-            }
+            return populateOnException(egBillregister, model, request);
         } else {
             try {
                 if (null != workFlowAction)
@@ -425,6 +431,30 @@ public class UpdateContractorBillController extends BaseBillController {
                     + updatedEgBillregister.getBillnumber();
         }
     }
+
+	private String populateOnException(final EgBillregister egBillregister, final Model model,
+			final HttpServletRequest request) {
+		setDropDownValues(model);
+		model.addAttribute(CONTRACTOR_ID,
+		        workOrderService.getByOrderNumber(egBillregister.getWorkordernumber()).getContractor().getId());
+		model.addAttribute(STATE_TYPE, egBillregister.getClass().getSimpleName());
+		prepareWorkflow(model, egBillregister, new WorkflowContainer());
+		model.addAttribute(APPROVAL_DESIGNATION, request.getParameter(APPROVAL_DESIGNATION));
+		model.addAttribute(APPROVAL_POSITION, request.getParameter(APPROVAL_POSITION));
+		model.addAttribute(NET_PAYABLE_ID, request.getParameter(NET_PAYABLE_ID));
+		model.addAttribute(NET_PAYABLE_AMOUNT, request.getParameter(NET_PAYABLE_AMOUNT));
+		model.addAttribute(DESIGNATION, request.getParameter(DESIGNATION));
+		if (egBillregister.getState() != null
+		        && (FinancialConstants.WORKFLOW_STATE_REJECTED.equals(egBillregister.getState().getValue())
+		                || financialUtils.isBillEditable(egBillregister.getState()))) {
+		    prepareValidActionListByCutOffDate(model);
+		    model.addAttribute("mode", "edit");
+		    return "contractorbill-update";
+		} else {
+		    model.addAttribute("mode", "view");
+		    return CONTRACTORBILL_VIEW;
+		}
+	}
 
     @RequestMapping(value = "/view/{billId}", method = RequestMethod.GET)
     public String view(final Model model, @PathVariable String billId,

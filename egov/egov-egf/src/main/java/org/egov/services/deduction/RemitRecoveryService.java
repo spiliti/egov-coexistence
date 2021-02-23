@@ -394,7 +394,7 @@ public class RemitRecoveryService {
 		if (null != voucherHeader && null != voucherHeader.getVouchermis()) {
 			if (null != voucherHeader.getVouchermis().getDepartmentcode()
 					&& !voucherHeader.getVouchermis().getDepartmentcode().equalsIgnoreCase("-1")) {
-				misQuery.append("and  mis.departmentcode=:misDepartmentcode");
+				misQuery.append(" and  mis.departmentcode=:misDepartmentcode");
 				params.put("misDepartmentcode", voucherHeader.getVouchermis().getDepartmentcode());
 			}
 			if (null != voucherHeader.getVouchermis().getFunctionary()

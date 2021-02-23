@@ -1573,11 +1573,11 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 
 		if (!"".equals(parameters.get("fromDate")[0])) {
 			sql.append(" and vh.voucherDate>=:fromDate");
-			sqlParams.put("fromDate", sdf.format(formatter.parse(parameters.get("fromDate")[0])));
+			sqlParams.put("fromDate", formatter.parse(parameters.get("fromDate")[0]));
 		}
 		if (!"".equals(parameters.get("toDate")[0])) {
 			sql.append(" and vh.voucherDate<=:toDate");
-			sqlParams.put("toDate", sdf.format(formatter.parse(parameters.get("toDate")[0])));
+			sqlParams.put("toDate", formatter.parse(parameters.get("toDate")[0]));
 		}
 		if (!StringUtils.isEmpty(voucherHeader.getVoucherNumber())) {
 			sql.append(" and vh.voucherNumber like :voucherNumber");
@@ -1616,7 +1616,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 			sql.append(" and ph.bankaccountnumberid=:bankaccountnumberid");
 			sql.append(" and lower(ph.type)=lower(:paymentMode)");
 			sql.append(" and ph.bankaccountnumberid=ba.id");
-			sqlParams.put("bankaccountnumberid", parameters.get("bankaccount")[0]);
+			sqlParams.put("bankaccountnumberid", Integer.valueOf(parameters.get("bankaccount")[0]));
 			sqlParams.put("paymentMode", parameters.get("paymentMode")[0]);
 		} else {
 			sql.append(" and ph.bankaccountnumberid=ba.id and lower(ph.type)=lower(:paymentMode)");
@@ -1631,10 +1631,10 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 		descriptionList.add("Reconciled");
 		final List<EgwStatus> egwStatusList = egwStatusDAO.getStatusListByModuleAndCodeList("Instrument",
 				descriptionList);
-		String statusId = "";
-		for (final EgwStatus egwStatus : egwStatusList)
-			statusId = statusId + egwStatus.getId() + ",";
-		statusId = statusId.substring(0, statusId.length() - 1);
+		List<Integer> statusId = new ArrayList<>();
+		for (final EgwStatus egwStatus : egwStatusList) {
+			statusId.add(egwStatus.getId());
+		}
 
 		persistenceService.find(" from Bankaccount where id = ?", Long.valueOf(parameters.get("bankaccount")[0]));
 		if (LOGGER.isDebugEnabled())
@@ -1675,7 +1675,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 					.addScalar("billId", LongType.INSTANCE).addScalar("billNumber").addScalar("expenditureType")
 					.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
-			params.put("vhStatus", approvedstatus);
+			params.put("vhStatus", Integer.valueOf(approvedstatus));
 			params.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
 			params.put("vhName", Arrays.asList(FinancialConstants.PAYMENTVOUCHER_NAME_REMITTANCE,
 					FinancialConstants.PAYMENTVOUCHER_NAME_SALARY, FinancialConstants.PAYMENTVOUCHER_NAME_PENSION));
@@ -1685,7 +1685,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				LOGGER.debug(" for non salary and remittance" + query);
 			LOGGER.info(" for non salary and remittance" + query);
 
-			params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+			persistenceService.populateQueryWithParams(query, params);
 
 			chequeAssignmentList = query.list();
 			// below one handles
@@ -1720,7 +1720,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 					.addScalar("billId", LongType.INSTANCE).addScalar("billNumber").addScalar("expenditureType")
 					.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
-			params.put("vhStatus", approvedstatus);
+			params.put("vhStatus", Integer.valueOf(approvedstatus));
 			params.putAll(sqlParams);
 			params.put("ihStatus", statusId);
 			params.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
@@ -1731,7 +1731,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				LOGGER.debug(" Surrendered rtgs nos" + qry);
 			LOGGER.info(" Surrendered rtgs nos" + qry);
 
-			params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+			persistenceService.populateQueryWithParams(qry, params);
 
 			chequeAssignmentList.addAll(qry.list());
 
@@ -1765,11 +1765,11 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 		}
 		if (!"".equals(parameters.get("fromDate")[0])) {
 			sql.append(" and vh.voucherDate>=:vhFromDate ");
-			sqlParams.put("vhFromDate", sdf.format(formatter.parse(parameters.get("fromDate")[0])));
+			sqlParams.put("vhFromDate", formatter.parse(parameters.get("fromDate")[0]));
 		}
 		if (!"".equals(parameters.get("toDate")[0])) {
 			sql.append(" and vh.voucherDate<=:vhToDate ");
-			sqlParams.put("vhToDate", sdf.format(formatter.parse(parameters.get("toDate")[0])));
+			sqlParams.put("vhToDate", formatter.parse(parameters.get("toDate")[0]));
 		}
 		if (!StringUtils.isEmpty(voucherHeader.getVoucherNumber())) {
 			sql.append(" and vh.voucherNumber like :voucherNumber");
@@ -1807,7 +1807,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 			sql.append(" and ph.bankaccountnumberid=:bankaccountnumberid");
 			sql.append(" and lower(ph.type)=lower(:paymentMode)");
 			sql.append(" and ph.bankaccountnumberid=ba.id");
-			sqlParams.put("bankaccountnumberid", parameters.get("bankaccount")[0]);
+			sqlParams.put("bankaccountnumberid", Integer.valueOf(parameters.get("bankaccount")[0]));
 			sqlParams.put("paymentMode", parameters.get("paymentMode")[0]);
 		} else {
 			sql.append(" and ph.bankaccountnumberid=ba.id").append(" and lower(ph.type)=lower(:paymentMode)");
@@ -1821,10 +1821,10 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 		descriptionList.add("Reconciled");
 		final List<EgwStatus> egwStatusList = egwStatusDAO.getStatusListByModuleAndCodeList("Instrument",
 				descriptionList);
-		String statusId = "";
-		for (final EgwStatus egwStatus : egwStatusList)
-			statusId = statusId + egwStatus.getId() + ",";
-		statusId = statusId.substring(0, statusId.length() - 1);
+		List<Integer> statusId = new ArrayList<>();
+		for (final EgwStatus egwStatus : egwStatusList) {
+			statusId.add(egwStatus.getId());
+		}
 
 		persistenceService.find(" from Bankaccount where id=?", Long.valueOf(parameters.get("bankaccount")[0]));
 		String payTo = null;
@@ -1879,7 +1879,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 					.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
 			params.putAll(tnebParams);
-			params.put("vhStatus", approvedstatus);
+			params.put("vhStatus", Integer.valueOf(approvedstatus));
 			params.putAll(sqlParams);
 			params.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
 			params.put("vhName", Arrays.asList(FinancialConstants.PAYMENTVOUCHER_NAME_REMITTANCE,
@@ -1889,7 +1889,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				LOGGER.debug(" for non salary and remittance" + query);
 			LOGGER.info(" for non salary and remittance" + query);
 
-			params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+			persistenceService.populateQueryWithParams(query, params);
 
 			chequeAssignmentList = query.list();
 			// below one handles
@@ -1926,7 +1926,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 					.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
 			params.putAll(tnebParams);
-			params.put("vhStatus", approvedstatus);
+			params.put("vhStatus", Integer.valueOf(approvedstatus));
 			params.putAll(sqlParams);
 			params.put("ihStatus", statusId);
 			params.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
@@ -1937,7 +1937,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				LOGGER.debug(" Surrendered rtgs nos" + qry);
 			LOGGER.info(" Surrendered rtgs nos" + qry);
 
-			params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+			persistenceService.populateQueryWithParams(qry, params);
 
 			chequeAssignmentList.addAll(qry.list());
 
@@ -1958,11 +1958,11 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
         final Map<String, Object> params = new HashMap<>();
         if (!"".equals(parameters.get("fromDate")[0])) {
             sql.append(" and vh.voucherDate>=:fromDate");
-            params.put("fromDate", sdf.format(formatter.parse(parameters.get("fromDate")[0])));
+            params.put("fromDate", formatter.parse(parameters.get("fromDate")[0]));
         }
         if (!"".equals(parameters.get("toDate")[0])) {
             sql.append(" and vh.voucherDate<=:toDate");
-            params.put("toDate", sdf.format(formatter.parse(parameters.get("toDate")[0])));
+            params.put("toDate", formatter.parse(parameters.get("toDate")[0]));
         }
         if (!StringUtils.isEmpty(voucherHeader.getVoucherNumber())) {
             sql.append(" and vh.voucherNumber like :voucherNumber");
@@ -2000,7 +2000,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
             sql.append(" and ph.bankaccountnumberid=:bankaccountnumberid");
             sql.append(" and lower(ph.type)=lower(:paymentMode)");
             sql.append(" and ph.bankaccountnumberid=ba.id");
-            params.put("bankaccountnumberid", parameters.get("bankaccount")[0]);
+            params.put("bankaccountnumberid", Integer.valueOf(parameters.get("bankaccount")[0]));
             params.put("paymentMode", parameters.get("paymentMode")[0]);
         } else {
             sql.append(" and ph.bankaccountnumberid=ba.id")
@@ -2016,10 +2016,10 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
         descriptionList.add("Reconciled");
         final List<EgwStatus> egwStatusList = egwStatusDAO.getStatusListByModuleAndCodeList("Instrument",
                 descriptionList);
-        String statusId = "";
-        for (final EgwStatus egwStatus : egwStatusList)
-            statusId = statusId + egwStatus.getId() + ",";
-        statusId = statusId.substring(0, statusId.length() - 1);
+        List<Integer> statusId = new ArrayList<>();
+		for (final EgwStatus egwStatus : egwStatusList) {
+			statusId.add(egwStatus.getId());
+		}
 
         persistenceService.find(" from Bankaccount where id=?", Long.valueOf(parameters.get("bankaccount")[0]));
         if (LOGGER.isDebugEnabled())
@@ -2076,10 +2076,10 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 					.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
 			params.put("vhName", FinancialConstants.PAYMENTVOUCHER_NAME_DIRECTBANK);
-			params.put("vhStatus", approvedstatus);
+			params.put("vhStatus", Integer.valueOf(approvedstatus));
 			params.put("ihStatus", statusId);
 
-			params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+			persistenceService.populateQueryWithParams(query, params);
 
 			chequeAssignmentList.addAll(query.list());
 
@@ -2177,10 +2177,10 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
             descriptionList.add("Reconciled");
             final List<EgwStatus> egwStatusList = egwStatusDAO.getStatusListByModuleAndCodeList("Instrument",
                     descriptionList);
-            String statusId = "";
-            for (final EgwStatus egwStatus : egwStatusList)
-                statusId = statusId + egwStatus.getId() + ",";
-            statusId = statusId.substring(0, statusId.length() - 1);
+            List<Integer> statusId = new ArrayList<>();
+    		for (final EgwStatus egwStatus : egwStatusList) {
+    			statusId.add(egwStatus.getId());
+    		}
 
             persistenceService.find(" from Bankaccount where id=?", Long.valueOf(parameters.get("bankaccount")[0]));
             if (LOGGER.isDebugEnabled())
@@ -2208,14 +2208,14 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 						.addScalar("paidAmount").addScalar("chequeDate").addScalar("paidTo")
 						.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
-				salaryParams.put("vhStatus", approvedstatus);
+				salaryParams.put("vhStatus", Integer.valueOf(approvedstatus));
 				salaryParams.putAll(sqlParams);
 				salaryParams.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
 				salaryParams.put("vhName", FinancialConstants.PAYMENTVOUCHER_NAME_SALARY);
 
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" for salary " + salaryQuery);
-				salaryParams.entrySet().forEach(entry -> salaryQuery.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(salaryQuery, salaryParams);
 
 				chequeAssignmentList = salaryQuery.list();
                 // below one handles
@@ -2243,13 +2243,13 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 						.addScalar("paidAmount", BigDecimalType.INSTANCE).addScalar("chequeDate").addScalar("paidTo")
 						.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
-				salaryParams.put("vhStatus", approvedstatus);
+				salaryParams.put("vhStatus", Integer.valueOf(approvedstatus));
 				salaryParams.putAll(sqlParams);
 				salaryParams.put("ihStatus", statusId);
 				salaryParams.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
 				salaryParams.put("vhName", FinancialConstants.PAYMENTVOUCHER_NAME_SALARY);
 
-				salaryParams.entrySet().forEach(entry -> salaryQry.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(salaryQry, salaryParams);
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" for salary " + salaryQry);
 				chequeAssignmentList.addAll(salaryQry.list());
@@ -2300,12 +2300,12 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
                         .addScalar("paidAmount", BigDecimalType.INSTANCE).addScalar("chequeDate").addScalar("paidTo")
                         .setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
                         
-                pensionParams.put("vhStatus", approvedstatus);
+                pensionParams.put("vhStatus", Integer.valueOf(approvedstatus));
                 pensionParams.putAll(sqlParams);
                 pensionParams.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
                 pensionParams.put("vhName", FinancialConstants.PAYMENTVOUCHER_NAME_PENSION);
                 
-                pensionParams.entrySet().forEach(entry -> pensionQuery.setParameter(entry.getKey(), entry.getValue()));
+                persistenceService.populateQueryWithParams(pensionQuery, pensionParams);
                 
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug(" for salary " + pensionQuery);
@@ -2335,7 +2335,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 						.addScalar("paidAmount", BigDecimalType.INSTANCE).addScalar("chequeDate").addScalar("paidTo")
 						.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
-				pensionParams.put("vhStatus", approvedstatus);
+				pensionParams.put("vhStatus", Integer.valueOf(approvedstatus));
 				pensionParams.putAll(sqlParams);
 				pensionParams.put("ihStatus", statusId);
 				pensionParams.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
@@ -2344,7 +2344,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" for salary " + pensionQry);
 
-				pensionParams.entrySet().forEach(entry -> pensionQry.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(pensionQry, pensionParams);
 
 				chequeAssignmentList.addAll(pensionQry.list());
 				final List<ChequeAssignment> tempChequeAssignmentList = chequeAssignmentList;
@@ -2399,7 +2399,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 						.addScalar("paidAmount", BigDecimalType.INSTANCE).addScalar("chequeDate")
 						.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
-				params.put("vhStatus", approvedstatus);
+				params.put("vhStatus", Integer.valueOf(approvedstatus));
 				params.putAll(sqlParams);
 				params.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
 				params.put("vhName", Arrays.asList(FinancialConstants.PAYMENTVOUCHER_NAME_REMITTANCE,
@@ -2408,7 +2408,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" for non salary and remittance" + query);
 
-				params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(query, params);
 
 				chequeAssignmentList = query.list();
 				// below one handles
@@ -2435,7 +2435,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 						.addScalar("paidAmount", BigDecimalType.INSTANCE).addScalar("chequeDate")
 						.setResultTransformer(Transformers.aliasToBean(ChequeAssignment.class));
 
-				params.put("vhStatus", approvedstatus);
+				params.put("vhStatus", Integer.valueOf(approvedstatus));
 				params.putAll(sqlParams);
 				params.put("ihStatus", statusId);
 				params.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
@@ -2445,7 +2445,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" for non salary and remittance" + qry);
 
-				params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(qry, params);
 				chequeAssignmentList.addAll(qry.list());
 
             } else {
@@ -2481,7 +2481,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" for salary and remittance" + query);
 
-				params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(query, params);
 				chequeAssignmentList = query.list();
 				// below one handles
 				// assign-->surrendar-->assign-->surrendar-->.......
@@ -2516,7 +2516,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 
 				params.put("vhStatus", Integer.valueOf(approvedstatus));
 				params.putAll(sqlParams);
-				params.put("ihStatus",  financialUtils.getStatuses(statusId));
+				params.put("ihStatus", statusId);
 				params.put("vhType", FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
 				params.put("vhName", FinancialConstants.PAYMENTVOUCHER_NAME_REMITTANCE);
 
@@ -3092,11 +3092,11 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
         final Map<String, Object> sqlParams = new HashMap<>();
         if (!"".equals(parameters.get("fromDate")[0])) {
             sql.append(" and vh.voucherDate>=:vhFromDate");
-            sqlParams.put("vhFromDate", sdf.format(formatter.parse(parameters.get("fromDate")[0])));
+            sqlParams.put("vhFromDate", formatter.parse(parameters.get("fromDate")[0]));
         }
         if (!"".equals(parameters.get("toDate")[0])) {
             sql.append(" and vh.voucherDate<=:vhToDate");
-            sqlParams.put("vhToDate", sdf.format(formatter.parse(parameters.get("toDate")[0])));
+            sqlParams.put("vhToDate", formatter.parse(parameters.get("toDate")[0]));
         }
         if (!StringUtils.isEmpty(voucherHeader.getVoucherNumber())) {
             sql.append(" and vh.voucherNumber like :voucherNumber");
@@ -3132,7 +3132,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
         }
         if (parameters.get("bankaccount") != null && !parameters.get("bankaccount")[0].equals("-1")) {
             sql.append(" and ph.bankaccountnumberid=:bankaccountnumberid");
-            sqlParams.put("bankaccountnumberid", parameters.get("bankaccount")[0]);
+            sqlParams.put("bankaccountnumberid", Integer.valueOf(parameters.get("bankaccount")[0]));
             sql.append(" and lower(ph.type)=lower(:paymentMode)");
             sqlParams.put("paymentMode", parameters.get("paymentMode")[0]);
             sql.append(" and ph.bankaccountnumberid=ba.id");
@@ -3166,10 +3166,10 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
         descriptionList.add("Reconciled");
         final List<EgwStatus> egwStatusList = egwStatusDAO.getStatusListByModuleAndCodeList("Instrument",
                 descriptionList);
-        String statusId = "";
-        for (final EgwStatus egwStatus : egwStatusList)
-            statusId = statusId + egwStatus.getId() + ",";
-        statusId = statusId.substring(0, statusId.length() - 1);
+        List<Integer> statusId = new ArrayList<>();
+		for (final EgwStatus egwStatus : egwStatusList) {
+			statusId.add(egwStatus.getId());
+		}
 
         persistenceService.find(" from Bankaccount where id=?", Long.valueOf(parameters.get("bankaccount")[0]));
         if (LOGGER.isDebugEnabled())
@@ -3216,7 +3216,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" for non salary and remittance" + query);
 
-				params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(query, params);
 
 				chequeAssignmentList = query.list();
             // below one handles
@@ -3265,7 +3265,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" Surrendered rtgs nos" + qry);
 
-				params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(qry, params);
 
 				chequeAssignmentList.addAll(qry.list());
 
@@ -3304,7 +3304,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" for non salary and remittance" + query);
 
-				params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(query, params);
 				chequeAssignmentList = query.list();
             // below one handles
             // assign-->surrendar-->assign-->surrendar-->.......
@@ -3349,7 +3349,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug(" Surrendered rtgs nos" + qry);
 
-				params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+				persistenceService.populateQueryWithParams(qry, params);
 
 				chequeAssignmentList.addAll(qry.list());
 			}
@@ -3436,10 +3436,12 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
         return eisCommonService.getEmployeeByUserId(ApplicationThreadLocals.getUserId());
     }
 
-    public String getEmployeeNameForPositionId(final Long pos) throws ApplicationRuntimeException {
-        Assignment assignment = assignmentService.getAssignmentsForPosition(+pos, new Date()).get(0);
-        return assignment.getEmployee().getName() + " (" + assignment.getDesignation().getName() + ")";
-    }
+	public String getEmployeeNameForPositionId(final Long pos) throws ApplicationRuntimeException {
+		final EmployeeInfo employee = microserviceUtils.getEmployeeByPositionId(pos);
+		final String designation = microserviceUtils.getDesignation(employee.getAssignments().get(0).getDesignation())
+				.get(0).getName();
+		return employee.getUser().getName() + " (" + designation + ")";
+	}
 
     public void finalApproval(final Long voucherid) {
         if (LOGGER.isDebugEnabled())

@@ -59,6 +59,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
@@ -66,11 +67,13 @@ import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.egov.commons.CVoucherHeader;
 import org.egov.commons.dao.FinancialYearDAO;
+import org.egov.egf.commons.CommonsUtil;
 import org.egov.eis.service.EisCommonService;
 import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.microservice.models.EmployeeInfo;
 import org.egov.infra.script.service.ScriptService;
+import org.egov.infra.security.utils.SecurityUtils;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infra.web.struts.annotation.ValidationErrorPage;
@@ -103,12 +106,15 @@ import com.exilant.GLEngine.ChartOfAccounts;
 @Results({
         @Result(name = "editVoucher", location = "journalVoucherModify-editVoucher.jsp"),
         @Result(name = "view", location = "journalVoucherModify-view.jsp"),
-        @Result(name = "message", location = "journalVoucherModify-message.jsp")
+        @Result(name = "message", location = "journalVoucherModify-message.jsp"),
+        @Result(name = JournalVoucherModifyAction.UNAUTHORIZED, location = "../workflow/unauthorized.jsp")
 })
 public class JournalVoucherModifyAction extends BaseVoucherAction {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(JournalVoucherModifyAction.class);
+    private static final String INVALID_APPROVER = "invalid.approver";
+    protected static final String UNAUTHORIZED = "unuthorized";
     private VoucherService voucherService;
     private List<VoucherDetails> billDetailslist;
     private List<VoucherDetails> subLedgerlist;
@@ -150,6 +156,12 @@ public class JournalVoucherModifyAction extends BaseVoucherAction {
 
     @Autowired
     private EgovMasterDataCaching masterDataCache;
+    
+    @Autowired
+    private SecurityUtils securityUtils;
+    
+    @Autowired
+    private CommonsUtil commonsUtil;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -177,6 +189,8 @@ public class JournalVoucherModifyAction extends BaseVoucherAction {
             voucherHeader = (CVoucherHeader) getPersistenceService().find(VOUCHERQUERY, Long.valueOf(voucherHeaderId));
         final Map<String, Object> vhInfoMap = voucherService.getVoucherInfo(voucherHeader.getId());
         voucherHeader = (CVoucherHeader) vhInfoMap.get(Constants.VOUCHERHEADER);
+        if (!commonsUtil.isApplicationOwner(securityUtils.getCurrentUser(), voucherHeader))
+            return UNAUTHORIZED;
         try {
             if (voucherHeader != null && voucherHeader.getState() != null)
                 if (voucherHeader.getState().getValue().contains("Rejected")) {
@@ -272,6 +286,16 @@ public class JournalVoucherModifyAction extends BaseVoucherAction {
     public String update() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("JournalVoucherModifyAction | updateVoucher | Start");
+        populateWorkflowBean();
+        if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workflowBean.getWorkFlowAction())) {
+            if (!commonsUtil.isValidApprover(voucherHeader, workflowBean.getApproverPositionId())) {
+                if (voucherHeader.getId() == null)
+                    voucherHeader = (CVoucherHeader) voucherService.findById(Long.parseLong(parameters.get(VHID)[0]), false);
+                setOneFunctionCenterValue();
+                addActionError(getText(INVALID_APPROVER));
+                return "editVoucher";
+            }
+        }
         target = "";
         loadSchemeSubscheme();
 
@@ -280,7 +304,6 @@ public class JournalVoucherModifyAction extends BaseVoucherAction {
             voucherHeader.setId(Long.valueOf(parameters.get(VHID)[0]));
         validateBeforeEdit(voucherHeader);
         CVoucherHeader oldVh = voucherHeader;
-        populateWorkflowBean();
         if (FinancialConstants.BUTTONCANCEL.equalsIgnoreCase(workflowBean.getWorkFlowAction())) {
             voucherHeader = (CVoucherHeader) voucherService.findById(Long.parseLong(parameters.get(VHID)[0]), false);
             sendForApproval();
@@ -352,7 +375,7 @@ public class JournalVoucherModifyAction extends BaseVoucherAction {
             billQuery.append(
                     "select bill.expendituretype,bill.id from CVoucherHeader vh,EgBillregister bill ,EgBillregistermis mis")
                     .append(" where vh.id=mis.voucherHeader and bill.id=mis.egBillregister and vh.id=?");
-            final Object[] bill = (Object[]) persistenceService.find(billQuery.toString()); // bill[0] contains expendituretype
+            final Object[] bill = (Object[]) persistenceService.find(billQuery.toString(), vhId); // bill[0] contains expendituretype
                                                                                             // and
             // bill[1] contaons billid
 
