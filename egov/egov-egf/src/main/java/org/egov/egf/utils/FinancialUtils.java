@@ -428,19 +428,11 @@ public class FinancialUtils {
     }
 
     public List<Integer> getStatuses(final String status) {
-		List<Integer> list = new ArrayList<>();
-		for (String s : status.split(",")) {
-			list.add(Integer.valueOf(s));
-		}
-		return list;
-	}
-    
+	return Arrays.stream(status.split(",")).map(Integer::valueOf).collect(Collectors.toList());
+    }
+
     public List<Character> getCoaTypes(final String coaType) {
-		List<Character> list = new ArrayList<>();
-		for (String s : coaType.split(",")) {
-			list.add(s.charAt(1));
-		}
-		return list;
-	}
+	return Arrays.stream(coaType.split(",")).map(s -> s.charAt(1)).collect(Collectors.toList());
+    }
 
 }

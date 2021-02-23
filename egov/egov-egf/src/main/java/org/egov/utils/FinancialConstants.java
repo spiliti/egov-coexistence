@@ -102,7 +102,7 @@ public interface FinancialConstants {
 	public static final String CONTINGENCYBILL_APPROVED_STATUS = "Approved";
 	public static final String CONTINGENCYBILL_PASSED_STATUS = "Voucher Created";
 	public static final String CONTINGENCYBILL_PAID_STATUS = "payment confirmed";
-	public static final String CONTINGENCYBILL_REJECTED_STATUS = "Rejected";
+	public static final String CONTINGENCYBILL_REJECTED_STATUS = "REJECTED";
 	// Status for Supplier Bills
 	public static final String SUPPLIERBILL_CREATED_STATUS = "Created";
 	public static final String SUPPLIERBILL_CANCELLED_STATUS = "Cancelled";

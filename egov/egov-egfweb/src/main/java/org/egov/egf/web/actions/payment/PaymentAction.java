@@ -1346,10 +1346,10 @@ public class PaymentAction extends BasePaymentAction {
             LOGGER.debug("Starting view...");
         paymentheader = getPayment();
         
-		final User loggedInUser = new User();
-		loggedInUser.setId(ApplicationThreadLocals.getUserId());
-		/*if (!commonsUtil.isApplicationOwner(loggedInUser, paymentheader))
-			return UNAUTHORIZED;*/
+	final User loggedInUser = new User();
+	loggedInUser.setId(ApplicationThreadLocals.getUserId());
+	/*if (!commonsUtil.isApplicationOwner(loggedInUser, paymentheader))
+		return UNAUTHORIZED;*/
         /*
          * if (paymentheader.getState().getValue() != null && !paymentheader.getState().getValue().isEmpty() &&
          * paymentheader.getState().getValue().contains("Rejected")) { if (LOGGER.isDebugEnabled()) LOGGER.debug("Completed view."

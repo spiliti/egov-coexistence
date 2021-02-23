@@ -116,19 +116,19 @@ public class AjaxWorkFlowAction extends BaseFormAction {
         return WF_APPROVERS;
     }
 
-	@Action(value = "/workflow/ajaxWorkFlow-getDesignationsByObjectType")
-	public String getDesignationsByObjectType() {
-		final List<String> workflowDesignations = new ArrayList<>();
-		if (!SELECT.equals(departmentRule)) {
-			final WorkFlowMatrix wfmatrix = getWfMatrix();
-			if (wfmatrix.getCurrentDesignation() != null) {
-				workflowDesignations.addAll(Arrays.asList(wfmatrix.getCurrentDesignation().split(",")));
-			}
-			designationList = microserviceUtils.getDesignations().stream()
-					.filter(desig -> workflowDesignations.contains(desig.getName())).collect(Collectors.toList());
-		}
-		return WF_DESIGNATIONS;
-	}
+    @Action(value = "/workflow/ajaxWorkFlow-getDesignationsByObjectType")
+    public String getDesignationsByObjectType() {
+	    final List<String> workflowDesignations = new ArrayList<>();
+	    if (!SELECT.equals(departmentRule)) {
+		    final WorkFlowMatrix wfmatrix = getWfMatrix();
+		    if (wfmatrix.getCurrentDesignation() != null) {
+			    workflowDesignations.addAll(Arrays.asList(wfmatrix.getCurrentDesignation().split(",")));
+		    }
+		    designationList = microserviceUtils.getDesignations().stream()
+				    .filter(desig -> workflowDesignations.contains(desig.getName())).collect(Collectors.toList());
+	    }
+	    return WF_DESIGNATIONS;
+    }
     
     @Action(value = "/workflow/ajaxWorkFlow-findDesignationsByObjectType")
 	public String findDesignationsByObjectType() {
