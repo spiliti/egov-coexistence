@@ -98,6 +98,8 @@ import org.egov.model.instrument.InstrumentVoucher;
 import org.egov.model.payment.Paymentheader;
 import org.egov.utils.FinancialConstants;
 import org.hibernate.FlushMode;
+import org.hibernate.HibernateException;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.type.LongType;
@@ -231,7 +233,7 @@ public class BillRegisterReportAction extends SearchFormAction {
     }
 
     @ValidationErrorPage(value = "new")
-    public String list() throws Exception {
+    public String list() {
         persistenceService.getSession().setDefaultReadOnly(true);
         persistenceService.getSession().setFlushMode(FlushMode.MANUAL);
         if (LOGGER.isDebugEnabled())
@@ -250,7 +252,7 @@ public class BillRegisterReportAction extends SearchFormAction {
     @ReadOnly
     @ValidationErrorPage(value = "completeBill")
     @Action(value = "/report/billRegisterReport-billSearch")
-    public String billSearch() throws Exception {
+    public String billSearch() {
         persistenceService.getSession().setDefaultReadOnly(true);
         persistenceService.getSession().setFlushMode(FlushMode.MANUAL);
         if (LOGGER.isDebugEnabled())
@@ -293,7 +295,7 @@ public class BillRegisterReportAction extends SearchFormAction {
     }
 
     @SuppressWarnings("unused")
-    protected void formatSearchResult() throws Exception {
+    protected void formatSearchResult(){
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("BillRegisterReportAction | formatSearchResult | start");
         billRegReportList = new ArrayList<BillRegisterReportBean>();
@@ -509,7 +511,7 @@ public class BillRegisterReportAction extends SearchFormAction {
                 }
 
                 billRegReportList.add(billRegReport);
-            } catch (final Exception e) {
+            } catch (final ObjectNotFoundException e) {
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug("Failed while processing bill number :" + object[0].toString());
                 throw e;
@@ -664,7 +666,7 @@ public class BillRegisterReportAction extends SearchFormAction {
 
             netAccountCode.put("Pension", penBillNetPayCodeList);
 
-        } catch (final Exception e)
+        } catch (final HibernateException e)
         {
             errorState = true;
             if (LOGGER.isDebugEnabled())

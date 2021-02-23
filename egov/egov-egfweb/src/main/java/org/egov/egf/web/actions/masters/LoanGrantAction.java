@@ -365,11 +365,14 @@ public class LoanGrantAction extends LoanGrantBaseAction {
             //persistenceService.setType(LoanGrantHeader.class);
             persistenceService.persist(loanGrantHeader);
         } catch (final ValidationException e) {
-            throw e;
-        } catch (final Exception e) {
             throw new ValidationException(Arrays.asList(new ValidationError("An error occured contact Administrator",
                     "An error occured contact Administrator")));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError("An error occured contact Administrator",
+           * "An error occured contact Administrator"))); }
+           */
         return "result";
     }
 

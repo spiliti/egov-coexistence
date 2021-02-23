@@ -807,10 +807,11 @@ public class DirectBankPaymentAction extends BasePaymentAction {
         } catch (final TaskFailedException e) {
             LOGGER.error(e.getMessage(), e);
             throw new ValidationException(Arrays.asList(new ValidationError(EXCEPTION_WHILE_SAVING_DATA, FAILED)));
-        } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new ValidationException(Arrays.asList(new ValidationError(EXCEPTION_WHILE_SAVING_DATA, FAILED)));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.error(e.getMessage(), e); throw
+           * new ValidationException(Arrays.asList(new
+           * ValidationError(EXCEPTION_WHILE_SAVING_DATA, FAILED))); }
+           */
 
     }
 

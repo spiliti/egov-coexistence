@@ -219,7 +219,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
     }
 
     @Action(value = "/masters/chartOfAccounts-view")
-    public String view() throws Exception {
+    public String view() {
         populateAccountCodePurpose();
         populateAccountDetailTypeList();
         populateCoaRequiredFields();
@@ -228,7 +228,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
     }
 
     @Action(value = "/masters/chartOfAccounts-viewChartOfAccounts")
-    public String viewChartOfAccounts() throws Exception {
+    public String viewChartOfAccounts(){
         populateAccountCodePurpose();
         populateAccountDetailTypeList();
         populateCoaRequiredFields();
@@ -236,7 +236,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
         return Constants.VIEW_COA;
     }
     @Action(value = "/masters/chartOfAccounts-modifyChartOfAccounts")
-    public String modifyChartOfAccounts() throws Exception {
+    public String modifyChartOfAccounts() {
         populateAccountCodePurpose();
         populateAccountDetailTypeList();
         populateCoaRequiredFields();
@@ -248,7 +248,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
     }
 
     @Action(value = "/masters/chartOfAccounts-modify")
-    public String modify() throws Exception {
+    public String modify() {
         populateAccountDetailTypeList();
         populateCoaRequiredFields();
         populateAccountCodePurpose();
@@ -267,7 +267,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
     }
 
     @Action(value = "/masters/chartOfAccounts-update")
-    public String update() throws Exception {
+    public String update() {
         setPurposeOnCoa();
         updateOnly = true;
         populateAccountDetailType();
@@ -317,7 +317,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
                     }
                 }
             }
-        } catch (final Exception e) {
+        } catch (final ValidationException e) {
             LOGGER.error(e.getMessage(), e);
             populateAccountDetailTypeList();
             final String message = accountDetail.concat(" ").concat(e.toString());
@@ -457,7 +457,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
     }
 
     @Action(value = "/masters/chartOfAccounts-addNewCoa")
-    public String addNewCoa() throws Exception {
+    public String addNewCoa() {
         model = new CChartOfAccounts();
         if (parentId != null)
             model.setParentId(parentId);
@@ -532,7 +532,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
     }
 
     @Action(value = "/masters/chartOfAccounts-save")
-    public String save() throws Exception {
+    public String save() {
         if (generatedGlcode == null || newGlcode == null) {
             addActionMessage(getText("chartOfAccount.invalid.glcode"));
             return NEW;
@@ -601,20 +601,20 @@ public class ChartOfAccountsAction extends BaseFormAction {
 
 
     @Action(value = "/masters/chartOfAccounts-editDetailedCode")
-    public String editDetailedCode() throws Exception {
+    public String editDetailedCode(){
         allChartOfAccounts = chartOfAccountsHibernateDAO.getDetailedCodesList();
         return "detailed-editCode";
     }
 
     @Action(value = "/masters/chartOfAccounts-viewDetailedCode")
-    public String viewDetailedCode() throws Exception {
+    public String viewDetailedCode() {
         allChartOfAccounts = chartOfAccountsHibernateDAO.getDetailedCodesList();
         return "detailed-viewCode";
     }
 
     @SkipValidation
     @Action(value = "/masters/chartOfAccounts-modifySearch")
-    public String modifySearch() throws Exception {
+    public String modifySearch() {
         if (glCode != null) {
             model = chartOfAccountsService.find("from CChartOfAccounts where classification=4 and glcode=?",
                     glCode.split("-")[0]);
@@ -634,7 +634,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
 
     @SkipValidation
     @Action(value = "/masters/chartOfAccounts-viewSearch")
-    public String viewSearch() throws Exception {
+    public String viewSearch() {
         if (glCode != null) {
             model = chartOfAccountsService.find("from CChartOfAccounts where classification=4 and glcode=?",
                     glCode.split("-")[0]);
@@ -654,14 +654,14 @@ public class ChartOfAccountsAction extends BaseFormAction {
     }
 
     @Action(value = "/masters/chartOfAccounts-addNew")
-    public String addNew() throws Exception {
+    public String addNew(){
         populateCodeLength();
         model = new CChartOfAccounts();
         return "detailed";
     }
 
     @Action(value = "/masters/chartOfAccounts-create")
-    public String create() throws Exception {
+    public String create() {
         if (glCode != null) {
             final CChartOfAccounts parent = chartOfAccountsService.find("from CChartOfAccounts where glcode=?",
                     glCode.split("-")[0]);

@@ -48,6 +48,7 @@
 package org.egov.egf.web.actions.report;
 
 
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -74,6 +75,7 @@ import org.hibernate.FlushMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -341,7 +343,7 @@ public class BalanceSheetReportAction extends BaseFormAction {
 
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateBalanceSheetPdf")
-    public String generateBalanceSheetPdf() throws Exception {
+    public String generateBalanceSheetPdf() throws JRException, IOException {
         populateDataSource();
         final JasperPrint jasper = reportHelper.generateFinancialStatementReportJasperPrint(balanceSheet,
                 getText("report.heading"),
@@ -353,7 +355,7 @@ public class BalanceSheetReportAction extends BaseFormAction {
 
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateBalanceSheetXls")
-    public String generateBalanceSheetXls() throws Exception {
+    public String generateBalanceSheetXls() throws JRException, IOException {
         populateDataSource();
         JasperPrint jasper = null;
         if (!balanceSheet.getPeriod().equalsIgnoreCase("Yearly"))
@@ -370,7 +372,7 @@ public class BalanceSheetReportAction extends BaseFormAction {
 
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateSchedulePdf")
-    public String generateSchedulePdf() throws Exception {
+    public String generateSchedulePdf() throws JRException, IOException {
         populateDataSourceForAllSchedules();
         final JasperPrint jasper = reportHelper.generateFinancialStatementReportJasperPrint(balanceSheet,
                 getText("report.heading"),
@@ -382,7 +384,7 @@ public class BalanceSheetReportAction extends BaseFormAction {
 
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateScheduleXls")
-    public String generateScheduleXls() throws Exception {
+    public String generateScheduleXls() throws JRException, IOException {
         populateDataSourceForAllSchedules();
         final JasperPrint jasper = reportHelper.generateFinancialStatementReportJasperPrint(balanceSheet,
                 getText("report.heading"),
@@ -395,7 +397,7 @@ public class BalanceSheetReportAction extends BaseFormAction {
     /* for detailed */
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateDetailedSchedulePdf")
-    public String generateDetailedSchedulePdf() throws Exception {
+    public String generateDetailedSchedulePdf() throws JRException, IOException {
         populateDataSourceForAllSchedulesDetailed();
         final JasperPrint jasper = reportHelper.generateFinancialStatementReportJasperPrint(balanceSheet,
                 getText("report.heading"),
@@ -408,7 +410,7 @@ public class BalanceSheetReportAction extends BaseFormAction {
     /* for detailed */
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateDetailedScheduleXls")
-    public String generateDetailedScheduleXls() throws Exception {
+    public String generateDetailedScheduleXls() throws JRException, IOException {
         populateDataSourceForAllSchedulesDetailed();
         final JasperPrint jasper = reportHelper.generateFinancialStatementReportJasperPrint(balanceSheet,
                 getText("report.heading"),
@@ -420,7 +422,7 @@ public class BalanceSheetReportAction extends BaseFormAction {
 
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateBalanceSheetSchedulePdf")
-    public String generateBalanceSheetSchedulePdf() throws Exception {
+    public String generateBalanceSheetSchedulePdf() throws JRException, IOException {
         populateDataSourceForSchedule();
         final JasperPrint jasper = reportHelper.generateFinancialStatementReportJasperPrint(balanceSheet,
                 getText("report.sub.schedule.heading"), header.toString(),
@@ -431,7 +433,7 @@ public class BalanceSheetReportAction extends BaseFormAction {
 
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateBalanceSheetScheduleXls")
-    public String generateBalanceSheetScheduleXls() throws Exception {
+    public String generateBalanceSheetScheduleXls() throws JRException, IOException {
         populateDataSourceForSchedule();
         final JasperPrint jasper = reportHelper.generateFinancialStatementReportJasperPrint(balanceSheet,
                 getText("report.sub.schedule.heading"), header.toString(),

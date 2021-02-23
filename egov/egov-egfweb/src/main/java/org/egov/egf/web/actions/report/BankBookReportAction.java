@@ -96,6 +96,7 @@ import org.egov.utils.Constants;
 import org.egov.utils.FinancialConstants;
 import org.egov.utils.ReportHelper;
 import org.hibernate.FlushMode;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.BigDecimalType;
@@ -104,6 +105,8 @@ import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
+
+import com.google.zxing.NotFoundException;
 
 import net.sf.jasperreports.engine.JRException;
 
@@ -181,7 +184,7 @@ public class BankBookReportAction extends BaseFormAction {
 	}
 
 	@Override
-	public String execute() throws Exception {
+	public String execute() {
 		finYearDate();
 		return "form";
 	}
@@ -654,7 +657,7 @@ public class BankBookReportAction extends BaseFormAction {
 	private String getAppConfigValueFor(final String module, final String key) {
 		try {
 			return appConfigValuesService.getConfigValuesByModuleAndKey(module, key).get(0).getValue();
-		} catch (final Exception e) {
+		} catch (final ValidationException e) {
 			throw new ValidationException(EMPTY_STRING, "The key '" + key + "' is not defined in appconfig");
 		}
 	}

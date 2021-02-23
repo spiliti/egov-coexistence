@@ -144,6 +144,7 @@ import com.exilant.GLEngine.Transaxtion;
 import com.exilant.GLEngine.TransaxtionParameter;
 import com.exilant.eGov.src.common.EGovernCommon;
 import com.exilant.eGov.src.transactions.VoucherTypeForULB;
+import com.exilant.exility.common.TaskFailedException;
 
 @Service
 public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
@@ -787,7 +788,7 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
 	}
 
 	public CVoucherHeader postIntoVoucherHeader(final CVoucherHeader voucherHeader,
-			final VoucherTypeBean voucherTypeBean) throws Exception {
+			final VoucherTypeBean voucherTypeBean) throws TaskFailedException {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("start | insertIntoVoucherHeader");
 		voucherHeader.setName(voucherTypeBean.getVoucherName());
@@ -806,7 +807,8 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
 		/*
 		 * if("Auto".equalsIgnoreCase(vNumGenMode)){ if(LOGGER.isDebugEnabled())
 		 * LOGGER.debug("Generating auto voucher number"); String vDate =
-		 * Constants.DDMMYYYYFORMAT2.format(voucherHeader.getVoucherDate());
+		 * Constants.DDMMYYYYFORMAT2.format(voucherHe
+		 * ader.getVoucherDate());
 		 * //String vn1 =
 		 * getGeneratedVoucherNumber(voucherHeader.getFundId().getId(),
 		 * autoVoucherType, voucherHeader.getVoucherDate()); voucherHeader
@@ -860,7 +862,7 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
 				update(voucherHeader);
 			}
 
-		} catch (final ApplicationRuntimeException e) {
+		} catch (final ApplicationRuntimeException | TaskFailedException e) {
 			LOGGER.error(e);
 			throw new ApplicationRuntimeException(e.getMessage());
 		}

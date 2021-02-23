@@ -419,11 +419,12 @@ public class AdvancePaymentAction extends BasePaymentAction {
         } catch (final ValidationException e) {
             LOGGER.error(e.getMessage(), e);
             throw e;
-        } catch (final Exception e) {
-            // handle engine exception
-            LOGGER.error(e.getMessage(), e);
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { // handle engine exception
+           * LOGGER.error(e.getMessage(), e); throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Posted to Ledger " + voucherHeader.getId());
         return voucherHeader;

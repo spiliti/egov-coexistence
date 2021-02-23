@@ -137,7 +137,7 @@ public class DishonoredChequeAction extends SearchFormAction {
     }
 
     @Action(value = "/brs/dishonoredCheque-list")
-    public String list() throws Exception {
+    public String list() {
         setPageSize(30);
         super.search();
         prepareResults();
@@ -172,7 +172,7 @@ public class DishonoredChequeAction extends SearchFormAction {
 	}
 
     @Action(value = "/brs/dishonoredCheque-dishonorCheque")
-    public String dishonorCheque() throws Exception {
+    public String dishonorCheque() {
         final String installmentIdsStr[] = installmentIds.split(",");
         for (final String installmentIdStr : installmentIdsStr) {
             InstrumentHeader ih = new InstrumentHeader();

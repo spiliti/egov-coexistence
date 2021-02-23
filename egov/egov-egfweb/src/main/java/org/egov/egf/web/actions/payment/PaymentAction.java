@@ -361,13 +361,13 @@ public class PaymentAction extends BasePaymentAction {
 
     @SkipValidation
     @Action(value = "/payment/payment-beforeSearch")
-    public String beforeSearch() throws Exception {
+    public String beforeSearch() {
         return "search";
     }
 
     @SkipValidation
     @Action(value = "/payment/payment-beforeTNEBSearch")
-    public String beforeTNEBSearch() throws Exception {
+    public String beforeTNEBSearch() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting beforeTNEBSearch...");
         setTNEBMandatoryFields();
@@ -432,7 +432,7 @@ public class PaymentAction extends BasePaymentAction {
     @SkipValidation
     @ValidationErrorPage(value = "search")
     @Action(value = "/payment/payment-search")
-    public String search() throws Exception {
+    public String search() throws ParseException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting search...");
         // Get App config value
@@ -1055,7 +1055,7 @@ public class PaymentAction extends BasePaymentAction {
             try {
                 this.setMiscount(0);
                 search();
-            } catch (final Exception e1) {
+            } catch (final ParseException e1) {
                 LOGGER.error(e.getMessage(), e1);
                 final List<ValidationError> errors = new ArrayList<ValidationError>();
                 errors.add(new ValidationError("exception", e1.getMessage()));
@@ -1067,7 +1067,7 @@ public class PaymentAction extends BasePaymentAction {
             try {
                this.setMiscount(0);
                 search();
-            } catch (final Exception e1) {
+            } catch (final ParseException e1) {
                 LOGGER.error(e.getMessage(), e1);
                 final List<ValidationError> errors = new ArrayList<ValidationError>();
                 errors.add(new ValidationError("exception", e1.getMessage()));
@@ -1262,7 +1262,7 @@ public class PaymentAction extends BasePaymentAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exception", e.getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
+        } catch (final ParseException e) {
 
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             loadbankBranch(billregister.getEgBillregistermis().getFund());
@@ -1467,13 +1467,13 @@ public class PaymentAction extends BasePaymentAction {
 
     @SkipValidation
     public void getBankBalance(final String accountId, final String vdate, final BigDecimal amount,
-            final Long paymentId, final Long bankGlcodeId) throws ParseException {
+            final Long paymentId, final Long bankGlcodeId) {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Inside getBankBalance.");
 
         try {
             balance = paymentService.getAccountBalance(accountId, vdate, amount, paymentId, bankGlcodeId);
-        } catch (final Exception e) {
+        } catch (final ParseException  |NumberFormatException e) {
             balance = BigDecimal.valueOf(-1);
         }
         if (LOGGER.isDebugEnabled())
@@ -1482,7 +1482,7 @@ public class PaymentAction extends BasePaymentAction {
 
     @SkipValidation
     @Action(value = "/payment/payment-beforeModify")
-    public String beforeModify() throws Exception {
+    public String beforeModify() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting beforeModify.");
         // if(validateUser("deptcheck"))
@@ -1494,7 +1494,7 @@ public class PaymentAction extends BasePaymentAction {
     }
 
     @ValidationErrorPage(value = LIST)
-    public String list() throws Exception {
+    public String list() throws ParseException{
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting list...");
         final List<String> descriptionList = new ArrayList<String>();
@@ -1659,7 +1659,7 @@ public class PaymentAction extends BasePaymentAction {
     @ValidationErrorPage(value = MODIFY)
     @SkipValidation
     @Action(value = "/payment/payment-edit")
-    public String edit() throws Exception {
+    public String edit() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting update...");
         try {
@@ -1687,12 +1687,12 @@ public class PaymentAction extends BasePaymentAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exception", e.getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exception", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.error(e.getMessage(), e); final
+           * List<ValidationError> errors = new ArrayList<ValidationError>();
+           * errors.add(new ValidationError("exception", e.getMessage())); throw
+           * new ValidationException(errors); }
+           */
 
         // action=MODIFY;
         if (LOGGER.isDebugEnabled())
@@ -1702,7 +1702,7 @@ public class PaymentAction extends BasePaymentAction {
 
     @ValidationErrorPage(value = "advancePaymentModify")
     @SkipValidation
-    public String updateAdvancePayment() throws Exception {
+    public String updateAdvancePayment() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting updateAdvancePayment...");
         paymentheader = (Paymentheader) persistenceService.find("from Paymentheader where id=?", paymentheader.getId());
@@ -1744,7 +1744,7 @@ public class PaymentAction extends BasePaymentAction {
                             paymentheader.getBankaccount().getFund().getId()));
             loadbankBranch(paymentheader.getBankaccount().getFund());
             throw new ValidationException(e.getErrors());
-        } catch (final Exception e) {
+        } catch (final ApplicationException | ParseException e) {
             addDropdownData("bankaccountList",
                     persistenceService.findAllBy(
                             " from Bankaccount where bankbranch.id=? and isactive=true and fund.id=?",
@@ -1780,7 +1780,7 @@ public class PaymentAction extends BasePaymentAction {
             LOGGER.debug("Completed validateAdvancePayment...");
     }
 
-    private void validateForUpdate() throws ValidationException, ApplicationException, ParseException {
+    private void validateForUpdate() {
         List<PaymentBean> tempBillList = new ArrayList<PaymentBean>();
         final List<String> expenseTypeList = new ArrayList<String>();
         if (LOGGER.isDebugEnabled())
@@ -1841,8 +1841,8 @@ public class PaymentAction extends BasePaymentAction {
              * if(expenseTypeList.get(j).equalsIgnoreCase(FinancialConstants. STANDARD_EXPENDITURETYPE_CONTINGENT))
              * paymentService.validateRTGSPaymentForModify(tempBillList);
              */
-        } catch (final ValidationException e) {
-            addFieldError(e.getErrors().get(0).getMessage(), getMessage(e.getErrors().get(0).getMessage()));
+        } catch (final ValidationException  |ApplicationException e) {
+            addFieldError(((ValidationException) e).getErrors().get(0).getMessage(), getMessage(((ValidationException) e).getErrors().get(0).getMessage()));
             // addFieldError("rtgs.payment.mandatory.details.missing",getMessage("rtgs.payment.mandatory.details.missing"));
         }
 

@@ -281,7 +281,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
 
     @SkipValidation
     @Action(value = "/voucher/preApprovedVoucher-voucher")
-    public String voucher() throws ApplicationException {
+    public String voucher() {
         List<AppConfigValues> cutOffDateconfigValue = appConfigValuesService.getConfigValuesByModuleAndKey("EGF",
                 "DataEntryCutOffDate");
         if (cutOffDateconfigValue != null && !cutOffDateconfigValue.isEmpty()) {
@@ -329,7 +329,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
             try {
                 // loading the bill detail info.
                 getMasterDataForBillVoucher();
-            } catch (final ValidationException e) {
+            } catch (final ValidationException |ApplicationException e) {
                 final List<ValidationError> errors = new ArrayList<ValidationError>();
                 errors.add(new ValidationError("exp", e.getMessage()));
                 throw new ValidationException(errors);
@@ -339,7 +339,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
             try {
                 // loading the bill detail info.
                 getMasterDataForBill();
-            } catch (final ValidationException e ) {
+            } catch (final ValidationException |ApplicationException e ) {
                 final List<ValidationError> errors = new ArrayList<ValidationError>();
                 errors.add(new ValidationError("exp", e.getMessage()));
                 throw new ValidationException(errors);
@@ -615,7 +615,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
 	@ValidationErrorPage("billview")
     @SkipValidation
     @Action(value = "/voucher/preApprovedVoucher-save")
-    public String save() throws ValidationException, ApplicationException {
+    public String save() {
         mode = "save";
         try {
             if (LOGGER.isDebugEnabled())
@@ -669,14 +669,12 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
                 }
             }
 
-        } catch (
-
-        final ValidationException e) {
+        } catch (final ValidationException | ApplicationException e) {
             voucher();
             mode = "";
-            if (e.getErrors().get(0).getMessage() != null
-                    && !e.getErrors().get(0).getMessage().equals(StringUtils.EMPTY))
-                throw new ValidationException(e.getErrors().get(0).getMessage(), e.getErrors().get(0).getMessage());
+            if (((ValidationException) e).getErrors().get(0).getMessage() != null
+                    && !((ValidationException) e).getErrors().get(0).getMessage().equals(StringUtils.EMPTY))
+                throw new ValidationException(((ValidationException) e).getErrors().get(0).getMessage(), ((ValidationException) e).getErrors().get(0).getMessage());
             else
                 throw new ValidationException("Voucher creation failed", "Voucher creation failed");
         } catch (final ApplicationRuntimeException e) {
@@ -685,23 +683,20 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            voucher();
-            mode = "";
-            if (e.getCause().getClass().equals(ValidationException.class)) {
-
-                final ValidationException s = (ValidationException) e;
-                final List<ValidationError> errors = new ArrayList<ValidationError>();
-                errors.add(new ValidationError("exp", s.getErrors().get(0).getMessage()));
-                throw new ValidationException(errors);
-            }
-            LOGGER.error(e.getMessage());
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            final ValidationException s = (ValidationException) e;
-            errors.add(new ValidationError("exception", s.getErrors().get(0).getMessage()));
-            throw new ValidationException(errors);
-        }
-
+        } /*
+           * catch (final Exception e) { voucher(); mode = ""; if
+           * (e.getCause().getClass().equals(ValidationException.class)) { final
+           * ValidationException s = (ValidationException) e; final
+           * List<ValidationError> errors = new ArrayList<ValidationError>();
+           * errors.add(new ValidationError("exp",
+           * s.getErrors().get(0).getMessage())); throw new
+           * ValidationException(errors); } LOGGER.error(e.getMessage()); final
+           * List<ValidationError> errors = new ArrayList<ValidationError>();
+           * final ValidationException s = (ValidationException) e;
+           * errors.add(new ValidationError("exception",
+           * s.getErrors().get(0).getMessage())); throw new
+           * ValidationException(errors); }
+           */
         getHeaderMandateFields();
         displayVoucherNumber = false;
         return "billview";
@@ -739,7 +734,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
     }
 
     @Action(value = "/voucher/preApprovedVoucher-update")
-    public String update() throws ValidationException {
+    public String update() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("voucher id=======" + parameters.get(VHID)[0]);
         methodName = "update";
@@ -774,10 +769,10 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
             if(voucherHeader.getId() != null && voucherHeader.getId().compareTo(new Long(0)) > 0){
                 finDashboardService.publishEvent(FinanceEventType.voucherUpdateById , new HashSet<>(Arrays.asList(voucherHeader.getId())));
             }
-        } catch (final ValidationException e) {
+        } catch (final ValidationException | ApplicationException e) {
 
             final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
+            errors.add(new ValidationError("exp", ((ValidationException) e).getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
         } /*
            * catch (final Exception e) { final List<ValidationError> errors =

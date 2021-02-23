@@ -277,7 +277,7 @@ public class BudgetReAppropriationAction extends BaseFormAction {
     }
 
     @Override
-    public String execute() throws Exception {
+    public String execute() {
         return NEW;
     }
 
@@ -376,10 +376,11 @@ public class BudgetReAppropriationAction extends BaseFormAction {
         } catch (final ValidationException e) {
             throw new ValidationException(Arrays.asList(new ValidationError(e.getErrors().get(0).getMessage(),
                     e.getErrors().get(0).getMessage())));
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(),
-                    e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         if (reAppropriationCreated)
             addActionMessage(getText("budget.reappropriation.existing.saved") + misc.getSequenceNumber());
         if (reAppForNewBudgetCreated)
