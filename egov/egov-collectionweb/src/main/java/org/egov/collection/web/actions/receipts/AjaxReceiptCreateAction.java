@@ -332,9 +332,9 @@ public class AjaxReceiptCreateAction extends BaseFormAction {
 
         } catch (final HibernateException e) {
             value = index + "~" + ERROR + "#";
-        } catch (final Exception e) {
-            value = index + "~" + ERROR + "#";
-        }
+        } /*
+           * catch (final Exception e) { value = index + "~" + ERROR + "#"; }
+           */
         return RESULT;
     }
 

@@ -119,6 +119,7 @@ import org.egov.infra.admin.master.entity.Department;
 import org.egov.infra.admin.master.entity.Role;
 import org.egov.infra.admin.master.entity.User;
 import org.egov.infra.config.core.ApplicationThreadLocals;
+import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.microservice.models.BillDetailAdditional;
 import org.egov.infra.microservice.models.BusinessDetails;
@@ -1047,8 +1048,9 @@ public class ReceiptAction extends BaseFormAction {
      * This method create a new receipt header object with details contained in given receipt header object.
      * 
      * @param oldReceiptHeader the instance of <code>ReceiptHeader</code> whose data is to be copied
+     * @throws ApplicationException 
      */
-    private void populateReceiptModelWithExistingReceiptInfo(final ReceiptHeader oldReceiptHeader) {
+    private void populateReceiptModelWithExistingReceiptInfo(final ReceiptHeader oldReceiptHeader) throws ApplicationException {
         totalAmntToBeCollected = BigDecimal.ZERO;
 
         receiptHeader = new ReceiptHeader(oldReceiptHeader.getReferencenumber(), oldReceiptHeader.getReferencedate(),
@@ -1108,7 +1110,7 @@ public class ReceiptAction extends BaseFormAction {
         setCollModesNotAllowedForRemitReceipt(oldReceiptHeader.getCollModesNotAllwd());
     }
 
-    private void loadReceiptDetails(final ReceiptHeader receiptHeader) {
+    private void loadReceiptDetails(final ReceiptHeader receiptHeader) throws ApplicationException {
         setReceiptMisc(receiptHeader.getReceiptMisc());
         setBillCreditDetailslist(
                 collectionCommon.setReceiptDetailsList(receiptHeader, CollectionConstants.COLLECTIONSAMOUNTTPE_CREDIT));
@@ -1335,10 +1337,11 @@ public class ReceiptAction extends BaseFormAction {
      * This method is invoked when receipt is cancelled
      *
      * @return
+     * @throws ApplicationException 
      */
     @ValidationErrorPage(value = "error")
     @Action(value = "/receipts/receipt-saveOnCancel")
-    public String saveOnCancel() {
+    public String saveOnCancel() throws ApplicationException {
         boolean isInstrumentDeposited = false;
 
         final ReceiptHeader receiptHeaderToBeCancelled = receiptHeaderService.findById(oldReceiptId, false);

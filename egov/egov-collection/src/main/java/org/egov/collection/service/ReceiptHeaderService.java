@@ -135,6 +135,7 @@ import org.egov.model.instrument.InstrumentHeader;
 import org.egov.model.instrument.InstrumentType;
 import org.egov.pims.commons.Designation;
 import org.egov.pims.commons.Position;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -819,7 +820,7 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
             } catch (ValidationException e) {
                 LOGGER.error("Validation error occurred while updating receipt details ", e);
                 throw e;
-            } catch (final Exception e) {
+            } catch (final ApplicationRuntimeException e) {
                 final String errMsg = "Exception while updating billing system [" + serviceDetails.getCode()
                         + "] with receipt details!";
                 LOGGER.error(errMsg, e);
@@ -834,7 +835,7 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
         else
             try {
                 return billingService.constructAdditionalInfoForReceipt(billReceipt);
-            } catch (final Exception e) {
+            } catch (final ApplicationRuntimeException e) {
                 final String errMsg = "Exception while constructing additional info for receipt [" + serviceCode + "]!";
                 LOGGER.error(errMsg, e);
                 throw new ApplicationRuntimeException(errMsg, e);
@@ -873,7 +874,7 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
 
         try {
             financialsUtil.getReversalVoucher(reversalVoucherInfoList);
-        } catch (final Exception exp) {
+        } catch (final ParseException exp) {
             final String errorMsg = "Receipt Service Exception while creating reversal voucher!";
             LOGGER.error(errorMsg, exp);
             throw new ApplicationRuntimeException(errorMsg, exp);
@@ -1004,7 +1005,7 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
                         CollectionConstants.RECEIPT_STATUS_CODE_TO_BE_SUBMITTED, CollectionConstants.WF_ACTION_SUBMIT,
                         operatorPosition, remarks);
             }
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             final String errorMsg = "Receipt Service Exception while workflow transition!";
             LOGGER.error(errorMsg, e);
             throw new ApplicationRuntimeException(e.getMessage());
@@ -1035,10 +1036,6 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             LOGGER.error(errors, e);
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            final String errorMsg = "Receipt Service Exception while workflow transition!";
-            LOGGER.error(errorMsg, e);
-            throw new ApplicationRuntimeException(e.getMessage());
         }
     }
 
@@ -1180,6 +1177,7 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
      * The billing system is updated about the persisted receipts. These include details of both newly created as well as
      * cancelled receipts. If the instrument list and voucher list are not empty, the .... is updated The receipt ids of the newly
      * created receipts are collectively populated to be shown on the print screen
+     * @throws JsonProcessingException 
      */
     @Transactional
     public ReceiptResponse populateAndPersistReceipts(final ReceiptHeader receiptHeader,
@@ -1229,12 +1227,10 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
         request.setDemands(Collections.singletonList(demand));
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = "";
-
         try {
             jsonInString = mapper.writeValueAsString(request);
         } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("json processing ", e);
         }
         System.out.println(jsonInString);
         return restTemplate.postForObject(url, request, DemandResponse.class);
@@ -1251,11 +1247,10 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
         reqWrapper.setRequestInfo(requestInfo);
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = "";
-
         try {
             jsonInString = mapper.writeValueAsString(reqWrapper);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+           LOGGER.error("Json processing", e);
         }
         System.out.println(jsonInString);
         Map postForObject = restTemplate.postForObject(url, reqWrapper, Map.class);
@@ -1674,7 +1669,7 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
             payment.setTransactionDate(transactionDate);
             payment.setTransactionNumber(transactionNumber);
             payment.setIfscCode(ifscCode);
-        } catch (Exception e) {
+        } catch (ObjectNotFoundException e) {
             LOGGER.error("ERROR occurred while setting the instruments details",e);
         }
     }

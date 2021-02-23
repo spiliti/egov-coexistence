@@ -86,6 +86,7 @@ import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.entity.Boundary;
 import org.egov.infra.admin.master.entity.Department;
 import org.egov.infra.admin.master.service.BoundaryService;
+import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.utils.NumberUtil;
 import org.egov.infra.validation.exception.ValidationError;
@@ -307,10 +308,11 @@ public class ChallanAction extends BaseFormAction {
      * happen through this method.
      *
      * @return the string
+     * @throws ApplicationException 
      */
     @Action(value = "/receipts/challan-save")
     @ValidationErrorPage(value = NEW)
-    public String save() {
+    public String save() throws ApplicationException {
 
         if (!actionName.equals(CollectionConstants.WF_ACTION_NAME_REJECT_CHALLAN))
             if (getPositionUser() == null || getPositionUser() == -1)
@@ -336,11 +338,12 @@ public class ChallanAction extends BaseFormAction {
      * This method in invoked when the user clicks on Create Challan Receipt from Menu Tree.
      *
      * @return the string
+     * @throws ApplicationException 
      */
     @ValidationErrorPage(value = "createReceipt")
     @SkipValidation
     @Action(value = "/receipts/challan-createReceipt")
-    public String createReceipt() {
+    public String createReceipt() throws ApplicationException {
         if (challanNumber != null && !"".equals(challanNumber)) {
             receiptHeader = (ReceiptHeader) persistenceService.findByNamedQuery(
                     CollectionConstants.QUERY_VALIDRECEIPT_BY_CHALLANNO, challanNumber);
@@ -376,7 +379,7 @@ public class ChallanAction extends BaseFormAction {
 
     @ValidationErrorPage(value = NEW)
     @Action(value = "/receipts/challan-saveChallan")
-    public String saveChallan() {
+    public String saveChallan() throws ApplicationException {
 
         receiptHeader.getReceiptDetails().clear();
         errors.clear();
@@ -402,11 +405,12 @@ public class ChallanAction extends BaseFormAction {
      * This method is invoked to view the challan.
      *
      * @return
+     * @throws ApplicationException 
      */
     @Action(value = "/receipts/challan-viewChallan")
     @ValidationErrorPage(value = ERROR)
     @SkipValidation
-    public String viewChallan() {
+    public String viewChallan() throws ApplicationException {
         if (challanId == null)
             receiptHeader = receiptHeaderService.findById(receiptId, false);
         else {
@@ -524,10 +528,11 @@ public class ChallanAction extends BaseFormAction {
      * This method directs the user to cancel the requested challan receipt
      *
      * @return
+     * @throws ApplicationException 
      */
     @Action(value = "/receipts/challan-cancelReceipt")
     @SkipValidation
-    public String cancelReceipt() {
+    public String cancelReceipt() throws ApplicationException {
         if (getSelectedReceipts() != null && getSelectedReceipts().length > 0) {
             receiptHeader = receiptHeaderService.findById(Long.valueOf(selectedReceipts[0]), false);
             loadReceiptDetails();
@@ -539,10 +544,11 @@ public class ChallanAction extends BaseFormAction {
      * This method is invoked when receipt is cancelled
      *
      * @return
+     * @throws ApplicationException 
      */
     @Action(value = "/receipts/challan-saveOnCancel")
     @SkipValidation
-    public String saveOnCancel() {
+    public String saveOnCancel() throws ApplicationException {
         boolean isInstrumentDeposited = false;
         setSourcePage(CollectionConstants.CANCELRECEIPT);
 
@@ -951,8 +957,9 @@ public class ChallanAction extends BaseFormAction {
 
     /**
      * Load receipt details.
+     * @throws ApplicationException 
      */
-    private void loadReceiptDetails() {
+    private void loadReceiptDetails() throws ApplicationException {
         setDeptId(receiptHeader.getReceiptMisc().getDepartment());
         //setDept(receiptHeader.getReceiptMisc().getDepartment()); Need to fix
         if (!receiptHeader.getReceiptDetails().isEmpty()) {

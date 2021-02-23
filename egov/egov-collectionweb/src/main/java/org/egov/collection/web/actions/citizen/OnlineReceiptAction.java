@@ -407,7 +407,7 @@ public class OnlineReceiptAction extends BaseFormAction {
 
         try {
             reportId = collectionCommon.generateReport(receipts, true);
-        } catch (final Exception e) {
+        } catch (final NumberFormatException e) {
             LOGGER.error(CollectionConstants.REPORT_GENERATION_ERROR, e);
             throw new ApplicationRuntimeException(CollectionConstants.REPORT_GENERATION_ERROR, e);
         }
@@ -472,7 +472,7 @@ public class OnlineReceiptAction extends BaseFormAction {
                 } else
                     setTotalAmountToBeCollected(totalAmountToBeCollected.setScale(
                             CollectionConstants.AMOUNT_PRECISION_DEFAULT, BigDecimal.ROUND_UP));
-            } catch (final Exception exp) {
+            } catch (final ValidationException exp) {
                 LOGGER.error(getText("billreceipt.error.improperbilldata"), exp);
                 addActionError(getText("billreceipt.error.improperbilldata"));
             }
