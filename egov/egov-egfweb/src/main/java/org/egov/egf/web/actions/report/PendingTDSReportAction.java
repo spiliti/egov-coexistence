@@ -626,10 +626,9 @@ public class PendingTDSReportAction extends BaseFormAction {
         } catch (final ApplicationRuntimeException e) {
             message = e.getMessage();
             return;
-        } catch (final Exception e) {
-            message = e.getMessage();
-            return;
-        }
+        } /*
+           * catch (final Exception e) { message = e.getMessage(); return; }
+           */
         for (final Object[] entry : result)
             for (final Object[] dedentry : resultTolDeduction) {
                 final TDSEntry tds = new TDSEntry();

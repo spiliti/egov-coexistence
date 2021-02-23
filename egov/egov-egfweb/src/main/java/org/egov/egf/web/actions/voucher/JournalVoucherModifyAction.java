@@ -241,7 +241,7 @@ public class JournalVoucherModifyAction extends BaseVoucherAction {
 
         try {
             financialYearDAO.getFinancialYearByDate(voucherHeader.getVoucherDate());
-        } catch (final Exception e) {
+        } catch (final ValidationException e) {
             throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
         }
 
@@ -324,16 +324,14 @@ public class JournalVoucherModifyAction extends BaseVoucherAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            resetVoucherHeader();
-            voucherHeader = oldVh;
-            setOneFunctionCenterValue();
-            if (subLedgerlist.size() == 0)
-                subLedgerlist.add(new VoucherDetails());
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) { resetVoucherHeader(); voucherHeader =
+           * oldVh; setOneFunctionCenterValue(); if (subLedgerlist.size() == 0)
+           * subLedgerlist.add(new VoucherDetails()); final
+           * List<ValidationError> errors = new ArrayList<ValidationError>();
+           * errors.add(new ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("JournalVoucherModifyAction | updateVoucher | End");
         return "message";

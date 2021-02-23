@@ -60,6 +60,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -135,6 +136,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.exilant.GLEngine.ChartOfAccounts;
 import com.exilant.eGov.src.transactions.VoucherTypeForULB;
+import com.google.zxing.NotFoundException;
 
 @Results({
         @Result(name = "editVoucher", type = "redirectAction", location = "journalVoucherModify-beforeModify", params = {
@@ -268,7 +270,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
 
     @SkipValidation
     @Action(value = "/voucher/preApprovedVoucher-voucher")
-    public String voucher() {
+    public String voucher() throws ApplicationException {
         List<AppConfigValues> cutOffDateconfigValue = appConfigValuesService.getConfigValuesByModuleAndKey("EGF",
                 "DataEntryCutOffDate");
         if (cutOffDateconfigValue != null && !cutOffDateconfigValue.isEmpty()) {
@@ -304,7 +306,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
 
             for (final AppConfigValues appConfigVal : configValues)
                 purposeValueVN = appConfigVal.getValue();
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             throw new ApplicationRuntimeException(
                     "Appconfig value for VOUCHERDATE_FROM_UI is not defined in the system");
         }
@@ -316,7 +318,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
             try {
                 // loading the bill detail info.
                 getMasterDataForBillVoucher();
-            } catch (final Exception e) {
+            } catch (final ValidationException e) {
                 final List<ValidationError> errors = new ArrayList<ValidationError>();
                 errors.add(new ValidationError("exp", e.getMessage()));
                 throw new ValidationException(errors);
@@ -326,7 +328,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
             try {
                 // loading the bill detail info.
                 getMasterDataForBill();
-            } catch (final Exception e) {
+            } catch (final ValidationException e ) {
                 final List<ValidationError> errors = new ArrayList<ValidationError>();
                 errors.add(new ValidationError("exp", e.getMessage()));
                 throw new ValidationException(errors);
@@ -596,7 +598,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
 	@ValidationErrorPage("billview")
     @SkipValidation
     @Action(value = "/voucher/preApprovedVoucher-save")
-    public String save() throws ValidationException {
+    public String save() throws ValidationException, ApplicationException {
         mode = "save";
         try {
             if (LOGGER.isDebugEnabled())
@@ -744,12 +746,12 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) { final List<ValidationError> errors =
+           * new ArrayList<ValidationError>(); errors.add(new
+           * ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
 
         return "message";
     }
@@ -1450,7 +1452,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
         try {
             addRelatedEntity(VoucherConstant.GLCODE, CChartOfAccounts.class);
             addRelatedEntity("detailType", Accountdetailtype.class);
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             LOGGER.error("Exception in PreApprovedVoucher", e);
             throw new ApplicationRuntimeException(e.getMessage());
         }

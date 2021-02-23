@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
@@ -88,7 +89,7 @@ public class MSCommController {
 //            if (null != access_token) {
 //                microserviceUtils.removeSessionFromRedis(access_token);
 //            }
-        } catch (Exception ex) {
+        } catch (HttpClientErrorException ex) {
 
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -104,7 +105,7 @@ public class MSCommController {
             if (null != oldToken && null != newToken) {
                 microserviceUtils.refreshToken(oldToken, newToken);
             }
-        } catch (Exception ex) {
+        } catch (HttpClientErrorException ex) {
 
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

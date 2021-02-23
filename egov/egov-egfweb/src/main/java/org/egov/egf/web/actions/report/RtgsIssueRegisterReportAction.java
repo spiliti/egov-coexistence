@@ -463,7 +463,7 @@ public class RtgsIssueRegisterReportAction extends ReportAction {
 
 			} catch (final ClassCastException e) {
 				LOGGER.error(e);
-			} catch (final Exception e) {
+			} catch (final ClassNotFoundException e) {
 				LOGGER.error("Exception to get EntityType=" + e.getMessage());
 			}
 		List<EntityType> subDetail = new ArrayList<EntityType>();
