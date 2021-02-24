@@ -57,6 +57,7 @@ import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.model.voucher.PreApprovedVoucher;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +113,7 @@ public class BillsAccountingService {
         } catch (final ValidationException e) {
             LOGGER.error(e.getErrors());
             throw new ValidationException(e.getErrors());
-        } catch (final Exception e)
+        } catch (final ApplicationRuntimeException e)
         {
             LOGGER.error(e.getMessage());
             throw new ApplicationRuntimeException(e.getMessage());
@@ -129,7 +130,7 @@ public class BillsAccountingService {
      */
     @Transactional
     public long createPreApprovedVoucherFromBillForPJV(final int billId, final List<PreApprovedVoucher> voucherdetailList,
-            final List<PreApprovedVoucher> subLedgerList) throws ApplicationRuntimeException
+            final List<PreApprovedVoucher> subLedgerList)
     {
         String voucherStatus = null;
         long vh = -1;
@@ -143,7 +144,7 @@ public class BillsAccountingService {
             } else
                 throw new ApplicationRuntimeException("PREAPPROVEDVOUCHERSTATUS" + MISSINGMSG);
             vh = createVoucher.createVoucherFromBillForPJV(billId, voucherStatus, voucherdetailList, subLedgerList);
-        } catch (final Exception e)
+        } catch (final ApplicationRuntimeException e)
         {
             LOGGER.error(e.getMessage());
             throw new ApplicationRuntimeException(e.getMessage());
@@ -188,7 +189,7 @@ public class BillsAccountingService {
      * @return
      */
     @Transactional
-    public long createVoucherFromBill(final int billId) throws ApplicationRuntimeException
+    public long createVoucherFromBill(final int billId)
     {
         try {
             String voucherStatus = null;
@@ -201,7 +202,7 @@ public class BillsAccountingService {
                 throw new ApplicationRuntimeException("DEFAULTVOUCHERCREATIONSTATUS" + MISSINGMSG);
              final long vh = createVoucher.createVoucherFromBill(billId, voucherStatus, null, null);
             return vh;
-        } catch (final Exception e)
+        } catch (final ApplicationRuntimeException e)
         {
             LOGGER.error(e.getMessage());
             throw new ApplicationRuntimeException(e.getMessage());
@@ -235,7 +236,7 @@ public class BillsAccountingService {
                 throw new ApplicationException("PJV is not created for this bill number [" + billNumber + "]");
 
             return (CVoucherHeader) query.uniqueResult();
-        } catch (final Exception e)
+        } catch (final HibernateException e)
         {
             throw new ApplicationException(e.getMessage());
         }

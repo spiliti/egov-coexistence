@@ -54,11 +54,15 @@ package com.exilant.eGov.src.reports;
 
 import com.exilant.eGov.src.common.EGovernCommon;
 import com.exilant.exility.common.TaskFailedException;
+
+import javassist.tools.rmi.ObjectNotFoundException;
+
 import org.apache.log4j.Logger;
 import org.egov.commons.CFinancialYear;
 import org.egov.commons.dao.FinancialYearHibernateDAO;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.infstr.utils.EGovConfig;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -150,7 +154,7 @@ public class CashBook {
 					effTime = new HashMap<>();
 				else
 					effTime = eGovernCommon.getEffectiveDateFilter(snapShotDateTime);
-			} catch (final Exception ex) {
+			} catch (final TaskFailedException ex) {
 				LOGGER.error("exception in getGeneralLedgerList", ex);
 				throw taskExc;
 			}
@@ -169,7 +173,7 @@ public class CashBook {
                 endDate = reportBean.getEndDate();
                 dt = sdf.parse(endDate);
                 formendDate = formatter1.format(dt);
-            } catch (final Exception e) {
+            } catch (final ParseException e) {
                 LOGGER.error("inside the try-startdate", e);
                 throw taskExc;
             }
@@ -179,7 +183,7 @@ public class CashBook {
                     dt = sdf.parse(startDate);
                     formstartDate = formatter1.format(dt);
                 }
-            } catch (final Exception e) {
+            } catch (final ParseException e) {
                 LOGGER.error("inside the try-startdate", e);
                 throw taskExc;
             }
@@ -209,7 +213,7 @@ public class CashBook {
             try {
                 dt = formatter1.parse(startDateformat);
                 startDateformat1 = sdf.format(dt);
-            } catch (final Exception e) {
+            } catch (final ParseException e) {
                 LOGGER.error("Parse Exception", e);
                 throw taskExc;
             }
@@ -844,39 +848,25 @@ public class CashBook {
     public String getMinCode(final String minGlCode) throws TaskFailedException {
         // if(LOGGER.isInfoEnabled()) LOGGER.info("coming");
         String minCode = "";
-        try {
-            final StringBuilder query = new StringBuilder("select glcode from chartofaccounts ")
-            		.append("where glcode like ?|| '%' and classification = 4 order by glcode asc");
-            pstmt = persistenceService.getSession().createSQLQuery(query.toString());
-            pstmt.setString(0, minGlCode);
-            final List<Object[]> rset = pstmt.list();
-            for (final Object[] element : rset)
-                minCode = element[0].toString();
-        } catch (final Exception sqlex) {
-            LOGGER.error(
-                    "Exception while getting minGlCode" + sqlex.getMessage(),
-                    sqlex);
-            throw taskExc;
-        }
+        final StringBuilder query = new StringBuilder("select glcode from chartofaccounts ")
+        		.append("where glcode like ?|| '%' and classification = 4 order by glcode asc");
+        pstmt = persistenceService.getSession().createSQLQuery(query.toString());
+        pstmt.setString(0, minGlCode);
+        final List<Object[]> rset = pstmt.list();
+        for (final Object[] element : rset)
+            minCode = element[0].toString();
         return minCode;
     }
 
     public String getMaxCode(final String maxGlCode) throws TaskFailedException {
         String maxCode = "";
-        try {
-            final StringBuilder query = new StringBuilder("  select glcode from chartofaccounts ")
-            		.append("where glcode like ?|| '%' and classification = 4 order by glcode desc");
-            pstmt = persistenceService.getSession().createSQLQuery(query.toString());
-            pstmt.setString(0, maxGlCode);
-            final List<Object[]> rset = pstmt.list();
-            for (final Object[] element : rset)
-                maxCode = element[0].toString();
-        } catch (final Exception sqlex) {
-            LOGGER.error(
-                    "Exception while getting maxGlCode" + sqlex.getMessage(),
-                    sqlex);
-            throw taskExc;
-        }
+        final StringBuilder query = new StringBuilder("  select glcode from chartofaccounts ")
+        		.append("where glcode like ?|| '%' and classification = 4 order by glcode desc");
+        pstmt = persistenceService.getSession().createSQLQuery(query.toString());
+        pstmt.setString(0, maxGlCode);
+        final List<Object[]> rset = pstmt.list();
+        for (final Object[] element : rset)
+            maxCode = element[0].toString();
         return maxCode;
     }
 
@@ -894,7 +884,7 @@ public class CashBook {
                 for (final Object[] element : rsCgn)
                     cgn = element[0].toString();
 
-            } catch (final Exception sqlex) {
+            } catch (final HibernateException sqlex) {
                 LOGGER.error("cgnCatch#" + sqlex.getMessage(), sqlex);
                 throw taskExc;
             }
@@ -902,7 +892,7 @@ public class CashBook {
         return cgn;
     }
 
-    public void isCurDate(final String VDate) throws TaskFailedException {
+    public void isCurDate(final String VDate) throws TaskFailedException  {
 
         try {
 
@@ -921,9 +911,9 @@ public class CashBook {
                                                     .parseInt(dt2[0]) < Integer
                                                     .parseInt(dt1[0]) ? -1 : 0;
                                             if (ret == -1)
-                                                throw new Exception();
+                                                throw new ParseException(today, ret);
 
-        } catch (final Exception ex) {
+        } catch (final ParseException ex) {
             LOGGER.error("Exception in isCurDate():" + ex.getMessage(), ex);
             throw new TaskFailedException(
                     "Date Should be within the today's date");
@@ -953,7 +943,7 @@ public class CashBook {
             rs = pstmt.list();
             for (final Object[] element : rs)
                 glcode[1] = element[0].toString();
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             LOGGER.error("Inside getGlcode", e);
             throw taskExc;
         }
@@ -965,19 +955,13 @@ public class CashBook {
         List<Object[]> rs = null;
         String ulbName = "";
         Query pstmt = null;
-        try {
-
-            final String query = "select name as \"name\" from companydetail";
-            pstmt = persistenceService.getSession().createSQLQuery(query);
-            if (LOGGER.isInfoEnabled())
-                LOGGER.info(query);
-            rs = pstmt.list();
-            for (final Object[] element : rs)
-                ulbName = element[0].toString();
-        } catch (final Exception e) {
-            LOGGER.error("Inside getUlbDetails", e);
-            throw taskExc;
-        }
+        final String query = "select name as \"name\" from companydetail";
+        pstmt = persistenceService.getSession().createSQLQuery(query);
+        if (LOGGER.isInfoEnabled())
+            LOGGER.info(query);
+        rs = pstmt.list();
+        for (final Object[] element : rs)
+            ulbName = element[0].toString();
         return ulbName;
     }
 

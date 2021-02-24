@@ -219,7 +219,7 @@ public class ReportEngine {
                 params.put("voucherStatusToInclude", statusesToInclude);
             }
 
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             LOGGER.error(e.getMessage());
             throw new ApplicationRuntimeException(e.getMessage());
         }

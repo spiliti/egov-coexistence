@@ -63,6 +63,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -192,11 +193,45 @@ public class XMLLoader extends DefaultHandler {
         if (objectToLoad != null) { // if it is null, the node is not loaded at
             // all..
             if (atts.getIndex("type") < 0)
-                ObjectGetSetter.set(objectToLoad, "type", qName); // try saving
+                try {
+                    ObjectGetSetter.set(objectToLoad, "type", qName);
+                } catch (InstantiationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (SecurityException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (NoSuchFieldException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } // try saving
             // tag as
             // 'type'
             // attribute
-            ObjectGetSetter.setAll(objectToLoad, atts); // set all attributes
+            try {
+                ObjectGetSetter.setAll(objectToLoad, atts);
+            } catch (InstantiationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchFieldException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } // set all attributes
             // from atts to members
             // of childobject
         }

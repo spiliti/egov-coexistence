@@ -72,6 +72,7 @@ import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infstr.services.PersistenceService;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -122,9 +123,10 @@ public class GeneralLedgerReport {
      * @param reportBean
      * @return
      * @throws TaskFailedException
+     * @throws ParseException 
      */
 
-    public LinkedList getGeneralLedgerList(final GeneralLedgerReportBean reportBean) throws TaskFailedException {
+    public LinkedList getGeneralLedgerList(final GeneralLedgerReportBean reportBean) throws TaskFailedException, ParseException {
         final LinkedList dataList = new LinkedList();
         if (LOGGER.isInfoEnabled())
             LOGGER.info("Indise the loop..........");
@@ -181,7 +183,7 @@ public class GeneralLedgerReport {
                 startDate = formatter1.format(dtOBj);
             } else
                 startDate = formstartDate;
-        } catch (final Exception e) {
+        } catch (final ParseException e) {
             LOGGER.error("inside the try-startdate" + e, e);
             throw taskExc;
         }
@@ -194,7 +196,7 @@ public class GeneralLedgerReport {
         try {
             dt = formatter1.parse(startDateformat);
             startDateformat1 = sdf.format(dt);
-        } catch (final Exception e) {
+        } catch (final ParseException e) {
             LOGGER.error("Parse Exception" + e, e);
             throw taskExc;
         }
@@ -236,7 +238,7 @@ public class GeneralLedgerReport {
 			try {
 				pstmt = persistenceService.getSession().createSQLQuery(entry.getKey());
 				persistenceService.populateQueryWithParams(pstmt, entry.getValue());
-			} catch (final Exception e) {
+			} catch (final HibernateException e) {
 				LOGGER.error("Exception in creating statement:" + pstmt, e);
 				throw taskExc;
 			}
@@ -404,7 +406,7 @@ public class GeneralLedgerReport {
 
                         currCode = code;
                     }// End If glcodes changing
-                } catch (final Exception ex) {
+                } catch (final TaskFailedException ex) {
                     LOGGER.error("ERROR (not an error): ResultSet is Empty", ex);
                     throw taskExc;
                 }
@@ -843,7 +845,7 @@ public class GeneralLedgerReport {
                 dataList.add(generalLedgerBean);
             }
 
-        } catch (final Exception ex) {
+        } catch (final TaskFailedException ex) {
             LOGGER.error("ERROR in getGeneralLedgerList " + ex.toString(), ex);
             throw taskExc;
         }

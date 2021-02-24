@@ -48,6 +48,7 @@
 package org.egov.egf.web.actions.report;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
@@ -179,7 +180,7 @@ public class GeneralLedgerReportAction extends BaseFormAction {
 			LOGGER.debug("GeneralLedgerAction | Search | start");
 		try {
 			generalLedgerDisplayList = generalLedgerReport.getGeneralLedgerList(generalLedgerReportBean);
-		} catch (final TaskFailedException e) {
+		} catch (final TaskFailedException |ParseException e) {
                     LOGGER.error("GeneralLedgerAction | list | End",e);
 
 		}
@@ -200,7 +201,7 @@ public class GeneralLedgerReportAction extends BaseFormAction {
 			LOGGER.debug("GeneralLedgerAction | Search | start");
 		try {
 			generalLedgerDisplayList = generalLedgerReport.getGeneralLedgerList(generalLedgerReportBean);
-		} catch (final TaskFailedException e) {
+		} catch (final TaskFailedException  |ParseException e) {
                     LOGGER.error("GeneralLedgerAction | list | End",e);
 
 		}

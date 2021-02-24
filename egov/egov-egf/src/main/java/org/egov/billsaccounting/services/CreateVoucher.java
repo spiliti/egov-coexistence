@@ -301,7 +301,7 @@ public class CreateVoucher {
 	 */
 
 	public long createVoucherFromBill(final int billId, String voucherStatus, final String voucherNumber,
-			final Date voucherDate) throws ApplicationRuntimeException, SQLException, TaskFailedException {
+			final Date voucherDate) {
 		CVoucherHeader vh = null;
 		try {
 			if (voucherStatus == null) {
@@ -337,7 +337,7 @@ public class CreateVoucher {
 						throw new ApplicationRuntimeException(
 								"Voucher " + result.getVoucherNumber() + " already exists for this bill ");
 				}
-			} catch (final Exception e) {
+			} catch (final ApplicationRuntimeException e) {
 				throw new ApplicationRuntimeException(e.getMessage());
 			}
 			final Fund fund = billMis.getFund();
@@ -533,7 +533,7 @@ public class CreateVoucher {
 			final List<ValidationError> errors = new ArrayList<ValidationError>();
 			errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
 			throw new ValidationException(errors);
-		} catch (final Exception e) {
+		} catch (final ApplicationRuntimeException e) {
 			LOGGER.error("Error in create voucher from bill" + e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
@@ -552,7 +552,7 @@ public class CreateVoucher {
 
 	public long createVoucherFromBillForPJV(final int billId, final String voucherStatus,
 			final List<PreApprovedVoucher> voucherdetailList, final List<PreApprovedVoucher> subLedgerList)
-			throws ApplicationRuntimeException, SQLException, TaskFailedException {
+		 {
 		final CVoucherHeader vh = null;
 		try {
 			if (LOGGER.isDebugEnabled())
@@ -610,7 +610,7 @@ public class CreateVoucher {
 			}
 
 			// vh=createVoucherheaderAndPostGLForPJV(fundId,egBillregister,fundSrcId,schemeId,subSchemeId,name,cgnCode,voucherType,voucherdetailList,subLedgerList);
-		} catch (final Exception e) {
+		} catch (final  ApplicationRuntimeException e) {
 			LOGGER.error("Error in createVoucherFromBillForPJV " + e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
