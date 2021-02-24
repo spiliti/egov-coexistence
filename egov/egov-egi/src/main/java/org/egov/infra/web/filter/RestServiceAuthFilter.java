@@ -32,6 +32,8 @@ import org.egov.infra.admin.master.entity.Role;
 import org.egov.infra.admin.master.entity.User;
 import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.config.security.authentication.userdetail.CurrentUser;
+import org.egov.infra.exception.ApplicationRuntimeException;
+import org.egov.infra.exception.AuthorizationException;
 import org.egov.infra.microservice.contract.Error;
 import org.egov.infra.microservice.contract.ErrorResponse;
 import org.egov.infra.microservice.contract.RequestInfoWrapper;
@@ -80,8 +82,8 @@ public class RestServiceAuthFilter implements Filter {
     private SecurityUtils securityUtils;
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws ServletException, IOException
+            {
         LOGGER.info("Rest service authentication initiated");
         
         HttpServletRequest httpRequest = (HttpServletRequest)req;
@@ -104,7 +106,7 @@ public class RestServiceAuthFilter implements Filter {
                 Authentication auth = this.prepareAuthenticationObj(request, user);
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 chain.doFilter(request, res);
-            } catch (Exception e) {
+            } catch (IOException | ServletException e) {
                 httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 httpResponse.setStatus(HttpStatus.SC_UNAUTHORIZED);
                 httpResponse.getWriter().write(getErrorResponse(e.getMessage()));
@@ -167,17 +169,17 @@ public class RestServiceAuthFilter implements Filter {
         return auth;
     }
 
-    private User getUserDetails(HttpServletRequest request) throws Exception {
+    private User getUserDetails(HttpServletRequest request) {
       
          String user_token = readAuthToken(request);
          String tenantId = readTenantId(request);
          setSchema(tenantId);
         if (user_token == null)
-            throw new Exception("AuthToken not found");
+            throw new AuthorizationException("AuthToken not found");
         HttpSession session = request.getSession();
         String admin_token = this.microserviceUtils.generateAdminToken(tenantId);
         if(admin_token==null)
-            throw new Exception("SI token generation failed");
+            throw new AuthorizationException("SI token generation failed");
         session.setAttribute(MS_USER_TOKEN, user_token);
         CustomUserDetails user = this.microserviceUtils.getUserDetails(user_token, admin_token);
         session.setAttribute(MS_TENANTID_KEY, user.getTenantId());
@@ -212,7 +214,7 @@ public class RestServiceAuthFilter implements Filter {
 
     }
 
-    private String readAuthToken(HttpServletRequest request) throws Exception {
+    private String readAuthToken(HttpServletRequest request) {
         LOGGER.info("Rest service - reading authtoken");
 
         try {
@@ -231,22 +233,22 @@ public class RestServiceAuthFilter implements Filter {
 
             String authToken = (String) reqInfo.get("authToken");
             if(authToken==null)
-                throw new Exception("authToken not found");
+                throw new AuthorizationException("authToken not found");
 
             return authToken;
         } catch (JsonParseException e) {
             e.printStackTrace();
-            throw new Exception("Request parsing failed");
+            throw new ApplicationRuntimeException("Request parsing failed");
         } catch (JsonMappingException e) {
             e.printStackTrace();
-            throw new Exception("Request object Mapping failed");
+            throw new ApplicationRuntimeException("Request object Mapping failed");
         } catch (IOException e) {
             e.printStackTrace();
-            throw new Exception("Request processing failed");
+            throw new ApplicationRuntimeException("Request processing failed");
         }
     }
     
-    private String readTenantId(HttpServletRequest request) throws Exception{
+    private String readTenantId(HttpServletRequest request){
         LOGGER.info("Rest service - reading tenantId");
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -263,18 +265,18 @@ public class RestServiceAuthFilter implements Filter {
                 tenantId= request.getParameter("tenantId");
             }
             if(tenantId==null || "null".equalsIgnoreCase(tenantId))
-                throw new Exception("tenantId is not found");
+                throw new NullPointerException("tenantId is not found");
 
             return tenantId;
         } catch (JsonParseException e) {
             e.printStackTrace();
-            throw new Exception("Request parsing failed");
+            throw new ApplicationRuntimeException("Request parsing failed");
         } catch (JsonMappingException e) {
             e.printStackTrace();
-            throw new Exception("Request object Mapping failed");
+            throw new ApplicationRuntimeException("Request object Mapping failed");
         } catch (IOException e) {
             e.printStackTrace();
-            throw new Exception("Request processing failed");
+            throw new ApplicationRuntimeException("Request processing failed");
         }
 
         

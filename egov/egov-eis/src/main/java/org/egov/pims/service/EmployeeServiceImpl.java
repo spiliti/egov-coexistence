@@ -87,6 +87,8 @@ import org.hibernate.type.IntegerType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javassist.tools.rmi.ObjectNotFoundException;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.lang.reflect.Field;
@@ -146,8 +148,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
     private final static Logger LOGGER = Logger.getLogger(EmployeeServiceImpl.class);
 
     @Deprecated
-    public List searchEmployee(Integer departmentId, Integer designationId, String code, String name, String searchAll)
-            throws Exception {
+    public List searchEmployee(Integer departmentId, Integer designationId, String code, String name, String searchAll) {
 
         List<EmployeeView> employeeList = null;
         try {
@@ -209,17 +210,14 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return employeeList;
     }
 
-    public List searchEmployee(Integer departmentId, Integer designationId, String code, String name, Integer status)
-            throws Exception {
+    public List searchEmployee(Integer departmentId, Integer designationId, String code, String name, Integer status) {
 
         List<EmployeeView> employeeList = null;
         try {
@@ -288,12 +286,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return employeeList;
     }
 
@@ -301,7 +297,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
      * search employee by department,designation,functionary,code and name
      */
     public List searchEmployee(Integer departmentId, Integer designationId, Integer functionaryId, String code,
-            String name, Integer status) throws Exception {
+            String name, Integer status) {
         List<EmployeeView> employeeList = null;
         try {
 
@@ -376,12 +372,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return employeeList;
     }
 
@@ -507,12 +501,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return employeeList;
     }
 
@@ -641,12 +633,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return employeeList;
     }
 
@@ -692,15 +682,15 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error("Exception ===" + he.getMessage());
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception e) {
-            LOGGER.error("Exception ===" + e.getMessage());
-            throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
-
-        }
+        } /*
+           * catch (Exception e) { LOGGER.error("Exception ===" +
+           * e.getMessage()); throw new ApplicationRuntimeException("Exception:"
+           * + e.getMessage(), e); }
+           */
         return employeeList;
     }
 
-    public List searchEmployee(Integer empId) throws Exception {
+    public List searchEmployee(Integer empId) {
         ArrayList<SearchEmpDTO> dataElCol = new ArrayList<SearchEmpDTO>();
         List employeeList = null;
 
@@ -723,12 +713,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
 
         return dataElCol;
     }
@@ -773,7 +761,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
                     dataElColt.add(new SearchEmpDTO(desid, deptId, empCode, fName, id, fromDate, toDate));
                 }
             }
-        } catch (Exception e) {
+        } catch (ApplicationRuntimeException e) {
 
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
@@ -800,10 +788,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return assignment;
     }
 
@@ -828,10 +816,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return assignment;
     }
 
@@ -959,10 +947,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return personalInformation;
 
     }
@@ -992,10 +980,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return position;
 
     }
@@ -1027,12 +1015,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return b;
     }
 
@@ -1047,7 +1033,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
     public void createAssignment(Assignment egEmpAssignment) {
         try {
             assignmentDAO.create(egEmpAssignment);
-        } catch (Exception e) {
+        } catch ( HibernateException e) {
 
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
@@ -1066,7 +1052,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
                 adk.setDetailname(accountdetailtype.getAttributename());
                 accountdetailkeyHibernateDAO.create(adk);
             }
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
         }
@@ -1078,7 +1064,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         try {
             if (egpimsPersonalInformation != null)
                 personalInformationDAO.update(egpimsPersonalInformation);
-        } catch (Exception e) {
+        } catch (HibernateException e) {
 
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
@@ -1139,7 +1125,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
                 }
             }
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
         }
@@ -1163,7 +1149,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
                 }
             }
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
         }
@@ -1188,7 +1174,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
             }
             employeeNamePoJo = new EmployeeNamePoJo(fn, mn, ln);
             return employeeNamePoJo;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
 
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
@@ -1260,7 +1246,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
     public void deleteLangKnownForEmp(PersonalInformation personalInformation) {
         try {
             personalInformationDAO.deleteLangKnownForEmp(personalInformation);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
 
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
@@ -1286,12 +1272,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return id;
     }
 
@@ -1316,12 +1300,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return String.valueOf(id);
     }
 
@@ -1380,11 +1362,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return b;
 
     }
@@ -1398,10 +1379,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return list;
     }
 
@@ -1414,14 +1395,14 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return list;
     }
 
-    public Assignment getLatestAssignmentForEmployeeByToDate(Integer empId, Date todate) throws Exception {
+    public Assignment getLatestAssignmentForEmployeeByToDate(Integer empId, Date todate) {
         Assignment assignment = null;
         try {
 
@@ -1430,10 +1411,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return assignment;
     }
 
@@ -1447,8 +1428,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
      * @throws TooManyValuesException
      * @throws NoSuchObjectException
      */
-    public PersonalInformation getEmployee(Integer deptId, Integer designationId, Long Boundaryid)
-            throws TooManyValuesException, NoSuchObjectException {
+    public PersonalInformation getEmployee(Integer deptId, Integer designationId, Long Boundaryid) {
         PersonalInformation personalInformation = null;
 
         try {
@@ -1457,7 +1437,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
                 personalInformation = personalInformationDAO.getEmployee(deptId, designationId, Boundaryid);
             }
 
-        } catch (Exception e) {
+        } catch (TooManyValuesException | NoSuchObjectException e) {
             throw new ApplicationRuntimeException("system.error", e);
         }
         return personalInformation;
@@ -1509,10 +1489,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return assignment;
     }
 
@@ -1529,7 +1509,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
 
             empList = personalInformationDAO.getAllEmpByGrade(gradeId);
 
-        } catch (Exception e) {
+        } catch (HibernateException e) {
 
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
@@ -1537,7 +1517,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         return empList;
     }
 
-    public PersonalInformation getEmpForPositionAndDate(Date dateEntered, Integer posId) throws Exception {
+    public PersonalInformation getEmpForPositionAndDate(Date dateEntered, Integer posId) {
 
         PersonalInformation personalInformation = null;
         try {
@@ -1570,10 +1550,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
 
         return personalInformation;
     }
@@ -1586,7 +1566,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
      * @return
      * @throws Exception
      */
-    public List<PersonalInformation> getEmpListForPositionAndDate(Date dateEntered, Integer posId) throws Exception {
+    public List<PersonalInformation> getEmpListForPositionAndDate(Date dateEntered, Integer posId) {
 
         PersonalInformation personalInformation = null;
         List<PersonalInformation> empList = null;
@@ -1622,10 +1602,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
 
         return empList;
     }
@@ -1660,7 +1640,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
      * @throws Exception
      */
 
-    public List getAllActiveUsersByGivenDesg(Integer DesgId) throws Exception {
+    public List getAllActiveUsersByGivenDesg(Integer DesgId) {
         List userList = null;
         try {
             if (DesgId != null && DesgId != 0) {
@@ -1668,7 +1648,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
 
             }
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new ApplicationRuntimeException("system.error", e);
         }
         return userList;
@@ -1692,9 +1672,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
 
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
 
         return list;
 
@@ -1719,9 +1700,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
 
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
 
         return list;
 
@@ -1771,10 +1753,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return assignment;
 
     }
@@ -1874,10 +1856,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return positionList;
     }
 
@@ -1925,10 +1907,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         } catch (HibernateException he) {
             LOGGER.error(he);
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            LOGGER.error(he);
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        }
+        } /*
+           * catch (Exception he) { LOGGER.error(he); throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return assignment;
 
     }
@@ -2044,10 +2026,10 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
 
         } catch (HibernateException he) {
             throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-        } catch (Exception he) {
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
-
-        }
+        } /*
+           * catch (Exception he) { throw new
+           * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
+           */
         return employeeList;
     }
 
@@ -2079,7 +2061,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
                 }
             }
 
-        } catch (Exception e) {
+        } catch (HibernateException e) {
 
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
         }
@@ -2170,7 +2152,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
 
             empUserMapList = personalInformationDAO.getListOfUsersNotMappedToEmp();
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
 
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);

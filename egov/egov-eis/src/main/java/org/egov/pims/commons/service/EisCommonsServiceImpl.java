@@ -48,6 +48,8 @@
 package org.egov.pims.commons.service;
 
 import org.apache.log4j.Logger;
+import org.egov.commons.exception.NoSuchObjectException;
+import org.egov.commons.exception.TooManyValuesException;
 import org.egov.eis.entity.EmployeeView;
 import org.egov.infra.admin.master.entity.User;
 import org.egov.infra.admin.master.service.AppConfigValueService;
@@ -107,7 +109,7 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 		{
 			positionMasterDAO.updatePosition(position);
 		}
-		catch(Exception e)
+		catch(HibernateException e)
 		{
 			
 			throw new ApplicationRuntimeException("Exception in deleting Installment."+e.getMessage(),e);
@@ -127,7 +129,7 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 			}
 			return pos;
 		}
-		catch(Exception e)
+		catch(HibernateException e)
 		{
 			
 			throw new ApplicationRuntimeException("Exception in deleting Installment."+e.getMessage(),e);
@@ -169,10 +171,10 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 		catch (HibernateException he) {
 				
 				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			} catch (Exception he)
-			{
-				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			}
+        } /*
+           * catch (Exception he) { throw new
+           * ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he); }
+           */
 			return userPosition;
  
     }
@@ -207,10 +209,10 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 		}
 		catch (HibernateException he) {
 				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			} catch (Exception he)
-			{
-				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			}
+        } /*
+           * catch (Exception he) { throw new
+           * ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he); }
+           */
 			return userPosition;
 
 	}
@@ -243,10 +245,10 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 		}
 		catch (HibernateException he) {
 				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			} catch (Exception he)
-			{
-				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			}
+        } /*
+           * catch (Exception he) { throw new
+           * ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he); }
+           */
 			return uerImpl;
 
 	}
@@ -280,11 +282,10 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 		 catch (HibernateException he) {
 				
 				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			} catch (Exception he)
-			{
-				
-				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			}
+        } /*
+           * catch (Exception he) { throw new
+           * ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he); }
+           */
 		 return checkEmpCode;
 	 }
 	 
@@ -306,10 +307,10 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 			 }
 			 catch (HibernateException he) {
 					throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-				} catch (Exception he)
-				{
-					throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-				}
+        } /*
+           * catch (Exception he) { throw new
+           * ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he); }
+           */
 				
 		 }
 		
@@ -330,12 +331,11 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 			position = EisManagersUtill.getEmployeeService().getPositionforEmp(personalInfo.getIdPersonalInformation());
 			
 		}
-		}catch(Exception e)
-		{
-			
-			throw new ApplicationRuntimeException("Exception in getCurrentPositionByUser :"+e.getMessage(),e);
-		}
-		return position;
+        } catch (HibernateException e) {
+
+            throw new ApplicationRuntimeException("Exception in getCurrentPositionByUser :" + e.getMessage(), e);
+        }
+        return position;
 	}
 	
 	public  User getUserForPosition(Integer posId, Date date)
@@ -367,10 +367,10 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 		}
 		catch (HibernateException he) {
 				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			} catch (Exception he)
-			{
-				throw new ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he);
-			}
+        } /*
+           * catch (Exception he) { throw new
+           * ApplicationRuntimeException(STR_EXCEPTION + he.getMessage(),he); }
+           */
 			return user;
 		
 	}
@@ -380,9 +380,9 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 	 * @param functionaryId
 	 * @return unique designation from view if dept and functionary is 0
 	 * else based on dept and functionary
-	 * @throws Exception
+	 * 
 	 */
-	 public List<Designation> getDesigantionBasedOnFuncDept(Integer deptId,Integer functionaryId) throws Exception
+	 public List<Designation> getDesigantionBasedOnFuncDept(Integer deptId,Integer functionaryId) 
 		{
 		 	
 			
@@ -422,7 +422,7 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 				desgMstr=(List<Designation>)query.list();
 				
 			}
-			catch(Exception e){
+			catch(HibernateException e){
 				
 				throw new ApplicationRuntimeException(e.getMessage(),e);
 			}
@@ -439,9 +439,11 @@ public class EisCommonsServiceImpl implements EisCommonsService {
 	  * @param functionaryId
 	  * @param onDate
 	  * @return Employee
-	  * @throws Exception 
+	 * @throws TooManyValuesException 
+	 * @throws NoSuchObjectException 
+	  * 
 	  */
-	 public PersonalInformation getTempAssignedEmployeeByDeptDesigFunctionaryDate(Integer deptId, Integer desigId, Integer functionaryId, Date onDate) throws Exception{
+	 public PersonalInformation getTempAssignedEmployeeByDeptDesigFunctionaryDate(Integer deptId, Integer desigId, Integer functionaryId, Date onDate) throws NoSuchObjectException, TooManyValuesException {
 		 return pimsDao.getTempAssignedEmployeeByDeptDesigFunctionaryDate(deptId, desigId, functionaryId, onDate);
 	 }
 	 

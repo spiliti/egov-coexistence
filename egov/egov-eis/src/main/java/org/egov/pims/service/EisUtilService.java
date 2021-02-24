@@ -61,6 +61,7 @@ import org.egov.pims.commons.Designation;
 import org.egov.pims.commons.Position;
 import org.egov.pims.dao.PersonalInformationDAO;
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
@@ -70,6 +71,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -134,7 +136,7 @@ public class EisUtilService implements OwnerGroupService<Position> {
 			mainStr.append(" and ((a.toDate is null and a.fromDate<= ?) or (a.fromDate <= ? and a.toDate >= ?))");
 			position = (Position) persistenceService.find(mainStr.toString(), userId, givenDate, givenDate, givenDate);
 
-		} catch (Exception e) {
+		} catch (HibernateException e) {
 			LOGGER.error("Exception while getting the getPrimaryPositionForUser=" + e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage(), e);
 
@@ -154,7 +156,7 @@ public class EisUtilService implements OwnerGroupService<Position> {
 			mainStr.append(
 					" and ((emp.toDate is null and emp.fromDate<= ?) or (emp.fromDate <= ? and emp.toDate >= ?))");
 			user = (User) persistenceService.find(mainStr.toString(), positionId, givenDate, givenDate, givenDate);
-		} catch (Exception e) {
+		} catch (HibernateException e) {
 			LOGGER.error("Exception while getting the getUserForPosition=" + e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage(), e);
 

@@ -163,12 +163,11 @@ public class ContraService extends PersistenceService<ContraJournalVoucher, Long
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("Exception occuerd while postiong into contractorJournal");
             throw new HibernateException(e);
-        } catch (final Exception e) {
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("Exception occuerd while postiong into contractorJournal");
-            throw new HibernateException(e);
-
-        }
+        } /*
+           * catch (final Exception e) { if (LOGGER.isDebugEnabled()) LOGGER.
+           * debug("Exception occuerd while postiong into contractorJournal");
+           * throw new HibernateException(e); }
+           */
         return existingCJV;
     }
 
@@ -186,12 +185,11 @@ public class ContraService extends PersistenceService<ContraJournalVoucher, Long
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("Exception occuerd while updateBankreconciliation" + e);
             throw new HibernateException(e);
-        } catch (final Exception e) {
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("Exception occuerd while updateBankreconciliation" + e);
-            throw new HibernateException(e);
-
-        }
+        } /*
+           * catch (final Exception e) { if (LOGGER.isDebugEnabled())
+           * LOGGER.debug("Exception occuerd while updateBankreconciliation" +
+           * e); throw new HibernateException(e); }
+           */
 
         return existingBR;
     }

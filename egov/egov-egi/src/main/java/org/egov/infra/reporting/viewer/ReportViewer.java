@@ -75,7 +75,7 @@ public class ReportViewer implements HttpRequestHandler {
     private ReportViewerUtil reportViewerUtil;
 
     @Override
-    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response) {
         String reportId = request.getParameter(ReportConstants.REQ_PARAM_REPORT_ID);
         try {
             ReportOutput reportOutput = reportViewerUtil.getReportOutputFormCache(reportId);
@@ -95,11 +95,7 @@ public class ReportViewer implements HttpRequestHandler {
                 renderError(response, "Report data not available");
                 return;
             }
-
             renderReport(response, reportOutput);
-        } catch (Exception e) {
-            LOGGER.error("Invalid report id [{}]", reportId, e);
-            renderError(response, "Report can not be rendered");
         } finally {
             reportViewerUtil.removeReportOutputFromCache(reportId);
         }
@@ -111,7 +107,7 @@ public class ReportViewer implements HttpRequestHandler {
             resp.setContentType(ReportViewerUtil.getContentType(reportOutput.getReportFormat()));
             resp.setContentLength(reportOutput.getReportOutputData().length);
             outputStream.write(reportOutput.getReportOutputData());
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOGGER.error("Exception in rendering report response with format [{}]!", reportOutput.getReportFormat(), e);
             throw new ApplicationRuntimeException("Error occurred in report viewer", e);
         }
@@ -123,7 +119,7 @@ public class ReportViewer implements HttpRequestHandler {
             resp.setContentType(ReportViewerUtil.getContentType(ReportFormat.HTM));
             resp.setContentLength(errorResponse.length);
             outputStream.write(errorResponse);
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOGGER.error("Error occurred while preparing report error response!", e);
             throw new ApplicationRuntimeException("Error occurred in report viewer", e);
         }

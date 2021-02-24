@@ -52,6 +52,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.egov.infra.web.spring.annotation.DuplicateRequestToken;
 import org.egov.infra.web.spring.annotation.ValidateToken;
+import org.hibernate.SessionException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.method.HandlerMethod;
@@ -61,6 +62,8 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -78,8 +81,8 @@ public class DuplicateFormSubmissionInterceptor extends HandlerInterceptorAdapte
     }
 
     @Override
-    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler)
-            throws Exception {
+    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception
+             {
         if (handler != null && handler instanceof HandlerMethod
                 && ((HandlerMethod) handler).getMethodAnnotation(ValidateToken.class) != null) {
             final HttpSession session = request.getSession();
@@ -142,7 +145,8 @@ public class DuplicateFormSubmissionInterceptor extends HandlerInterceptorAdapte
 
     private static void scheduleForRemoval(final HttpSession session, final String tokenName) {
         final Runnable tokenRemoverTask = () -> {
-            try {session.removeAttribute(tokenName);}catch(Exception e) {}
+            try {session.removeAttribute(tokenName);
+            }catch(SessionException e) {}
         };
         executor.schedule(tokenRemoverTask, ORPHEN_TOKEN_REMOVAL_DELAY, TimeUnit.MILLISECONDS);
     }
