@@ -209,15 +209,6 @@ public class UpdateExpenseBillController extends BaseBillController {
         if (request.getParameter("approvalComent") != null)
             approvalComment = request.getParameter("approvalComent");
         
-        if (workFlowAction != null && FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction)) {
-            if (!commonsUtil.isValidApprover(egBillregister, approvalPosition)) {
-                model.addAttribute("errorMessage", getLocalizedMessage(INVALID_APPROVER, null, null));
-                prepareBillDetailsForView(egBillregister);
-                expenseBillService.validateSubledgeDetails(egBillregister);
-                return populateOnException(egBillregister, model, request);
-            }
-        }
-
         if (request.getParameter(APPROVAL_POSITION) != null && !request.getParameter(APPROVAL_POSITION).isEmpty())
             approvalPosition = Long.valueOf(request.getParameter(APPROVAL_POSITION));
 
@@ -227,6 +218,16 @@ public class UpdateExpenseBillController extends BaseBillController {
             approvalPosition = Long.valueOf(request.getParameter(APPROVAL_POSITION));
         if (request.getParameter(APPROVAL_DESIGNATION) != null && !request.getParameter(APPROVAL_DESIGNATION).isEmpty())
             apporverDesignation = String.valueOf(request.getParameter(APPROVAL_DESIGNATION));
+
+        
+        if (workFlowAction != null && FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction)) {
+            if (!commonsUtil.isValidApprover(egBillregister, approvalPosition)) {
+                model.addAttribute("errorMessage", getLocalizedMessage(INVALID_APPROVER, null, null));
+                prepareBillDetailsForView(egBillregister);
+                expenseBillService.validateSubledgeDetails(egBillregister);
+                return populateOnException(egBillregister, model, request);
+            }
+        }
 
         if (egBillregister.getState() != null
                 && (FinancialConstants.WORKFLOW_STATE_REJECTED.equals(egBillregister.getState().getValue())

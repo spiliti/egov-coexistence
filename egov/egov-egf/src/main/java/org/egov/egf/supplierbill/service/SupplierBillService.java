@@ -356,7 +356,7 @@ public class SupplierBillService {
                     && workFlowAction.equals(FinancialConstants.BUTTONCANCEL))
                 egBillregister.setStatus(financialUtils.getStatusByModuleAndCode(FinancialConstants.SBILL,
                         FinancialConstants.SUPPLIERBILL_CANCELLED_STATUS));
-            else if (FinancialConstants.SUPPLIERBILL_CANCELLED_STATUS.equals(egBillregister.getStatus().getCode())
+            else if (FinancialConstants.SUPPLIERBILL_REJECTED_STATUS.equals(egBillregister.getStatus().getCode())
                     && workFlowAction.equals(FinancialConstants.BUTTONFORWARD))
                 egBillregister.setStatus(financialUtils.getStatusByModuleAndCode(FinancialConstants.SBILL,
                         FinancialConstants.SUPPLIERBILL_CREATED_STATUS));

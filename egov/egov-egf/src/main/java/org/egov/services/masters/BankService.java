@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.commons.Bank;
+import org.egov.commons.utils.BankAccountType;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.utils.FinancialConstants;
 import org.hibernate.Criteria;
@@ -129,9 +130,9 @@ public class BankService extends PersistenceService<Bank, Integer> {
         return bankBranchList;
     }
 
-    public List<Map<String, Object>> getBankByFundAndType(Integer fundId, String typeOfAccount) {
+    public List<Map<String, Object>> getBankByFundAndType(Integer fundId, List<BankAccountType> list) {
         List<Map<String, Object>> bankBranchList = new ArrayList<>();
-        for (final Object[] element : fetchBankByFundAndTypeOfAccount(fundId, typeOfAccount)) {
+        for (final Object[] element : fetchBankByFundAndTypeOfAccount(fundId, list)) {
             Map<String, Object> bankBrmap = new HashMap<>();
             bankBrmap.put(BANK_BRANCH_ID, element[0].toString());
             bankBrmap.put(BANK_BRANCH_NAME, element[1].toString());
@@ -140,7 +141,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
         return bankBranchList;
     }
 
-	private List<Object[]> fetchBankByFundAndTypeOfAccount(final Integer fundId, final String typeOfAccount) {
+	private List<Object[]> fetchBankByFundAndTypeOfAccount(final Integer fundId, final List<BankAccountType> list) {
 		final StringBuilder query = new StringBuilder();
 		query.append("select DISTINCT concat(concat(bank.id,'-'),bankBranch.id) as bankbranchid,")
 				.append("concat(concat(bank.name,' '),bankBranch.branchname) as bankbranchname ")
@@ -157,7 +158,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
 		if (fundId != null)
 			qry.setInteger(FUND_ID, fundId);
 
-		qry.setParameterList("accountType", Arrays.asList(typeOfAccount.split(",")));
+		qry.setParameterList("accountType", list);
 
 		List<Object[]> bankBranch = qry.list();
 
