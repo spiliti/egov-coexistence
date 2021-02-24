@@ -79,6 +79,7 @@ public class EgBillregister extends StateAware implements java.io.Serializable {
     @NotNull
     @Length(min = 1,max=50)
     @SafeHtml
+    @Column(updatable = false)
     private String billnumber;
     
     @NotNull
@@ -113,6 +114,7 @@ public class EgBillregister extends StateAware implements java.io.Serializable {
     private String division;
     @SafeHtml
     @Length(max = 50)
+    @Column(updatable = false)
     private String workordernumber;
     @SafeHtml
     @Length(max = 50)

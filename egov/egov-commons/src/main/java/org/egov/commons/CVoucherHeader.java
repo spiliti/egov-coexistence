@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -100,6 +101,7 @@ public class CVoucherHeader extends StateAware implements java.io.Serializable {
     private Date effectiveDate;
     @SafeHtml
     @Length(max = 30)
+    @Column(updatable = false)
     private String voucherNumber;
     private Date voucherDate;
     @ManyToOne(fetch = FetchType.LAZY)
