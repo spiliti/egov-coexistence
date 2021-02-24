@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
+import com.mchange.rmi.NotAuthorizedException;
 
 public class ApplicationSecurityRepository implements SecurityContextRepository {
 
@@ -87,7 +88,7 @@ public class ApplicationSecurityRepository implements SecurityContextRepository 
 			LOGGER.info(" ***  Session   found  in redis.... ," + request.getSession().getId());
 			
 			context.setAuthentication(this.prepareAuthenticationObj(request, cur_user));
-		} catch (Exception e) {
+		} catch (SecurityException | NotAuthorizedException e) {
 			LOGGER.error(e.getMessage());
 			LOGGER.error(" ***  Session is not found in Redis. Creating empty security context");
 			return SecurityContextHolder.createEmptyContext();
@@ -120,7 +121,7 @@ public class ApplicationSecurityRepository implements SecurityContextRepository 
 		return auth;
 	}
 
-    private User getUserDetails(HttpServletRequest request) throws Exception {
+    private User getUserDetails(HttpServletRequest request) throws NotAuthorizedException  {
         String user_token = null;
         String tenantid = null;
         user_token = request.getParameter("auth_token");
@@ -130,14 +131,14 @@ public class ApplicationSecurityRepository implements SecurityContextRepository 
         
         if (user_token == null){
             session.setAttribute("error-code", 440);
-            throw new Exception("AuthToken not found");
+            throw new NotAuthorizedException("AuthToken not found");
         }
         
         String admin_token = this.microserviceUtils.generateAdminToken(tenantid);
         session.setAttribute(MS_USER_TOKEN, user_token);
         CustomUserDetails user = this.microserviceUtils.getUserDetails(user_token, admin_token);
         if(null==user || user.getId()==null)
-            throw new Exception("Invalid Token");
+            throw new NotAuthorizedException("Invalid Token");
         session.setAttribute(MS_TENANTID_KEY, user.getTenantId());
         session.setAttribute(USERID_KEY,user.getId());
         UserSearchResponse response = this.microserviceUtils.getUserInfo(user_token, user.getTenantId(), user.getUuid());

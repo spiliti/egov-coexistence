@@ -96,10 +96,13 @@ public final class EGovConfig {
 			} catch (final ConfigurationException cex) {
 				LOGGER.error("Error occurred in initializeClassVariable", cex);
 				throw new ApplicationRuntimeException("Exception in initializeClassVariable", cex);
-			} catch (final Exception exp) {
-				LOGGER.error("Error occurred in initializeClassVariable", exp);
-				throw new ApplicationRuntimeException("Exception in initializeClassVariable", exp);
-			} catch (final Error exp) {
+            } /*
+               * catch (final Exception exp) {
+               * LOGGER.error("Error occurred in initializeClassVariable", exp);
+               * throw new
+               * ApplicationRuntimeException("Exception in initializeClassVariable"
+               * , exp); }
+               */catch (final Error exp) {
 				LOGGER.error("Error occurred in initializeClassVariable", exp);
 				throw new ApplicationRuntimeException("Exception in initializeClassVariable", exp);
 			}

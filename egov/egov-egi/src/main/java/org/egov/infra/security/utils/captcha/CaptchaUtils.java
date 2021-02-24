@@ -50,7 +50,9 @@ package org.egov.infra.security.utils.captcha;
 
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpException;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -62,6 +64,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,7 +95,7 @@ public class CaptchaUtils {
     @Autowired
     private DefaultCaptchaService captchaService;
 
-    public boolean captchaIsValid(HttpServletRequest request) {
+    public boolean captchaIsValid(HttpServletRequest request){
         try {
             if (highlySecure) {
                 List<NameValuePair> urlParameters = new ArrayList<>();
@@ -108,7 +113,7 @@ public class CaptchaUtils {
                 String response = request.getParameter(J_CAPTCHA_RESPONSE);
                 return captchaService.validateResponseForID(captchaId, response);
             }
-        } catch (Exception e) {
+        } catch (UnsupportedOperationException | IOException e) {
             LOG.warn("Captcha verification failed", e);
             return false;
         }

@@ -82,9 +82,9 @@ public interface PersonalInformationDAO
 	 public PersonalInformation getTempAssignedEmployeeByDeptDesigFunctionaryDate(Integer deptId, Integer desigId, Integer functionaryId, Date onDate) throws Exception;
 	 
 	 public abstract List getAllDesignationByDept(Integer deptId)throws TooManyValuesException, NoSuchObjectException;
-	 public abstract List getAllActiveUsersByGivenDesg(Integer DesgId)throws Exception;
-	 public List<PersonalInformation> getAllEmpByGrade(Integer gradeId) throws Exception;
-	 public List getListOfUsersNotMappedToEmp() throws Exception;
+	 public abstract List getAllActiveUsersByGivenDesg(Integer DesgId);
+	 public List<PersonalInformation> getAllEmpByGrade(Integer gradeId);
+	 public List getListOfUsersNotMappedToEmp();
 
 	void create(PersonalInformation egpimsPersonalInformation);
 

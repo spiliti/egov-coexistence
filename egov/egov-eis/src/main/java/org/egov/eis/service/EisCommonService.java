@@ -62,6 +62,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javassist.tools.rmi.ObjectNotFoundException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -128,7 +130,7 @@ public class EisCommonService {
 		try {
 			List<Assignment> assignments = assignmentService.getAssignmentsForPosition(posId, givenDate);
 			return assignments.isEmpty() ? null : assignments.get(0).getEmployee();
-		} catch (final Exception e) {
+		} catch (final ApplicationRuntimeException e) {
 			throw new ApplicationRuntimeException("User Not Found", e);
 		}
 	}

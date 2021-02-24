@@ -229,10 +229,11 @@ public class ScriptService  {
             LOG.error(e.getErrors().get(0).getMessage());
             throw e;
         }
-        catch (final  Exception e) {
-            LOG.error("Exception  for " + script.getType() + ":" + script.getName() + ":" + script.getScript(), e);
-            throw new ApplicationRuntimeException("script.error", e);
-        }
+        /*
+         * catch (final Exception e) { LOG.error("Exception  for " +
+         * script.getType() + ":" + script.getName() + ":" + script.getScript(),
+         * e); throw new ApplicationRuntimeException("script.error", e); }
+         */
     }
 
     /**

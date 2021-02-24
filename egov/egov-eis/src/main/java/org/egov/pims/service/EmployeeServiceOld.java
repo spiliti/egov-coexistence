@@ -80,7 +80,7 @@ public interface EmployeeServiceOld
 	public abstract PersonalInformation getEmloyeeById(Integer employeeId);
 	public abstract GenericMaster getGenericMaster(Integer masterId,String masterName);
 
-	public abstract ServiceHistory getServiceId(Integer serviceId)throws Exception;
+	public abstract ServiceHistory getServiceId(Integer serviceId);
 	public abstract PersonalInformation getEmpForUserId(Long userId);
 
 	public abstract Assignment getAssignmentById(Integer assignmentId);
@@ -95,14 +95,14 @@ public interface EmployeeServiceOld
 	public abstract Map getMapForList(List list);
 	public abstract Map getMapForList(List list, String fieldName1, String fieldName2);
 
-	public abstract List searchEmployee(Integer departmentId,Integer designationId,String code,String name,Integer status)throws Exception;
+	public abstract List searchEmployee(Integer departmentId,Integer designationId,String code,String name,Integer status);
 	/*
 	 * search employee by department,designation,functionary,code and name
 	 */
-	public abstract List searchEmployee(Integer departmentId,Integer designationId,Integer functionaryId,String code,String name,Integer status)throws Exception;
+	public abstract List searchEmployee(Integer departmentId,Integer designationId,Integer functionaryId,String code,String name,Integer status);
 	@Deprecated
 	public abstract List searchEmployee(Integer departmentId,Integer designationId,String code,String name,String searchAll)throws Exception;
-	public abstract List searchEmployee(Integer empId)throws Exception;
+	public abstract List searchEmployee(Integer empId);
 	public abstract void deleteLangKnownForEmp(PersonalInformation personalInformation);
 	public abstract Integer getNextVal();
 	public abstract boolean checkPos(Integer posId,Date fromDate,Date toDate,Integer empId,String isPrimary);
@@ -111,7 +111,7 @@ public interface EmployeeServiceOld
 	public abstract String getEmployeeCode();
 	public abstract List getListOfPersonalInformationByEmpIdsList(List empIdsList);
 	public List getListOfEmployeeWithoutAssignment(Date fromdate);/*new*/
-	public Assignment getLatestAssignmentForEmployeeByToDate(Integer empId,Date todate) throws Exception;
+	public Assignment getLatestAssignmentForEmployeeByToDate(Integer empId,Date todate);
 	public PersonalInformation getEmployee(Integer deptId, Integer designationId, Long Boundaryid)throws TooManyValuesException, NoSuchObjectException;
 	public PersonalInformation getEmployeeByFunctionary(Long deptId, Long designationId, Long Boundaryid,Integer functionaryId)throws TooManyValuesException, NoSuchObjectException;
 	public Assignment getLastAssignmentByEmp(Integer empId);

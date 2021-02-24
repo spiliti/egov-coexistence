@@ -437,9 +437,11 @@ public class PersonalInformationHibernateDAO implements PersonalInformationDAO
 	  * @param functionaryId
 	  * @param onDate
 	  * @return Employee
+	 * @throws NoSuchObjectException 
+	 * @throws TooManyValuesException 
 	  * @throws Exception 
 	  */
-	 public PersonalInformation getTempAssignedEmployeeByDeptDesigFunctionaryDate(Integer deptId, Integer desigId, Integer functionaryId, Date onDate) throws Exception{
+	 public PersonalInformation getTempAssignedEmployeeByDeptDesigFunctionaryDate(Integer deptId, Integer desigId, Integer functionaryId, Date onDate) throws NoSuchObjectException, TooManyValuesException{
 		 PersonalInformation tempAssignedEemployee = null;
 		 LOGGER.info("Inside temp assigned emp API-----------");
 		 List<PersonalInformation> listEmployee = null;
@@ -513,7 +515,7 @@ public class PersonalInformationHibernateDAO implements PersonalInformationDAO
 		 return userList;
 	 }
 	 
-	 public List<PersonalInformation> getAllEmpByGrade(Integer gradeId) throws Exception
+	 public List<PersonalInformation> getAllEmpByGrade(Integer gradeId)
 	 {
 		 List<PersonalInformation> listEmployee = null;
 		 Query qry = getCurrentSession().createQuery("select distinct A.employee from Assignment A where A.gradeId.id=:gradeId ");
