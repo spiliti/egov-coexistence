@@ -345,21 +345,21 @@ public class ContractorBillService {
     public void contractorBillRegisterStatusChange(final EgBillregister egBillregister, final String workFlowAction) {
         if (null != egBillregister && null != egBillregister.getStatus()
                 && null != egBillregister.getStatus().getCode())
-            if (FinancialConstants.CONTINGENCYBILL_CREATED_STATUS.equals(egBillregister.getStatus().getCode())
+            if (FinancialConstants.CONTRACTORBILL_CREATED_STATUS.equals(egBillregister.getStatus().getCode())
                     && egBillregister.getState() != null && workFlowAction.equalsIgnoreCase(FinancialConstants.BUTTONAPPROVE))
                 egBillregister.setStatus(financialUtils.getStatusByModuleAndCode(FinancialConstants.CONTRACTOR_BILL,
                         FinancialConstants.CONTRACTORBILL_APPROVED_STATUS));
             else if (workFlowAction.equals(FinancialConstants.BUTTONREJECT))
                 egBillregister.setStatus(financialUtils.getStatusByModuleAndCode(FinancialConstants.CONTRACTOR_BILL,
-                        FinancialConstants.CONTINGENCYBILL_REJECTED_STATUS));
-            else if (FinancialConstants.CONTINGENCYBILL_REJECTED_STATUS.equals(egBillregister.getStatus().getCode())
+                        FinancialConstants.CONTRACTORBILL_REJECTED_STATUS));
+            else if (FinancialConstants.CONTRACTORBILL_REJECTED_STATUS.equals(egBillregister.getStatus().getCode())
                     && workFlowAction.equals(FinancialConstants.BUTTONCANCEL))
                 egBillregister.setStatus(financialUtils.getStatusByModuleAndCode(FinancialConstants.CONTRACTOR_BILL,
-                        FinancialConstants.CONTINGENCYBILL_CANCELLED_STATUS));
-            else if (FinancialConstants.CONTINGENCYBILL_REJECTED_STATUS.equals(egBillregister.getStatus().getCode())
+                        FinancialConstants.CONTRACTORBILL_CANCELLED_STATUS));
+            else if (FinancialConstants.CONTRACTORBILL_REJECTED_STATUS.equals(egBillregister.getStatus().getCode())
                     && workFlowAction.equals(FinancialConstants.BUTTONFORWARD))
                 egBillregister.setStatus(financialUtils.getStatusByModuleAndCode(FinancialConstants.CONTRACTOR_BILL,
-                        FinancialConstants.CONTINGENCYBILL_CREATED_STATUS));
+                        FinancialConstants.CONTRACTORBILL_CREATED_STATUS));
 
     }
 

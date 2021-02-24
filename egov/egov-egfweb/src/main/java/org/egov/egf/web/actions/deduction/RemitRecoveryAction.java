@@ -87,6 +87,7 @@ import org.egov.commons.dao.BankHibernateDAO;
 import org.egov.commons.dao.FinancialYearHibernateDAO;
 import org.egov.commons.service.BankAccountService;
 import org.egov.commons.service.FunctionService;
+import org.egov.commons.utils.BankAccountType;
 import org.egov.commons.utils.EntityType;
 import org.egov.dao.voucher.VoucherHibernateDAO;
 import org.egov.deduction.model.EgRemittance;
@@ -544,6 +545,13 @@ public class RemitRecoveryAction extends BasePaymentAction {
     public String sendForApproval() {
         paymentheader = paymentService.find("from Paymentheader where id=?", Long.valueOf(paymentid));
         populateWorkflowBean();
+        if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workflowBean.getWorkFlowAction())) {
+            if (!commonsUtil.isValidApprover(paymentheader, workflowBean.getApproverPositionId())) {
+                addActionError(getText(INVALID_APPROVER));
+                view();
+                return VIEW;
+            }
+        }
         paymentheader = paymentActionHelper.sendForApproval(paymentheader, workflowBean);
 
         if (FinancialConstants.BUTTONREJECT.equalsIgnoreCase(workflowBean.getWorkFlowAction()))
@@ -568,12 +576,14 @@ public class RemitRecoveryAction extends BasePaymentAction {
     @Action(value = "/deduction/remitRecovery-viewInboxItem")
     public String viewInboxItem() {
         paymentheader = paymentService.find("from Paymentheader where id=?", Long.valueOf(paymentid));
-        /*
-         * if (paymentheader.getState().getValue() != null && !paymentheader.getState().getValue().isEmpty() &&
-         * paymentheader.getState().getValue().contains("Reject")) {
-         * voucherHeader.setId(paymentheader.getVoucherheader().getId()); showCancel = true; return beforeEdit(); }
-         */
-        showApprove = true;
+        if (!commonsUtil.isApplicationOwner(securityUtils.getCurrentUser(), paymentheader))
+			return UNAUTHORIZED;
+        view();
+        return VIEW;
+    }
+
+	private void view() {
+		showApprove = true;
         voucherHeader.setId(paymentheader.getVoucherheader().getId());
         if(paymentheader.getVoucherheader().getVoucherDate()!=null) {
             Date voucherDates=paymentheader.getVoucherheader().getVoucherDate();
@@ -582,9 +592,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
            }
         }
         prepareForViewModifyReverse();
-        // loadApproverUser(voucherHeader.getType());
-        return VIEW;
-    }
+	}
 
     /**
      * @return
@@ -844,10 +852,10 @@ public class RemitRecoveryAction extends BasePaymentAction {
         loadBankAccountNumberForFundAndType();
     }
 
-    private void loadBankBranchForFundAndType() {
-        addDropdownData("bankList",
-                bankService.getBankByFundAndType(voucherHeader.getFundId().getId(), "RECEIPTS_PAYMENTS,PAYMENTS"));
-    }
+	private void loadBankBranchForFundAndType() {
+		addDropdownData("bankList", bankService.getBankByFundAndType(voucherHeader.getFundId().getId(),
+				Arrays.asList(BankAccountType.RECEIPTS_PAYMENTS, BankAccountType.PAYMENTS)));
+	}
 
     private void loadBankAccountNumberForFundAndType() {
         Bankaccount bankaccount = null;
