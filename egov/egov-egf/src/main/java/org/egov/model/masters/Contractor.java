@@ -92,6 +92,7 @@ public class Contractor extends AbstractAuditable implements EntityType {
     @SafeHtml
     @Length(max = 50, message = "Maximum of 50 Characters allowed for Code")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialchar, message = "Special Characters are not allowed in Code")
+    @Column(updatable = false)
     private String code;
 
     @NotNull
@@ -131,12 +132,14 @@ public class Contractor extends AbstractAuditable implements EntityType {
     @SafeHtml
     @Length(max = 10, message = "PAN No Field length should be 10 and it should be in the format XXXXX1234X")
     @OptionalPattern(regex = Constants.PANNUMBER, message = "Enter the PAN No in correct format - XXXXX1234X")
+    @Column(updatable = false)
     private String panNumber;
 
     @NotNull
     @SafeHtml
     @Length(min = 15, max = 15, message = "Maximum of 15 Characters allowed for TIN/GST No")
     @OptionalPattern(regex = Constants.ALPHANUMERIC, message = "Special Characters are not allowed in TIN/GST No")
+    @Column(updatable = false)
     private String tinNumber;
 
     @ManyToOne

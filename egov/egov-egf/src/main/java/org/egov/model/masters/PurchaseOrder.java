@@ -50,6 +50,7 @@ package org.egov.model.masters;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -94,6 +95,7 @@ public class PurchaseOrder extends AbstractAuditable implements EntityType {
     @Length(max = 100, message = "Maximum of 100 Characters allowed for Order Number")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialcharForContraWOAndSupplierName, message = "Special Characters are not allowed in Order Number")
     @NotNull
+    @Column(updatable = false)
     private String orderNumber;
 
     @SafeHtml
