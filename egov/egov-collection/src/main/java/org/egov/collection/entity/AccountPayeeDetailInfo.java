@@ -66,19 +66,17 @@ public class AccountPayeeDetailInfo {
 
     public AccountPayeeDetailInfo(final AccountPayeeDetail accountPayeeDetail, final EgovCommon egovCommon) {
         this.accountPayeeDetail = accountPayeeDetail;
-        try {
-            populateEntityType(accountPayeeDetail, egovCommon);
-        } catch (final ApplicationException e) {
-            throw new ApplicationRuntimeException("Could not get entity type for account detail type ["
-                    + accountPayeeDetail.getAccountDetailType().getTablename() + "], account detail key id ["
-                    + accountPayeeDetail.getAccountDetailKey().getId() + "]", e);
-        }
+        populateEntityType(accountPayeeDetail, egovCommon);
     }
 
-    public void populateEntityType(final AccountPayeeDetail accountPayeeDetail, final EgovCommon egovCommon)
-            throws ApplicationException {
-        entityType = egovCommon.getEntityType(accountPayeeDetail.getAccountDetailType(), accountPayeeDetail
-                .getAccountDetailKey().getDetailkey());
+    public void populateEntityType(final AccountPayeeDetail accountPayeeDetail, final EgovCommon egovCommon) {
+        try {
+            entityType = egovCommon.getEntityType(accountPayeeDetail.getAccountDetailType(), accountPayeeDetail
+                    .getAccountDetailKey().getDetailkey());
+        } catch (ApplicationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**
