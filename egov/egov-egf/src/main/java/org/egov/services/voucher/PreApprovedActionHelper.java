@@ -108,11 +108,6 @@ public class PreApprovedActionHelper {
             else
                 throw new ValidationException("Voucher creation failed", "Voucher creation failed");
 
-        } catch (final ApplicationRuntimeException | SQLException |TaskFailedException e) {
-
-            final List<ValidationError> errors = new ArrayList<>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
         }
         return voucherHeader;
     }

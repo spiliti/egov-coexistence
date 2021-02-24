@@ -50,6 +50,7 @@ package com.exilant.exility.pagemanager;
 import com.exilant.eGov.src.domain.User;
 import com.exilant.exility.common.DataCollection;
 import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -89,7 +90,7 @@ public class SecurityGuard {
                     LOGGER.debug("$$$UsesrID$$$ = " + request.getSession().getAttribute("current_UserID"));
             } else
                 dc.addValue("current_loginName", "");
-        } catch (final Exception te) {
+        } catch (final HibernateException te) {
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("Exp=" + te.getMessage());
             // dc.addMessage();

@@ -248,8 +248,7 @@ public class ChartOfAccts {
     }
 
     @Transactional
-    public void insert(final Connection connection) throws SQLException,
-    TaskFailedException {
+    public void insert(final Connection connection){
         created = new SimpleDateFormat("dd/mm/yyyy").format(new Date());
         try {
             created = formatter.format(sdf.parse(created));
@@ -290,7 +289,7 @@ public class ChartOfAccts {
 					.setString(16, removeSingleQuotes(getMajorCode(glCode))).executeUpdate();
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting the data  " + e.getMessage(), new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
+        } catch (final TaskFailedException | ParseException e) {
             LOGGER.error("Exception occured while getting the data  " + e.getMessage(), new Exception(e.getMessage()));
         }
     }

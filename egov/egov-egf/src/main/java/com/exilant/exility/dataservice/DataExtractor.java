@@ -53,6 +53,7 @@ import com.exilant.exility.common.ObjectGetSetter;
 import com.exilant.exility.common.TaskFailedException;
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -225,7 +226,7 @@ public class DataExtractor {
 
     public HashMap extractIntoMap(final String sql,
             final String keyName,
-            final Class collectionMemberClass) throws TaskFailedException {
+            final Class collectionMemberClass) throws TaskFailedException, InvocationTargetException, NoSuchMethodException, SecurityException, NoSuchFieldException {
         // DBHandler handler = DBHandler.getHandler();
         /* Connection con = handler.getConnection(); */
         final Connection con = null;// This fix is for Phoenix Migration.EgovDatabaseManager.openConnection();
@@ -238,7 +239,7 @@ public class DataExtractor {
     public HashMap extractIntoMap(final String sql,
             final Connection con,
             final String keyName,
-            final Class collectionMemberClass) throws TaskFailedException {
+            final Class collectionMemberClass) throws TaskFailedException, InvocationTargetException, NoSuchMethodException, SecurityException, NoSuchFieldException {
 
         final HashMap map = new HashMap();
         int columnCount = 0;

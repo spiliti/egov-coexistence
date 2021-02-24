@@ -80,6 +80,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.exilant.GLEngine.CoaCache;
+import com.exilant.exility.common.TaskFailedException;
 
 /**
  * @author venki
@@ -267,10 +268,6 @@ public class CreateBankAccountService {
     }
 
     public void clearCache() {
-        try {
-            coaCache.reLoad();
-        } catch (Exception e) {
-            LOGGER.error("Error while reloading coa cache");
-        }
+        coaCache.reLoad();
     }
 }

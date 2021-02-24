@@ -168,11 +168,12 @@ public class PaymentActionHelper {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) { final List<ValidationError> errors =
+           * new ArrayList<ValidationError>(); errors.add(new
+           * ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
         return paymentheader;
     }
 
@@ -194,12 +195,12 @@ public class PaymentActionHelper {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) { final List<ValidationError> errors =
+           * new ArrayList<ValidationError>(); errors.add(new
+           * ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
         return paymentheader;
     }
 
@@ -325,7 +326,7 @@ public class PaymentActionHelper {
                     " from Miscbilldetail where payVoucherHeader.id = ? order by paidto",
                     paymentheader.getVoucherheader().getId());
 
-        } catch (final Exception e) {
+        } catch (final ValidationException e) {
             throw new ValidationException("", "Total Paid Amount Exceeding Net Amount For This Bill");
         }
         if (LOGGER.isDebugEnabled())
@@ -548,11 +549,12 @@ public class PaymentActionHelper {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            // handle engine exception
-            LOGGER.error(e.getMessage(), e);
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { // handle engine exception
+           * LOGGER.error(e.getMessage(), e); throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Posted to Ledger " + voucherHeader.getId());
         return voucherHeader;

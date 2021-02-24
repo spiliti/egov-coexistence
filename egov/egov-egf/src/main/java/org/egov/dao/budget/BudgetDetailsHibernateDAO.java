@@ -470,10 +470,12 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in consumeEncumbranceBudget API()===" + v.getErrors());
 			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exception in consumeEncumbranceBudget API()=" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception in consumeEncumbranceBudget API()=" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * e.getMessage()); }
+           */
 	}
 
 	@Deprecated
@@ -549,9 +551,10 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 				return BigDecimal.ZERO;
 		} catch (final ValidationException v) {
 			throw v;
-		} catch (final Exception e) {
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(EMPTY_STRING, e.getMessage()); }
+           */
 	}
 
 	@Deprecated
@@ -632,11 +635,14 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 			return budgetUsage;
 
 		} catch (final ValidationException v) {
-			throw v;
-		} catch (final Exception e) {
-			LOGGER.error("Exception in consumeEncumbranceBudget API()=" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+		    LOGGER.error("Exception in consumeEncumbranceBudget API()=" + v.getMessage());
+                    throw new ValidationException(EMPTY_STRING, v.getMessage());
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception in consumeEncumbranceBudget API()=" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * e.getMessage()); }
+           */
 	}
 
 	private void validateParameters(final Long financialyearid, final Long functionid, final List<Long> budgetheadid) {
@@ -893,10 +899,12 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getPlanningBudgetAvailable API()===" + v.getErrors());
 			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exception in getPlanningBudgetAvailable API()=" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception in getPlanningBudgetAvailable API()=" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * e.getMessage()); }
+           */
 	}
 
 	@Override
@@ -929,10 +937,12 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getPlanningBudgetAvailable API()===" + v.getErrors());
 			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exception in getPlanningBudgetAvailable API()=" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception in getPlanningBudgetAvailable API()=" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * e.getMessage()); }
+           */
 	}
 
 	/**
@@ -1093,11 +1103,13 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 				return new BigDecimal(ob.toString());
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getActualBudgetUtilized API()####" + v.getErrors());
-			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exp in getActualBudgetUtilized API()===" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, "Exp in getActualBudgetUtilized API()===" + e.getMessage());
-		}
+                        throw new ValidationException(EMPTY_STRING, "Exp in getActualBudgetUtilized API()===" + v.getMessage());
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exp in getActualBudgetUtilized API()===" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * "Exp in getActualBudgetUtilized API()===" + e.getMessage()); }
+           */
 	}
 
 	/**
@@ -1257,12 +1269,15 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 				return new BigDecimal(ob.toString());
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getActualBudgetUtilizedForBudgetaryCheck API()===" + v.getErrors());
-			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exp in getActualBudgetUtilizedForBudgetaryCheck API()===" + e.getMessage());
 			throw new ValidationException(EMPTY_STRING,
-					"Exp in getActualBudgetUtilizedForBudgetaryCheck API()===" + e.getMessage());
-		}
+                                "Exp in getActualBudgetUtilizedForBudgetaryCheck API()===" + v.getMessage());
+        } /*
+           * catch (final Exception e) { LOGGER.
+           * error("Exp in getActualBudgetUtilizedForBudgetaryCheck API()===" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * "Exp in getActualBudgetUtilizedForBudgetaryCheck API()===" +
+           * e.getMessage()); }
+           */
 	}
 
 	@Override
@@ -1387,11 +1402,14 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 				return getApprovedAmt(bdList);
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getBudgetedAmtForYear==" + v.getErrors());
-			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exp in getBudgetedAmtForYear==" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, "Exp in getBudgetedAmtForYear==" + e.getMessage());
-		}
+	                     throw new ValidationException(EMPTY_STRING, "Exp in getBudgetedAmtForYear==" + v.getMessage());
+
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exp in getBudgetedAmtForYear==" + e.getMessage());
+           * throw new ValidationException(EMPTY_STRING,
+           * "Exp in getBudgetedAmtForYear==" + e.getMessage()); }
+           */
 	}
 
 	/**
@@ -1474,11 +1492,14 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 				return getApprovedAmtAsOnDate(bdList, asOnDate);
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getBudgetedAmtForYear==" + v.getErrors());
-			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exp in getBudgetedAmtForYear==" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, "Exp in getBudgetedAmtForYear==" + e.getMessage());
-		}
+	                     throw new ValidationException(EMPTY_STRING, "Exp in getBudgetedAmtForYear==" + v.getMessage());
+
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exp in getBudgetedAmtForYear==" + e.getMessage());
+           * throw new ValidationException(EMPTY_STRING,
+           * "Exp in getBudgetedAmtForYear==" + e.getMessage()); }
+           */
 	}
 
 	@Override
@@ -1556,11 +1577,13 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 				return bdList.get(0).getPlanningPercent();
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getBudgetedAmtForYear==" + v.getErrors());
-			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exp in getBudgetedAmtForYear==" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, "Exp in getBudgetedAmtForYear==" + e.getMessage());
-		}
+	                     throw new ValidationException(EMPTY_STRING, "Exp in getBudgetedAmtForYear==" + v.getMessage());
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exp in getBudgetedAmtForYear==" + e.getMessage());
+           * throw new ValidationException(EMPTY_STRING,
+           * "Exp in getBudgetedAmtForYear==" + e.getMessage()); }
+           */
 	}
 
 	/**
@@ -1644,12 +1667,15 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 				return getApprovedAmtDeptwise(bdList);
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getAggregateBudgetedAmtForYear ==" + v.getErrors());
-			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exp in getAggregateBudgetedAmtForYear ...==" + e.getMessage());
 			throw new ValidationException(EMPTY_STRING,
-					"Exception in getAggregateBudgetedAmtForYear==" + e.getMessage());
-		}
+                                "Exception in getAggregateBudgetedAmtForYear==" + v.getMessage());
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exp in getAggregateBudgetedAmtForYear ...==" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * "Exception in getAggregateBudgetedAmtForYear==" + e.getMessage());
+           * }
+           */
 	}
 
 	private BigDecimal getApprovedAmt(final List<BudgetDetail> bdList) {
@@ -1774,10 +1800,11 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 				return checkCondition(paramMap);
 			}
 		} catch (final ValidationException v) {
-			throw v;
-		} catch (final Exception e) {
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+                    throw new ValidationException(EMPTY_STRING, v.getMessage());
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(EMPTY_STRING, e.getMessage()); }
+           */
 		return true;
 	}
 
@@ -1918,10 +1945,11 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 			} else // no budget check for coa
 				return true;
 		} catch (final ValidationException v) {
-			throw v;
-		} catch (final Exception e) {
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+                    throw new ValidationException(EMPTY_STRING, v.getMessage());
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(EMPTY_STRING, e.getMessage()); }
+           */
 		return true;
 	}
 
@@ -2031,11 +2059,14 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 		} catch (final ValidationException v) {
 			final List<ValidationError> errors = new ArrayList<ValidationError>();
 			errors.add(new ValidationError("exp", v.getErrors().get(0).getMessage()));
+			LOGGER.error("Exception in getBudgetHeadByGlcode API=" + v.getMessage());
 			throw new ValidationException(errors);
-		} catch (final Exception e) {
-			LOGGER.error("Exception in getBudgetHeadByGlcode API=" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception in getBudgetHeadByGlcode API=" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * e.getMessage()); }
+           */
 	}
 
 	/**
@@ -2072,10 +2103,12 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getBudgetHeadForGlcodeList API()=" + v.getErrors());
 			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exception in getBudgetHeadForGlcodeList API=" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception in getBudgetHeadForGlcodeList API=" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * e.getMessage()); }
+           */
 	}
 
 	/**
@@ -2268,10 +2301,11 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in budgetary check API()=" + v.getErrors());
 			throw v;
-		} catch (final Exception e) {
-			LOGGER.error("Exp in budgetary check API()=" + e.getMessage());
-			throw e;
-		}
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exp in budgetary check API()=" + e.getMessage());
+           * throw e; }
+           */
 		return true;
 	}
 
@@ -2443,10 +2477,12 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getBillAmountForBudgetCheck API()===" + v.getErrors());
 			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exp in getBillAmountForBudgetCheck API()===" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, "Exp in getBillAmountForBudgetCheck API()===" + e.getMessage());
-		}
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exp in getBillAmountForBudgetCheck API()===" +
+           * e.getMessage()); throw new ValidationException(EMPTY_STRING,
+           * "Exp in getBillAmountForBudgetCheck API()===" + e.getMessage()); }
+           */
 	}
 
 	/**
@@ -2560,10 +2596,12 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 		} catch (final ValidationException v) {
 			LOGGER.error("Exp in getBudgetedAmtForYear==" + v.getErrors());
 			throw new ValidationException(v.getErrors());
-		} catch (final Exception e) {
-			LOGGER.error("Exp in getBudgetedAmtForYear==" + e.getMessage());
-			throw new ValidationException(EMPTY_STRING, "Exp in getBudgetedAmtForYear==" + e.getMessage());
-		}
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exp in getBudgetedAmtForYear==" + e.getMessage());
+           * throw new ValidationException(EMPTY_STRING,
+           * "Exp in getBudgetedAmtForYear==" + e.getMessage()); }
+           */
 	}
 
 	/**
@@ -2833,9 +2871,10 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 				throw new ValidationException(EMPTY_STRING, "No Functions mapped for the given fund and department  ");
 		} catch (final ValidationException v) {
 			throw v;
-		} catch (final Exception e) {
-			throw new ValidationException(EMPTY_STRING, e.getMessage());
-		}
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(EMPTY_STRING, e.getMessage()); }
+           */
 		return functionsList;
 
 	}

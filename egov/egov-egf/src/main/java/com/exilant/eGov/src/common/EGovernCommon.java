@@ -231,7 +231,7 @@ public class EGovernCommon extends AbstractTask {
 
 
 
-	public Map<String, Map<String, Object>> getEffectiveDateFilter(String val) throws TaskFailedException, Exception {
+	public Map<String, Map<String, Object>> getEffectiveDateFilter(String val) throws TaskFailedException {
 		final Map<String, Map<String, Object>> queryMap = new HashMap<>();
 		final Map<String, Object> params = new HashMap<>();
 		if (val == null)
@@ -244,11 +244,11 @@ public class EGovernCommon extends AbstractTask {
 		return queryMap;
 	}
 
-	public String getCurDateTime() throws TaskFailedException, Exception {
+	public String getCurDateTime() throws TaskFailedException{
 		return new SimpleDateFormat("dd-Mon-yyyy HH:mm:ss").format(new Date());
 	}
 
-	public String getBillNumber() throws TaskFailedException, Exception
+	public String getBillNumber() throws TaskFailedException
 	{
 		throw new TaskFailedException("Method Not Supported Exception");
 	}

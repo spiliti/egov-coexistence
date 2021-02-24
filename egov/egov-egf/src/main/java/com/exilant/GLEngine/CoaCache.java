@@ -54,6 +54,7 @@ import org.egov.commons.CChartOfAccounts;
 import org.egov.commons.service.ChartOfAccountDetailService;
 import org.egov.infra.cache.impl.ApplicationCacheManager;
 import org.egov.infstr.services.PersistenceService;
+import org.elasticsearch.index.mapper.MapperException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.transform.Transformers;
@@ -145,7 +146,7 @@ public class CoaCache implements Serializable {
             	LOGGER.debug("Loading size:" + glAccountCodes.size());
             hm.put(GLACCIDNODE, glAccountIds);
             applicationCacheManager.put(ROOTNODE, hm);
-        } catch (final Exception e) {
+        } catch (final MapperException e) {
             throw e;
         }
         

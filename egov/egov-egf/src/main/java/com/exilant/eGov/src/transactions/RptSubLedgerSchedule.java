@@ -55,6 +55,7 @@ package com.exilant.eGov.src.transactions;
 
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,6 +72,7 @@ import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infstr.services.PersistenceService;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -78,6 +80,8 @@ import org.springframework.stereotype.Service;
 
 import com.exilant.GLEngine.GeneralLedgerBean;
 import com.exilant.exility.common.TaskFailedException;
+
+import javassist.tools.rmi.ObjectNotFoundException;
 
 /**
  * @author Administrator TODO To change the template for this generated type
@@ -135,7 +139,7 @@ public class RptSubLedgerSchedule {
                 dt = sdf.parse(startDate);
                 formstartDate = formatter1.format(dt);
             }
-        } catch (final Exception e) {
+        } catch (final ParseException e) {
             LOGGER.error("Parse Error" + e);
             throw new TaskFailedException();
         }
@@ -154,7 +158,7 @@ public class RptSubLedgerSchedule {
             getSubQuery(startDateDBFormat, endDate);
             formatSLTypeReport();
             reportBean.setAccName(getAccountname(glCode));
-        } catch (final Exception exception) {
+        } catch (final TaskFailedException exception) {
             LOGGER.error("Exception in getSubLedgerTypeSchedule .." + exception.getMessage());
             throw new TaskFailedException();
         }
@@ -281,100 +285,95 @@ public class RptSubLedgerSchedule {
 
             if (LOGGER.isInfoEnabled())
             LOGGER.info("Main QUERY..." + query);
-        try {
-            GeneralLedgerBean gb = null;
-            resultset = pst.list();
+        GeneralLedgerBean gb = null;
+        resultset = pst.list();
 
-            final Accountdetailtype accountdetailtype = (Accountdetailtype) persistenceService.find(
-                    " from Accountdetailtype where id=?", Integer.valueOf(accEntityId));
-            EntityType entity = null ;
-            if(resultset.size()!=0)
-            {
-            for (final Object[] element : resultset) {
-                gb = new GeneralLedgerBean();
-                double openingBal = 0.0;
-                double closingBal = 0.0;
-                double opgCredit = 0.0;
-                double opgDebit = 0.0;
-                double prevDebit = 0.0;
-                double prevCredit = 0.0;
-                double debitamount = 0.0;
-                double creditamount = 0.0;
-             
-					try {
-						entity = (EntityType) persistenceService.find(
-								" from " + accountdetailtype.getFullQualifiedName() + " where id = ?",
-								element[0].toString());
-					} catch (final Exception ee) {
-						LOGGER.error(ee.getMessage(), ee);
-						entity = (EntityType) persistenceService.find(
-								" from " + accountdetailtype.getFullQualifiedName() + " where id = ?",
-								element[0].toString());
-					} 
-          
-                if (entity != null) {
-                    gb.setCode(entity.getCode());
-                    gb.setName(entity.getName());
-                } else {
-                    gb.setCode("");
-                    gb.setName("");
-                }
-                
-                gb.setAccEntityKey(element[0].toString());
-                if (element[5].toString() != null)
-                    creditamount = Double.parseDouble(element[5].toString());
-                if (element[6].toString() != null)
-                    debitamount = Double.parseDouble(element[6].toString());
-                if (element[1].toString() != null)
-                    opgCredit = Double.parseDouble(element[1].toString());
-                if (element[2].toString() != null)
-                    opgDebit = Double.parseDouble(element[2].toString());
-                if (element[3].toString() != null)
-                    prevDebit = Double.parseDouble(element[3].toString());
-                if (element[4].toString() != null)
-                    prevCredit = Double.parseDouble(element[4].toString());
-
-                openingBal = opgCredit + prevCredit - (opgDebit + prevDebit);
-                if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("Calcualted opening balance... " + openingBal + "==");
-                if (openingBal > 0) {
-                    gb.setOpeningBal("" + numberToString(((Double) openingBal).toString()) + " Cr");
-                    totalOpgBal = totalOpgBal + openingBal;
-                } else if (openingBal < 0) {
-                    totalOpgBal = totalOpgBal + openingBal;
-                    final double openingBal1 = openingBal * -1;
-                    gb.setOpeningBal("" + numberToString(((Double) openingBal1).toString()) + " Dr");
-                } else
-                    gb.setOpeningBal("&nbsp;");
-
-                closingBal = openingBal + creditamount - debitamount;
-                if (closingBal > 0)
-                    gb.setClosingBal("" + numberToString(((Double) closingBal).toString()) + " Cr");
-                else if (closingBal < 0) {
-                    final double closingBal1 = closingBal * -1;
-                    gb.setClosingBal("" + numberToString(((Double) closingBal1).toString()) + " Dr");
-                } else
-                    gb.setClosingBal("&nbsp;");
-
-                if (debitamount > 0) {
-                    gb.setDebitamount("" + numberToString(((Double) debitamount).toString()));
-                    totalDr = totalDr + debitamount;
-                } else
-                    gb.setDebitamount("&nbsp;");
-                if (creditamount > 0) {
-                    gb.setCreditamount("" + numberToString(((Double) creditamount).toString()));
-                    totalCr = totalCr + creditamount;
-                } else
-                    gb.setCreditamount("&nbsp;");
-                
-                gb.setAccEntityId(accEntityId);
-                totalClosingBal = totalOpgBal + totalCr - totalDr;
-                dataList.add(gb);
+        final Accountdetailtype accountdetailtype = (Accountdetailtype) persistenceService.find(
+                " from Accountdetailtype where id=?", Integer.valueOf(accEntityId));
+        EntityType entity = null ;
+        if(resultset.size()!=0)
+        {
+        for (final Object[] element : resultset) {
+            gb = new GeneralLedgerBean();
+            double openingBal = 0.0;
+            double closingBal = 0.0;
+            double opgCredit = 0.0;
+            double opgDebit = 0.0;
+            double prevDebit = 0.0;
+            double prevCredit = 0.0;
+            double debitamount = 0.0;
+            double creditamount = 0.0;
+         
+        		try {
+        			entity = (EntityType) persistenceService.find(
+        					" from " + accountdetailtype.getFullQualifiedName() + " where id = ?",
+        					element[0].toString());
+        		} catch (final Exception ee) {
+        			LOGGER.error(ee.getMessage(), ee);
+        			entity = (EntityType) persistenceService.find(
+        					" from " + accountdetailtype.getFullQualifiedName() + " where id = ?",
+        					element[0].toString());
+        		} 
+        
+            if (entity != null) {
+                gb.setCode(entity.getCode());
+                gb.setName(entity.getName());
+            } else {
+                gb.setCode("");
+                gb.setName("");
             }
-            }
-        } catch (final Exception e) {
-            LOGGER.error("Error in subledger schedule report....." + e.getMessage());
-            throw new TaskFailedException();
+            
+            gb.setAccEntityKey(element[0].toString());
+            if (element[5].toString() != null)
+                creditamount = Double.parseDouble(element[5].toString());
+            if (element[6].toString() != null)
+                debitamount = Double.parseDouble(element[6].toString());
+            if (element[1].toString() != null)
+                opgCredit = Double.parseDouble(element[1].toString());
+            if (element[2].toString() != null)
+                opgDebit = Double.parseDouble(element[2].toString());
+            if (element[3].toString() != null)
+                prevDebit = Double.parseDouble(element[3].toString());
+            if (element[4].toString() != null)
+                prevCredit = Double.parseDouble(element[4].toString());
+
+            openingBal = opgCredit + prevCredit - (opgDebit + prevDebit);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("Calcualted opening balance... " + openingBal + "==");
+            if (openingBal > 0) {
+                gb.setOpeningBal("" + numberToString(((Double) openingBal).toString()) + " Cr");
+                totalOpgBal = totalOpgBal + openingBal;
+            } else if (openingBal < 0) {
+                totalOpgBal = totalOpgBal + openingBal;
+                final double openingBal1 = openingBal * -1;
+                gb.setOpeningBal("" + numberToString(((Double) openingBal1).toString()) + " Dr");
+            } else
+                gb.setOpeningBal("&nbsp;");
+
+            closingBal = openingBal + creditamount - debitamount;
+            if (closingBal > 0)
+                gb.setClosingBal("" + numberToString(((Double) closingBal).toString()) + " Cr");
+            else if (closingBal < 0) {
+                final double closingBal1 = closingBal * -1;
+                gb.setClosingBal("" + numberToString(((Double) closingBal1).toString()) + " Dr");
+            } else
+                gb.setClosingBal("&nbsp;");
+
+            if (debitamount > 0) {
+                gb.setDebitamount("" + numberToString(((Double) debitamount).toString()));
+                totalDr = totalDr + debitamount;
+            } else
+                gb.setDebitamount("&nbsp;");
+            if (creditamount > 0) {
+                gb.setCreditamount("" + numberToString(((Double) creditamount).toString()));
+                totalCr = totalCr + creditamount;
+            } else
+                gb.setCreditamount("&nbsp;");
+            
+            gb.setAccEntityId(accEntityId);
+            totalClosingBal = totalOpgBal + totalCr - totalDr;
+            dataList.add(gb);
+        }
         }
     }
 
@@ -420,7 +419,7 @@ public class RptSubLedgerSchedule {
             if (list.get(0) != null)
                 accName = list.get(0).toString();
 
-        } catch (final Exception sqlex) {
+        } catch (final HibernateException sqlex) {
             LOGGER.error("Exp in getAccountname" + sqlex.getMessage(), sqlex);
             return null;
         }

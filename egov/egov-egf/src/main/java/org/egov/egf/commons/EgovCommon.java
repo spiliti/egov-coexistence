@@ -55,6 +55,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -748,7 +749,7 @@ public class EgovCommon {
     }
 
     public EntityType getEntityType(final Accountdetailtype accountdetailtype,
-            final Serializable detailkey) throws ApplicationException {
+            final Serializable detailkey ) throws ApplicationException{
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("EgovCommon | getEntityType| Start");
         EntityType entity = null;
@@ -759,7 +760,7 @@ public class EgovCommon {
 				Accountdetailkey accdetailKey = (Accountdetailkey) persistenceService
 						.find("from Accountdetailkey where detailkey=?", (Integer) detailkey);
                 if(null==accdetailKey || accdetailKey.getDetailname()==null){
-                    throw new Exception("Employee not found for "+ detailkey);
+                    throw new NullPointerException("Employee not found for "+ detailkey);
                 }
                 String[] detailNames = accdetailKey.getDetailname().split("-");
                 Employee employee = new Employee();
@@ -782,7 +783,7 @@ public class EgovCommon {
         } catch (final ClassCastException e) {
             LOGGER.error(e);
             throw new ApplicationException(e.getMessage());
-        } catch (final Exception e) {
+        } catch (final ClassNotFoundException | NoSuchMethodException | SecurityException e) {
             LOGGER.error("Exception to get EntityType=" + e.getMessage(), e);
             throw new ApplicationException(e.getMessage());
         }
@@ -795,9 +796,10 @@ public class EgovCommon {
      *
      * @return
      * @throws ValidationException
+     * @throws SQLException 
      */
     public Map<String, Object> getCashChequeInfoForBoundary()
-            throws ValidationException {
+            {
         String chequeInHand = null;
         Long chequeInHandId = null;
         String cashInHand = null;
@@ -860,7 +862,7 @@ public class EgovCommon {
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug("cashInHand is " + cashInHand
                             + " cashInHandId is " + cashInHandId);
-            } catch (final Exception e) {
+            } catch (final ApplicationRuntimeException | ValidationException| SQLException e) {
                 LOGGER.error("Exception occuerd while getting  "
                         + e.getMessage(), e);
                 throw new ApplicationRuntimeException(e.getMessage());
