@@ -50,6 +50,7 @@ package org.egov.egf.web.controller.supplier;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -466,11 +467,15 @@ public class CreateSupplierBillController extends BaseBillController {
 
     @RequestMapping(value = "/downloadBillDoc", method = RequestMethod.GET)
     public void getBillDoc(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException {
+            throws IOException, FileNotFoundException {
         final ServletContext context = request.getServletContext();
         final String fileStoreId = request.getParameter("fileStoreId");
         String fileName = "";
         final File downloadFile = fileStoreService.fetch(fileStoreId, FinancialConstants.FILESTORE_MODULECODE);
+        String canonicalPath = downloadFile.getCanonicalPath();
+        if (!canonicalPath.equals(downloadFile.getPath())) 
+           throw new FileNotFoundException("Invalid file path, please try again.");
+        
         final FileInputStream inputStream = new FileInputStream(downloadFile);
         EgBillregister egBillregister = supplierBillService.getById(Long.parseLong(request.getParameter("egBillRegisterId")));
         egBillregister = getBillDocuments(egBillregister);
