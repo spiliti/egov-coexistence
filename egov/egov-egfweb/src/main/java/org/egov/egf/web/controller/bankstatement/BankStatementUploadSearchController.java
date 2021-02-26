@@ -73,6 +73,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Comparator;
@@ -127,11 +128,15 @@ public class BankStatementUploadSearchController {
 
     @RequestMapping(value = "/downloadDoc", method = RequestMethod.GET)
     public void getBillDoc(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException {
+            throws IOException, FileNotFoundException {
         final ServletContext context = request.getServletContext();
         final String fileStoreId = request.getParameter("fileStoreId");
         String fileName = "";
         final File downloadFile = fileStoreService.fetch(fileStoreId, FinancialConstants.FILESTORE_MODULECODE);
+        String canonicalPath = downloadFile.getCanonicalPath();
+        if (!canonicalPath.equals(downloadFile.getPath())) 
+           throw new FileNotFoundException("Invalid file path, please try again.");
+        
         final FileInputStream inputStream = new FileInputStream(downloadFile);
 
         DocumentUpload doc = autoReconcileHelper.getDocumentsByFileStoreId(fileStoreId);
