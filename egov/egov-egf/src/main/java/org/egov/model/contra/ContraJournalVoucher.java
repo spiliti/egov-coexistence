@@ -108,7 +108,7 @@ public class ContraJournalVoucher extends StateAware implements Auditable {
     }
 
     @Override
-    public void setId(final Long id) {
+    protected void setId(final Long id) {
         this.id = id;
     }
 

@@ -66,7 +66,7 @@ public class StatusMaster implements java.io.Serializable
 			/**
 			 * @param id The id to set.
 			 */
-			public void setId(Integer id) {
+			private void setId(Integer id) {
 				this.id = id;
 			}
 			/**
