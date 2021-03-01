@@ -220,7 +220,7 @@ public class PersonalInformation implements java.io.Serializable,EntityType
 		return this.idPersonalInformation;
 	}
 	
-	public void setIdPersonalInformation(Integer idPersonalInformation)
+	private void setIdPersonalInformation(Integer idPersonalInformation)
 	{
 		this.idPersonalInformation = idPersonalInformation;
 	}

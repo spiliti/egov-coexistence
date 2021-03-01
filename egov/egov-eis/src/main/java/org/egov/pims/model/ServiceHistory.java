@@ -87,7 +87,7 @@ public class ServiceHistory implements Serializable,Comparable
 public Integer getIdService() {
 	return idService;
 }
-public void setIdService(Integer idService) {
+private void setIdService(Integer idService) {
 	this.idService = idService;
 }
 public Date getCommentDate() {
