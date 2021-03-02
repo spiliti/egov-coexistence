@@ -195,7 +195,7 @@ public class BudgetProposalAction extends GenericWorkFlowAction {
     private boolean deptHeading = true;
     private String functionsNotYetReceiced;
     private Map<Long, BudgetGroup> budgetGroupMap;
-    private Map<Integer, Fund> fundMap;
+    private Map<Long, Fund> fundMap;
     private Map<Long, CFunction> functionMap;
     private Map<String, Department> deptMap;
     private List<AppConfigValues> excludelist = new ArrayList<AppConfigValues>();
@@ -336,7 +336,7 @@ public class BudgetProposalAction extends GenericWorkFlowAction {
             functionMap.put(fn.getId(), fn);
 
         final List<Fund> fundList = masterDataCache.get("egi-fund");
-        fundMap = new HashMap<Integer, Fund>();
+        fundMap = new HashMap<Long, Fund>();
         for (final Fund f : fundList)
             fundMap.put(f.getId(), f);
         final List<Department> deptList = masterDataCache.get("egi-department");

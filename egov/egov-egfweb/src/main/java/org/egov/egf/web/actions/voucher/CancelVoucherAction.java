@@ -493,7 +493,7 @@ public class CancelVoucherAction extends BaseFormAction {
         final Session session = persistenceService.getSession();
         final List<String> voucherNumbers = new ArrayList<>();
         for (int i = 0; i < selectedVhs.length; i++) {
-            voucherObj = (CVoucherHeader) persistenceService.find("from CVoucherHeader vh where vh.id=?1", selectedVhs[i]);
+            voucherObj = (CVoucherHeader) persistenceService.find("from CVoucherHeader vh where vh.id=?", selectedVhs[i]);
             ids.add(selectedVhs[i]);
             final boolean value = cancelBillAndVoucher.canCancelVoucher(voucherObj);
 

@@ -48,8 +48,10 @@
 
 package org.egov.egf.web.controller.bank;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.util.List;
+
+import javax.validation.Valid;
+
 import org.egov.commons.Bank;
 import org.egov.egf.commons.bank.service.CreateBankService;
 import org.egov.egf.web.controller.bank.adaptor.BankJsonAdaptor;
@@ -59,15 +61,16 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
-import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * @author venki
@@ -86,20 +89,20 @@ public class BankController {
     @Autowired
     private MessageSource messageSource;
 
-    @RequestMapping(value = "/new", method = RequestMethod.POST)
+    @GetMapping(value = "/new")
     public String newForm(final Model model) {
         model.addAttribute(BANK, new Bank());
         return "bank-new";
     }
 
-    @RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
+    @GetMapping(value = "/edit/{id}")
     public String edit(@PathVariable("id") final Integer id, final Model model) {
         final Bank bank = createBankService.getById(id);
         model.addAttribute(BANK, bank);
         return "bank-update";
     }
 
-    @RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
+    @GetMapping(value = "/view/{id}")
     public String view(@PathVariable("id") final Integer id, final Model model) {
         final Bank bank = createBankService.getById(id);
         model.addAttribute(BANK, bank);
@@ -107,7 +110,7 @@ public class BankController {
         return "bank-view";
     }
 
-    @RequestMapping(value = "/search/{mode}", method = RequestMethod.POST)
+    @GetMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final Bank bank = new Bank();
         model.addAttribute(BANK, bank);
@@ -115,7 +118,7 @@ public class BankController {
 
     }
 
-    @RequestMapping(value = "/success/{id}/{mode}", method = RequestMethod.GET)
+    @GetMapping(value = "/success/{id}/{mode}")
     public String success(@PathVariable("id") final Integer id,@PathVariable("mode") final String mode, final Model model) {
         final Bank bank = createBankService.getById(id);
         model.addAttribute(BANK, bank);
@@ -123,7 +126,7 @@ public class BankController {
         return "bank-success";
     }
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PostMapping(value = "/create")
     public String create(@Valid @ModelAttribute final Bank bank, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors())
@@ -133,7 +136,7 @@ public class BankController {
         return "redirect:/bank/success/" + bank.getId()+"/create";
     }
 
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @PostMapping(value = "/update")
     public String update(@Valid @ModelAttribute final Bank bank, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors())
@@ -143,7 +146,7 @@ public class BankController {
         return "redirect:/bank/success/" + bank.getId()+"/view";
     }
 
-    @RequestMapping(value = "/ajaxsearch/{mode}", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String ajaxsearch(@PathVariable("mode") final String mode, final Model model, @ModelAttribute final Bank bank) {
         final List<Bank> searchResultList = createBankService.search(bank);

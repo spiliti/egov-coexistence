@@ -174,18 +174,18 @@ public class SchemeAction extends BaseFormAction {
         query.append("From Scheme scheme");
         if (scheme.getFund().getId() != null) {
             query.append(" where scheme.fund.id =?");
-            params.add(Integer.valueOf(scheme.getFund().getId()));
+            params.add(scheme.getFund().getId());
         }
         if (scheme.getValidfrom() != null && scheme.getValidto() != null) {
             query.append(" and scheme.validfrom>=? and scheme.validto<=?");
-            params.add(Constants.DDMMYYYYFORMAT1.format(scheme.getValidfrom()));
-            params.add(Constants.DDMMYYYYFORMAT1.format(scheme.getValidto()));
+            params.add(scheme.getValidfrom());
+            params.add(scheme.getValidto());
         } else if (scheme.getValidfrom() != null) {
             query.append(" and scheme.validfrom>=?");
-            params.add(Constants.DDMMYYYYFORMAT1.format(scheme.getValidfrom()));
+            params.add(scheme.getValidfrom());
         } else if (scheme.getValidto() != null) {
             query.append(" and scheme.validto<=?");
-            params.add(Constants.DDMMYYYYFORMAT1.format(scheme.getValidto()));
+            params.add(scheme.getValidto());
         }
         query.append(" order by scheme.name");
         schemeList = persistenceService.findAllBy(query.toString(), params.toArray());

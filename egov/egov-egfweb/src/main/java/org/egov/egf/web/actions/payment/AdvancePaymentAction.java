@@ -324,7 +324,7 @@ public class AdvancePaymentAction extends BasePaymentAction {
         populateBankAccounts(paymentheader.getBankaccount().getBankbranch().getId(), fund.getId());
     }
 
-    private void populateBankAccounts(final Integer bankBranchId, final Integer fundId) {
+    private void populateBankAccounts(final Integer bankBranchId, final Long fundId) {
         addDropdownData("accountNumberList", persistenceService.findAllBy(
                 "from Bankaccount ba where ba.bankbranch.id=? and ba.fund.id=? and ba.type in (?,?) "
                         + "and ba.isactive=true order by ba.chartofaccounts.glcode", bankBranchId, fundId,

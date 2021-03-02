@@ -402,6 +402,7 @@ function onChangeServiceClass(obj)
 <div class="formmainbox"><div class="subheadnew"><s:text name="searchreceipts.title"/>
 </div>
 <div class="subheadsmallnew"><span class="subheadnew"><s:text name="searchreceipts.criteria"/></span></div>
+<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 
 	    <tr>

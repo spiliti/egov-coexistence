@@ -243,6 +243,14 @@
 				return false;
 			    }
 	    	document.subSchemeForm.action='/services/EGF/masters/subScheme-search.action';
+	    	jQuery(subSchemeForm).append(
+                    jQuery('<input>', {
+                        type: 'hidden',
+                        name: '${_csrf.parameterName}',
+                        value: '${_csrf.token}'
+                    })
+                );
+	    	
 	    	document.subSchemeForm.submit();
 	    	return true;
 	    }     

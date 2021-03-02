@@ -474,10 +474,8 @@ public class IncomeExpenditureService extends ReportService {
 		}
 		if (incomeExpenditureStatement.getDepartment() != null
 				&& !"null".equals(incomeExpenditureStatement.getDepartment().getCode())) {
-			Department dept = this.microserviceUtils
-					.getDepartmentByCode(incomeExpenditureStatement.getDepartment().getCode());
-			queryStr.append(" and bd.executing_department = :deptId");
-			params.put("deptId", dept.getId());
+			queryStr.append(" and bd.executing_department = :deptCode");
+			params.put("deptCode", incomeExpenditureStatement.getDepartment().getCode());
 		}
 		if (incomeExpenditureStatement.getFunction() != null && incomeExpenditureStatement.getFunction().getId() != null
 				&& incomeExpenditureStatement.getFunction().getId() != 0) {

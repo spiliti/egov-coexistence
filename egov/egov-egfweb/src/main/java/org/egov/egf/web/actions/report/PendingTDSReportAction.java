@@ -553,12 +553,10 @@ public class PendingTDSReportAction extends BaseFormAction {
 				Query sqlQuery = persistenceService.getSession().createSQLQuery(qry.toString());
 				sqlQuery.setParameter("glCode", recovery.getChartofaccounts().getId(), LongType.INSTANCE)
 						.setParameter("fundId", fund.getId(), LongType.INSTANCE)
-						.setParameter("date1", Constants.DDMMYYYYFORMAT2.format(asOnDate), StringType.INSTANCE)
-						.setParameter("date2",
-								Constants.DDMMYYYYFORMAT2
-										.format(financialYearDAO.getFinancialYearByDate(asOnDate).getStartingDate()),
-								StringType.INSTANCE)
-						.setParameter("deptCode", department.getCode(), StringType.INSTANCE);
+						.setParameter("date1", asOnDate)
+						.setParameter("date2",financialYearDAO.getFinancialYearByDate(asOnDate).getStartingDate());
+				if (!deptQuery.equals(""))
+					sqlQuery.setParameter("deptCode", department.getCode(), StringType.INSTANCE);
 				result = sqlQuery.list();
                 
              // Query to get total deduction
@@ -572,11 +570,8 @@ public class PendingTDSReportAction extends BaseFormAction {
 				Query sqlQuery2 = persistenceService.getSession().createSQLQuery(qryTolDeduction.toString());
 				sqlQuery2.setParameter("glCode", recovery.getChartofaccounts().getId(), LongType.INSTANCE)
 						.setParameter("fundId", fund.getId(), LongType.INSTANCE)
-						.setParameter("date1", Constants.DDMMYYYYFORMAT2.format(asOnDate), StringType.INSTANCE)
-						.setParameter("date2",
-								Constants.DDMMYYYYFORMAT2
-										.format(financialYearDAO.getFinancialYearByDate(asOnDate).getStartingDate()),
-								StringType.INSTANCE);
+						.setParameter("date1", asOnDate)
+						.setParameter("date2",financialYearDAO.getFinancialYearByDate(asOnDate).getStartingDate());
                 resultTolDeduction = sqlQuery2.list();
             }else{
                 final StringBuilder qry = new StringBuilder("select vh.name,sum(erd.remittedamt),er.month from eg_remittance_detail erd,")
@@ -589,16 +584,14 @@ public class PendingTDSReportAction extends BaseFormAction {
                         .append(" group by er.month,vh.name order by er.month,vh.name");
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug(qry);
-                Query sqlQuery = persistenceService.getSession().createSQLQuery(qry.toString());
+				Query sqlQuery = persistenceService.getSession().createSQLQuery(qry.toString());
 				sqlQuery.setParameter("glCode", recovery.getChartofaccounts().getId(), LongType.INSTANCE)
 						.setParameter("fundId", fund.getId(), LongType.INSTANCE)
-						.setParameter("date1", Constants.DDMMYYYYFORMAT2.format(asOnDate), StringType.INSTANCE)
-						.setParameter("date2",
-								Constants.DDMMYYYYFORMAT2
-										.format(financialYearDAO.getFinancialYearByDate(asOnDate).getStartingDate()),
-								StringType.INSTANCE)
-						.setParameter("deptCode", department.getCode(), StringType.INSTANCE)
-						.setParameter("detailKey", detailKey, StringType.INSTANCE);
+						.setParameter("date1", asOnDate).setParameter("date2",
+								financialYearDAO.getFinancialYearByDate(asOnDate).getStartingDate());
+				if (!deptQuery.equals(""))
+					sqlQuery.setParameter("deptCode", department.getCode(), StringType.INSTANCE);
+				sqlQuery.setParameter("detailKey", detailKey, StringType.INSTANCE);
 				result = sqlQuery.list();
                 // Query to get total deduction
 				final StringBuilder qryTolDeduction = new StringBuilder(
@@ -614,11 +607,8 @@ public class PendingTDSReportAction extends BaseFormAction {
 				Query sqlQuery2 = persistenceService.getSession().createSQLQuery(qryTolDeduction.toString());
 				sqlQuery2.setParameter("glCode", recovery.getChartofaccounts().getId(), LongType.INSTANCE)
 						.setParameter("fundId", fund.getId(), LongType.INSTANCE)
-						.setParameter("date1", Constants.DDMMYYYYFORMAT2.format(asOnDate), StringType.INSTANCE)
-						.setParameter("date2",
-								Constants.DDMMYYYYFORMAT2
-										.format(financialYearDAO.getFinancialYearByDate(asOnDate).getStartingDate()),
-								StringType.INSTANCE)
+						.setParameter("date1", asOnDate)
+						.setParameter("date2",financialYearDAO.getFinancialYearByDate(asOnDate).getStartingDate())
 						.setParameter("deptCode", department.getCode(), StringType.INSTANCE)
 						.setParameter("detailKey", detailKey, StringType.INSTANCE);
                 resultTolDeduction = sqlQuery2.list();

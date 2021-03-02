@@ -69,10 +69,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -112,14 +113,14 @@ public class RecoveryController {
         model.addAttribute("banks", bankService.findAll());
     }
 
-    @RequestMapping(value = "/new", method = RequestMethod.POST)
+    @GetMapping(value = "/new")
     public String newForm(final Model model) {
         prepareNewForm(model);
         model.addAttribute("recovery", new Recovery());
         return RECOVERY_NEW;
     }
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PostMapping(value = "/create")
     public String create(@Valid @ModelAttribute final Recovery recovery, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors()) {
@@ -139,7 +140,7 @@ public class RecoveryController {
         return "redirect:/recovery/result/" + recovery.getId() + "/create";
     }
 
-    @RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
+    @GetMapping(value = "/edit/{id}")
     public String edit(@PathVariable("id") final Long id, final Model model) {
         final Recovery recovery = recoveryService.findOne(id);
         if (recovery.getBank() != null && recovery.getBank().getId() != null)
@@ -154,7 +155,7 @@ public class RecoveryController {
         return RECOVERY_EDIT;
     }
 
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @PostMapping(value = "/update")
     public String update(@Valid @ModelAttribute final Recovery recovery, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors()) {
@@ -173,7 +174,7 @@ public class RecoveryController {
         return "redirect:/recovery/result/" + recovery.getId() + "/update";
     }
 
-    @RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
+    @GetMapping(value = "/view/{id}")
     public String view(@PathVariable("id") final Long id, final Model model) {
         final Recovery recovery = recoveryService.findOne(id);
         if (recovery.getBank() != null && recovery.getBank().getId() != null)
@@ -183,7 +184,7 @@ public class RecoveryController {
         return RECOVERY_VIEW;
     }
 
-    @RequestMapping(value = "/result/{id}/{mode}", method = RequestMethod.GET)
+    @GetMapping(value = "/result/{id}/{mode}")
     public String result(@PathVariable("id") final Long id, @PathVariable("mode") final String mode,
             final Model model) {
         final Recovery recovery = recoveryService.findOne(id);
@@ -192,7 +193,7 @@ public class RecoveryController {
         return RECOVERY_RESULT;
     }
 
-    @RequestMapping(value = "/search/{mode}", method = RequestMethod.POST)
+    @GetMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final Recovery recovery = new Recovery();
         prepareNewForm(model);
@@ -201,7 +202,7 @@ public class RecoveryController {
 
     }
 
-    @RequestMapping(value = "/ajaxsearch/{mode}", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     public @ResponseBody String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
             @ModelAttribute final Recovery recovery) {
         if (recovery != null && recovery.getChartofaccounts().getId() != null)
@@ -213,7 +214,7 @@ public class RecoveryController {
         return result;
     }
 
-    @RequestMapping(value = "/ajax/getAccountCodes", method = RequestMethod.GET)
+    @GetMapping(value = "/ajax/getAccountCodes")
     public @ResponseBody List<CChartOfAccounts> getAccountCodes(
             @RequestParam("subLedgerCode") final String subLedgerCode) {
         List<CChartOfAccounts> accounts = null;

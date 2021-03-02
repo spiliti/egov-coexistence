@@ -268,10 +268,12 @@ public class PaymentAction extends BasePaymentAction {
         }
         if (parameters.get("fundId") != null && !parameters.get("fundId")[0].equals("-1")) {
             final Fund fund = (Fund) persistenceService.find("from Fund where id=?",
-                    Integer.parseInt(parameters.get("fundId")[0]));
+                    Long.valueOf(parameters.get("fundId")[0]));
             addDropdownData("bankbranchList",
                     persistenceService.findAllBy(
-                            "from Bankbranch br where br.id in (select bankbranch.id from Bankaccount where fund=? and type in ('RECEIPTS_PAYMENTS','PAYMENTS') ) and br.isactive=true order by br.bank.name asc",
+                            "from Bankbranch br where br.id in (select bankbranch.id from Bankaccount"
+                            + " where fund=? and type in ('RECEIPTS_PAYMENTS','PAYMENTS') )"
+                            + " and br.isactive=true order by br.bank.name asc",
                             fund));
         } else
             addDropdownData("bankbranchList", Collections.EMPTY_LIST);
@@ -1344,8 +1346,8 @@ public class PaymentAction extends BasePaymentAction {
         
 		final User loggedInUser = new User();
 		loggedInUser.setId(ApplicationThreadLocals.getUserId());
-		if (!commonsUtil.isApplicationOwner(loggedInUser, paymentheader))
-			return UNAUTHORIZED;
+		/*if (!commonsUtil.isApplicationOwner(loggedInUser, paymentheader))
+			return UNAUTHORIZED;*/
         /*
          * if (paymentheader.getState().getValue() != null && !paymentheader.getState().getValue().isEmpty() &&
          * paymentheader.getState().getValue().contains("Rejected")) { if (LOGGER.isDebugEnabled()) LOGGER.debug("Completed view."

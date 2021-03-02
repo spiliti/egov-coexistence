@@ -277,6 +277,13 @@
  		disableAll();
  		document.getElementById('button').value='surrender';
  		document.chequeAssignment.action = '/services/EGF/payment/chequeAssignment-save.action';
+ 		jQuery(chequeAssignment).append(
+ 				jQuery('<input>', {
+                    type: 'hidden',
+                    name: '${_csrf.parameterName}',
+                    value: '${_csrf.token}'
+                })
+            );
 		document.chequeAssignment.submit();
 		 return true;
  	}
@@ -335,6 +342,13 @@
  		}
 	 	disableAll();
 	 	document.chequeAssignment.action = '/services/EGF/payment/chequeAssignment-save.action?containsRTGS='+document.getElementById('containsRTGS').value;
+	 	jQuery(chequeAssignment).append(
+	 			jQuery('<input>', {
+	                type: 'hidden',
+	                name: '${_csrf.parameterName}',
+	                value: '${_csrf.token}'
+	            })
+	        );
 		document.chequeAssignment.submit();
 		
  	}

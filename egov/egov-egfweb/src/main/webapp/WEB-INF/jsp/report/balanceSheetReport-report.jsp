@@ -93,9 +93,14 @@ function validateMandatoryFields(){
 	function balanceSheetReportSubmit()
 	{
 		if(validateMandatoryFields()){
-	document.balanceSheetReport.action='/services/EGF/report/balanceSheetReport-printBalanceSheetReport.action';
-	document.balanceSheetReport.submit();
-	return true;
+			document.balanceSheetReport.action='/services/EGF/report/balanceSheetReport-printBalanceSheetReport.action';
+			jQuery(balanceSheetReport).append(jQuery('<input>', {
+		        type : 'hidden',
+		        name : '${_csrf.parameterName}',
+		        value : '${_csrf.token}'
+		    }));
+			document.balanceSheetReport.submit();
+			return true;
 		}
 		return false;
 

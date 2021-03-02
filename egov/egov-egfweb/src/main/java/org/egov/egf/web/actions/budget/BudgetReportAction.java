@@ -1261,16 +1261,18 @@ public class BudgetReportAction extends BaseFormAction {
         budgetReportList.add(new BudgetReportView("", "", "", null, null, null));
     }
 
-    protected String getQueryForSelectedType(final String code) {
-        if (budgetReport.getType() == null)
-            return "";
-        if (!"ALL".equalsIgnoreCase(budgetReport.getType()))
-            if ("IE".equalsIgnoreCase(budgetReport.getType()))
-                return String.format("and (bd.budgetGroup.%s.type='I' or bd.budgetGroup.%s.type='E') ", code, code);
-            else
-                return String.format("and bd.budgetGroup.%s.type=", code).concat(budgetReport.getType());
-        return "";
-    }
+	protected String getQueryForSelectedType(final String code, final Map<String, Object> params) {
+		if (budgetReport.getType() == null)
+			return "";
+		if (!"ALL".equalsIgnoreCase(budgetReport.getType()))
+			if ("IE".equalsIgnoreCase(budgetReport.getType()))
+				return String.format("and (bd.budgetGroup.%s.type='I' or bd.budgetGroup.%s.type='E') ", code, code);
+			else {
+				params.put("type", budgetReport.getType().toCharArray()[0]);
+				return String.format("and bd.budgetGroup.%s.type=:type", code);
+			}
+		return "";
+	}
 
     @ReadOnly
     protected Map<String, Object> getParamMap() {
@@ -1548,21 +1550,25 @@ public class BudgetReportAction extends BaseFormAction {
         return budgetGroup.getMinCode() == null ? budgetGroup.getMajorCode().getGlcode() : budgetGroup.getMinCode().getGlcode();
     }
 
-    void fetchBudgetDetails(final List<BudgetDetail> budgetDetails, final String deptQuery, final String finalStatus,
-            final String budgetType, final String code) {
-        final List<BudgetDetail> results = persistenceService.getSession()
-                .createQuery(new StringBuilder(" from BudgetDetail bd where bd.budget.financialYear.id=:finYearId")
-                        .append(deptQuery).append(" and bd.budget.isbere=:isBeRe and bd.budget.status.code =:status ")
-                        .append(getQueryForSelectedType(code))
-                        .append(String.format("  order by bd.budgetGroup.%s.glcode", code))
-                        .toString())
-                .setParameter("finYearId", budgetReport.getFinancialYear().getId(), LongType.INSTANCE)
-                .setParameter("execDept", budgetReport.getDepartment().getCode(), StringType.INSTANCE)
-                .setParameter("isBeRe", budgetType, StringType.INSTANCE)
-                .setParameter("status", finalStatus, StringType.INSTANCE)
-                .list();
-        budgetDetails.addAll(results);
-    }
+	void fetchBudgetDetails(final List<BudgetDetail> budgetDetails, final String deptQuery, final String finalStatus,
+			final String budgetType, final String code) {
+
+		final Map<String, Object> params = new HashMap<>();
+		final Query query = persistenceService.getSession()
+				.createQuery(new StringBuilder(" from BudgetDetail bd where bd.budget.financialYear.id=:finYearId ")
+						.append(deptQuery).append(" and bd.budget.isbere=:isBeRe and bd.budget.status.code =:status ")
+						.append(getQueryForSelectedType(code, params))
+						.append(String.format("  order by bd.budgetGroup.%s.glcode", code)).toString())
+				.setParameter("finYearId", budgetReport.getFinancialYear().getId(), LongType.INSTANCE)
+				.setParameter("isBeRe", budgetType, StringType.INSTANCE)
+				.setParameter("status", finalStatus, StringType.INSTANCE);
+		if (!deptQuery.equals("")) {
+			query.setParameter("execDept", budgetReport.getDepartment().getCode(), StringType.INSTANCE);
+		}
+		persistenceService.populateQueryWithParams(query, params);
+		final List<BudgetDetail> results = query.list();
+		budgetDetails.addAll(results);
+	}
 
     private void getBudgetReappropriationAmt() {
         final String status = getFinalStatus();

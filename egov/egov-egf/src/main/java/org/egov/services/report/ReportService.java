@@ -161,8 +161,8 @@ public abstract class ReportService {
         return "";
     }
 
-    public List<Integer> getfundList(final List<Fund> fundList) {
-    	final List<Integer> funds = new ArrayList<>();
+    public List<Long> getfundList(final List<Fund> fundList) {
+    	final List<Long> funds = new ArrayList<>();
         for (final Fund fund : fundList)
             funds.add(fund.getId());
         return funds;

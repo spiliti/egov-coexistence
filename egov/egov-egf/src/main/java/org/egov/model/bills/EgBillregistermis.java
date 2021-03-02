@@ -157,7 +157,6 @@ public class EgBillregistermis extends AbstractPersistable<Integer> implements j
 
     @ManyToOne
     @JoinColumn(name = "fundid")
-    @Column(updatable = false)
     private Fund fund;
 
     @ManyToOne
@@ -177,12 +176,10 @@ public class EgBillregistermis extends AbstractPersistable<Integer> implements j
 
     @ManyToOne
     @JoinColumn(name = "schemeid")
-    @Column(updatable = false)
     private Scheme scheme;
 
     @ManyToOne
     @JoinColumn(name = "subschemeid")
-    @Column(updatable = false)
     private SubScheme subScheme;
 
     @ManyToOne

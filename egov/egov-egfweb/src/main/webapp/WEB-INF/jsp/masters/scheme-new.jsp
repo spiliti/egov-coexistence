@@ -84,9 +84,23 @@
  	    var showMode = document.getElementById('mode').value;
  	   if(showMode=='edit'){
         	document.schemeForm.action='${pageContext.request.contextPath}/masters/scheme-edit.action';
+        	jQuery(schemeForm).append(
+                    jQuery('<input>', {
+                        type: 'hidden',
+                        name: '${_csrf.parameterName}',
+                        value: '${_csrf.token}'
+                    })
+                );
     		document.schemeForm.submit();
  	   }else{
  		  	document.schemeForm.action='${pageContext.request.contextPath}/masters/scheme-create.action';
+ 		  	jQuery(schemeForm).append(
+ 	                jQuery('<input>', {
+ 	                    type: 'hidden',
+ 	                    name: '${_csrf.parameterName}',
+ 	                    value: '${_csrf.token}'
+ 	                })
+ 	            );
  	    	document.schemeForm.submit();
  	 	   }
     	return true;

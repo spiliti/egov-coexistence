@@ -300,7 +300,7 @@ public class VoucherHelper {
 
 	}
 
-	public String getGeneratedVoucherNumber(final Integer fundId, String voucherType, final Date voucherDate,
+	public String getGeneratedVoucherNumber(final Long fundId, String voucherType, final Date voucherDate,
 			String vNumGenMode, String voucherNumber) throws TaskFailedException {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("fundId | in getGeneratedVoucherNumber      :" + fundId);

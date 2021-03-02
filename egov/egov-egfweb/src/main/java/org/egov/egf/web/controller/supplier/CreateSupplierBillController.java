@@ -98,9 +98,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -188,7 +189,7 @@ public class CreateSupplierBillController extends BaseBillController {
         model.addAttribute(NET_PAYABLE_CODES, chartOfAccountsService.getSupplierNetPayableAccountCodes());
     }
 
-    @RequestMapping(value = "/newform", method = RequestMethod.POST)
+    @GetMapping(value = "/newform")
     public String showNewForm(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
             HttpServletRequest request) {
         setDropDownValues(model);
@@ -202,7 +203,7 @@ public class CreateSupplierBillController extends BaseBillController {
         return SUPPLIERBILL_FORM;
     }
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PostMapping(value = "/create")
     public String create(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
             final BindingResult resultBinder, final HttpServletRequest request, @RequestParam final String workFlowAction)
             throws IOException {
@@ -407,7 +408,7 @@ public class CreateSupplierBillController extends BaseBillController {
 
     }
 
-    @RequestMapping(value = "/success", method = RequestMethod.GET)
+    @GetMapping(value = "/success")
     public String showSuccessPage(@RequestParam("billNumber") final String billNumber, final Model model,
             final HttpServletRequest request) {
         final String[] keyNameArray = request.getParameter(APPROVER_DETAILS).split(",");
@@ -465,7 +466,7 @@ public class CreateSupplierBillController extends BaseBillController {
         return message;
     }
 
-    @RequestMapping(value = "/downloadBillDoc", method = RequestMethod.GET)
+    @GetMapping(value = "/downloadBillDoc")
     public void getBillDoc(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, FileNotFoundException {
         final ServletContext context = request.getServletContext();

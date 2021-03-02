@@ -228,7 +228,7 @@ public class EgovCommon {
      */
     @SuppressWarnings("unchecked")
     public BigDecimal getCashBalance(final Date VoucherDate,
-            final String cashInHandCode, final Integer fundId) {
+            final String cashInHandCode, final Long fundId) {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("EgovCommon | getCashBalance");
         BigDecimal opeAvailable1 = BigDecimal.ZERO;

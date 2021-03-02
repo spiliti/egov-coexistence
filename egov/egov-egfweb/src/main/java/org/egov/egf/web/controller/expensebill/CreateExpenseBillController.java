@@ -86,6 +86,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -140,7 +141,7 @@ public class CreateExpenseBillController extends BaseBillController {
         super.setDropDownValues(model);
     }
 
-    @RequestMapping(value = "/newform", method = RequestMethod.POST)
+    @GetMapping(value = "/newform")
     public String showNewForm(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,HttpServletRequest request) {
         LOGGER.info("New expensebill creation request created");
         Cookie[] cookies = request.getCookies();

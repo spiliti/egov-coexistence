@@ -89,7 +89,7 @@ public class SubSchemeAction extends BaseFormAction {
     SubSchemeHibernateDAO subSchemeHibernateDAO;
     private boolean isactive = false;
     private boolean clearValues = false;
-    private int fundId;
+    private long fundId;
     private static final String REQUIRED = "required";
     private int schemeId;
     private Long subSchemeId;
@@ -321,11 +321,11 @@ public class SubSchemeAction extends BaseFormAction {
         return (User) persistenceService.getSession().load(User.class, ApplicationThreadLocals.getUserId());
     }
 
-    public void setFundId(final int fundId) {
+    public void setFundId(final long fundId) {
         this.fundId = fundId;
     }
 
-    public int getFundId() {
+    public long getFundId() {
         return fundId;
     }
 

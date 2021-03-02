@@ -183,7 +183,7 @@ public class CommonAction extends BaseFormAction {
             " AND ih.statusId.moduletype='Instrument' AND iv.instrumentHeaderId = ih.id and ih.bankAccountId is not null " +
             "AND iv.voucherHeaderId     = ph.voucherheader AND ph.bankaccount = ih.bankAccountId AND ph.type = '"
             + FinancialConstants.MODEOFPAYMENT_RTGS + "' " + "GROUP BY ih.transactionNumber,ih.id order by ih.id desc";
-    private Integer fundId;
+    private Long fundId;
     private Integer schemeId;
     private Integer department;
     private Integer bankId;
@@ -1101,11 +1101,11 @@ public class CommonAction extends BaseFormAction {
         return "bankAccNum";
     }
 
-    public Integer getFundId() {
+    public Long getFundId() {
         return fundId;
     }
 
-    public void setFundId(final Integer fundId) {
+    public void setFundId(final Long fundId) {
         this.fundId = fundId;
     }
 
