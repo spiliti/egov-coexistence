@@ -873,7 +873,7 @@ function createDropdownFormatterCode(prefix){
 }
 var selecteddetailtype;
 var onDropdownChange = function(index,obj) { 
-	
+		var csrfToken = document.getElementById('csrfTokenValue').value;
 		var subledgerid=document.getElementById('subLedgerlist['+obj.value+'].glcode.id');
 		var accountCode = subledgerid.options[subledgerid.selectedIndex].text;
 		if(subledgerid.options[subledgerid.selectedIndex].value==0){
@@ -881,7 +881,7 @@ var onDropdownChange = function(index,obj) {
 		}
 		selecteddetailtype=document.getElementById('subLedgerlist['+obj.value+'].detailType.id').value;
 		//document.getElementById('subLedgerlist['+obj.value+'].subledgerCode').value= subledgerid.options[subledgerid.selectedIndex].text;
-		var url = path+'/receipts/ajaxReceiptCreate-getDetailType.action?accountCode='+accountCode+'&index='+obj.value+'&selectedDetailType='+selecteddetailtype+'&onload=false';
+		var url = path+'/receipts/ajaxReceiptCreate-getDetailType.action?accountCode='+accountCode+'&index='+obj.value+'&selectedDetailType='+selecteddetailtype+'&onload=false'+'&_csrf='+csrfToken;
 		var transaction = YAHOO.util.Connect.asyncRequest('POST', url, postType, null);
 };
 var postType = {
@@ -993,7 +993,7 @@ function getDetailCodeValue(val){
 
 }
 function check(){
-	
+	var csrfToken = document.getElementById('csrfTokenValue').value;
 	var accountCodes=new Array();
 	var count=0;
 	for(var i=0;i<billDetailTableIndex+1;i++){
@@ -1008,7 +1008,7 @@ function check(){
 			count++;
 		}
 	}
-	var url =  path+'/receipts/ajaxReceiptCreate-getDetailCode.action?accountCodes='+accountCodes;
+	var url =  path+'/receipts/ajaxReceiptCreate-getDetailCode.action?accountCodes='+accountCodes+'&_csrf='+csrfToken;
 	var transaction = YAHOO.util.Connect.asyncRequest('POST', url, callbackJV, null);
 	
 }

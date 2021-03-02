@@ -494,7 +494,7 @@ public class BudgetAppropriationRegisterReportAction extends BaseFormAction {
             }
             if (fund.getId() != null && fund.getId() != -1) {
                 query.append(" and bd.fund.id=?");
-                params.add(Integer.valueOf(fund.getId()));
+                params.add(fund.getId());
             }
             budgedDetailList = persistenceService.findAllBy(query.toString(), params.toArray());
             if (budgedDetailList != null && budgedDetailList.size() > 0)

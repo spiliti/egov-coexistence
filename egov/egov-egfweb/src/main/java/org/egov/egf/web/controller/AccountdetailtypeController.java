@@ -65,10 +65,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -94,14 +95,14 @@ public class AccountdetailtypeController {
 
 	}
 
-	@RequestMapping(value = "/new", method = RequestMethod.POST)
+	@GetMapping(value = "/new")
 	public String newForm(final Model model) {
 		prepareNewForm(model);
 		model.addAttribute("accountdetailtype", new Accountdetailtype());
 		return ACCOUNTDETAILTYPE_NEW;
 	}
 
-	@RequestMapping(value = "/create", method = RequestMethod.POST)
+	@PostMapping(value = "/create")
 	public String create(@Valid @ModelAttribute final Accountdetailtype accountdetailtype, final BindingResult errors,
 			final Model model, final RedirectAttributes redirectAttrs) {
 		if (errors.hasErrors()) {
@@ -122,7 +123,7 @@ public class AccountdetailtypeController {
 		return "redirect:/accountdetailtype/result/" + accountdetailtype.getId()+"/create";
 	}
 
-	@RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
+	@GetMapping(value = "/edit/{id}")
 	public String edit(@PathVariable("id") final Integer id, Model model) {
 		Accountdetailtype accountdetailtype = accountdetailtypeService.findOne(id);
 		prepareNewForm(model);
@@ -130,7 +131,7 @@ public class AccountdetailtypeController {
 		return ACCOUNTDETAILTYPE_EDIT;
 	}
 
-	@RequestMapping(value = "/update", method = RequestMethod.POST)
+	@PostMapping(value = "/update")
 	public String update(@ModelAttribute final Accountdetailtype accountdetailtype, final BindingResult errors,
 			final Model model, final RedirectAttributes redirectAttrs) {
 		if (errors.hasErrors()) {
@@ -151,7 +152,7 @@ public class AccountdetailtypeController {
 		return "redirect:/accountdetailtype/result/" + accountdetailtype.getId()+"/update";
 	}
 
-	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
+	@GetMapping(value = "/view/{id}")
 	public String view(@PathVariable("id") final Integer id, Model model) {
 		Accountdetailtype accountdetailtype = accountdetailtypeService.findOne(id);
 		prepareNewForm(model);
@@ -159,7 +160,7 @@ public class AccountdetailtypeController {
 		return ACCOUNTDETAILTYPE_VIEW;
 	}
 
-	@RequestMapping(value = "/result/{id}/{mode}", method = RequestMethod.GET)
+	@GetMapping(value = "/result/{id}/{mode}")
 	public String result(@PathVariable("id") final Integer id,@PathVariable("mode") final String mode, Model model) {
 		Accountdetailtype accountdetailtype = accountdetailtypeService.findOne(id);
 		model.addAttribute("accountdetailtype", accountdetailtype);
@@ -167,7 +168,7 @@ public class AccountdetailtypeController {
 		return ACCOUNTDETAILTYPE_RESULT;
 	}
 
-	@RequestMapping(value = "/search/{mode}", method = RequestMethod.POST)
+	@GetMapping(value = "/search/{mode}")
 	public String search(@PathVariable("mode") final String mode, Model model) {
 		Accountdetailtype accountdetailtype = new Accountdetailtype();
 		prepareNewForm(model);
@@ -176,7 +177,7 @@ public class AccountdetailtypeController {
 
 	}
 
-	@RequestMapping(value = "/ajaxsearch/{mode}", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
 	public @ResponseBody String ajaxsearch(@PathVariable("mode") final String mode, Model model,
 			@ModelAttribute final Accountdetailtype accountdetailtype) {
 		List<Accountdetailtype> searchResultList = accountdetailtypeService.search(accountdetailtype, mode);

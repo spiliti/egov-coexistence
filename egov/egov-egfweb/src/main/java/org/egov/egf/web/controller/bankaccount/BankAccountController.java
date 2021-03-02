@@ -48,8 +48,10 @@
 
 package org.egov.egf.web.controller.bankaccount;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.util.List;
+
+import javax.validation.Valid;
+
 import org.egov.commons.Bankaccount;
 import org.egov.commons.CChartOfAccounts;
 import org.egov.commons.CGeneralLedger;
@@ -70,15 +72,16 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
-import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * @author venki
@@ -126,14 +129,14 @@ public class BankAccountController {
         model.addAttribute("autoglcode", createBankAccountService.autoBankAccountGLCodeEnabled());
     }
 
-    @RequestMapping(value = "/new", method = RequestMethod.POST)
+    @GetMapping(value = "/new")
     public String newForm(final Model model) {
         setDropDownValues(model);
         model.addAttribute(BANKACCOUNT, new Bankaccount());
         return "bankaccount-new";
     }
 
-    @RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
+    @GetMapping(value = "/edit/{id}")
     public String edit(@PathVariable("id") final Long id, final Model model) {
         final Bankaccount bankaccount = createBankAccountService.getById(id);
         setDropDownValues(model);
@@ -142,7 +145,7 @@ public class BankAccountController {
         return "bankaccount-update";
     }
 
-    @RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
+    @GetMapping(value = "/view/{id}")
     public String view(@PathVariable("id") final Long id, final Model model) {
         final Bankaccount bankaccount = createBankAccountService.getById(id);
         model.addAttribute(BANKACCOUNT, bankaccount);
@@ -150,7 +153,7 @@ public class BankAccountController {
         return "bankaccount-view";
     }
 
-    @RequestMapping(value = "/search/{mode}", method = RequestMethod.POST)
+    @GetMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final Bankaccount bankaccount = new Bankaccount();
         setDropDownValues(model);
@@ -159,7 +162,7 @@ public class BankAccountController {
 
     }
 
-    @RequestMapping(value = "/success/{id}/{mode}", method = RequestMethod.GET)
+    @GetMapping(value = "/success/{id}/{mode}")
     public String success(@PathVariable("id") final Long id,@PathVariable("mode") final String mode, final Model model) {
         final Bankaccount bankaccount = createBankAccountService.getById(id);
         model.addAttribute(BANKACCOUNT, bankaccount);
@@ -167,7 +170,7 @@ public class BankAccountController {
         return "bankaccount-success";
     }
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PostMapping(value = "/create")
     public String create(@Valid @ModelAttribute final Bankaccount bankaccount, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
         if (!createBankAccountService.autoBankAccountGLCodeEnabled())
@@ -183,7 +186,7 @@ public class BankAccountController {
         return "redirect:/bankaccount/success/" + bankaccount.getId()+"/create";
     }
 
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @PostMapping(value = "/update")
     public String update(@Valid @ModelAttribute final Bankaccount bankaccount, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors()) {
@@ -197,7 +200,7 @@ public class BankAccountController {
         return "redirect:/bankaccount/success/" + bankaccount.getId()+"/view";
     }
 
-    @RequestMapping(value = "/ajaxsearch/{mode}", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
             @ModelAttribute final Bankaccount bankaccount) {

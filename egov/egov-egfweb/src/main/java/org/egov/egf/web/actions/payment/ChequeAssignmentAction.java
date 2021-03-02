@@ -820,11 +820,14 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
         try {
             if (bankaccount != null) {
                 if (department != null) {
-                	StringBuilder query = new StringBuilder("select ac.serialNo ,fs.finYearRange from  AccountCheques ac,CFinancialYear fs,ChequeDeptMapping cd")
-                            .append(" where ac.serialNo = fs.id and  bankAccountId=? ")
-                                            .append(" and ac.id=cd.accountCheque and cd.allotedTo=(select id from Department where id =? )")
-                                            .append(" order by serialNo desc ");
-                    final List<Object[]> yearCodeList = persistenceService.findAllBy(query.toString(),Long.valueOf(bankaccount),Long.valueOf(department));
+					StringBuilder query = new StringBuilder(
+							"select ac.serialNo ,fs.finYearRange from  AccountCheques ac,")
+									.append("CFinancialYear fs,ChequeDeptMapping cd")
+									.append(" where ac.serialNo = fs.id and  bankAccountId=? ")
+									.append(" and ac.id=cd.accountCheque and cd.allotedTo=? ")
+									.append(" order by serialNo desc ");
+					final List<Object[]> yearCodeList = persistenceService.findAllBy(query.toString(),
+							Long.valueOf(bankaccount), department);
                     if (yearCodeList != null) {
                         for (final Object[] s : yearCodeList)
                             chequeSlNoMap.put(s[0], s[1]);

@@ -208,9 +208,10 @@ public class CancelBillAction extends BaseFormAction {
 		final Map<String, Map<String, Object>> queryMap = new HashMap<>();
         final Map<String, Object> params = new HashMap<>();
         final String userCond = " where ";
-        final StringBuilder query = new StringBuilder(
-                " select billmis.egBillregister.id, billmis.egBillregister.billnumber, billmis.egBillregister.billdate, billmis.egBillregister.billamount, billmis.departmentcode ")
-                .append("  from EgBillregistermis billmis ");
+		final StringBuilder query = new StringBuilder(
+				" select billmis.egBillregister.id, billmis.egBillregister.billnumber, billmis.egBillregister.billdate,")
+						.append(" billmis.egBillregister.billamount, billmis.departmentcode ")
+						.append("  from EgBillregistermis billmis ");
         // if the logged in user is same as creator or is superruser
         query.append(userCond);
         
@@ -254,8 +255,6 @@ public class CancelBillAction extends BaseFormAction {
 		if (expType == null || expType.equalsIgnoreCase("")) {
             query.append(" and billmis.egBillregister.status.description=:description");
             params.put("description", FinancialConstants.CONTINGENCYBILL_APPROVED_STATUS);
-//			query.append(" and billmis.egBillregister.expendituretype ='"
-//					+ FinancialConstants.STANDARD_EXPENDITURETYPE_CONTINGENT + "'");
 		} else {
             query.append(" and billmis.egBillregister.expendituretype =:expenditureType");
             params.put("expenditureType", expType);
@@ -323,10 +322,10 @@ public class CancelBillAction extends BaseFormAction {
             final List<Object[]> tempBillList = new ArrayList<Object[]>();
             List<Object[]> billListWithNoVouchers, billListWithCancelledReversedVouchers;
             final Query queryOne = persistenceService.getSession().createQuery(list.get(0));
-            queries.get(list.get(0)).entrySet().forEach(entry -> queryOne.setParameter(entry.getKey(), entry.getValue()));
+            persistenceService.populateQueryWithParams(queryOne, queries.get(list.get(0)));
             billListWithNoVouchers = queryOne.list();
             final Query queryTwo = persistenceService.getSession().createQuery(list.get(1));
-            queries.get(list.get(1)).entrySet().forEach(entry -> queryTwo.setParameter(entry.getKey(), entry.getValue()));
+            persistenceService.populateQueryWithParams(queryTwo, queries.get(list.get(1)));
             billListWithCancelledReversedVouchers = queryTwo.list();
 
             tempBillList.addAll(billListWithNoVouchers);
@@ -431,7 +430,7 @@ public class CancelBillAction extends BaseFormAction {
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug(" Cancel Query - " + cancelQuery.toString());
             final Query totalNativeQuery = persistenceService.getSession()
-                    .createQuery(cancelQuery.toString());
+                    .createSQLQuery(cancelQuery.toString());
             totalNativeQuery.setParameter("statusId", Long.valueOf(status.getId()), LongType.INSTANCE);
             cancelQueryMap.entrySet().forEach(entry -> totalNativeQuery.setParameter(entry.getKey(), entry.getValue()));
             totalNativeQuery.setParameterList("ids", ids);

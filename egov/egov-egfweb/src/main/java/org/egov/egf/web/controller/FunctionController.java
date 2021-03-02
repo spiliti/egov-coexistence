@@ -62,8 +62,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -93,14 +95,14 @@ public class FunctionController {
 		model.addAttribute("functions", functionService.findAllIsNotLeafTrue());
 	}
 
-	@RequestMapping(value = "/new", method = RequestMethod.POST)
+	@GetMapping(value = "/new")
 	public String newForm(final Model model) {
 		prepareNewForm(model);
 		model.addAttribute("CFunction", new CFunction());
 		return FUNCTION_NEW;
 	}
 
-	@RequestMapping(value = "/create", method = RequestMethod.POST)
+	@PostMapping(value = "/create")
 	public String create(@Valid @ModelAttribute final CFunction function,
 			final BindingResult errors, final Model model,
 			final RedirectAttributes redirectAttrs) {
@@ -121,7 +123,7 @@ public class FunctionController {
 		return "redirect:/function/result/" + function.getId()+"/create";
 	}
 
-	@RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
+	@GetMapping(value = "/edit/{id}")
 	public String edit(@PathVariable("id") final Long id, Model model) {
 		CFunction function = functionService.findOne(id);
 		prepareNewForm(model);
@@ -129,7 +131,7 @@ public class FunctionController {
 		return FUNCTION_EDIT;
 	}
 
-	@RequestMapping(value = "/update", method = RequestMethod.POST)
+	@PostMapping(value = "/update")
 	public String update(@Valid @ModelAttribute final CFunction function,
 			final BindingResult errors, final Model model,
 			final RedirectAttributes redirectAttrs) {
@@ -154,7 +156,7 @@ public class FunctionController {
 		return FUNCTION_VIEW;
 	}
 
-	@RequestMapping(value = "/result/{id}/{mode}", method = RequestMethod.GET)
+	@GetMapping(value = "/result/{id}/{mode}")
 	public String result(@PathVariable("id") final Long id,@PathVariable("mode") final String mode, Model model) {
 		CFunction function = functionService.findOne(id);
 		model.addAttribute("function", function);
@@ -162,7 +164,7 @@ public class FunctionController {
 		return FUNCTION_RESULT;
 	}
 
-	@RequestMapping(value = "/search/{mode}", method = RequestMethod.POST)
+	@GetMapping(value = "/search/{mode}")
 	public String search(@PathVariable("mode") final String mode, Model model) {
 		CFunction function = new CFunction();
 		prepareNewForm(model);
@@ -171,7 +173,7 @@ public class FunctionController {
 
 	}
 
-	@RequestMapping(value = "/ajaxsearch/{mode}", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
 	public @ResponseBody String ajaxsearch(
 			@PathVariable("mode") final String mode, Model model,
 			@ModelAttribute final CFunction function) {

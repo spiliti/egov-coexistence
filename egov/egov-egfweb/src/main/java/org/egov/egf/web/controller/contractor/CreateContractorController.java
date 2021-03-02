@@ -64,10 +64,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -106,14 +107,14 @@ public class CreateContractorController {
                 egwStatusHibDAO.getStatusByModule(FinancialConstants.STATUS_MODULE_NAME_CONTRACTOR));
     }
 
-    @RequestMapping(value = "/newform", method = RequestMethod.POST)
+    @GetMapping(value = "/newform")
     public String showNewForm(@ModelAttribute("contractor") final Contractor contractor, final Model model) {
         prepareNewForm(model);
         model.addAttribute("contractor", new Contractor());
         return NEW;
     }
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PostMapping(value = "/create")
     public String create(@Valid @ModelAttribute final Contractor contractor, final BindingResult errors,
             final Model model, final RedirectAttributes redirectAttrs) throws IOException {
 
@@ -132,7 +133,7 @@ public class CreateContractorController {
         return "redirect:/contractor/result/" + contractor.getId() + "/create";
     }
 
-    @RequestMapping(value = "/edit/{id}", method = RequestMethod.POST)
+    @GetMapping(value = "/edit/{id}")
     public String edit(@PathVariable("id") final Long id, final Model model) {
         final Contractor contractor = contractorService.getById(id);
         prepareNewForm(model);
@@ -140,7 +141,7 @@ public class CreateContractorController {
         return EDIT;
     }
 
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @PostMapping(value = "/update")
     public String update(@Valid @ModelAttribute final Contractor contractor, final BindingResult errors,
             final Model model, final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors()) {
@@ -152,7 +153,7 @@ public class CreateContractorController {
         return "redirect:/contractor/result/" + contractor.getId() + "/view";
     }
 
-    @RequestMapping(value = "/view/{id}", method = RequestMethod.POST)
+    @GetMapping(value = "/view/{id}")
     public String view(@PathVariable("id") final Long id, final Model model) {
         final Contractor contractor = contractorService.getById(id);
         prepareNewForm(model);
@@ -161,7 +162,7 @@ public class CreateContractorController {
         return VIEW;
     }
 
-    @RequestMapping(value = "/search/{mode}", method = RequestMethod.POST)
+    @GetMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final Contractor contractor = new Contractor();
         prepareNewForm(model);
@@ -170,7 +171,7 @@ public class CreateContractorController {
 
     }
 
-    @RequestMapping(value = "/ajaxsearch/{mode}", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
             @ModelAttribute final Contractor contractor) {
@@ -184,7 +185,7 @@ public class CreateContractorController {
         return gson.toJson(object);
     }
 
-    @RequestMapping(value = "/result/{id}/{mode}", method = RequestMethod.GET)
+    @GetMapping(value = "/result/{id}/{mode}")
     public String result(@PathVariable("id") final Long id, @PathVariable("mode") final String mode, final Model model) {
         final Contractor contractor = contractorService.getById(id);
         model.addAttribute("contractor", contractor);

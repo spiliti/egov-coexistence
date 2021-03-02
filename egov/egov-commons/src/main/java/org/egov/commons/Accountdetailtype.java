@@ -107,7 +107,6 @@ public class Accountdetailtype extends AbstractPersistable<Integer> {
     private String attributename;
 
     @NotNull
-    @Min(1)
     private BigDecimal nbroflevels = BigDecimal.ZERO;
 
     private Boolean isactive;

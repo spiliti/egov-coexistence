@@ -78,10 +78,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
@@ -125,14 +126,14 @@ public class TransactionSummaryController {
 		model.addAttribute("cFunctions", functionDAO.getAllActiveFunctions());
 	}
 
-	@RequestMapping(value = "/new", method = RequestMethod.POST)
+	@GetMapping(value = "/new")
 	public String newForm(final Model model) {
 		prepareNewForm(model);
 		model.addAttribute("transactionSummaryDto", new TransactionSummaryDto());
 		return TRANSACTIONSUMMARY_NEW;
 	}
 
-	@RequestMapping(value = "/create", method = RequestMethod.POST)
+	@PostMapping(value = "/create")
 	public @ResponseBody ResponseEntity<?> create(@ModelAttribute final TransactionSummaryDto transactionSummaryDto,
 			final BindingResult errors, final Model model, final RedirectAttributes redirectAttrs,
 			HttpServletResponse response) {
@@ -202,7 +203,7 @@ public class TransactionSummaryController {
 		return tempTransactionSummaries;
 	}
 
-	@RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
+	@GetMapping(value = "/edit/{id}")
 	public String edit(@PathVariable("id") final Long id, Model model) {
 		TransactionSummary transactionSummary = transactionSummaryService.findOne(id);
 		prepareNewForm(model);
@@ -210,7 +211,7 @@ public class TransactionSummaryController {
 		return TRANSACTIONSUMMARY_EDIT;
 	}
 
-	@RequestMapping(value = "/update", method = RequestMethod.POST)
+	@PostMapping(value = "/update")
 	public String update(@ModelAttribute final TransactionSummary transactionSummary, final BindingResult errors,
 			final Model model, final RedirectAttributes redirectAttrs) {
 		if (errors.hasErrors()) {
@@ -222,7 +223,7 @@ public class TransactionSummaryController {
 		return "redirect:/transactionsummary/result/" + transactionSummary.getId();
 	}
 
-	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
+	@GetMapping(value = "/view/{id}")
 	public String view(@PathVariable("id") final Long id, Model model) {
 		TransactionSummary transactionSummary = transactionSummaryService.findOne(id);
 		prepareNewForm(model);
@@ -230,20 +231,20 @@ public class TransactionSummaryController {
 		return TRANSACTIONSUMMARY_VIEW;
 	}
 
-	@RequestMapping(value = "/result/{id}", method = RequestMethod.GET)
+	@GetMapping(value = "/result/{id}")
 	public String result(@PathVariable("id") final Long id, Model model) {
 		TransactionSummary transactionSummary = transactionSummaryService.findOne(id);
 		model.addAttribute("transactionSummary", transactionSummary);
 		return TRANSACTIONSUMMARY_RESULT;
 	}
 
-	@RequestMapping(value = "/ajax/getMajorHeads", method = RequestMethod.GET)
+	@GetMapping(value = "/ajax/getMajorHeads")
 	public @ResponseBody List<CChartOfAccounts> getMajorHeads(@RequestParam("type") Character type) {
 		List<CChartOfAccounts> accounts = chartOfAccountsDAO.findByType(type);
 		return accounts;
 	}
 
-	@RequestMapping(value = "/ajax/getMinorHeads", method = RequestMethod.GET)
+	@GetMapping(value = "/ajax/getMinorHeads")
 	public @ResponseBody List<CChartOfAccounts> getMinorHeads(@RequestParam("majorCode") String majorCode,
 			@RequestParam("classification") Long classification) {
 		List<CChartOfAccounts> accounts = chartOfAccountsDAO.findByMajorCodeAndClassification(majorCode,
@@ -251,7 +252,7 @@ public class TransactionSummaryController {
 		return accounts;
 	}
 
-	@RequestMapping(value = "/ajax/getAccounts", method = RequestMethod.GET)
+	@GetMapping(value = "/ajax/getAccounts")
 	public @ResponseBody List<CChartOfAccounts> getAccounts(@RequestParam("term") String glcode,
 			@RequestParam("majorCode") String majorCode, @RequestParam("classification") Long classification) {
 		List<CChartOfAccounts> accounts = null;
@@ -265,7 +266,7 @@ public class TransactionSummaryController {
 		return accounts;
 	}
 
-	@RequestMapping(value = "/ajax/getAccountDetailTypes", method = RequestMethod.GET)
+	@GetMapping(value = "/ajax/getAccountDetailTypes")
 	public @ResponseBody List<Accountdetailtype> getAccountDetailTypes(@RequestParam("id") Long id) {
 		CChartOfAccounts account = (CChartOfAccounts) chartOfAccountsDAO.findById(id.intValue(), false);
 		List<Accountdetailtype> detailTypes = new ArrayList<Accountdetailtype>();
@@ -275,7 +276,7 @@ public class TransactionSummaryController {
 		return detailTypes;
 	}
 
-	@RequestMapping(value = "/ajax/searchTransactionSummariesForNonSubledger", method = RequestMethod.GET)
+	@GetMapping(value = "/ajax/searchTransactionSummariesForNonSubledger")
 	public @ResponseBody List<Map<String, String>> searchTransactionSummariesForNonSubledger(
 			@RequestParam("finYear") Long finYear, @RequestParam("fund") Long fund, @RequestParam("functn") Long functn,
 			@RequestParam("department") String department, @RequestParam("glcodeId") Long glcodeId) {
@@ -298,7 +299,7 @@ public class TransactionSummaryController {
 		return result;
 	}
 
-	@RequestMapping(value = "/ajax/searchTransactionSummariesForSubledger", method = RequestMethod.GET)
+	@GetMapping(value = "/ajax/searchTransactionSummariesForSubledger")
 	public @ResponseBody List<Map<String, String>> searchTransactionSummariesForSubledger(
 			@RequestParam("finYear") Long finYear, @RequestParam("fund") Long fund, @RequestParam("functn") Long functn,
 			@RequestParam("department") String department, @RequestParam("glcodeId") Long glcodeId,
@@ -323,7 +324,7 @@ public class TransactionSummaryController {
 		return result;
 	}
 
-	@RequestMapping(value = "/ajax/deleteTransaction", method = RequestMethod.GET)
+	@GetMapping (value = "/ajax/deleteTransaction")
 	public @ResponseBody String deleteTransaction(@RequestParam("id") Long id) {
 
 		if (id != null) {
@@ -334,7 +335,7 @@ public class TransactionSummaryController {
 		return "success";
 	}
 
-	@RequestMapping(value = "/ajax/getTransactionSummary", method = RequestMethod.GET)
+	@GetMapping(value = "/ajax/getTransactionSummary")
 	public @ResponseBody TransactionSummary getTransactionSummary(@RequestParam("glcodeid") Long glcodeId,
 			@RequestParam("accountdetailtypeid") Long accountDetailTypeId,
 			@RequestParam("accountdetailkey") Integer accountDetailKey) {

@@ -80,7 +80,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
         super(type);
     }
 
-    public List<Map<String,Object>> getPaymentApprovedBankAndBranchName(Integer fundId, Date asOnDate) {
+    public List<Map<String,Object>> getPaymentApprovedBankAndBranchName(Long fundId, Date asOnDate) {
         List<Map<String,Object>> bankBranches = new ArrayList<>();
         final List<String> addedBanks = new ArrayList<>();
         for (final Object[] account : fetchBankAndBranchNameHasApprovedPayment(fundId, asOnDate)) {
@@ -119,7 +119,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
         return bankBranches;
     }
 
-    public List<Map<String, Object>> getAllBankAndBranchName(Integer fundId) {
+    public List<Map<String, Object>> getAllBankAndBranchName(Long fundId) {
         List<Map<String, Object>> bankBranchList = new ArrayList<>();
         for (final Object[] element : fetchAllBankAndBankbranchName(fundId)) {
             Map<String, Object> bankBrmap = new HashMap<>();
@@ -130,7 +130,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
         return bankBranchList;
     }
 
-    public List<Map<String, Object>> getBankByFundAndType(Integer fundId, List<BankAccountType> list) {
+    public List<Map<String, Object>> getBankByFundAndType(Long fundId, List<BankAccountType> list) {
         List<Map<String, Object>> bankBranchList = new ArrayList<>();
         for (final Object[] element : fetchBankByFundAndTypeOfAccount(fundId, list)) {
             Map<String, Object> bankBrmap = new HashMap<>();
@@ -141,7 +141,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
         return bankBranchList;
     }
 
-	private List<Object[]> fetchBankByFundAndTypeOfAccount(final Integer fundId, final List<BankAccountType> list) {
+	private List<Object[]> fetchBankByFundAndTypeOfAccount(final Long fundId, final List<BankAccountType> list) {
 		final StringBuilder query = new StringBuilder();
 		query.append("select DISTINCT concat(concat(bank.id,'-'),bankBranch.id) as bankbranchid,")
 				.append("concat(concat(bank.name,' '),bankBranch.branchname) as bankbranchname ")
@@ -156,7 +156,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
 		final Query qry = getSession().createQuery(query.toString());
 
 		if (fundId != null)
-			qry.setInteger(FUND_ID, fundId);
+			qry.setLong(FUND_ID, fundId);
 
 		qry.setParameterList("accountType", list);
 
@@ -165,7 +165,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
 		return bankBranch;
 	}
 
-	private List<Object[]> fetchAllBankAndBankbranchName(final Integer fundId) {
+	private List<Object[]> fetchAllBankAndBankbranchName(final Long fundId) {
 		StringBuilder query = new StringBuilder();
 		query.append("select DISTINCT concat(concat(bank.id,'-'),bankBranch.id) as bankbranchid,")
 				.append("concat(concat(bank.name,' '),bankBranch.branchname) as bankbranchname ")
@@ -173,7 +173,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
 				.append(" and bankBranch.isactive=true and bankaccount.isactive=true ")
 				.append("and bank.id = bankBranch.bank.id and bankBranch.id = bankaccount.bankbranch.id ")
 				.append("and bankaccount.fund.id=:fundId order by 2");
-		return getSession().createSQLQuery(query.toString()).setInteger(FUND_ID, fundId).list();
+		return getSession().createSQLQuery(query.toString()).setLong(FUND_ID, fundId).list();
 	}
 
 	private List<Object[]> fetchBankAndBranchNameWithRTGSAssigned(final Date asOnDate) {
@@ -216,7 +216,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
 		return getSession().createSQLQuery(queryString.toString()).setParameter("date", asOnDate).list();
 	}
 
-	private List<Object[]> fetchBankAndBranchNameHasApprovedPayment(Integer fundId, Date asOnDate) {
+	private List<Object[]> fetchBankAndBranchNameHasApprovedPayment(Long fundId, Date asOnDate) {
 		StringBuilder queryString = new StringBuilder();
 		// query to fetch vouchers for which no cheque has been assigned
 		queryString.append(
@@ -255,7 +255,7 @@ public class BankService extends PersistenceService<Bank, Integer> {
 				.append("AND bankaccount.type IN ('RECEIPTS_PAYMENTS','PAYMENTS') AND bankBranch.id = bankaccount.branchid");
 		if (fundId != null && fundId > 0)
 			queryString.append(" and bankaccount.fundid=:fundId");
-		return getSession().createSQLQuery(queryString.toString()).setInteger(FUND_ID, fundId)
+		return getSession().createSQLQuery(queryString.toString()).setLong(FUND_ID, fundId)
 				.setParameterList("vhName", Arrays.asList(FinancialConstants.PAYMENTVOUCHER_NAME_REMITTANCE,
 						FinancialConstants.PAYMENTVOUCHER_NAME_SALARY))
 				.setDate("asOnDate", asOnDate).list();

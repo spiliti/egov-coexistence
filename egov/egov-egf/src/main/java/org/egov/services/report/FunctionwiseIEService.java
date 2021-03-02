@@ -1096,7 +1096,7 @@ public class FunctionwiseIEService
                         .addScalar("deptName", StringType.INSTANCE)
                         .setString("isBeRe", isBeRe)
                         .setLong("finYearId", reportSearch.getFinYearId())
-                        .setInteger("fundId", reportSearch.getFund().getId())
+                        .setLong("fundId", reportSearch.getFund().getId())
                         .setResultTransformer(Transformers.aliasToBean(CommonReportBean.class));
 
                 if (reportSearch.getFunction() != null && reportSearch.getFunction().getId() != null
@@ -1116,7 +1116,7 @@ public class FunctionwiseIEService
                         .addScalar("isMajor", BooleanType.INSTANCE)
                         .setString("isBeRe", isBeRe)
                         .setLong("finYearId", reportSearch.getFinYearId())
-                        .setInteger("fundId", reportSearch.getFund().getId())
+                        .setLong("fundId", reportSearch.getFund().getId())
                         .setResultTransformer(Transformers.aliasToBean(CommonReportBean.class));
                 if (reportSearch.getFunction() != null && reportSearch.getFunction().getId() != null
                         && reportSearch.getFunction().getId() != -1)
@@ -1133,7 +1133,7 @@ public class FunctionwiseIEService
                     .setString("isBeRe", isBeRe)
                     .setDate("asOnDate", reportSearch.getAsOnDate())
                     .setLong("finYearId", reportSearch.getFinYearId())
-                    .setInteger("fundId", reportSearch.getFund().getId())
+                    .setLong("fundId", reportSearch.getFund().getId())
                     .setResultTransformer(Transformers.aliasToBean(CommonReportBean.class));
 
             if (reportSearch.getFunction() != null && reportSearch.getFunction().getId() != null
@@ -1154,7 +1154,7 @@ public class FunctionwiseIEService
                     .setString("isBeRe", isBeRe)
                     .setDate("asOnDate", reportSearch.getAsOnDate())
                     .setLong("finYearId", reportSearch.getFinYearId())
-                    .setInteger("fundId", reportSearch.getFund().getId())
+                    .setLong("fundId", reportSearch.getFund().getId())
                     .setResultTransformer(Transformers.aliasToBean(CommonReportBean.class));
             if (reportSearch.getFunction() != null && reportSearch.getFunction().getId() != null
                     && reportSearch.getFunction().getId() != -1)
@@ -1181,7 +1181,7 @@ public class FunctionwiseIEService
                     .setString("isBeRe", isBeRe)
                     .setDate("asOnDate", reportSearch.getAsOnDate())
                     .setLong("finYearId", reportSearch.getFinYearId())
-                    .setInteger("fundId", reportSearch.getFund().getId())
+                    .setLong("fundId", reportSearch.getFund().getId())
 
                     .setResultTransformer(Transformers.aliasToBean(CommonReportBean.class));
             if (reportSearch.getFunction() != null && reportSearch.getFunction().getId() != null
@@ -1202,7 +1202,7 @@ public class FunctionwiseIEService
                     .setString("isBeRe", isBeRe)
                     .setDate("asOnDate", reportSearch.getAsOnDate())
                     .setLong("finYearId", reportSearch.getFinYearId())
-                    .setInteger("fundId", reportSearch.getFund().getId())
+                    .setLong("fundId", reportSearch.getFund().getId())
                     .setResultTransformer(Transformers.aliasToBean(CommonReportBean.class));
             if (reportSearch.getFunction() != null && reportSearch.getFunction().getId() != null
                     && reportSearch.getFunction().getId() != -1)

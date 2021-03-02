@@ -106,7 +106,7 @@ public class TransactionSummaryService {
 						.append(" (select glCodeId.id from CChartOfAccountDetail ) ").toString(),
 				TransactionSummary.class);
 		query.setParameter("finYear", finYear);
-		query.setParameter("fund", fund.intValue());
+		query.setParameter("fund", fund);
 		query.setParameter("functn", functn);
 		query.setParameter("department", department);
 		query.setParameter("glcodeId", glcodeId);
@@ -122,7 +122,7 @@ public class TransactionSummaryService {
 						.append(" and ts.accountdetailtype.id =:accountDetailTypeId ").toString(),
 				TransactionSummary.class);
 		query.setParameter("finYear", finYear);
-		query.setParameter("fund", fund.intValue());
+		query.setParameter("fund", fund);
 		query.setParameter("functn", functn);
 		query.setParameter("department", department);
 		query.setParameter("glcodeId", glcodeId);

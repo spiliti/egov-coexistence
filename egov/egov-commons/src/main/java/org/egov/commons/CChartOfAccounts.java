@@ -254,10 +254,11 @@ public class CChartOfAccounts extends AbstractAuditable {
         this.type = type;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        return o instanceof CChartOfAccounts && ((CChartOfAccounts) o).getId().equals(getId());
-    }
+	@Override
+	public boolean equals(final Object o) {
+		return o instanceof CChartOfAccounts && ((CChartOfAccounts) o).getId() != null
+				&& ((CChartOfAccounts) o).getId().equals(getId());
+	}
 
     @Override
     public int hashCode() {

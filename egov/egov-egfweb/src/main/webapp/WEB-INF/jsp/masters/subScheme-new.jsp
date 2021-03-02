@@ -83,6 +83,13 @@
 		else
 			var url = '/services/EGF/masters/subScheme-create.action';
 		document.subSchemeForm.action = url;
+		jQuery(subSchemeForm).append(
+                jQuery('<input>', {
+                    type: 'hidden',
+                    name: '${_csrf.parameterName}',
+                    value: '${_csrf.token}'
+                })
+            );
 		document.subSchemeForm.submit();
 		return true;
 	}

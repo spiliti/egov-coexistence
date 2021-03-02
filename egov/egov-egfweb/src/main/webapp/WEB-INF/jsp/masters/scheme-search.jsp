@@ -86,6 +86,13 @@
 
 		
     	document.schemeForm.action='${pageContext.request.contextPath}/masters/scheme-search.action';
+    	jQuery(schemeForm).append(
+                jQuery('<input>', {
+                    type: 'hidden',
+                    name: '${_csrf.parameterName}',
+                    value: '${_csrf.token}'
+                })
+            );
     	document.schemeForm.submit();
     	//return true;
     	

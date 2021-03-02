@@ -84,7 +84,7 @@ public class BudgetUploadReportService {
 
 		String reMaterializedPath = "", beMaterializedPath = "";
 		Long functionId = null;
-		Integer fundId = null;
+		Long fundId = null;
 		String deptCode = null;
 		Budget reBudget = new Budget();
 		Budget beBudget = new Budget();
@@ -124,7 +124,7 @@ public class BudgetUploadReportService {
 		return budgetUploadReportList;
 	}
 
-	public String getQuery(final String reMaterializedPath, final String beMaterializedPath, final Integer fundId,
+	public String getQuery(final String reMaterializedPath, final String beMaterializedPath, final Long fundId,
 			final Long functionId, final String deptCode, final Map<String, Object> params) {
 
 		final StringBuilder subQuery = new StringBuilder();

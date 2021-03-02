@@ -416,7 +416,7 @@ public class BudgetVarianceReportAction extends BaseFormAction {
         }
         if (!"".equalsIgnoreCase(accountType) && !"-1".equalsIgnoreCase(accountType)) {
             query.append(" and budgetGroup.accountType=:accountType");
-            params.put("accountType", accountType);
+            params.put("accountType", BudgetAccountType.valueOf(accountType));
         }
         queryMap.put(query.toString(), params);
         return queryMap;

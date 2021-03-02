@@ -2468,7 +2468,7 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         }
     }
 
-	public BudgetDetail getBudgetDetail(final Integer fundId, final Long functionId, final String deptCode,
+	public BudgetDetail getBudgetDetail(final Long fundId, final Long functionId, final String deptCode,
 			final Long glCodeId, final CFinancialYear fYear, final String budgetType) {
 		return find(
 				new StringBuilder("from BudgetDetail bd where bd.fund.id = ? and bd.function.id = ? ")
@@ -2478,7 +2478,7 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 
 	}
 
-	public BudgetDetail getBudgetDetail(final Integer fundId, final Long functionId, final String deptCode,
+	public BudgetDetail getBudgetDetail(final Long fundId, final Long functionId, final String deptCode,
 			final Long budgetGroupId) {
 		return find(
 				new StringBuilder("from BudgetDetail bd where bd.fund.id = ? and bd.function.id = ?")
@@ -2486,7 +2486,7 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 				fundId, functionId, deptCode, budgetGroupId);
 	}
 
-    public List<String> getDepartmentFromBudgetDetailByFundId(final Integer fundId) {
+    public List<String> getDepartmentFromBudgetDetailByFundId(final Long fundId) {
 
         final Criteria criteria = getSession().createCriteria(BudgetDetail.class);
 

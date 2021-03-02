@@ -137,7 +137,7 @@ public class BillVoucherAction extends BaseVoucherAction {
     @SuppressWarnings("unchecked")
     @Action(value = "/voucher/billVoucher-lists")
     public String lists() throws ValidationException {
-        final StringBuffer query = new StringBuffer(300);
+        final StringBuilder query = new StringBuilder();
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Expenditure Type selected :=" + expType);
         final List<Object> params = new ArrayList<>();
@@ -145,7 +145,8 @@ public class BillVoucherAction extends BaseVoucherAction {
 
             final String statusid = getApprovalStatusForBills();
             query.append("from EgBillregister br where br.status.id in (?)")
-                    .append(" and ( br.egBillregistermis.voucherHeader is null or br.egBillregistermis.voucherHeader in (from CVoucherHeader vh where vh.status =? ))");
+                    .append(" and ( br.egBillregistermis.voucherHeader is null or br.egBillregistermis.voucherHeader in ")
+                    .append("(from CVoucherHeader vh where vh.status =? ))");
             params.add(Integer.valueOf(statusid));
             params.add(4);
             if (null != billNumber && StringUtils.isNotEmpty(billNumber)) {
@@ -167,7 +168,7 @@ public class BillVoucherAction extends BaseVoucherAction {
             }
             preApprovedVoucherList = persistenceService.findAllBy(query.toString(), params.toArray());
             populateDepartmentNames();
-            if(preApprovedVoucherList.size()==0)
+            if(preApprovedVoucherList.isEmpty())
             {
             	addActionError("No records found.");
             }

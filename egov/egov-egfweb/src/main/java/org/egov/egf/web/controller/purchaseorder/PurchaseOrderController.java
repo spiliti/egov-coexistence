@@ -67,10 +67,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -115,14 +116,14 @@ public class PurchaseOrderController {
         model.addAttribute("suppliers", supplierService.getAllActiveEntities(null));
     }
 
-    @RequestMapping(value = "/newform", method = RequestMethod.POST)
+    @GetMapping(value = "/newform")
     public String showNewForm(@ModelAttribute("purchaseOrder") final PurchaseOrder purchaseOrder, final Model model) {
         prepareNewForm(model);
         model.addAttribute("purchaseOrder", new PurchaseOrder());
         return NEW;
     }
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PostMapping(value = "/create")
     public String create(@Valid @ModelAttribute final PurchaseOrder purchaseOrder, final BindingResult errors,
             final Model model, final RedirectAttributes redirectAttrs) throws IOException {
 
@@ -138,7 +139,7 @@ public class PurchaseOrderController {
         return "redirect:/purchaseorder/result/" + purchaseOrder.getId() + "/create";
     }
 
-    @RequestMapping(value = "/edit/{id}", method = RequestMethod.POST)
+    @GetMapping(value = "/edit/{id}")
     public String edit(@PathVariable("id") final Long id, final Model model) {
         final PurchaseOrder purchaseOrder = purchaseOrderService.getById(id);
         List<EgBillregister> bills = egBillRegisterService.getBillsByWorkOrderNumber(purchaseOrder.getOrderNumber());
@@ -152,7 +153,7 @@ public class PurchaseOrderController {
         return EDIT;
     }
 
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @PostMapping(value = "/update")
     public String update(@Valid @ModelAttribute final PurchaseOrder purchaseOrder, final BindingResult errors,
             final Model model, final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors()) {
@@ -164,7 +165,7 @@ public class PurchaseOrderController {
         return "redirect:/purchaseorder/result/" + purchaseOrder.getId() + "/view";
     }
 
-    @RequestMapping(value = "/view/{id}", method = RequestMethod.POST)
+    @GetMapping(value = "/view/{id}")
     public String view(@PathVariable("id") final Long id, final Model model) {
         final PurchaseOrder purchaseOrder = purchaseOrderService.getById(id);
         populateDepartmentName(purchaseOrder);
@@ -174,7 +175,7 @@ public class PurchaseOrderController {
         return VIEW;
     }
 
-    @RequestMapping(value = "/search/{mode}", method = RequestMethod.POST)
+    @GetMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final PurchaseOrder purchaseOrder = new PurchaseOrder();
         prepareNewForm(model);
@@ -183,7 +184,7 @@ public class PurchaseOrderController {
 
     }
 
-    @RequestMapping(value = "/ajaxsearch/{mode}", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
             @ModelAttribute final PurchaseOrder purchaseOrder) {
@@ -197,7 +198,7 @@ public class PurchaseOrderController {
         return gson.toJson(object);
     }
 
-    @RequestMapping(value = "/result/{id}/{mode}", method = RequestMethod.GET)
+    @GetMapping(value = "/result/{id}/{mode}")
     public String result(@PathVariable("id") final Long id, @PathVariable("mode") final String mode, final Model model) {
         final PurchaseOrder purchaseOrder = purchaseOrderService.getById(id);
         populateDepartmentName(purchaseOrder);

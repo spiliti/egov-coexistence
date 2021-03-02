@@ -85,7 +85,7 @@ public class BankAccountService extends PersistenceService<Bankaccount, Long> {
         super(type);
     }
 
-    public List<Bankaccount> getBankaccountsHasApprovedPayment(Integer fundId, Integer branchId) {
+    public List<Bankaccount> getBankaccountsHasApprovedPayment(Long fundId, Integer branchId) {
         List<Bankaccount> bankaccounts = new ArrayList<>();
         final List<String> addedBanks = new ArrayList<>();
         for (final Object[] account : fetchBanAccountNoAndBankNameForApprovedPayment(fundId, branchId)) {
@@ -155,7 +155,7 @@ public class BankAccountService extends PersistenceService<Bankaccount, Long> {
         return bankaccounts;
     }
 
-	public List<Bankaccount> getBankAccounts(Integer fundId, Integer branchId, Integer bankId, String typeOfAccount) {
+	public List<Bankaccount> getBankAccounts(Long fundId, Integer branchId, Integer bankId, String typeOfAccount) {
 		List<Bankaccount> bankaccounts;
 		if (isNotBlank(typeOfAccount)) {
 			if (typeOfAccount.indexOf(',') != -1) {
@@ -250,7 +250,7 @@ public class BankAccountService extends PersistenceService<Bankaccount, Long> {
 				.setInteger(BRANCH_ID, branchId).setString("type", isBlank(chequeType) ? "CHEQUE" : chequeType).list();
 	}
 
-	private List<Object[]> fetchBanAccountNoAndBankNameForApprovedPayment(final Integer fundId,
+	private List<Object[]> fetchBanAccountNoAndBankNameForApprovedPayment(final Long fundId,
 			final Integer branchId) {
 		StringBuilder queryString = new StringBuilder();
 		// query to fetch vouchers for which no cheque has been assigned
@@ -292,7 +292,7 @@ public class BankAccountService extends PersistenceService<Bankaccount, Long> {
 				.setParameterList("vhName", Arrays.asList(PAYMENTVOUCHER_NAME_REMITTANCE, PAYMENTVOUCHER_NAME_SALARY))
 				.setInteger(BRANCH_ID, branchId);
 		if (fundId != null && fundId > 0)
-			query.setInteger("fundId", fundId);
+			query.setLong("fundId", fundId);
 
 		return query.list();
 	}

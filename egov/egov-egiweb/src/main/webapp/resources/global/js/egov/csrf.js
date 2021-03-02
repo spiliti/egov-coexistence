@@ -2,7 +2,7 @@
  *    eGov  SmartCity eGovernance suite aims to improve the internal efficiency,transparency,
  *    accountability and the service delivery of the government  organizations.
  *
- *     Copyright (C) 2017  eGovernments Foundation
+ *     Copyright (C) 2018  eGovernments Foundation
  *
  *     The updated version of eGov suite of products as by eGovernments Foundation
  *     is available at http://www.egovernments.org
@@ -45,75 +45,22 @@
  *   In case of any queries, you can reach eGovernments Foundation at contact@egovernments.org.
  *
  */
-package org.egov.commons.dao;
-
-import org.egov.commons.Fund;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.List;
-
-@Repository
-public class FundHibernateDAO {
-    @Transactional
-    public Fund update(final Fund entity) {
-        getCurrentSession().update(entity);
-        return entity;
-    }
-
-    @Transactional
-    public Fund create(final Fund entity) {
-        getCurrentSession().persist(entity);
-        return entity;
-    }
-
-    @Transactional
-    public void delete(Fund entity) {
-        getCurrentSession().delete(entity);
-    }
-
-
-    public List<Fund> findAll() {
-        return (List<Fund>) getCurrentSession().createCriteria(Fund.class).list();
-    }
-
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    
-    public Session getCurrentSession() {
-        return entityManager.unwrap(Session.class);
-    }
-
-   
-    public List findAllActiveFunds() {
-        return getCurrentSession().createQuery("from Fund where isactive = true order by name").list();
-
-    }
-
-
-    /**
-     * This method returns all the <code>Fund</code> records which are active
-     * and is a leaf.
-     * 
-     * @return a <code>List</code> of <code>Fund</code> objects.
-     */
-    public List findAllActiveIsLeafFunds() {
-        return getCurrentSession().createQuery("from Fund where isactive = true and isnotleaf=false order by name")
-                .list();
-    }
-
-    public Fund fundByCode(final String fundCode) {
-        final Query qry = getCurrentSession().createQuery("FROM Fund f WHERE f.code =:fundCode");
-        qry.setString("fundCode", fundCode);
-        return (Fund) qry.uniqueResult();
-    }
-
-    public Fund fundById(Long id, boolean b) {
-        return (Fund) getCurrentSession().get(Fund.class, id);
-    }
-}
+const token = jQuery("meta[name='_csrf']") && jQuery("meta[name='_csrf']").attr("content") !== ''
+    ? jQuery("meta[name='_csrf']").attr("content") : null;
+const header = jQuery("meta[name='_csrf_header']") && jQuery("meta[name='_csrf_header']").attr("content") !== ''
+    ? jQuery("meta[name='_csrf_header']").attr("content") : null;
+$(document).ajaxSend(function (e, xhr, options) {
+    if (token && header)
+        xhr.setRequestHeader(header, token);
+});
+jQuery(document).ready(function () {
+    var tokenExist = tokenName && tokenVal;
+    jQuery("form").submit(function () {
+        if (tokenExist)
+        	jQuery('<input />').attr('type', 'hidden')
+                .attr('name', tokenName)
+                .attr('value', tokenVal)
+                .appendTo($(this));
+        return true;
+    });
+});

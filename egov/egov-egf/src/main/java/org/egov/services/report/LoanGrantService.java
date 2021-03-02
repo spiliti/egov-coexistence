@@ -86,7 +86,7 @@ public class LoanGrantService extends PersistenceService {
 
 	@SuppressWarnings("unchecked")
 	public List<Object> schemeUtilizationBy(final Integer schemeId, final Integer subSchemeId, final Date fromDate,
-			final Date toDate, final List<Integer> projectCodeIdList, final Integer fundId) {
+			final Date toDate, final List<Integer> projectCodeIdList, final Long fundId) {
 		final Accountdetailtype detailType = (Accountdetailtype) find("from Accountdetailtype where upper(name)=?",
 				"PROJECTCODE");
 		final StringBuilder schemeUtilSql = new StringBuilder();
@@ -219,7 +219,7 @@ public class LoanGrantService extends PersistenceService {
     @SuppressWarnings("unchecked")
     public List<Object> searchGC(final Integer schemeId, final Integer subSchemeId, final Date fromDate, final Date toDate,
             final Long agencyId,
-            final Integer pcTypeId, final Integer faTypeId, final Integer fundId) {
+            final Integer pcTypeId, final Integer faTypeId, final Long fundId) {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting searchGC");
         List<Object> grantContribList = new ArrayList<Object>();
@@ -271,7 +271,7 @@ public class LoanGrantService extends PersistenceService {
 	 */
 	private List<Object> getDataByAgency(final Integer schemeId, final Integer subSchemeId, final Date fromDate,
 			final Date toDate, final Long agencyId, final Integer pcTypeId, final Integer faTypeId,
-			final Integer fundId) {
+			final Long fundId) {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Starting getDataByAgency for agencyId:" + agencyId);
 		final StringBuilder sql = new StringBuilder();
@@ -427,7 +427,7 @@ public class LoanGrantService extends PersistenceService {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Object> getLoanBy(final Integer schemeId, final Long agencyId, final Integer faTypeId,
-			final Integer fundId) {
+			final Long fundId) {
 		List<Object> loanByAgencyList = null;
 		if (agencyId != null && agencyId != -1)
 			loanByAgencyList = getLoanByAgency(schemeId, agencyId, faTypeId, fundId);
@@ -445,7 +445,7 @@ public class LoanGrantService extends PersistenceService {
 	}
 
 	public List<Object> getLoanByAgency(final Integer schemeId, final Long agencyId, final Integer faTypeId,
-			final Integer fundId) {
+			final Long fundId) {
 		final StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT vh.vouchernumber AS voucherNumber,  gld.amount    AS amount,  ")
 				.append(" gld.detailkeyid AS detailKey,   gld.detailtypeid detailType ,vh.voucherdate  ")

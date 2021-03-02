@@ -108,7 +108,7 @@ public class FundService {
         return fundRepository.findByCode(code);
     }
 
-    public Fund findOne(final Integer id) {
+    public Fund findOne(final Long id) {
         return fundRepository.findOne(id);
     }
 

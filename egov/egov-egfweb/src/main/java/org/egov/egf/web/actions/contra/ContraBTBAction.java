@@ -1265,7 +1265,7 @@ public class ContraBTBAction extends BaseVoucherAction {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<Bankaccount> getAccountNumbers(final Integer branchId, final Integer fundId,
+	private List<Bankaccount> getAccountNumbers(final Integer branchId, final Long fundId,
 			final String typeOfAccount) {
 		List<Bankaccount> accountNumbersList = new ArrayList<Bankaccount>();
 		typeOfAccount.split(",");
@@ -1278,15 +1278,17 @@ public class ContraBTBAction extends BaseVoucherAction {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map getBankBranches(final Integer fundId, final String typeOfAccount) {
+	private Map getBankBranches(final Long fundId, final String typeOfAccount) {
 		typeOfAccount.split(",");
 		final Map<String, Object> bankBrmap = new LinkedHashMap();
 		if (fundId != null) {
-			final List<Object[]> bankBranch = persistenceService.findAllBy(
-					"select DISTINCT concat(concat(bank.id,'-'),bankBranch.id) as bankbranchid,concat(concat(bank.name,' '),bankBranch.branchname) as bankbranchname "
-							+ " FROM Bank bank,Bankbranch bankBranch,Bankaccount bankaccount "
-							+ " where  bank.isactive=true  and bankBranch.isactive=true and bankaccount.isactive=true and bank.id = bankBranch.bank.id and bankBranch.id = bankaccount.bankbranch.id"
-							+ " and bankaccount.fund.id=?",
+			final List<Object[]> bankBranch = persistenceService.findAllBy(new StringBuilder(
+					"select DISTINCT concat(concat(bank.id,'-'),bankBranch.id) as bankbranchid,concat(concat(bank.name,' '),")
+							.append("bankBranch.branchname) as bankbranchname ")
+							.append(" FROM Bank bank,Bankbranch bankBranch,Bankaccount bankaccount ")
+							.append(" where  bank.isactive=true  and bankBranch.isactive=true and bankaccount.isactive=true")
+							.append(" and bank.id = bankBranch.bank.id and bankBranch.id = bankaccount.bankbranch.id")
+							.append(" and bankaccount.fund.id=?").toString(),
 					fundId);
 			for (final Object[] element : bankBranch)
 				bankBrmap.put(element[0].toString(), element[1].toString());
@@ -1336,7 +1338,7 @@ public class ContraBTBAction extends BaseVoucherAction {
 				if (contraBean.getFromFundId() != null && contraBean.getFromFundId() != -1)
 
 					addDropdownData("fromAccNumList", getAccountNumbers(Integer.valueOf(split[1]),
-							Integer.valueOf(contraBean.getFromFundId()), "RECEIPTS_PAYMENTS,RECEIPTS"));
+							contraBean.getFromFundId(), "RECEIPTS_PAYMENTS,RECEIPTS"));
 				else
 					addDropdownData("fromAccNumList", Collections.EMPTY_LIST);
 		} else
