@@ -57,18 +57,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>e-governments egf web</name>
-    <artifactId>egov-egfweb</artifactId>
+    <artifactId>egov-egfweb-secfix</artifactId>
     <packaging>war</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egf</artifactId>
+            <artifactId>egov-egf-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi</artifactId>
+            <artifactId>egov-egi-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
         </dependency>
 

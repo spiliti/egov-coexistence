@@ -57,24 +57,24 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>e-governments commons</name>
-    <artifactId>egov-commons</artifactId>
+    <artifactId>egov-commons-secfix</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi</artifactId>
+            <artifactId>egov-egi-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-config</artifactId>
+            <artifactId>egov-config-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi</artifactId>
+            <artifactId>egov-egi-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
             <classifier>tests</classifier>
             <scope>test</scope>
@@ -82,7 +82,7 @@
 
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-config</artifactId>
+            <artifactId>egov-config-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
             <classifier>tests</classifier>
             <scope>test</scope>

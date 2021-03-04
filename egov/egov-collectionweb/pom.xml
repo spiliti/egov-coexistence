@@ -57,19 +57,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>e-governments collection web</name>
-    <artifactId>egov-collectionweb</artifactId>
+    <artifactId>egov-collectionweb-secfix</artifactId>
     <packaging>war</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-collection</artifactId>
+            <artifactId>egov-collection-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi</artifactId>
+            <artifactId>egov-egi-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
             <classifier>tests</classifier>
             <scope>test</scope>

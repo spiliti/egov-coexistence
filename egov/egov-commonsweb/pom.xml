@@ -55,7 +55,7 @@
         <version>3.0.0-COE-SNAPSHOT</version>
     </parent>
 
-    <artifactId>egov-commonsweb</artifactId>
+    <artifactId>egov-commonsweb-secfix</artifactId>
     <packaging>war</packaging>
     <name>e-governments commons web</name>
 
@@ -63,7 +63,7 @@
     <dependencies>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi</artifactId>
+            <artifactId>egov-egi-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
             <classifier>tests</classifier>
             <scope>test</scope>
@@ -71,7 +71,7 @@
 
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-commons</artifactId>
+            <artifactId>egov-commons-secfix</artifactId>
             <version>3.0.0-COE-SNAPSHOT</version>
         </dependency>
 

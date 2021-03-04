@@ -55,7 +55,7 @@
         <version>3.0.0-COE-SNAPSHOT</version>
     </parent>
     <name>e-governments database</name>
-    <artifactId>egov-database</artifactId>
+    <artifactId>egov-database-secfix</artifactId>
     <properties>
         <validateOnMigrate>true</validateOnMigrate>
     </properties>

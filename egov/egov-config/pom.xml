@@ -56,7 +56,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>e-governments config</name>
-    <artifactId>egov-config</artifactId>
+    <artifactId>egov-config-secfix</artifactId>
 
     <build>
         <plugins>

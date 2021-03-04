@@ -113,7 +113,7 @@ public class AjaxBankRemittanceAction extends BaseFormAction {
     /**
      * A <code>Long</code> representing the fund id. The fund id is arriving from the miscellanoeus receipt screen
      */
-    private Integer fundId;
+    private Long fundId;
     private Integer branchId;
     private Integer bankAccountId;
     private String serviceId;
@@ -374,11 +374,11 @@ public class AjaxBankRemittanceAction extends BaseFormAction {
         this.fundName = fundName;
     }
 
-    public Integer getFundId() {
+    public Long getFundId() {
         return fundId;
     }
 
-    public void setFundId(final Integer fundId) {
+    public void setFundId(final Long fundId) {
         this.fundId = fundId;
     }
 
