@@ -84,7 +84,7 @@ import org.springframework.web.client.RestTemplate;
 @Controller
 public class PortalLinkController {
 
-    private static final String REFERER_IP = "103.21.58.98";
+    private static final String REFERER_IP = "";
     @Autowired
     private PortalLinkService portalLinkService;
     @Autowired
