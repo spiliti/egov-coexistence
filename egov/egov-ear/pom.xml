@@ -64,37 +64,37 @@
     <dependencies>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egiweb</artifactId>
+            <artifactId>egov-egiweb-secfix</artifactId>
             <version>${project.parent.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-commonsweb</artifactId>
+            <artifactId>egov-commonsweb-secfix</artifactId>
             <version>${project.parent.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-eisweb</artifactId>
+            <artifactId>egov-eisweb-secfix</artifactId>
             <version>${project.parent.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egfweb</artifactId>
+            <artifactId>egov-egfweb-secfix</artifactId>
             <version>${project.parent.version}</version>
             <type>war</type>
         </dependency>
      	<dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-collectionweb</artifactId>
+            <artifactId>egov-collectionweb-secfix</artifactId>
             <version>${project.parent.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi</artifactId>
+            <artifactId>egov-egi-secfix</artifactId>
             <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
@@ -105,27 +105,27 @@
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-config</artifactId>
+            <artifactId>egov-config-secfix</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-commons</artifactId>
+            <artifactId>egov-commons-secfix</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-eis</artifactId>
+            <artifactId>egov-eis-secfix</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egf</artifactId>
+            <artifactId>egov-egf-secfix</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
        <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-collection</artifactId>
+            <artifactId>egov-collection-secfix</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <!-- Following dependencies are included in ear as these are used only
@@ -173,27 +173,27 @@
                     <modules>
                         <webModule>
                             <groupId>org.egov</groupId>
-                            <artifactId>egov-egiweb</artifactId>
+                            <artifactId>egov-egiweb-secfix</artifactId>
                             <contextRoot>/services/egi</contextRoot>
                         </webModule>
                         <webModule>
                             <groupId>org.egov</groupId>
-                            <artifactId>egov-commonsweb</artifactId>
+                            <artifactId>egov-commonsweb-secfix</artifactId>
                             <contextRoot>/services/common</contextRoot>
                         </webModule>
                         <webModule>
                             <groupId>org.egov</groupId>
-                            <artifactId>egov-eisweb</artifactId>
+                            <artifactId>egov-eisweb-secfix</artifactId>
                             <contextRoot>/services/eis</contextRoot>
                         </webModule>
                         <webModule>
                             <groupId>org.egov</groupId>
-                            <artifactId>egov-egfweb</artifactId>
+                            <artifactId>egov-egfweb-secfix</artifactId>
                             <contextRoot>/services/EGF</contextRoot>
                  	    </webModule>
                  	    <webModule>
                             <groupId>org.egov</groupId>
-                            <artifactId>egov-collectionweb</artifactId>
+                            <artifactId>egov-collectionweb-secfix</artifactId>
                             <contextRoot>/services/collection</contextRoot>
                      	</webModule>
                     </modules>
