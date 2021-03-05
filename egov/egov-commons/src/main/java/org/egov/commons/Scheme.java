@@ -99,7 +99,7 @@ public class Scheme implements java.io.Serializable {
         return id;
     }
 
-    private void setId(final Integer id) {
+    public void setId(final Integer id) {
         this.id = id;
     }
 
