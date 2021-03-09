@@ -52,6 +52,7 @@ import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -59,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -381,6 +383,14 @@ public class FinancialUtils {
         return documentDetailsList;
     }
     
+    public List<Integer> getStatuses(final String status) {
+	return Arrays.stream(status.split(",")).map(Integer::valueOf).collect(Collectors.toList());
+    }
+
+    public List<Character> getCoaTypes(final String coaType) {
+	return Arrays.stream(coaType.split(",")).map(s -> s.charAt(1)).collect(Collectors.toList());
+    }
+
     @Transactional
     public void migrateUploadedFiles(RequestInfo requestInfo, List<DocumentUpload> docsUpload) {
         FileStoreMapper fileStoreS3 = null;
