@@ -200,7 +200,7 @@ public class BankEntriesNotInBankBookAction extends BasePaymentAction {
             queryParams.put("bankaccount", bankaccount);
         }
         if (voucherHeader.getVouchermis().getDepartmentcode() != null) {
-            subQuery.append(" and bemis.departmentid = :deptcode");
+            subQuery.append(" and bemis.departmentcode = :deptcode");
             queryParams.put("deptcode", voucherHeader.getVouchermis().getDepartmentcode());
         }
         if (voucherHeader.getFundId() != null) {
