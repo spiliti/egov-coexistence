@@ -282,6 +282,7 @@ public class ReceiptAction extends BaseFormAction {
     private String serviceId;
     private String serviceCategory;
     private String serviceIdText;
+    private String serviceTypeId = null;
 
     @Autowired
     private FundHibernateDAO fundDAO;
@@ -1139,7 +1140,7 @@ public class ReceiptAction extends BaseFormAction {
         // LOGGER.error("Error in printReceipts", e);
         // }
 
-        List<Receipt> receiptlist = this.microserviceUtils.searchReciepts(null, null, null, null,
+        List<Receipt> receiptlist = this.microserviceUtils.searchReciepts(null, null, null, getServiceTypeId(),
                 Arrays.asList(selectedReceipts));
 
         receiptlist.stream().forEach(receipt -> {
@@ -2164,6 +2165,14 @@ public class ReceiptAction extends BaseFormAction {
     
     public void setSelectedPayments(String[] selectedPayments) {
         this.selectedPayments = selectedPayments;
+    }
+    
+    public String getServiceTypeId() {
+        return serviceTypeId;
+    }
+
+    public void setServiceTypeId(final String serviceType) {
+        serviceTypeId = serviceType;
     }
 
 }
