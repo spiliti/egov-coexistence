@@ -688,8 +688,8 @@ public class BankBookReportAction extends BaseFormAction {
                 .append("and vh.voucherDate<=:endDate and vh.status not in(")
                 .append(voucherStatusToExclude).append(") ").append(miscQuery).append(" ").toString();
         queryFromParams.put("glCode",glCode1);
-        queryFromParams.put("startDate",Constants.DDMMYYYYFORMAT1.format(startDate));
-        queryFromParams.put("endDate",Constants.DDMMYYYYFORMAT1.format(endDate));
+        queryFromParams.put("startDate",startDate);
+        queryFromParams.put("endDate",endDate);
         queryFromParams.putAll(queryParams);        
         OrderBy = "order by voucherdate,vouchernumber";
         
