@@ -970,7 +970,7 @@ public class TrialBalanceAction extends BaseFormAction {
 		setTodayDate(new Date());
 		if (rb.getFundId() != null) {
 			heading.append(" For ");
-			final String name = (String) persistenceService.find("select name from Fund where id=?", Integer.valueOf(rb.getFundId()));
+			final String name = (String) persistenceService.find("select name from Fund where id=?", Long.valueOf(rb.getFundId()));
 			heading.append(name);
 		} else
 			heading.append(" For All Funds ");
