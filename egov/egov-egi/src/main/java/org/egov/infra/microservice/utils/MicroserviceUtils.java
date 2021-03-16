@@ -55,7 +55,6 @@ import static org.egov.infra.utils.DateUtils.toDefaultDateTimeFormat;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -161,7 +160,6 @@ import org.egov.infra.utils.DateUtils;
 import org.egov.infra.web.support.ui.Inbox;
 import org.egov.infstr.utils.EgovMasterDataCaching;
 import org.jfree.util.Log;
-import org.joda.time.DateTime;
 import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -176,7 +174,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -187,7 +184,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
-import javassist.tools.rmi.ObjectNotFoundException;
 
 
 @SuppressWarnings("deprecation")
@@ -297,6 +293,9 @@ public class MicroserviceUtils {
 
     @Value("${egov.services.egov-indexer.url}")
     private String egovIndexerUrl;
+    
+    @Value("${collection.payment.searchurl.enabled}")
+    private Boolean paymentSearchEndPointEnabled;
     
     private ObjectMapper mapper;
     SimpleDateFormat ddMMMyyyyFormat = new SimpleDateFormat("dd-MMM-yyyy");
@@ -1069,6 +1068,12 @@ public class MicroserviceUtils {
                 .receiptNumbers(Arrays.stream(receiptNumbers.split(",")).collect(Collectors.toSet())).build();
         return this.getReceipt(criteria);
     }
+    
+    public List<Receipt> getReceiptsList(String receiptNumbers,String serviceCode) {
+        ReceiptSearchCriteria criteria = new ReceiptSearchCriteria().builder()
+                .receiptNumbers(Arrays.stream(receiptNumbers.split(",")).collect(Collectors.toSet())).businessCodes(Arrays.stream(serviceCode.split(",")).collect(Collectors.toSet())).build();
+        return this.getReceipt(criteria);
+    }
 
     public List<Receipt> getReceipts(String status, String serviceCode, String fund, String department,
             String receiptDate) {
@@ -1636,14 +1641,26 @@ public class MicroserviceUtils {
 
     public List<Payment> getPayments(PaymentSearchCriteria searchCriteria) {
         PaymentResponse response = null;
-        StringBuilder url = new StringBuilder(appConfigManager.getEgovCollSerHost())
-                .append(appConfigManager.getCollSerPaymentSearch()).append("?");
+        StringBuilder url = new StringBuilder();
+        if (paymentSearchEndPointEnabled) {
+            url = new StringBuilder(appConfigManager.getEgovCollSerHost())
+                    .append(appConfigManager.getCollSerPaymentModuleNameSearch()).append("?");
+        } else {
+            url = new StringBuilder(appConfigManager.getEgovCollSerHost())
+                    .append(appConfigManager.getCollSerPaymentSearch()).append("?");
+        }
         final RequestInfo requestInfo = getRequestInfo();
         RequestInfoWrapper reqWrapper = new RequestInfoWrapper();
         reqWrapper.setRequestInfo(requestInfo);
         try {
             preparePaymentSearchQueryString(searchCriteria, url);
-            response = restTemplate.postForObject(url.toString(), reqWrapper, PaymentResponse.class);
+            if (paymentSearchEndPointEnabled) {
+                for (String serviceCode :searchCriteria.getBusinessServices()) {
+                response = restTemplate.postForObject(url.toString(), reqWrapper, PaymentResponse.class,serviceCode);
+                }
+            } else {
+                response = restTemplate.postForObject(url.toString(), reqWrapper, PaymentResponse.class);
+            }
             return response.getPayments();
         } catch (RestClientException e) {
             LOGGER.error("ERROR occurred while fetching the Payment list : ", e);
@@ -1756,6 +1773,7 @@ public class MicroserviceUtils {
         return requestInfo;
     }
 
+    //payment workflow url without modulename
     public PaymentResponse performWorkflow(Set<String> paymentIdSet, PaymentAction action, String reason) {
         List<PaymentWorkflow> paymentWFList = paymentIdSet.stream().map(id -> PaymentWorkflow.builder().paymentId(id)
                 .tenantId(getTenentId()).reason(reason).action(action).build()).collect(Collectors.toList());
@@ -1765,6 +1783,21 @@ public class MicroserviceUtils {
         StringBuilder uri = new StringBuilder(appConfigManager.getEgovCollSerHost())
                 .append(appConfigManager.getCollSerPaymentWorkflow());
         response = restTemplate.postForObject(uri.toString(), request, PaymentResponse.class);
+        return response;
+    }
+    
+    // payment workflow url with module name
+    public PaymentResponse performWorkflowWithModuleName(Set<String> paymentIdSet, PaymentAction action, String reason,
+            String serviceCode) {
+        List<PaymentWorkflow> paymentWFList = paymentIdSet.stream().map(id -> PaymentWorkflow.builder().paymentId(id)
+                .tenantId(getTenentId()).reason(reason).action(action).build()).collect(Collectors.toList());
+        PaymentWorkflowRequest request = PaymentWorkflowRequest.builder().paymentWorkflows(paymentWFList)
+                .requestInfo(getRequestInfo()).build();
+        PaymentResponse response = null;
+        StringBuilder uri = new StringBuilder();
+        uri = new StringBuilder(appConfigManager.getEgovCollSerHost())
+                .append(appConfigManager.getCollSerPaymentModuleNameWorkflow());
+        response = restTemplate.postForObject(uri.toString(), request, PaymentResponse.class, serviceCode);
         return response;
     }
 
