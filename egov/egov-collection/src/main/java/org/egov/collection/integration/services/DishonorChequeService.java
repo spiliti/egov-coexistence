@@ -553,8 +553,6 @@ public class DishonorChequeService implements FinancialIntegrationService {
             List<Instrument> instList = microserviceUtils.getInstrumentsBySearchCriteria(insSearchContra );
             Map<String, String> receiptInstMap = instList.stream().map(Instrument::getInstrumentVouchers).flatMap(x -> x.stream()).collect(Collectors.toMap(InstrumentVoucher::getReceiptHeaderId, InstrumentVoucher::getInstrument));
             Set<String> receiptIds = receiptInstMap.keySet();
-            //ReceiptSearchCriteria rSearchcriteria = ReceiptSearchCriteria.builder().receiptNumbers(receiptIds).build();
-            final List<String> serviceCodeList = new ArrayList<>();
             ReceiptSearchCriteria rSearchcriteria=null;
             if (paymentSearchEndPointEnabled) {
                 final Set<String> serviceCodeLists = new HashSet();
@@ -565,7 +563,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 List<BankAccountServiceMapping> mappings = microserviceUtils
                         .getBankAcntServiceMappingsByBankAcc(StringUtils.join(accNumberList, ","), null);
                 for (BankAccountServiceMapping basm : mappings) {
-                    serviceCodeList.add(basm.getBusinessDetails());
+                    serviceCodeLists.add(basm.getBusinessDetails());
                 }
                 rSearchcriteria = ReceiptSearchCriteria.builder().receiptNumbers(receiptIds)
                         .businessCodes(serviceCodeLists).build();
@@ -791,7 +789,6 @@ public class DishonorChequeService implements FinancialIntegrationService {
     }
     public List<DishonoredChequeBean> getDishonouredChequeReport(DishonoredChequeBean model) {
         try {
-            final List<String> serviceCodeList = new ArrayList<>();
             InstrumentSearchContract insSearchContra = new InstrumentSearchContract();
             this.prepareDishonouredSearchCriteria(model, insSearchContra);
             List<Instrument> instList = microserviceUtils.getInstrumentsBySearchCriteria(insSearchContra );
@@ -807,7 +804,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 List<BankAccountServiceMapping> mappings = microserviceUtils
                         .getBankAcntServiceMappingsByBankAcc(StringUtils.join(accNumberList, ","), null);
                 for (BankAccountServiceMapping basm : mappings) {
-                    serviceCodeList.add(basm.getBusinessDetails());
+                    serviceCodeLists.add(basm.getBusinessDetails());
                 }
                 rSearchcriteria = ReceiptSearchCriteria.builder().receiptNumbers(receiptIds)
                         .businessCodes(serviceCodeLists).build();
