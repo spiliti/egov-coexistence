@@ -294,6 +294,9 @@ public class MicroserviceUtils {
     @Value("${egov.services.egov-indexer.url}")
     private String egovIndexerUrl;
     
+    @Value("${collection.payment.searchurl.enabled}")
+    private Boolean paymentSearchEndPointEnabled;
+    
     private ObjectMapper mapper;
     SimpleDateFormat ddMMMyyyyFormat = new SimpleDateFormat("dd-MMM-yyyy");
 
@@ -1072,6 +1075,11 @@ public class MicroserviceUtils {
                 .receiptNumbers(Arrays.stream(receiptNumbers.split(",")).collect(Collectors.toSet())).build();
         return this.getReceipt(criteria);
     }
+    public List<Receipt> getReceipts(String receiptNumbers,String accountNumber) {
+        ReceiptSearchCriteria criteria = new ReceiptSearchCriteria().builder()
+                .receiptNumbers(Arrays.stream(receiptNumbers.split(",")).collect(Collectors.toSet())).build();
+        return this.getReceipt(criteria);
+    }
 
     public List<Receipt> getReceipts(String status, String serviceCode, String fund, String department,
             String receiptDate) {
@@ -1641,14 +1649,26 @@ public class MicroserviceUtils {
 
     public List<Payment> getPayments(PaymentSearchCriteria searchCriteria) {
         PaymentResponse response = null;
-        StringBuilder url = new StringBuilder(appConfigManager.getEgovCollSerHost())
-                .append(appConfigManager.getCollSerPaymentSearch()).append("?");
+        StringBuilder url = new StringBuilder();
+        if (paymentSearchEndPointEnabled) {
+            url = new StringBuilder(appConfigManager.getEgovCollSerHost())
+                    .append(appConfigManager.getCollSerPaymentModuleNameSearch()).append("?");
+        } else {
+            url = new StringBuilder(appConfigManager.getEgovCollSerHost())
+                    .append(appConfigManager.getCollSerPaymentSearch()).append("?");
+        }
         final RequestInfo requestInfo = getRequestInfo();
         RequestInfoWrapper reqWrapper = new RequestInfoWrapper();
         reqWrapper.setRequestInfo(requestInfo);
         try {
             preparePaymentSearchQueryString(searchCriteria, url);
-            response = restTemplate.postForObject(url.toString(), reqWrapper, PaymentResponse.class);
+            if (paymentSearchEndPointEnabled) {
+                for (String serviceCode :searchCriteria.getBusinessServices()) {
+                response = restTemplate.postForObject(url.toString(), reqWrapper, PaymentResponse.class,serviceCode);
+                }
+            } else {
+                response = restTemplate.postForObject(url.toString(), reqWrapper, PaymentResponse.class);
+            }
             return response.getPayments();
         } catch (Exception e) {
             LOGGER.error("ERROR occurred while fetching the Payment list : ", e);
@@ -1760,7 +1780,7 @@ public class MicroserviceUtils {
         requestInfo.setUserInfo(getUserInfo());
         return requestInfo;
     }
-
+     //payment workflow url without modulename
     public PaymentResponse performWorkflow(Set<String> paymentIdSet, PaymentAction action, String reason) {
         List<PaymentWorkflow> paymentWFList = paymentIdSet.stream().map(id -> PaymentWorkflow.builder().paymentId(id)
                 .tenantId(getTenentId()).reason(reason).action(action).build()).collect(Collectors.toList());
@@ -1770,6 +1790,20 @@ public class MicroserviceUtils {
         StringBuilder uri = new StringBuilder(appConfigManager.getEgovCollSerHost())
                 .append(appConfigManager.getCollSerPaymentWorkflow());
         response = restTemplate.postForObject(uri.toString(), request, PaymentResponse.class);
+        return response;
+    }
+    // payment workflow url with module name 
+    public PaymentResponse performWorkflowWithModuleName(Set<String> paymentIdSet, PaymentAction action, String reason,
+            String serviceCode) {
+        List<PaymentWorkflow> paymentWFList = paymentIdSet.stream().map(id -> PaymentWorkflow.builder().paymentId(id)
+                .tenantId(getTenentId()).reason(reason).action(action).build()).collect(Collectors.toList());
+        PaymentWorkflowRequest request = PaymentWorkflowRequest.builder().paymentWorkflows(paymentWFList)
+                .requestInfo(getRequestInfo()).build();
+        PaymentResponse response = null;
+        StringBuilder uri = new StringBuilder();
+        uri = new StringBuilder(appConfigManager.getEgovCollSerHost())
+                .append(appConfigManager.getCollSerPaymentModuleNameWorkflow());
+        response = restTemplate.postForObject(uri.toString(), request, PaymentResponse.class, serviceCode);
         return response;
     }
 

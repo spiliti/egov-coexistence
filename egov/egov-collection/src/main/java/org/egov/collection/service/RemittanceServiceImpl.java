@@ -95,6 +95,7 @@ import org.egov.infra.microservice.models.BusinessService;
 import org.egov.infra.microservice.models.BusinessServiceCriteria;
 import org.egov.infra.microservice.models.BusinessServiceMapping;
 import org.egov.infra.microservice.models.Department;
+import org.egov.infra.microservice.models.DishonorReasonContract;
 import org.egov.infra.microservice.models.FinancialStatus;
 import org.egov.infra.microservice.models.Instrument;
 import org.egov.infra.microservice.models.InstrumentAccountCode;
@@ -122,6 +123,7 @@ import org.egov.model.instrument.InstrumentHeader;
 import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
@@ -150,7 +152,9 @@ public class RemittanceServiceImpl extends RemittanceService {
     private transient RemittanceSchedulerService remittanceSchedulerService;
     @Autowired
     private MicroserviceUtils microserviceUtils;
-
+    
+    @Value("${collection.payment.searchurl.enabled}")
+    private Boolean paymentSearchEndPointEnabled;
     /**
      * Create Contra Vouchers
      *
@@ -314,7 +318,20 @@ public class RemittanceServiceImpl extends RemittanceService {
         case "V2":
         case "VERSION2":
             if(!paymentIdSet.isEmpty()){
-                microserviceUtils.performWorkflow(paymentIdSet,PaymentWorkflow.PaymentAction.REMIT, "Payment got remitted from finance");
+                if (paymentSearchEndPointEnabled) {
+                    final List<String> serviceCodeList = new ArrayList<>(0);
+                    if(!receiptList.isEmpty())
+                    receiptList.stream().forEach(receipt -> {
+                        serviceCodeList.add(receipt.getService());
+                    });
+                    microserviceUtils.performWorkflowWithModuleName(paymentIdSet, PaymentWorkflow.PaymentAction.REMIT,
+                            "Payment got remitted from finance", StringUtils.join(serviceCodeList, ","));
+
+                } else {
+                    microserviceUtils.performWorkflow(paymentIdSet, PaymentWorkflow.PaymentAction.REMIT,
+                            "Payment got remitted from finance");
+
+                }
             }
             break;
 
@@ -1026,7 +1043,7 @@ public class RemittanceServiceImpl extends RemittanceService {
             }
         }
 
-        receiptList = microserviceUtils.getReceipts(receiptNumbers.toString());
+        receiptList = microserviceUtils.getReceipts(receiptNumbers.toString(),businessDetails.getCode());
         final Map<String, Object> instrumentDepositMap = financialsUtil.prepareForUpdateInstrumentDepositSQL();
         if (totalChequeVoucherAmt.compareTo(totalChequeAmount) != 0) {
             String validationMessage = "There is a difference of amount " + totalChequeAmount.subtract(totalChequeVoucherAmt)
@@ -1053,7 +1070,15 @@ public class RemittanceServiceImpl extends RemittanceService {
         case "V2":
         case "VERSION2":
             if(!paymentIdSet.isEmpty()){
-                microserviceUtils.performWorkflow(paymentIdSet,PaymentWorkflow.PaymentAction.REMIT, "Payment got remitted from finance");
+                if (paymentSearchEndPointEnabled) {
+                    microserviceUtils.performWorkflowWithModuleName(paymentIdSet, PaymentWorkflow.PaymentAction.REMIT,
+                            "Payment got remitted from finance", businessDetails.getCode());
+
+                } else {
+                    microserviceUtils.performWorkflow(paymentIdSet, PaymentWorkflow.PaymentAction.REMIT,
+                            "Payment got remitted from finance");
+
+                } 
             }
             break;
 
