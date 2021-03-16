@@ -282,7 +282,7 @@ public class ReceiptAction extends BaseFormAction {
     private String serviceId;
     private String serviceCategory;
     private String serviceIdText;
-    private String serviceTypeId = null;
+    private String serviceTypeId;
 
     @Autowired
     private FundHibernateDAO fundDAO;
