@@ -800,7 +800,9 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 final Set<String> accNumberList = new HashSet();
                 instList.stream().forEach(ins -> {
                     accNumberList.add(ins.getBankAccount().getAccountNumber());
+                    LOGGER.info("AccountNumer ---+ins.getBankAccount().getAccountNumber()");
                 });
+                LOGGER.info("AccountNumer ---+accNumberList");
                 List<BankAccountServiceMapping> mappings = microserviceUtils
                         .getBankAcntServiceMappingsByBankAcc(StringUtils.join(accNumberList, ","), null);
                 for (BankAccountServiceMapping basm : mappings) {
