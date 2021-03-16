@@ -553,8 +553,26 @@ public class DishonorChequeService implements FinancialIntegrationService {
             List<Instrument> instList = microserviceUtils.getInstrumentsBySearchCriteria(insSearchContra );
             Map<String, String> receiptInstMap = instList.stream().map(Instrument::getInstrumentVouchers).flatMap(x -> x.stream()).collect(Collectors.toMap(InstrumentVoucher::getReceiptHeaderId, InstrumentVoucher::getInstrument));
             Set<String> receiptIds = receiptInstMap.keySet();
-            ReceiptSearchCriteria rSearchcriteria = ReceiptSearchCriteria.builder().receiptNumbers(receiptIds).build();
-            List<Receipt> receipt = microserviceUtils.getReceipt(rSearchcriteria  );
+            //ReceiptSearchCriteria rSearchcriteria = ReceiptSearchCriteria.builder().receiptNumbers(receiptIds).build();
+            final List<String> serviceCodeList = new ArrayList<>();
+            ReceiptSearchCriteria rSearchcriteria=null;
+            if (paymentSearchEndPointEnabled) {
+                final Set<String> serviceCodeLists = new HashSet();
+                final Set<String> accNumberList = new HashSet();
+                instList.stream().forEach(ins -> {
+                    accNumberList.add(ins.getBankAccount().getAccountNumber());
+                });
+                List<BankAccountServiceMapping> mappings = microserviceUtils
+                        .getBankAcntServiceMappingsByBankAcc(StringUtils.join(accNumberList, ","), null);
+                for (BankAccountServiceMapping basm : mappings) {
+                    serviceCodeList.add(basm.getBusinessDetails());
+                }
+                rSearchcriteria = ReceiptSearchCriteria.builder().receiptNumbers(receiptIds)
+                        .businessCodes(serviceCodeLists).build();
+            } else {
+                rSearchcriteria = ReceiptSearchCriteria.builder().receiptNumbers(receiptIds).build();
+            }
+            List<Receipt> receipt = microserviceUtils.getReceipt(rSearchcriteria);
             Map<String, Receipt> receiptIdToReceiptMap= null;
             switch (ApplicationThreadLocals.getCollectionVersion().toUpperCase()) {
             case "V2":
