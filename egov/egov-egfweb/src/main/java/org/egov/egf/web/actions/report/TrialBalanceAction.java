@@ -273,7 +273,7 @@ public class TrialBalanceAction extends BaseFormAction {
 				fundList = masterDataCache.get("egi-fund");
 			else {
 				fundList = new ArrayList<Fund>();
-				fundList.add((Fund) persistenceService.find("from Fund where id=?", rb.getFundId()));
+				fundList.add((Fund) persistenceService.find("from Fund where id=?", Long.valueOf(rb.getFundId())));
 			}
 			gererateReportForAsOnDate();
 		}
@@ -309,7 +309,7 @@ public class TrialBalanceAction extends BaseFormAction {
 
         if (rb.getFundId() != null) {
             fundcondition = " and fundid=:fundId";
-            fundQueryParams.put("fundId", rb.getFundId());
+            fundQueryParams.put("fundId", Long.valueOf(rb.getFundId()));
         } else
             fundcondition = " and fundid in (select id from fund where isactive=true and isnotleaf!=true )";
         if ((null != rb.getDepartmentCode() && !rb.getDepartmentCode().isEmpty()) || null != rb.getFunctionaryId()) {
@@ -464,7 +464,7 @@ public class TrialBalanceAction extends BaseFormAction {
             final SQLQuery sqlQuery = persistenceService.getSession().createSQLQuery(query.toString());
             sqlQuery.addScalar("accCode")
                     .addScalar("accName")
-                    .addScalar("fundId", StringType.INSTANCE)
+                    .addScalar("fundId")
                     .addScalar("amount", BigDecimalType.INSTANCE)
                     .setResultTransformer(Transformers.aliasToBean(TrialBalanceBean.class));
             sqlQuery.setParameter("toDate", rb.getToDate(), DateType.INSTANCE);
@@ -682,7 +682,7 @@ public class TrialBalanceAction extends BaseFormAction {
                 .addScalar("creditOPB", BigDecimalType.INSTANCE)
                 .addScalar("debitOPB", BigDecimalType.INSTANCE)
                 .setResultTransformer(Transformers.aliasToBean(TrialBalanceBean.class));
-        openingBalanceQry.setParameter("fundId", rb.getFundId(), IntegerType.INSTANCE)
+        openingBalanceQry.setParameter("fundId", Long.valueOf(rb.getFundId()))
                 .setParameter("fromDate", rb.getFromDate(), DateType.INSTANCE)
                 .setParameter("toDate", rb.getToDate(), DateType.INSTANCE);
 
@@ -723,7 +723,7 @@ public class TrialBalanceAction extends BaseFormAction {
                 .addScalar("tillDateCreditOPB", BigDecimalType.INSTANCE)
                 .addScalar("tillDateDebitOPB", BigDecimalType.INSTANCE)
                 .setResultTransformer(Transformers.aliasToBean(TrialBalanceBean.class));
-        tillDateOPBQry.setParameter("fundId", rb.getFundId(), IntegerType.INSTANCE);
+        tillDateOPBQry.setParameter("fundId", Long.valueOf(rb.getFundId()));
 
         deptQuertParams.entrySet().forEach(entry -> tillDateOPBQry.setParameter(entry.getKey(), entry.getValue()));
         functionaryQueryParams.entrySet().forEach(entry -> tillDateOPBQry.setParameter(entry.getKey(), entry.getValue()));
@@ -765,7 +765,7 @@ public class TrialBalanceAction extends BaseFormAction {
                 .addScalar("creditAmount", BigDecimalType.INSTANCE)
                 .addScalar("debitAmount", BigDecimalType.INSTANCE)
                 .setResultTransformer(Transformers.aliasToBean(TrialBalanceBean.class));
-        currentDebitCreditQry.setParameter("fundId", rb.getFundId(), IntegerType.INSTANCE);
+        currentDebitCreditQry.setParameter("fundId", Long.valueOf(rb.getFundId()));
 
         deptQuertParams.entrySet().forEach(entry -> currentDebitCreditQry.setParameter(entry.getKey(), entry.getValue()));
         functionaryQueryParams.entrySet().forEach(entry -> currentDebitCreditQry.setParameter(entry.getKey(), entry.getValue()));
@@ -970,7 +970,7 @@ public class TrialBalanceAction extends BaseFormAction {
 		setTodayDate(new Date());
 		if (rb.getFundId() != null) {
 			heading.append(" For ");
-			final String name = (String) persistenceService.find("select name from Fund where id=?", rb.getFundId());
+			final String name = (String) persistenceService.find("select name from Fund where id=?", Integer.valueOf(rb.getFundId()));
 			heading.append(name);
 		} else
 			heading.append(" For All Funds ");
