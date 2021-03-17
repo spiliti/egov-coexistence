@@ -53,6 +53,11 @@ $(document).ready(function(){
 			bootbox.alert('Please Enter the Remarks!');
 			return false;
 		}
+		jQuery(dishonorChequeForm).append(jQuery('<input>', {
+            type : 'hidden',
+            name : '${_csrf.parameterName}',
+            value : '${_csrf.token}'
+        }));
 		$("#dishonorChequeForm").submit();
 	});
 	
