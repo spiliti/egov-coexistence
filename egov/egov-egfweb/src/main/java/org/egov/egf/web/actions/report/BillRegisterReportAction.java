@@ -600,7 +600,7 @@ public class BillRegisterReportAction extends SearchFormAction {
             String coaQuery;
             for (final AppConfigValues appConfigValues : cBillNetPurpose) {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue()), LongType.INSTANCE).list();
+                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     cBillNetPayCodeList.add(chartOfAccounts.getId());
             }
@@ -613,7 +613,7 @@ public class BillRegisterReportAction extends SearchFormAction {
             
             for (final AppConfigValues appConfigValues : purchBillNetPurpose) {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue()), LongType.INSTANCE).list();
+                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     pBillNetPayCodeList.add(chartOfAccounts.getId());
             }
@@ -630,7 +630,7 @@ public class BillRegisterReportAction extends SearchFormAction {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug("Querying CChartOfAccounts -  " + coaQuery);
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue()), LongType.INSTANCE).list();
+                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     sBillNetPayCodeList.add(chartOfAccounts.getId());
 
@@ -646,7 +646,7 @@ public class BillRegisterReportAction extends SearchFormAction {
 
             for (final AppConfigValues appConfigValues : wBillNetPurpose) {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue()), LongType.INSTANCE).list();
+                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     wBillNetPayCodeList.add(chartOfAccounts.getId());
             }
@@ -659,7 +659,7 @@ public class BillRegisterReportAction extends SearchFormAction {
             
             for (final AppConfigValues appConfigValues : pensionBillNetPurpose) {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue()), LongType.INSTANCE).list();
+                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     penBillNetPayCodeList.add(chartOfAccounts.getId());
             }
