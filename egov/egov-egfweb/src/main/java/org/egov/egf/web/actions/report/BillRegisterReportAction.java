@@ -52,6 +52,7 @@ package org.egov.egf.web.actions.report;
 
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -68,6 +70,9 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.displaytag.properties.SortOrderEnum;
+import org.displaytag.tags.TableTagParameters;
+import org.displaytag.util.ParamEncoder;
 import org.egov.commons.CChartOfAccounts;
 import org.egov.commons.CVoucherHeader;
 import org.egov.commons.EgwStatus;
@@ -84,13 +89,13 @@ import org.egov.infra.admin.master.entity.Boundary;
 import org.egov.infra.admin.master.entity.Department;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.config.persistence.datasource.routing.annotation.ReadOnly;
+import org.egov.infra.persistence.utils.Page;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infra.web.struts.actions.SearchFormAction;
 import org.egov.infra.web.struts.annotation.ValidationErrorPage;
 import org.egov.infra.web.utils.EgovPaginatedList;
 import org.egov.infstr.search.SearchQuery;
-import org.egov.infstr.search.SearchQuerySQL;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.infstr.utils.EgovMasterDataCaching;
 import org.egov.model.bills.Miscbilldetail;
@@ -102,7 +107,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.type.LongType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -184,19 +188,9 @@ public class BillRegisterReportAction extends SearchFormAction {
 
     @Override
     public SearchQuery prepareQuery(final String sortField, final String sortOrder) {
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug("BillRegisterReportAction | prepare | start");
-        
-        Map<String, Object> map = getQuery();
-        String query = String.valueOf(map.get("query"));
-        List<Object> params = (List<Object>) map.get("params");
-        if (null != sortField)
-            query = new StringBuilder(query).append(" order by ").append(sortField).append(" ").append(sortOrder).toString();
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug("BillRegisterReportAction | prepare | query >> " + query);
-        return new SearchQuerySQL(query, new StringBuilder("select count(*) from ( ").append(query).append(" ) as count").toString(), params);
+    	return null;
     }
-
+    
     @Override
     public Object getModel() {
 
@@ -241,13 +235,39 @@ public class BillRegisterReportAction extends SearchFormAction {
         setPageSize(50);
         loadDropdownData();
         validateBeforeSearch();
-        search();
+        srch();
         formatSearchResult();
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("BillRegisterReportAction | list | End");
 
         return NEW;
     }
+    
+	private void srch() {
+		final Map<String, Object> params = new HashMap<>();
+		final String mainQuery = getQuery(getSort(), getSortDir(), params);
+		final String countQry = new StringBuilder("select count(*) from ( ").append(mainQuery).append(" ) as count")
+				.toString();
+
+		int pageNum = getPage();
+		int pageSize = getPageSize();
+		if (this.parameters.get(new ParamEncoder("currentRowObject")
+				.encodeParameterName(TableTagParameters.PARAMETER_EXPORTTYPE)) != null) {
+			pageSize = -1;
+			pageNum = 1;
+		}
+		
+		Query query = persistenceService.getSession().createSQLQuery(mainQuery);
+		persistenceService.populateQueryWithParams(query, params);
+		final Page resultPage = new Page(query, pageNum, pageSize);
+
+		Query countQuery = persistenceService.getSession().createSQLQuery(countQry);
+		persistenceService.populateQueryWithParams(countQuery, params);
+		final int searchCount = ((BigInteger) countQuery.uniqueResult()).intValue();
+
+		this.searchResult = new EgovPaginatedList(resultPage, searchCount, getSort(),
+				SortOrderEnum.fromName(getSortDir()));
+	}
 
     @ReadOnly
     @ValidationErrorPage(value = "completeBill")
@@ -261,7 +281,7 @@ public class BillRegisterReportAction extends SearchFormAction {
         setPageSize(50);
         loadDropdownData();
         validateBeforeSearch();
-        search();
+        srch();
         formatSearchResult();
         titleName = microserviceUtils.getHeaderNameForTenant().toUpperCase()+" \\n";
         if (LOGGER.isDebugEnabled())
@@ -600,7 +620,9 @@ public class BillRegisterReportAction extends SearchFormAction {
             String coaQuery;
             for (final AppConfigValues appConfigValues : cBillNetPurpose) {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
+				final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameterList("value", Arrays
+						.stream(appConfigValues.getValue().split(",")).map(Long::valueOf).collect(Collectors.toList()))
+						.list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     cBillNetPayCodeList.add(chartOfAccounts.getId());
             }
@@ -613,7 +635,9 @@ public class BillRegisterReportAction extends SearchFormAction {
             
             for (final AppConfigValues appConfigValues : purchBillNetPurpose) {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
+				final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameterList("value", Arrays
+						.stream(appConfigValues.getValue().split(",")).map(Long::valueOf).collect(Collectors.toList()))
+						.list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     pBillNetPayCodeList.add(chartOfAccounts.getId());
             }
@@ -630,7 +654,9 @@ public class BillRegisterReportAction extends SearchFormAction {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug("Querying CChartOfAccounts -  " + coaQuery);
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
+				final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameterList("value", Arrays
+						.stream(appConfigValues.getValue().split(",")).map(Long::valueOf).collect(Collectors.toList()))
+						.list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     sBillNetPayCodeList.add(chartOfAccounts.getId());
 
@@ -646,7 +672,9 @@ public class BillRegisterReportAction extends SearchFormAction {
 
             for (final AppConfigValues appConfigValues : wBillNetPurpose) {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
+				final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameterList("value", Arrays
+						.stream(appConfigValues.getValue().split(",")).map(Long::valueOf).collect(Collectors.toList()))
+						.list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     wBillNetPayCodeList.add(chartOfAccounts.getId());
             }
@@ -659,7 +687,9 @@ public class BillRegisterReportAction extends SearchFormAction {
             
             for (final AppConfigValues appConfigValues : pensionBillNetPurpose) {
             	coaQuery = "from CChartOfAccounts where purposeId in (:value)";
-                final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameter("value", Long.valueOf(appConfigValues.getValue())).list();
+				final List<CChartOfAccounts> coaList = session.createQuery(coaQuery).setParameterList("value", Arrays
+						.stream(appConfigValues.getValue().split(",")).map(Long::valueOf).collect(Collectors.toList()))
+						.list();
                 for (final CChartOfAccounts chartOfAccounts : coaList)
                     penBillNetPayCodeList.add(chartOfAccounts.getId());
             }
@@ -678,13 +708,8 @@ public class BillRegisterReportAction extends SearchFormAction {
         }
     }
 
-    protected Map<String, Object> getQuery() {
-        final StringBuffer query = new StringBuffer(1000);
-        final List<Object> params = new ArrayList<>();
-        /*
-         * if(null != voucherHeader.getVoucherNumber() && !StringUtils.isEmpty(voucherHeader.getVoucherNumber())){
-         * whereQuery.append(" and vh.vouchernumber like '%"+voucherHeader.getVoucherNumber()+"%'"); }
-         */
+	protected String getQuery(String sortField, String sortOrder, Map<String, Object> params) {
+		final StringBuilder query = new StringBuilder();
         if (StringUtils.isEmpty(exptype)) {
             final List<String> expndtrList = dropdownData.get("expenditureList");
             for (final String expenditure : expndtrList) {
@@ -695,31 +720,32 @@ public class BillRegisterReportAction extends SearchFormAction {
         } else
             getQueryByExpndType(query,exptype, params);
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("query", query);
-        map.put("params", params);
-        return map;
+		if (null != sortField)
+			query.append(" order by ").append(sortField).append(" ").append(sortOrder);
+
+		return query.toString();
     }
     
-    protected void getQueryByExpndType(final StringBuffer query,final String expndType, final List<Object> params) {
+    protected void getQueryByExpndType(final StringBuilder query,final String expndType, final Map<String, Object> params) {
         netAccountCodeValue();
         final List<Long> listOfNetPayGlIds = netAccountCode.get(expndType);
 
         // query to get bills for which vouchers are approved.
-		query.append(
-				" select b.billnumber ,vh.vouchernumber as vouchernumber, mis.payto,b.passedamount, sum(bd.creditamount) as netpay, s.description,b.billdate as billdate")
+		query.append(" select b.billnumber ,vh.vouchernumber as vouchernumber, mis.payto,b.passedamount,")
+				.append(" sum(bd.creditamount) as netpay, s.description,b.billdate as billdate")
 				.append(" from eg_billregister b, eg_billdetails bd, voucherheader vh,eg_billregistermis mis , egw_status s ")
-				.append(" where b.id= bd.billid and b.id=mis.billid and mis.voucherheaderid =vh.id  and s.id= b.statusid and bd.creditamount > 0");
+				.append(" where b.id= bd.billid and b.id=mis.billid and mis.voucherheaderid =vh.id")
+				.append("  and s.id= b.statusid and bd.creditamount > 0");
 		prepareCriteria(query, params);
 		prepareVoucherFilter(query, params);
 		if (listOfNetPayGlIds != null && !listOfNetPayGlIds.isEmpty()) {
-			query.append("  and bd.glcodeid in(?)");
-			params.add(listOfNetPayGlIds);
+			query.append("  and bd.glcodeid in (:listOfNetPayGlIds)");
+			params.put("listOfNetPayGlIds", listOfNetPayGlIds);
 		}
-		query.append(" and b.expendituretype=?").append("  and vh.status IN (0,5) ")
+		query.append(" and b.expendituretype = :expndType  and vh.status IN (0,5) ")
 				.append(" group by b.billnumber, vh.vouchernumber,mis.payto, b.passedamount, s.description,b.billdate");
 
-		params.add(expndType);
+		params.put("expndType", expndType);
 		query.append(" UNION ");
 
         // query to get bills for which vouchers are Cancelled.
@@ -730,83 +756,85 @@ public class BillRegisterReportAction extends SearchFormAction {
 		prepareCriteria(query, params);
 		prepareVoucherFilter(query, params);
 		if (listOfNetPayGlIds != null && !listOfNetPayGlIds.isEmpty()) {
-			query.append("  and bd.glcodeid in(?)");
-			params.add(listOfNetPayGlIds);
+			query.append("  and bd.glcodeid in (:listOfNetPayGlIds)");
+			params.put("listOfNetPayGlIds", listOfNetPayGlIds);
 		}
-		query.append(" and b.expendituretype=?").append("  and vh.status = 4")
+		query.append(" and b.expendituretype = :expndType and vh.status = 4")
 				.append(" group by b.billnumber,vouchernumber, mis.payto, b.passedamount, s.description,b.billdate");
-		params.add(expndType);
+		params.put("expndType", expndType);
         
-        if (voucherHeader.getVoucherNumber() == null || StringUtils.isEmpty(voucherHeader.getVoucherNumber())) {
+		if (voucherHeader.getVoucherNumber() == null || StringUtils.isEmpty(voucherHeader.getVoucherNumber())) {
 			query.append(" UNION ");
 			// query to get bills for voucher is not created
 			query.append(
-					" select b.billnumber ,'' as vouchernumber, mis.payto,b.passedamount, sum(bd.creditamount) as netpay, s.description,b.billdate as billdate")
+					" select b.billnumber ,'' as vouchernumber, mis.payto,b.passedamount, sum(bd.creditamount) as netpay,")
+					.append(" s.description,b.billdate as billdate")
 					.append(" from eg_billregister b, eg_billdetails bd,eg_billregistermis mis , egw_status s ")
-					.append(" where b.id= bd.billid and b.id=mis.billid  and s.id= b.statusid and  mis.voucherheaderid is null and bd.creditamount > 0");
+					.append(" where b.id= bd.billid and b.id=mis.billid  and s.id= b.statusid and  mis.voucherheaderid is null")
+					.append(" and bd.creditamount > 0");
 			prepareCriteria(query, params);
 			if (listOfNetPayGlIds != null && !listOfNetPayGlIds.isEmpty()) {
-				query.append("  and bd.glcodeid in(?)");
-				params.add(listOfNetPayGlIds);
+				query.append("  and bd.glcodeid in (:listOfNetPayGlIds)");
+				params.put("listOfNetPayGlIds", listOfNetPayGlIds);
 			}
-			query.append(" and b.expendituretype=?").append(
+			query.append(" and b.expendituretype=:expndType").append(
 					" group by b.billnumber, vouchernumber,mis.payto, b.passedamount, s.description,b.billdate");
-			params.add(expndType);
-        }
+			params.put("expndType", expndType);
+		}
     }
     
-    private void prepareCriteria(StringBuffer whereQuery, List<Object> params) {
+    private void prepareCriteria(StringBuilder whereQuery, Map<String, Object> params) {
         if (null != voucherHeader.getFundId()) {
-            whereQuery.append(" and mis.fundid=?");
-            params.add(Long.valueOf(voucherHeader.getFundId().getId()));
+            whereQuery.append(" and mis.fundid=:fundid");
+            params.put("fundid", voucherHeader.getFundId().getId());
         }
         if (null != voucherHeader.getVouchermis().getDepartmentcode()) {
-            whereQuery.append(" and mis.departmentcode=?");
-            params.add(voucherHeader.getVouchermis().getDepartmentcode());
+            whereQuery.append(" and mis.departmentcode=:departmentcode");
+            params.put("departmentcode", voucherHeader.getVouchermis().getDepartmentcode());
         }
         if (null != voucherHeader.getVouchermis().getSchemeid()) {
-            whereQuery.append(" and mis.schemeid=?");
-            params.add(Long.valueOf(voucherHeader.getVouchermis().getSchemeid().getId()));
+            whereQuery.append(" and mis.schemeid=:schemeid");
+            params.put("schemeid", Long.valueOf(voucherHeader.getVouchermis().getSchemeid().getId()));
         }
         if (null != voucherHeader.getVouchermis().getSubschemeid()) {
-            whereQuery.append(" and mis.subschemeid=?");
-            params.add(Long.valueOf(voucherHeader.getVouchermis().getSubschemeid().getId()));
+            whereQuery.append(" and mis.subschemeid=:subschemeid");
+            params.put("subschemeid", Long.valueOf(voucherHeader.getVouchermis().getSubschemeid().getId()));
         }
         if (null != voucherHeader.getVouchermis().getFunctionary()) {
-            whereQuery.append(" and mis.functionaryid=?");
-            params.add(Long.valueOf(voucherHeader.getVouchermis().getFunctionary().getId()));
+            whereQuery.append(" and mis.functionaryid=:functionaryid");
+            params.put("functionaryid", Long.valueOf(voucherHeader.getVouchermis().getFunctionary().getId()));
         }
         if (null != voucherHeader.getVouchermis().getFundsource()) {
-            whereQuery.append(" and mis.fundsourceid=?");
-            params.add(Long.valueOf(voucherHeader.getVouchermis().getFundsource().getId()));
+            whereQuery.append(" and mis.fundsourceid=:fundsourceid");
+            params.put("fundsourceid", voucherHeader.getVouchermis().getFundsource().getId());
         }
         if (null != voucherHeader.getVouchermis().getDivisionid()) {
-            whereQuery.append(" and mis.fieldid=?");
-            params.add(Long.valueOf(voucherHeader.getVouchermis().getDivisionid().getId()));
+            whereQuery.append(" and mis.fieldid=:fieldid");
+            params.put("fieldid", voucherHeader.getVouchermis().getDivisionid().getId());
         }
         if (!StringUtils.isEmpty(billType)) {
-            whereQuery.append(" and  b.billtype=?");
-            params.add(billType);
+            whereQuery.append(" and  b.billtype=:billtype");
+            params.put("billtype", billType);
         }
         if (null != fromDate) {
-            whereQuery.append(" and b.billdate >= to_date(?,'dd/MM/yyyy')");
-            params.add(fromDate);
+            whereQuery.append(" and b.billdate >= :fromDate");
+            params.put("fromDate", fromDate);
         }
         if (null != toDate) {
-            whereQuery.append(" and b.billdate <= to_date(?,'dd/MM/yyyy')");
-            params.add(toDate);
+            whereQuery.append(" and b.billdate <= :toDate");
+            params.put("toDate", toDate);
         }
         if (null != billNumber && !StringUtils.isEmpty(billNumber)) {
-            whereQuery.append(" and b.billnumber like ?");
-            params.add("%" + billNumber + "%");
+            whereQuery.append(" and b.billnumber like :billnumber");
+            params.put("billnumber", "%" + billNumber + "%");
         }
     }
     
-    private void prepareVoucherFilter(StringBuffer voucherQry, List<Object> params) {
+    private void prepareVoucherFilter(StringBuilder voucherQry, Map<String, Object> params) {
         // voucher header condition for complete bill register report
         if (voucherHeader.getVoucherNumber() != null && !StringUtils.isEmpty(voucherHeader.getVoucherNumber())) {
-            voucherQry.append(" and vh.vouchernumber like ?");
-            params.add("%" + voucherHeader.getVoucherNumber() + "%");
+            voucherQry.append(" and vh.vouchernumber like :vouchernumber");
+            params.put("vouchernumber", "%" + voucherHeader.getVoucherNumber() + "%");
 
         }
     }
