@@ -289,8 +289,11 @@ public class VoucherStatusReportAction extends BaseFormAction {
 		voucherIDOwnerNameMap = new HashMap<Long, String>();
 		Long voucherHeaderId;
 		String voucherOwner;
-		final Query qry = voucherSearchQuery();
-		final Long count = (Long) persistenceService.find(countQry);
+		final Map<String, Object> params = new HashMap<>();
+		final Query qry = voucherSearchQuery(params);
+		final Query countQuery = persistenceService.getSession().createQuery(countQry);
+		persistenceService.populateQueryWithParams(countQuery, params);
+		final Long count = (Long) countQuery.uniqueResult();
 		final Page resPage = new Page(qry, page, pageSize);
 		pagedResults = new EgovPaginatedList(resPage, count.intValue());
 		final List<CVoucherHeader> list = pagedResults != null ? pagedResults.getList() : null;
@@ -360,9 +363,8 @@ public class VoucherStatusReportAction extends BaseFormAction {
 		return nameMap;
 	}
 	
-	private Query voucherSearchQuery() {
+	private Query voucherSearchQuery(Map<String, Object> params) {
         StringBuilder sql = new StringBuilder(500);
-        Map<String, Object> params = new HashMap<>();
         if (modeOfPayment.equals("-1"))
             sql.append(" from CVoucherHeader vh where ");
         else
@@ -383,11 +385,11 @@ public class VoucherStatusReportAction extends BaseFormAction {
         }
         if (fromDate != null) {
             sql.append(" and vh.voucherDate>=:fromDate");
-            params.put("fromDate",Constants.DDMMYYYYFORMAT1.format(fromDate));
+            params.put("fromDate",fromDate);
         }
         if (toDate != null) {
             sql.append(" and vh.voucherDate<=:toDate");
-            params.put("toDate",Constants.DDMMYYYYFORMAT1.format(toDate));
+            params.put("toDate",toDate);
         }
         if (voucherHeader.getStatus() != -1) {
             sql.append(" and vh.status=:status");
@@ -422,7 +424,7 @@ public class VoucherStatusReportAction extends BaseFormAction {
         countQry = "select count(*) " + sql;
         final Query query = persistenceService.getSession()
                 .createQuery(new StringBuilder().append("select vh ").append(sql)
-                        .append(" order by vh.vouchermis.departmentid.name ,vh.voucherDate, vh.voucherNumber").toString());
+                        .append(" order by vh.vouchermis.departmentcode ,vh.voucherDate, vh.voucherNumber").toString());
         params.entrySet().forEach(entry -> query.setParameter(entry.getKey(), entry.getValue()));
         return query;
     }
@@ -464,7 +466,8 @@ public class VoucherStatusReportAction extends BaseFormAction {
 	@SuppressWarnings("unchecked")
 	private void populateData() throws ParseException, ApplicationException {
 		final List<CVoucherHeader> list = new ArrayList();
-		list.addAll(voucherSearchQuery().list());
+		final Map<String, Object> params = new HashMap<>();
+		list.addAll(voucherSearchQuery(params).list());
 		Map<String, String> depMap = new HashMap<>();
 		List<org.egov.infra.microservice.models.Department> depList = masterDataCache.get("egi-department");
 		for (org.egov.infra.microservice.models.Department dep : depList) {

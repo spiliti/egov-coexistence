@@ -49,7 +49,6 @@
 package org.egov.egf.commons;
 
 import org.egov.eis.service.EisCommonService;
-import org.egov.eis.service.PositionMasterService;
 import org.egov.infra.admin.master.entity.User;
 import org.egov.infra.microservice.models.EmployeeInfo;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
@@ -68,8 +67,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommonsUtil {
 
-	@Autowired
-	private PositionMasterService positionMasterService;
 	@Autowired
 	private EisCommonService eisCommonService;
 	@Autowired
