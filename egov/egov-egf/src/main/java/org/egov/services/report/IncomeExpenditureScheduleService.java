@@ -217,7 +217,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
                 if (ieContains(CurrentYearLedgerDetail, row[0].toString()))
                     for (final Object[] cur : CurrentYearLedgerDetail) {
                         final String fundnm = incomeExpenditureService.getFundNameForId(statement.getFunds(),
-                                Integer.valueOf(cur[3].toString()));
+                               Long.valueOf(cur[3].toString()));
                         if (cur[0].toString().equals(row[0].toString())) {
                             addrow = true;
                             if (I.equalsIgnoreCase(cur[4].toString()))
@@ -250,7 +250,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
                     for (final Object[] pre : previousLedgerBalance)
                         if (pre[0].toString().equals(row[0].toString())) {
                             final String fundnm = incomeExpenditureService.getFundNameForId(statement.getFunds(),
-                                    Integer.valueOf(pre[3].toString()));
+                                    Long.valueOf(pre[3].toString()));
                             addrow = true;
                             if (I.equalsIgnoreCase(pre[4].toString()))
                                 preAmount = ((BigDecimal)pre[2]).multiply(NEGATIVE);
@@ -391,7 +391,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
                                 amount =(BigDecimal)cur[2];
                             ieEntry.getNetAmount()
                             .put(incomeExpenditureService.getFundNameForId(statement.getFunds(),
-                                    Integer.valueOf(cur[3].toString())),
+                                    Long.valueOf(cur[3].toString())),
                                     incomeExpenditureService.divideAndRound(amount, divisor));
 
                         }
@@ -404,7 +404,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
                             else
                                 preAmount = (BigDecimal) pre[2];
                             ieEntry.getPreviousYearAmount().put(incomeExpenditureService.getFundNameForId(statement.getFunds(),
-                                    Integer.valueOf(pre[3].toString())),
+                                    Long.valueOf(pre[3].toString())),
                                     incomeExpenditureService.divideAndRound(preAmount, divisor));
 
                         }
@@ -437,7 +437,7 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
                             if (I.equalsIgnoreCase(type))
                                 total = total.multiply(NEGATIVE);
                             balanceSheetEntry.getFundWiseAmount().put(
-                                    incomeExpenditureService.getFundNameForId(fundList, new Integer(row[1].toString())),
+                                    incomeExpenditureService.getFundNameForId(fundList, new Long(row[1].toString())),
                                     incomeExpenditureService.divideAndRound(total, divisor));
                         }
                         balanceSheetEntry.setGlCode(glCode);
@@ -451,23 +451,23 @@ public class IncomeExpenditureScheduleService extends ScheduleService {
                             if (statement.get(index).getGlCode() != null
                                     && row[2].toString().equals(statement.get(index).getGlCode())) {
                                 final String fundNameForId = incomeExpenditureService.getFundNameForId(fundList,
-                                        new Integer(row[1].toString()));
+                                        new Long(row[1].toString()));
                                 if (statement.get(index).getFundWiseAmount().get(fundNameForId) == null)
                                     statement
                                     .get(index)
                                     .getFundWiseAmount()
                                     .put(incomeExpenditureService.getFundNameForId(fundList,
-                                            new Integer(row[1].toString())), amount);
+                                            new Long(row[1].toString())), amount);
                                 else
                                     statement
                                     .get(index)
                                     .getFundWiseAmount()
                                     .put(incomeExpenditureService.getFundNameForId(fundList,
-                                            new Integer(row[1].toString())),
+                                            new Long(row[1].toString())),
                                             statement
                                             .get(index)
                                             .getFundWiseAmount()
-                                            .get(incomeExpenditureService.getFundNameForId(fundList, new Integer(
+                                            .get(incomeExpenditureService.getFundNameForId(fundList, new Long(
                                                     row[1].toString()))).add(amount));
                             }
                         }

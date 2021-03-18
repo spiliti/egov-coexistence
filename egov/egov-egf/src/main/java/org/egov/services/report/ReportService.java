@@ -82,6 +82,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.BigDecimalType;
+import org.hibernate.type.LongType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -154,7 +155,7 @@ public abstract class ReportService {
 		return query.toString();
 	}
 
-    public String getFundNameForId(final List<Fund> fundList, final Integer id) {
+    public String getFundNameForId(final List<Fund> fundList, final Long id) {
         for (final Fund fund : fundList)
             if (id.equals(fund.getId()))
                 return fund.getName();
@@ -225,8 +226,7 @@ public abstract class ReportService {
             if (type.get(index).getGlCode() != null
                     && row.getGlCode().equals(type.get(index).getGlCode()))
                 type.get(index).getFundWiseAmount().put(
-                        getFundNameForId(fundList, Integer.valueOf(row
-                                .getFundId())), amount);
+                        getFundNameForId(fundList, row.getFundId()), amount);
         }
     }
 
@@ -236,7 +236,7 @@ public abstract class ReportService {
             final BigDecimal amount = divideAndRound(row.getAmount(), divisor);
 
             if (type.getIE(index).getGlCode() != null && row.getGlCode().equals(type.getIE(index).getGlCode()))
-                type.getIE(index).getNetAmount().put(getFundNameForId(fundList, Integer.valueOf(row.getFundId())), amount);
+                type.getIE(index).getNetAmount().put(getFundNameForId(fundList, row.getFundId()), amount);
         }
     }
 
@@ -280,7 +280,7 @@ public abstract class ReportService {
 						.append(" where s.id=coa2.scheduleid and ")
 						.append("coa2.classification=2 and s.reporttype = :reporttype) ").append(filterQuery)
 						.append(" group by c.majorcode,v.fundid,c.type order by c.majorcode").toString())
-				.addScalar("glCode").addScalar("fundId", BigDecimalType.INSTANCE).addScalar("type")
+				.addScalar("glCode").addScalar("fundId",LongType.INSTANCE).addScalar("type")
 				.addScalar("amount", BigDecimalType.INSTANCE)
 				.setResultTransformer(Transformers.aliasToBean(StatementResultObject.class));
 		sqlParams.put("coaType", financialUtils.getCoaTypes(coaType));
