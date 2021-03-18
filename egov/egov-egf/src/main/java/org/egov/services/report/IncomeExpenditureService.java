@@ -204,13 +204,13 @@ public class IncomeExpenditureService extends ReportService {
                             if (pre.isIncome())
                                 pre.negateAmount();
                             preentry.getPreviousYearAmount().put(
-                                    getFundNameForId(statement.getFunds(), Integer.valueOf(pre.getFundId())),
+                                    getFundNameForId(statement.getFunds(), pre.getFundId()),
                                     divideAndRound(pre.getAmount(), divisor));
                         } else if (E.equalsIgnoreCase(queryObject.getType().toString())) {
                             if (pre.isIncome())
                                 pre.negateAmount();
                             preentry.getPreviousYearAmount().put(
-                                    getFundNameForId(statement.getFunds(), Integer.valueOf(pre.getFundId())),
+                                    getFundNameForId(statement.getFunds(), pre.getFundId()),
                                     divideAndRound(pre.getAmount(), divisor));
                         }
                     if (queryObject.getGlCode() != null) {
@@ -235,7 +235,7 @@ public class IncomeExpenditureService extends ReportService {
                     } else {
                         final IEStatementEntry entry = new IEStatementEntry();
                         if (row.getAmount() != null && row.getFundId() != null) {
-                            entry.getNetAmount().put(getFundNameForId(statement.getFunds(), Integer.valueOf(row.getFundId())),
+                            entry.getNetAmount().put(getFundNameForId(statement.getFunds(), row.getFundId()),
                                     divideAndRound(row.getAmount(), divisor));
                             if (queryObject.getGlCode() != null && contains(PreYearResults, row.getGlCode())) {
                                 final List<StatementResultObject> preRow = getRowWithGlCode(PreYearResults,
@@ -245,7 +245,7 @@ public class IncomeExpenditureService extends ReportService {
                                         pre.negateAmount();
                                     if (pre.getGlCode() != null && pre.getGlCode().equals(row.getGlCode()))
                                         entry.getPreviousYearAmount().put(
-                                                getFundNameForId(statement.getFunds(), Integer.valueOf(pre.getFundId())),
+                                                getFundNameForId(statement.getFunds(), pre.getFundId()),
                                                 divideAndRound(pre.getAmount(), divisor));
                                 }
                             }
@@ -377,8 +377,8 @@ public class IncomeExpenditureService extends ReportService {
             if (type.get(index).getGlCode() != null
                     && row.getGlCode().equals(type.get(index).getGlCode()))
                 type.getIE(index).getPreviousYearAmount().put(
-                        getFundNameForId(fundList, Integer.valueOf(row
-                                .getFundId())), amount);
+                        getFundNameForId(fundList, row
+                                .getFundId()), amount);
         }
     }
 

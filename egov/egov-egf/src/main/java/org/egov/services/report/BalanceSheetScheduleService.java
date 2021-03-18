@@ -151,20 +151,20 @@ public class BalanceSheetScheduleService extends ScheduleService {
                             LOGGER.debug(entry.getGlCode() + "==================" + total);
                         if (entry.getFundWiseAmount().isEmpty())
                             entry.getFundWiseAmount().put(
-                                    balanceSheetService.getFundNameForId(fundList, new Integer(obj[1].toString())),
+                                    balanceSheetService.getFundNameForId(fundList, new Long(obj[1].toString())),
                                     balanceSheetService.divideAndRound(total, divisor));
                         else {
                             boolean shouldAddNewFund = true;
                             for (final Entry<String, BigDecimal> object : entry.getFundWiseAmount().entrySet())
                                 if (object.getKey().equalsIgnoreCase(
-                                        balanceSheetService.getFundNameForId(fundList, new Integer(obj[1].toString())))) {
+                                        balanceSheetService.getFundNameForId(fundList, new Long(obj[1].toString())))) {
                                     entry.getFundWiseAmount().put(object.getKey(),
                                             object.getValue().add(balanceSheetService.divideAndRound(total, divisor)));
                                     shouldAddNewFund = false;
                                 }
                             if (shouldAddNewFund)
                                 entry.getFundWiseAmount().put(
-                                        balanceSheetService.getFundNameForId(fundList, new Integer(obj[1].toString())),
+                                        balanceSheetService.getFundNameForId(fundList, new Long(obj[1].toString())),
                                         balanceSheetService.divideAndRound(total, divisor));
                         }
                     }
@@ -314,7 +314,7 @@ public class BalanceSheetScheduleService extends ScheduleService {
                             if (L.equalsIgnoreCase(type.toString()))
                                 total = total.multiply(NEGATIVE);
                             balanceSheetEntry.getFundWiseAmount().put(
-                                    balanceSheetService.getFundNameForId(fundList, new Integer(row[1].toString())),
+                                    balanceSheetService.getFundNameForId(fundList, new Long(row[1].toString())),
                                     balanceSheetService.divideAndRound(total, divisor));
                         }
                         if (row[2] != null)
@@ -331,22 +331,22 @@ public class BalanceSheetScheduleService extends ScheduleService {
                             if (balanceSheet.get(index).getGlCode() != null
                                     && row[2].toString().equals(balanceSheet.get(index).getGlCode())) {
                                 final String fundNameForId = balanceSheetService.getFundNameForId(fundList,
-                                        new Integer(row[1].toString()));
+                                        new Long(row[1].toString()));
                                 if (balanceSheet.get(index).getFundWiseAmount().get(fundNameForId) == null)
                                     balanceSheet
                                     .get(index)
                                     .getFundWiseAmount()
-                                    .put(balanceSheetService.getFundNameForId(fundList, new Integer(row[1].toString())),
+                                    .put(balanceSheetService.getFundNameForId(fundList, new Long(row[1].toString())),
                                             amount);
                                 else
                                     balanceSheet
                                     .get(index)
                                     .getFundWiseAmount()
-                                    .put(balanceSheetService.getFundNameForId(fundList, new Integer(row[1].toString())),
+                                    .put(balanceSheetService.getFundNameForId(fundList, new Long(row[1].toString())),
                                             balanceSheet
                                             .get(index)
                                             .getFundWiseAmount()
-                                            .get(balanceSheetService.getFundNameForId(fundList, new Integer(
+                                            .get(balanceSheetService.getFundNameForId(fundList, new Long(
                                                     row[1].toString()))).add(amount));
                             }
                         }
@@ -520,7 +520,7 @@ public class BalanceSheetScheduleService extends ScheduleService {
                             if (L.equalsIgnoreCase(type))
                                 total = total.multiply(NEGATIVE);
                             balanceSheetEntry.getFundWiseAmount().put(
-                                    balanceSheetService.getFundNameForId(fundList, new Integer(row[1].toString())),
+                                    balanceSheetService.getFundNameForId(fundList, new Long(row[1].toString())),
                                     balanceSheetService.divideAndRound(total, divisor));
                         }
                         balanceSheetEntry.setGlCode(glCode);
@@ -534,7 +534,7 @@ public class BalanceSheetScheduleService extends ScheduleService {
                             if (balanceSheet.get(index).getGlCode() != null
                                     && row[2].toString().equals(balanceSheet.get(index).getGlCode())) {
                                 final String fundNameForId = balanceSheetService.getFundNameForId(fundList,
-                                        new Integer(row[1].toString()));
+                                        new Long(row[1].toString()));
                                 if (balanceSheet.get(index).getFundWiseAmount().get(fundNameForId) == null)
                                     balanceSheet.get(index).getFundWiseAmount().put(fundNameForId, amount);
                                 else
@@ -577,7 +577,7 @@ public class BalanceSheetScheduleService extends ScheduleService {
                             if (L.equalsIgnoreCase(type))
                                 total = total.multiply(NEGATIVE);
                             balanceSheetEntry.getFundWiseAmount().put(
-                                    balanceSheetService.getFundNameForId(fundList, new Integer(row[1].toString())),
+                                    balanceSheetService.getFundNameForId(fundList, new Long(row[1].toString())),
                                     balanceSheetService.divideAndRound(total, divisor));
                         }
                         balanceSheetEntry.setGlCode(glCode);
@@ -591,7 +591,7 @@ public class BalanceSheetScheduleService extends ScheduleService {
                             if (balanceSheet.get(index).getGlCode() != null
                                     && row[2].toString().equals(balanceSheet.get(index).getGlCode())) {
                                 final String fundNameForId = balanceSheetService.getFundNameForId(fundList,
-                                        new Integer(row[1].toString()));
+                                        new Long(row[1].toString()));
                                 if (balanceSheet.get(index).getFundWiseAmount().get(fundNameForId) == null)
                                     balanceSheet.get(index).getFundWiseAmount().put(fundNameForId, amount);
                                 else

@@ -125,18 +125,18 @@ public class BalanceSheetService extends ReportService {
                 for (final StatementEntry entry : balanceSheet.getEntries())
                     if (obj[2].toString().equals(entry.getGlCode()))
                         if (entry.getFundWiseAmount().isEmpty())
-                            entry.getFundWiseAmount().put(getFundNameForId(fundList, new Integer(obj[1].toString())),
+                            entry.getFundWiseAmount().put(getFundNameForId(fundList, new Long(obj[1].toString())),
                                     divideAndRound(total, divisor));
                         else {
                             boolean shouldAddNewFund = true;
                             for (final Entry<String, BigDecimal> object : entry.getFundWiseAmount().entrySet())
-                                if (object.getKey().equalsIgnoreCase(getFundNameForId(fundList, new Integer(obj[1].toString())))) {
+                                if (object.getKey().equalsIgnoreCase(getFundNameForId(fundList, new Long(obj[1].toString())))) {
                                     entry.getFundWiseAmount().put(object.getKey(),
                                             object.getValue().add(divideAndRound(total, divisor)));
                                     shouldAddNewFund = false;
                                 }
                             if (shouldAddNewFund)
-                                entry.getFundWiseAmount().put(getFundNameForId(fundList, new Integer(obj[1].toString())),
+                                entry.getFundWiseAmount().put(getFundNameForId(fundList, new Long(obj[1].toString())),
                                         divideAndRound(total, divisor));
                         }
             }
@@ -207,7 +207,7 @@ public class BalanceSheetService extends ReportService {
 				for (final Object[] obj : excessieAmountList) {
 
 					if (obj[0] != null && obj[1] != null) {
-						final String fundNameForId = getFundNameForId(fundList, Integer.valueOf(obj[1].toString()));
+						final String fundNameForId = getFundNameForId(fundList, Long.valueOf(obj[1].toString()));
 						if (entry.getFundWiseAmount().containsKey(fundNameForId))
 							entry.getFundWiseAmount().put(fundNameForId, entry.getFundWiseAmount().get(fundNameForId)
 									.add(divideAndRound((BigDecimal) obj[0], divisor)));
@@ -455,7 +455,7 @@ public class BalanceSheetService extends ReportService {
                         final StatementEntry balanceSheetEntry = new StatementEntry();
                         if (row.getAmount() != null && row.getFundId() != null)
                             balanceSheetEntry.getFundWiseAmount().put(
-                                    getFundNameForId(fundList, Integer.valueOf(row.getFundId())),
+                                    getFundNameForId(fundList, row.getFundId()),
                                     divideAndRound(row.getAmount(), divisor));
                         if (queryObject.getGlCode() != null) {
                             balanceSheetEntry.setGlCode(queryObject.getGlCode());
