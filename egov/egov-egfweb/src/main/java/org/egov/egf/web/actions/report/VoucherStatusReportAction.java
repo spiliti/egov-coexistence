@@ -448,6 +448,9 @@ public class VoucherStatusReportAction extends BaseFormAction {
 			addFieldError("From Date", getText("Please enter From Date"));
 		if (toDate == null)
 			addFieldError("To Date", getText("Please enter To Date"));
+		if (fromDate != null && toDate != null && toDate.before(fromDate)) {
+			addFieldError("To Date", getText("From Date should be less than To Date"));
+		}
 		checkMandatoryField("fundId", "fund", voucherHeader.getFundId(), "voucher.fund.mandatory");
 		checkMandatoryField("vouchermis.departmentcode", "department",
 				voucherHeader.getVouchermis().getDepartmentcode(), "voucher.department.mandatory");
