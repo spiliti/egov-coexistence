@@ -134,16 +134,12 @@ public class BillRegisterReportAction extends SearchFormAction {
     // expenditure type.
     private Date fromDate;
     String titleName = "";
-    
    
- @Autowired
- @Qualifier("persistenceService")
- private PersistenceService persistenceService;
- @Autowired	
+    @Autowired
+    @Qualifier("persistenceService")
+    private PersistenceService persistenceService;
+ 	@Autowired	
     private  AppConfigValueService appConfigValueService;
-    
-   
-
 	private Date toDate;
     private String exptype;
     private Long preVoucherId;
@@ -292,6 +288,10 @@ public class BillRegisterReportAction extends SearchFormAction {
     }
 
     public void validateBeforeSearch() {
+    	if (voucherHeader.getFundId() == null) {
+    		throw new ValidationException(Arrays.asList(new ValidationError("fund",
+                    "Fund is mandatory")));
+    	}
         if (null != fromDate && null != toDate && fromDate.after(toDate))
             throw new ValidationException(Arrays.asList(new ValidationError("date",
                     "from date can not be greater than to date")));

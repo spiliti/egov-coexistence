@@ -112,11 +112,6 @@
            }         
           });*/
         document.subLedgerForm.action = "/services/EGF/report/subLedgerReport-search.action";
-        jQuery(subLedgerForm).append(jQuery('<input>', {
-	        type : 'hidden',
-	        name : '${_csrf.parameterName}',
-	        value : '${_csrf.token}'
-	    }));
         document.subLedgerForm.submit();
         return true;
            
