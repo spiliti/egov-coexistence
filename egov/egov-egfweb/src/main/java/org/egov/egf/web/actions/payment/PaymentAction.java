@@ -237,6 +237,7 @@ public class PaymentAction extends BasePaymentAction {
     DateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
     SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd");
     Date date;
+    private Boolean validateMandatoryFields=false;
     @Autowired
     private ChartOfAccounts chartOfAccounts;
  
@@ -438,7 +439,9 @@ public class PaymentAction extends BasePaymentAction {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting search...");
         // Get App config value
-        
+        validateMandatoryFields();
+        if(hasErrors())
+            return "search";
         final Map<String, Object> sqlParams = new HashMap<>();
         final StringBuffer sql = new StringBuffer();
         if (!"".equals(billNumber)) {
@@ -972,7 +975,7 @@ public class PaymentAction extends BasePaymentAction {
      * @throws ValidationException this api is called from searchbills method is changed to save to enable csrf fix actaul method
      * name was generate payment. I doesnot save data but forwards to screen where for selected bill we can make payment
      */
-    @SkipValidation
+    
     @ValidationErrorPage("searchbills")
     @Action(value = "/payment/payment-save")
     public String save() throws ValidationException {
@@ -1954,12 +1957,17 @@ public class PaymentAction extends BasePaymentAction {
         return paymentheader;
     }
 
-    private void validateBillVoucherDate(List<PaymentBean> paymentList, Date paymentVoucherDate) {
+    private void validateBillVoucherDate(List<PaymentBean> paymentList, Date paymentVoucherDate) throws ParseException {
         for (PaymentBean paymentBean : paymentList) {
             if (paymentBean.getBillVoucherDate().after(paymentVoucherDate)) {
                 throw new ValidationException("voucherDate", getMessage("payment.voucherdate.validation",
                         new String[] { DateUtils.getDefaultFormattedDate(paymentVoucherDate) }));
             }
+        }
+        final Date cuttDate = DateUtils.parseDate(cutOffDate, "dd/MM/yyyy");
+        if(paymentVoucherDate.after(cuttDate)) {
+            throw new ValidationException("cutOffDate", getMessage("vouchercutoffdate.message",
+                    new String[] {DateUtils.getDefaultFormattedDate(cuttDate)}));
         }
     }
     
@@ -1989,6 +1997,39 @@ public class PaymentAction extends BasePaymentAction {
         }
         return null;
     }
+    
+    public boolean validateMandatoryFields() throws ParseException {
+        if (voucherHeader.getFundId() == null || voucherHeader.getFundId().getId() == -1) {
+            addFieldError("voucherHeader.fund", getText("msg.please.select.fund"));
+            return false;
+        }
+        if (StringUtils.isNotEmpty(fromDate) || StringUtils.isNotEmpty(toDate)) {
+            boolean isDateFrom = false;
+            boolean isDateTo = false;
+            String fromDates = fromDate;
+            String toDates = toDate;
+            String datePattern = "\\d{1,2}/\\d{1,2}/\\d{4}";
+            isDateFrom = fromDates.matches(datePattern);
+            isDateTo = toDates.matches(datePattern);
+            if (!isDateFrom || !isDateTo) {
+                addActionError(getText("msg.please.select.bill.valid.date"));
+                return false;
+            }
+        }
+        Date datefrom = null;
+        Date dateto = null;
+        if (StringUtils.isNotEmpty(fromDate) && StringUtils.isNotEmpty(toDate)) {
+            datefrom = sdf1.parse(fromDate);
+            dateto = sdf1.parse(toDate);
+        if (datefrom.after(dateto)) {
+            addFieldError("toDate", getText("msg.from.to.date.greater"));
+            return false;
+        } 
+        }else
+            return true;
+        return true;
+    }
+   
 
     protected String getMessage(final String key) {
         return getText(key);
