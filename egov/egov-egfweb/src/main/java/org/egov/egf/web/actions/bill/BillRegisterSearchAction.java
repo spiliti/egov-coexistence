@@ -78,8 +78,12 @@ import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +111,7 @@ public class BillRegisterSearchAction extends BaseFormAction {
     private Boolean validateMandatoryFields=false;
     @Autowired
     private AppConfigValueService appConfigValueService;
+    DateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
    
  @Autowired
  @Qualifier("persistenceService")
@@ -174,7 +179,7 @@ public class BillRegisterSearchAction extends BaseFormAction {
     }
 
     @Action(value = "/bill/billRegisterSearch-search")
-    public String search() {
+    public String search() throws ParseException {
         validateMandatoryFields();
         if (hasErrors())
             return NEW;
@@ -262,7 +267,7 @@ public class BillRegisterSearchAction extends BaseFormAction {
     }
     
     
-    public boolean validateMandatoryFields() {
+    public boolean validateMandatoryFields() throws ParseException {
         if (expType == null || expType.equals("-1")) {
             addFieldError("expType", getText("msg.please.select.expenditure.type"));
             return false;
@@ -280,7 +285,7 @@ public class BillRegisterSearchAction extends BaseFormAction {
             addFieldError("billDateTo", getText("msg.please.select.bill.to.date"));
             return false;
         }
-        if (billDateFrom != null || billDateTo != null) {
+        if (!billDateFrom.isEmpty() || !billDateTo.isEmpty()) {
             boolean isDateFrom = false;
             boolean isDateTo = false;
             String fromDate = billDateFrom;
@@ -293,14 +298,18 @@ public class BillRegisterSearchAction extends BaseFormAction {
                 return false;
             }
         }
-        int checKDate = 0;
-        if (billDateFrom != null && billDateTo != null)
-            checKDate = billDateFrom.compareTo(billDateTo);
-        if (checKDate > 0) {
-            addFieldError("billDateTo", getText("msg.from.to.date.greater"));
-            return false;
+        Date datefrom = null;
+        Date dateto = null;
+        if (StringUtils.isNotEmpty(billDateFrom) && StringUtils.isNotEmpty(billDateTo)) {
+            datefrom = sdf1.parse(billDateFrom);
+            dateto = sdf1.parse(billDateTo);
+            if (datefrom.after(dateto)) {
+                addFieldError("toDate", getText("msg.from.to.date.greater"));
+                return false;
+                }
         } else
             return true;
+        return true;
     }
 
     private List<Object[]> getOwnersForWorkFlowState(final List<Long> stateIds)
