@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.egov.infra.persistence.validator.annotation.DateFormat;
 import org.hibernate.validator.constraints.SafeHtml;
 
 public class RemittanceReportModel {
@@ -46,7 +47,9 @@ public class RemittanceReportModel {
     @SafeHtml
     private String bankAccount;
     private Long financialYear;
+    @DateFormat
     private Date fromDate;
+    @DateFormat
     private Date toDate;
     @SafeHtml
     private String remittedOn;
