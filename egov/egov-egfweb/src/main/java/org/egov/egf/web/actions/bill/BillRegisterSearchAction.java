@@ -50,7 +50,7 @@
  */
 package org.egov.egf.web.actions.bill;
 
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -64,7 +64,6 @@ import org.egov.commons.Scheme;
 import org.egov.commons.SubScheme;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.entity.Boundary;
-import org.egov.infra.admin.master.entity.Department;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.web.struts.actions.BaseFormAction;
 import org.egov.infstr.services.PersistenceService;
@@ -105,6 +104,7 @@ public class BillRegisterSearchAction extends BaseFormAction {
     private String billDateTo;
     private String expType;
     private List<Map<String, Object>> billList;
+    private Boolean validateMandatoryFields=false;
     @Autowired
     private AppConfigValueService appConfigValueService;
    
@@ -175,33 +175,35 @@ public class BillRegisterSearchAction extends BaseFormAction {
 
     @Action(value = "/bill/billRegisterSearch-search")
     public String search() {
-
+        validateMandatoryFields();
+        if (hasErrors())
+            return NEW;
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("BillRegisterSearchAction | search | Start");
         final Map<String, Object> params = new HashMap<>();
-		final StringBuilder query = new StringBuilder(
-				"select br.expendituretype , br.billtype ,br.billnumber , br.billdate ,")
-						.append(" br.billamount , br.passedamount ,egwstatus.description,billmis.sourcePath,")
-						.append(" br.id ,br.status.id,egwstatus.description ,br.state.id,br.lastModifiedBy.id ")
-						.append(" from EgBillregister br, EgBillregistermis billmis , EgwStatus egwstatus")
-						.append(" where   billmis.egBillregister.id = br.id and egwstatus.id = br.status.id  ")
-						.append(" and br.expendituretype=:expendituretype");
+        final StringBuilder query = new StringBuilder(
+                "select br.expendituretype , br.billtype ,br.billnumber , br.billdate ,")
+                        .append(" br.billamount , br.passedamount ,egwstatus.description,billmis.sourcePath,")
+                        .append(" br.id ,br.status.id,egwstatus.description ,br.state.id,br.lastModifiedBy.id ")
+                        .append(" from EgBillregister br, EgBillregistermis billmis , EgwStatus egwstatus")
+                        .append(" where   billmis.egBillregister.id = br.id and egwstatus.id = br.status.id  ")
+                        .append(" and br.expendituretype=:expendituretype");
 
-		Entry<String, Map<String, Object>> queryWithParams = VoucherHelper.getBillDateQuery(billDateFrom, billDateTo)
-				.entrySet().iterator().next();
+        Entry<String, Map<String, Object>> queryWithParams = VoucherHelper.getBillDateQuery(billDateFrom, billDateTo)
+                .entrySet().iterator().next();
 
-		query.append(queryWithParams.getKey());
-		params.putAll(queryWithParams.getValue());
+        query.append(queryWithParams.getKey());
+        params.putAll(queryWithParams.getValue());
 
-		queryWithParams = VoucherHelper.getBillMisQuery(billregister).entrySet().iterator().next();
-		query.append(queryWithParams.getKey());
-		params.putAll(queryWithParams.getValue());
+        queryWithParams = VoucherHelper.getBillMisQuery(billregister).entrySet().iterator().next();
+        query.append(queryWithParams.getKey());
+        params.putAll(queryWithParams.getValue());
 
-		params.put("expendituretype", expType);
-        
+        params.put("expendituretype", expType);
+
         final Query qry = persistenceService.getSession().createQuery(query.toString());
         params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
-        
+
         final List<Object[]> list = qry.list();
         final List<Long> stateIds = new ArrayList<Long>();
         final Map<Long, String> stateIdAndOwnerNameMap = new HashMap<Long, String>();
@@ -237,17 +239,17 @@ public class BillRegisterSearchAction extends BaseFormAction {
                 if (null != object[7])
                     billMap.put("sourcepath", object[7].toString());
                 else
-                    billMap.put("sourcepath",
-                            "/services/EGF/bill/billView-view.action?billId=" + object[8].toString());
+                    billMap.put("sourcepath", "/services/EGF/bill/billView-view.action?billId=" + object[8].toString());
                 // If bill is created from create bill screen
-                if (object[11] != null)
-                {
-                    if (!(getStringValue(object[10]).equalsIgnoreCase(FinancialConstants.CONTINGENCYBILL_APPROVED_STATUS) || getStringValue(
-                            object[10]).equalsIgnoreCase(FinancialConstants.CONTINGENCYBILL_CANCELLED_STATUS)))
-                        billMap.put(
-                                "ownerName",
-                                stateIdAndOwnerNameMap.get(getLongValue(object[11])) != null ? stateIdAndOwnerNameMap
-                                        .get(getLongValue(object[11])) : "-");
+                if (object[11] != null) {
+                    if (!(getStringValue(object[10])
+                            .equalsIgnoreCase(FinancialConstants.CONTINGENCYBILL_APPROVED_STATUS)
+                            || getStringValue(object[10])
+                                    .equalsIgnoreCase(FinancialConstants.CONTINGENCYBILL_CANCELLED_STATUS)))
+                        billMap.put("ownerName",
+                                stateIdAndOwnerNameMap.get(getLongValue(object[11])) != null
+                                        ? stateIdAndOwnerNameMap.get(getLongValue(object[11]))
+                                        : "-");
                     else
                         billMap.put("ownerName", "-");
                 } else
@@ -257,6 +259,48 @@ public class BillRegisterSearchAction extends BaseFormAction {
         } else
             billList = new ArrayList<Map<String, Object>>();
         return NEW;
+    }
+    
+    
+    public boolean validateMandatoryFields() {
+        if (expType == null || expType.equals("-1")) {
+            addFieldError("expType", getText("msg.please.select.expenditure.type"));
+            return false;
+        }
+        if (billregister.getEgBillregistermis().getFund() == null
+                || billregister.getEgBillregistermis().getFund().getId() == -1) {
+            addFieldError("egBillregistermis.fund", getText("msg.please.select.fund"));
+            return false;
+        }
+        if (billDateFrom == null || StringUtils.isEmpty(billDateFrom)) {
+            addFieldError("billDateFrom", getText("msg.please.select.bill.from.date"));
+            return false;
+        }
+        if (billDateTo == null || StringUtils.isEmpty(billDateTo)) {
+            addFieldError("billDateTo", getText("msg.please.select.bill.to.date"));
+            return false;
+        }
+        if (billDateFrom != null || billDateTo != null) {
+            boolean isDateFrom = false;
+            boolean isDateTo = false;
+            String fromDate = billDateFrom;
+            String toDate = billDateTo;
+            String datePattern = "\\d{1,2}/\\d{1,2}/\\d{4}";
+            isDateFrom = fromDate.matches(datePattern);
+            isDateTo = toDate.matches(datePattern);
+            if (!isDateFrom || !isDateTo) {
+                addFieldError("billDateTo", getText("msg.please.select.bill.valid.date"));
+                return false;
+            }
+        }
+        int checKDate = 0;
+        if (billDateFrom != null && billDateTo != null)
+            checKDate = billDateFrom.compareTo(billDateTo);
+        if (checKDate > 0) {
+            addFieldError("billDateTo", getText("msg.from.to.date.greater"));
+            return false;
+        } else
+            return true;
     }
 
     private List<Object[]> getOwnersForWorkFlowState(final List<Long> stateIds)
