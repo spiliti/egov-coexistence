@@ -397,7 +397,14 @@ function onChangeServiceClass(obj)
 	</b></font>
   </li>
 </span>
-
+<s:if test="%{hasErrors()}">
+	<div align="center">
+	    <div id="actionErrorMessages" class="alert alert-danger">
+	      <s:actionerror/>
+	      <s:fielderror/>	      
+	    </div>
+	</div>
+</s:if>
 <s:form theme="simple" name="searchReceiptForm" action="searchReceipt-search.action">
 <div class="formmainbox"><div class="subheadnew"><s:text name="searchreceipts.title"/>
 </div>

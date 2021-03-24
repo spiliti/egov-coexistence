@@ -68,9 +68,6 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
-import org.apache.struts2.json.JSONException;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.egov.collection.constants.CollectionConstants;
 import org.egov.collection.entity.AccountPayeeDetail;
@@ -97,9 +94,7 @@ import org.egov.commons.CChartOfAccountDetail;
 import org.egov.commons.CChartOfAccounts;
 import org.egov.commons.CFinancialYear;
 import org.egov.commons.CFunction;
-import org.egov.commons.Functionary;
 import org.egov.commons.Fund;
-import org.egov.commons.Fundsource;
 import org.egov.commons.Scheme;
 import org.egov.commons.SubScheme;
 import org.egov.commons.dao.BankBranchHibernateDAO;
@@ -122,7 +117,6 @@ import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.microservice.models.BillDetailAdditional;
-import org.egov.infra.microservice.models.BusinessDetails;
 import org.egov.infra.microservice.models.BusinessService;
 import org.egov.infra.microservice.models.CollectionType;
 import org.egov.infra.microservice.models.EmployeeInfo;
@@ -634,8 +628,12 @@ public class ReceiptAction extends BaseFormAction {
     @ValidationErrorPage(value = "new")
     @Action(value = "/receipts/receipt-newform")
     public String newform() {
+        populateForm();
+        return NEW;
+    }
 
-        final String manualReceiptInfoRequired = collectionsUtil.getAppConfigValue(
+	private void populateForm() {
+		final String manualReceiptInfoRequired = collectionsUtil.getAppConfigValue(
                 CollectionConstants.MODULE_NAME_COLLECTIONS_CONFIG, CollectionConstants.MANUALRECEIPTINFOREQUIRED);
         if (CollectionConstants.YES.equalsIgnoreCase(manualReceiptInfoRequired))
             setManualReceiptNumberAndDateReq(Boolean.TRUE);
@@ -644,8 +642,7 @@ public class ReceiptAction extends BaseFormAction {
 
         // set collection modes allowed rule through script
         setCollectionModesNotAllowed();
-        return NEW;
-    }
+	}
 
     /**
      * This method is invoked when user creates a receipt.
@@ -655,6 +652,11 @@ public class ReceiptAction extends BaseFormAction {
     @ValidationErrorPage(value = "new")
     @Action(value = "/receipts/receipt-save")
     public String save() {
+    	validateMiscDetails();
+    	if (hasErrors()) {
+    		populateForm();
+    		return NEW;
+    	}
         String returnValue;
         List<InstrumentHeader> receiptInstrList = new ArrayList<>(0);
         LOGGER.info("Receipt creation process is started !!!!!!");
@@ -847,7 +849,25 @@ public class ReceiptAction extends BaseFormAction {
         return returnValue;
     }
 
-    public void createMisc() {
+	private void validateMiscDetails() {
+		if (StringUtils.isEmpty(serviceCategory))
+			addActionError(getText("error.select.service.category"));
+		if ((instrHeaderCash.getInstrumentAmount() != null
+				&& instrHeaderCash.getInstrumentAmount().compareTo(BigDecimal.ZERO) < 0)
+				|| (instrHeaderCard.getInstrumentAmount() != null
+						&& instrHeaderCard.getInstrumentAmount().compareTo(BigDecimal.ZERO) < 0)
+				|| (instrHeaderBank.getInstrumentAmount() != null
+						&& instrHeaderBank.getInstrumentAmount().compareTo(BigDecimal.ZERO) < 0)
+				|| (instrHeaderOnline.getInstrumentAmount() != null
+						&& instrHeaderOnline.getInstrumentAmount().compareTo(BigDecimal.ZERO) < 0)) {
+			addActionError(getText("billreceipt.invalidcreditamount.errormessage"));
+		}
+		if (StringUtils.isEmpty(paidBy)) {
+			addActionError(getText("billreceipt.missingpayeename.errormessage"));
+		}
+	}
+
+	public void createMisc() {
         headerFields = new ArrayList<>(0);
         mandatoryFields = new ArrayList<>(0);
         getHeaderMandateFields();
@@ -1130,6 +1150,8 @@ public class ReceiptAction extends BaseFormAction {
     private String viewReceipts(final boolean printReceipts) {
         if (selectedReceipts == null || selectedReceipts.length == 0)
             throw new ApplicationRuntimeException("No receipts selected to view!");
+        if (StringUtils.isEmpty(serviceTypeId) || serviceTypeId.equals("-1"))
+        	throw new ApplicationRuntimeException("Service Type is missing");
 
         receipts = new ReceiptHeader[selectedReceipts.length];
         // receipts = new ReceiptHeader[1];

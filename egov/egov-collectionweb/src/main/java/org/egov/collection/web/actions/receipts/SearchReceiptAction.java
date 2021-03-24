@@ -211,6 +211,10 @@ public class SearchReceiptAction extends SearchFormAction {
     @Override
     @Action(value = "/receipts/searchReceipt-search")
     public String search() {
+    	validateSearchParams();
+    	if (hasErrors())
+    		return SUCCESS;
+    		
         target = "searchresult";
         collectionVersion = ApplicationThreadLocals.getCollectionVersion();
 
@@ -294,7 +298,14 @@ public class SearchReceiptAction extends SearchFormAction {
         return SUCCESS;
     }
 
-    /**
+	private void validateSearchParams() {
+		if (StringUtils.isEmpty(serviceTypeId) || serviceTypeId.equals("-1"))
+			addActionError(getText("error.select.service.type"));
+		if (fromDate != null && toDate != null && !fromDate.equals(toDate) && !fromDate.before(toDate))
+			addActionError(getText("common.comparedate.errormessage"));
+	}
+
+	/**
      * @return the target
      */
     public String getTarget() {
