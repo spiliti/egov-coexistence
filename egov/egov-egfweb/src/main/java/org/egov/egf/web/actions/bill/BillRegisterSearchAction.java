@@ -108,7 +108,6 @@ public class BillRegisterSearchAction extends BaseFormAction {
     private String billDateTo;
     private String expType;
     private List<Map<String, Object>> billList;
-    private Boolean validateMandatoryFields=false;
     @Autowired
     private AppConfigValueService appConfigValueService;
     DateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
@@ -267,23 +266,19 @@ public class BillRegisterSearchAction extends BaseFormAction {
     }
     
     
-    public boolean validateMandatoryFields() throws ParseException {
+    public void validateMandatoryFields() throws ParseException {
         if (expType == null || expType.equals("-1")) {
             addFieldError("expType", getText("msg.please.select.expenditure.type"));
-            return false;
         }
         if (billregister.getEgBillregistermis().getFund() == null
                 || billregister.getEgBillregistermis().getFund().getId() == -1) {
             addFieldError("egBillregistermis.fund", getText("msg.please.select.fund"));
-            return false;
         }
         if (billDateFrom == null || StringUtils.isEmpty(billDateFrom)) {
             addFieldError("billDateFrom", getText("msg.please.select.bill.from.date"));
-            return false;
         }
         if (billDateTo == null || StringUtils.isEmpty(billDateTo)) {
             addFieldError("billDateTo", getText("msg.please.select.bill.to.date"));
-            return false;
         }
         if (!billDateFrom.isEmpty() || !billDateTo.isEmpty()) {
             boolean isDateFrom = false;
@@ -295,7 +290,6 @@ public class BillRegisterSearchAction extends BaseFormAction {
             isDateTo = toDate.matches(datePattern);
             if (!isDateFrom || !isDateTo) {
                 addFieldError("billDateTo", getText("msg.please.select.bill.valid.date"));
-                return false;
             }
         }
         Date datefrom = null;
@@ -305,11 +299,8 @@ public class BillRegisterSearchAction extends BaseFormAction {
             dateto = sdf1.parse(billDateTo);
             if (datefrom.after(dateto)) {
                 addFieldError("toDate", getText("msg.from.to.date.greater"));
-                return false;
-                }
-        } else
-            return true;
-        return true;
+            }
+        }
     }
 
     private List<Object[]> getOwnersForWorkFlowState(final List<Long> stateIds)

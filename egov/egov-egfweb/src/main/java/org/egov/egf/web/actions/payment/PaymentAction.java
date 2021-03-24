@@ -237,7 +237,6 @@ public class PaymentAction extends BasePaymentAction {
     DateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
     SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd");
     Date date;
-    private Boolean validateMandatoryFields=false;
     @Autowired
     private ChartOfAccounts chartOfAccounts;
  
@@ -1998,11 +1997,8 @@ public class PaymentAction extends BasePaymentAction {
         return null;
     }
     
-    public boolean validateMandatoryFields() throws ParseException {
-        if (voucherHeader.getFundId() == null || voucherHeader.getFundId().getId() == -1) {
-            addFieldError("voucherHeader.fund", getText("msg.please.select.fund"));
-            return false;
-        }
+    public void validateMandatoryFields() throws ParseException {
+        checkMandatory("fundId", Constants.FUND, voucherHeader.getFundId(), "voucher.fund.mandatory");
         if (StringUtils.isNotEmpty(fromDate) || StringUtils.isNotEmpty(toDate)) {
             boolean isDateFrom = false;
             boolean isDateTo = false;
@@ -2013,7 +2009,6 @@ public class PaymentAction extends BasePaymentAction {
             isDateTo = toDates.matches(datePattern);
             if (!isDateFrom || !isDateTo) {
                 addActionError(getText("msg.please.select.bill.valid.date"));
-                return false;
             }
         }
         Date datefrom = null;
@@ -2021,15 +2016,11 @@ public class PaymentAction extends BasePaymentAction {
         if (StringUtils.isNotEmpty(fromDate) && StringUtils.isNotEmpty(toDate)) {
             datefrom = sdf1.parse(fromDate);
             dateto = sdf1.parse(toDate);
-        if (datefrom.after(dateto)) {
-            addFieldError("toDate", getText("msg.from.to.date.greater"));
-            return false;
+            if (datefrom.after(dateto)) {
+                addFieldError("toDate", getText("msg.from.to.date.greater"));
+            }
         } 
-        }else
-            return true;
-        return true;
     }
-   
 
     protected String getMessage(final String key) {
         return getText(key);
