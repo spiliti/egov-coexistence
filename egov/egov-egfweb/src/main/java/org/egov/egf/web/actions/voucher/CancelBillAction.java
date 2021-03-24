@@ -305,19 +305,39 @@ public class CancelBillAction extends BaseFormAction {
 		billListDisplay.clear();
 	}
 
-	public void validateFund() {
-		if (fund == null || fund.getId() == -1)
-			addFieldError("fund.id", getText("voucher.fund.mandatory"));
-	}
+    public void validateFund() throws ParseException {
+        if (fund == null || fund.getId() == -1)
+            addFieldError("fund.id", getText("voucher.fund.mandatory"));
+        if (StringUtils.isNotEmpty(fromDate) || StringUtils.isNotEmpty(toDate)) {
+            boolean isDateFrom = false;
+            boolean isDateTo = false;
+            String fromDates = fromDate;
+            String toDates = toDate;
+            String datePattern = "\\d{1,2}/\\d{1,2}/\\d{4}";
+            isDateFrom = fromDates.matches(datePattern);
+            isDateTo = toDates.matches(datePattern);
+            if (!isDateFrom || !isDateTo) {
+                addActionError(getText("msg.please.select.valid.date"));
+            }
+        }
+        Date datefrom = null;
+        Date dateto = null;
+        if (StringUtils.isNotEmpty(fromDate) && StringUtils.isNotEmpty(toDate)) {
+            datefrom = formatter.parse(fromDate);
+            dateto = formatter.parse(toDate);
+            if (datefrom.after(dateto)) {
+                addFieldError("toDate", getText("msg.fromDate.cant.be.greater.than.toDate"));
+            }
+        }
+    }
 
 	@ValidationErrorPage(value = "search")
 	@Action(value = "/voucher/cancelBill-search")
-	public String search() {
-	    
-		validateFund();
-		if (!hasFieldErrors()) {
-			billListDisplay.clear();
-			final Map<String, Map<String, Object>> queries = query();
+	public String search() throws ParseException {   
+        validateFund();
+        if (!hasErrors()) {
+            billListDisplay.clear();
+            final Map<String, Map<String, Object>> queries = query();
             final List<String> list = queries.keySet().stream().collect(Collectors.toList());
             final List<Object[]> tempBillList = new ArrayList<Object[]>();
             List<Object[]> billListWithNoVouchers, billListWithCancelledReversedVouchers;
