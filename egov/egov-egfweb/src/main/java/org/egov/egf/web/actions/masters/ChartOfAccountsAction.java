@@ -105,10 +105,10 @@ public class ChartOfAccountsAction extends BaseFormAction {
     private static final long LONG_FOUR = 4l;
     private static final long LONG_TWO = 2l;
    
- @Autowired
- @Qualifier("persistenceService")
- private PersistenceService persistenceService;
- @Autowired
+    @Autowired
+    @Qualifier("persistenceService")
+    private PersistenceService persistenceService;
+    @Autowired
     @Qualifier("chartOfAccountsService")
     private PersistenceService<CChartOfAccounts, Long> chartOfAccountsService;
     @Autowired
@@ -268,6 +268,13 @@ public class ChartOfAccountsAction extends BaseFormAction {
 
     @Action(value = "/masters/chartOfAccounts-update")
     public String update() {
+    	if (StringUtils.isEmpty(model.getName())) {
+    		addActionError("Please Enter the Name");
+    		populateAccountDetailTypeList();
+            populateCoaRequiredFields();
+            populateAccountCodePurpose();
+    		return EDIT;
+    	}
         setPurposeOnCoa();
         updateOnly = true;
         populateAccountDetailType();
@@ -615,7 +622,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
     @SkipValidation
     @Action(value = "/masters/chartOfAccounts-modifySearch")
     public String modifySearch() {
-        if (glCode != null) {
+        if (!StringUtils.isEmpty(glCode)) {
             model = chartOfAccountsService.find("from CChartOfAccounts where classification=4 and glcode=?",
                     glCode.split("-")[0]);
             if (model == null) {
@@ -669,9 +676,13 @@ public class ChartOfAccountsAction extends BaseFormAction {
                 addActionMessage(getText("chartOfAccount.no.data"));
                 return addNew();
             }
-            if (generatedGlcode == null || newGlcode == null) {
+            if (StringUtils.isEmpty(generatedGlcode) || StringUtils.isEmpty(newGlcode)) {
                 addActionMessage(getText("chartOfAccount.invalid.glcode"));
                 return "detailed";
+            }
+            if (StringUtils.isEmpty(model.getName())) {
+            	addActionMessage(getText("chartOfAccount.name.mandatory"));
+            	return "detailed";
             }
             final CChartOfAccounts coa = chartOfAccountsService.find("from CChartOfAccounts where glcode=?",
                     generatedGlcode.concat(newGlcode));
