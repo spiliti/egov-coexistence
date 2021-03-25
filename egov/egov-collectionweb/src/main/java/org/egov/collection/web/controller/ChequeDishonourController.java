@@ -53,6 +53,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 
+import javax.persistence.NoResultException;
+import javax.validation.Valid;
+
 import org.apache.commons.lang.StringUtils;
 import org.egov.collection.constants.CollectionConstants;
 import org.egov.collection.entity.DishonoredChequeBean;
@@ -68,6 +71,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -122,7 +126,11 @@ public class ChequeDishonourController {
     }
 
     @RequestMapping(method = { RequestMethod.GET }, value = "/_search")
-    public @ResponseBody ResponseEntity getDishonorChequeSearch(@ModelAttribute final DishonoredChequeBean model) throws Exception {
+    public @ResponseBody ResponseEntity getDishonorChequeSearch(@Valid @ModelAttribute final DishonoredChequeBean model,final BindingResult errors){
+        dishonorChequeService.validateBeforeSearch(model,errors);
+        if(errors.hasErrors()) {
+            return new ResponseEntity<>("Error occurred while doing dishonoring of Instrument Number", HttpStatus.BAD_REQUEST);
+        }
         try {
             return new ResponseEntity<>(getDishonorCheque(model), HttpStatus.OK);
         } catch (final HttpClientErrorException e) {
@@ -138,14 +146,21 @@ public class ChequeDishonourController {
     }
 
     @RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/submit")
-    public String submit(@ModelAttribute final DishonoredChequeBean chequeBean, final Model model,
-            final RedirectAttributes redAttribute) {
+    public String submit(@Valid @ModelAttribute final DishonoredChequeBean chequeBean, final Model model,
+            final RedirectAttributes redAttribute,final BindingResult errors) {
         final String returnPage = "dishonor_cheque_success";
+            dishonorChequeService.validateManadatoryFields(chequeBean,errors);
+            if(errors.hasErrors()) {
+                redAttribute.addFlashAttribute("errorMessage",
+                        "Error occurred while doing dishonoring of Instrument Number " + chequeBean.getInstrumentNumber()
+                                + ". Please contact to Administration.");
+            return "redirect:/dishonour/cheque/form";
+            }
         try {
             dishonorChequeService.processDishonor(chequeBean);
             model.addAttribute("dishonoredChequeModel", chequeBean);
             return returnPage;
-        } catch (final Exception e) {
+        } catch (final NoResultException e) {
             LOGGER.error("Error Occurred while doing dishonoring of Instrument Number : {}",
                     chequeBean.getInstrumentNumber());
             redAttribute.addFlashAttribute("errorMessage",
@@ -155,7 +170,7 @@ public class ChequeDishonourController {
         }
     }
 
-    private List<DishonoredChequeBean> getDishonorCheque(final DishonoredChequeBean model) throws Exception {
+    private List<DishonoredChequeBean> getDishonorCheque(final DishonoredChequeBean model) {
         List<DishonoredChequeBean> resultList = new ArrayList<>();
         final String bankBranch = model.getBankBranch();
         String bankId = null;

@@ -116,6 +116,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
 @Service
 @Transactional(readOnly = true)
@@ -855,5 +856,21 @@ public class DishonorChequeService implements FinancialIntegrationService {
         }
     }
 
-  
+    public void validateManadatoryFields(final DishonoredChequeBean chequeBean, final BindingResult resultBinder) {
+        if (StringUtils.isEmpty(chequeBean.getRemarks()) || chequeBean.getRemarks() == null)
+            resultBinder.reject("Remarks is Required");
+        if (StringUtils.isEmpty(chequeBean.getDishonorReason()) || chequeBean.getDishonorReason() == null)
+            resultBinder.reject("DishonourReason is Required");
+        if (chequeBean.getDishonorDate() == null)
+            resultBinder.reject("TransactionDate is Required");
+    }
+
+    public void validateBeforeSearch(final DishonoredChequeBean chequeBean, final BindingResult resultBinder) {
+        if (StringUtils.isEmpty(chequeBean.getInstrumentMode()) || chequeBean.getInstrumentMode() == null)
+            resultBinder.reject("msg.please.select.instrument.mode");
+        if (StringUtils.isEmpty(chequeBean.getInstrumentNumber()) || chequeBean.getInstrumentNumber() == null)
+            resultBinder.reject("msg.please.enter.cheque.dd.number");
+        if (chequeBean.getTransactionDate() == null)
+            resultBinder.reject("msg.please.select.cheque.dd.date");
+    }
 }

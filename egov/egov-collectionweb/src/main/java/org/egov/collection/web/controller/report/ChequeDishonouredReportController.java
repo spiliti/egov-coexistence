@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.apache.log4j.Logger;
 import org.egov.collection.entity.DishonoredChequeBean;
 import org.egov.collection.integration.services.DishonorChequeService;
@@ -64,7 +66,7 @@ public class ChequeDishonouredReportController {
     
     @RequestMapping(value = "/_search", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<DishonoredChequeBean> getDishonouredChequeSearch(@ModelAttribute final DishonoredChequeBean dishonoredChequeBean)
+    public List<DishonoredChequeBean> getDishonouredChequeSearch(@Valid @ModelAttribute final DishonoredChequeBean dishonoredChequeBean)
             throws ParseException {
         List<DishonoredChequeBean> resultList = new ArrayList<>();
         resultList = dishonorChequeService.getDishonouredChequeReport(dishonoredChequeBean);
@@ -104,6 +106,3 @@ public class ChequeDishonouredReportController {
         return hashMap;
     }
 }
-
-
-
