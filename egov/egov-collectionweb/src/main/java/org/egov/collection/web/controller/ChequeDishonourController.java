@@ -127,11 +127,12 @@ public class ChequeDishonourController {
 
     @RequestMapping(method = { RequestMethod.GET }, value = "/_search")
     public @ResponseBody ResponseEntity getDishonorChequeSearch(@Valid @ModelAttribute final DishonoredChequeBean model,final BindingResult errors){
-        dishonorChequeService.validateBeforeSearch(model,errors);
-        if(errors.hasErrors()) {
-            return new ResponseEntity<>("Error occurred while doing dishonoring of Instrument Number", HttpStatus.BAD_REQUEST);
-        }
         try {
+            dishonorChequeService.validateBeforeSearch(model, errors);
+            if (errors.hasErrors()) {
+                LOGGER.error(errors.getAllErrors().toString());
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
             return new ResponseEntity<>(getDishonorCheque(model), HttpStatus.OK);
         } catch (final HttpClientErrorException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

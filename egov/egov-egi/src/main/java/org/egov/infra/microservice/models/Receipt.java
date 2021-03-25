@@ -76,6 +76,16 @@ public class Receipt {
     @JsonIgnore
     @SafeHtml
     private String transactionNumber;
+    
+    private String service;
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
 
     public String getTenantId() {
         return tenantId;

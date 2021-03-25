@@ -602,6 +602,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 chequeBean.setBankName(getBankName(ins));
                 chequeBean.setAccountNumber(ins.getBankAccount().getAccountNumber());
                 chequeBean.setPayTo(ins.getPayee());
+                chequeBean.setService(receiptIdToReceiptMapTemp.get(ins.getInstrumentVouchers().get(0).getReceiptHeaderId()).getService());
                 populateReceiptVoucherAccountDetails(receiptVoucherHeader, chequeBean);
                 populateReversalVoucherAccountDetails(receiptVoucherHeader, payInSlipVoucher, chequeBean);
                 dishonoredChequeList.add(chequeBean);
@@ -847,6 +848,7 @@ public class DishonorChequeService implements FinancialIntegrationService {
                 Date date=new Date(dateVal); 
                 chequeBean.setDishonorDate(date);
                 chequeBean.setDishonorReason(ins.getDishonor().getReason());
+                chequeBean.setService(receiptIdToReceiptMapTemp.get(ins.getInstrumentVouchers().get(0).getReceiptHeaderId()).getService());
                 dishonoredChequeList.add(chequeBean);
             });
             return dishonoredChequeList;
