@@ -124,19 +124,28 @@ public class BillVoucherAction extends BaseVoucherAction {
     public String newForm() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("BillVoucherAction | newform | START");
-        final List<String> listBillReg = VoucherHelper.EXPENDITURE_TYPES;
+        populateFormData();
+        return NEW;
+    }
+
+	private void populateFormData() {
+		final List<String> listBillReg = VoucherHelper.EXPENDITURE_TYPES;
         final Map<String, String> expTypeList = new LinkedHashMap<String, String>();
         for (final String expType : listBillReg)
             expTypeList.put(expType, expType);
 
         addDropdownData("expTypeList", listBillReg);
-        return NEW;
-    }
+	}
 
     @ValidationErrorPage(NEW)
     @SuppressWarnings("unchecked")
     @Action(value = "/voucher/billVoucher-lists")
     public String lists() throws ValidationException {
+    	validateForm();
+    	if (hasErrors()) {
+    		populateFormData();
+    		return NEW;
+    	}
         final StringBuilder query = new StringBuilder();
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Expenditure Type selected :=" + expType);
@@ -168,20 +177,25 @@ public class BillVoucherAction extends BaseVoucherAction {
             }
             preApprovedVoucherList = persistenceService.findAllBy(query.toString(), params.toArray());
             populateDepartmentNames();
-            if(preApprovedVoucherList.isEmpty())
-            {
-            	addActionError("No records found.");
-            }
-        } catch (final ValidationException e) {
+			if (preApprovedVoucherList.isEmpty()) {
+				addActionError("No records found.");
+			}
+		} catch (final ValidationException e) {
 
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
-            throw new ValidationException(errors);
-        } catch (final ParseException e) {
-            throw new ValidationException(Arrays.asList(new ValidationError("not a valid date", "not a valid date")));
-        }
+			final List<ValidationError> errors = new ArrayList<>();
+			errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
+			throw new ValidationException(errors);
+		} catch (final ParseException e) {
+			throw new ValidationException(Arrays.asList(new ValidationError("not a valid date", "not a valid date")));
+		}
         return newForm();
     }
+
+	private void validateForm() {
+		if (StringUtils.isEmpty(expType)) {
+    		addActionError(getText("msg.please.select.bill.type"));
+    	}
+	}
 
     private void populateDepartmentNames() {
         List<Department> departments = microserviceUtils.getDepartments();
@@ -222,7 +236,7 @@ public class BillVoucherAction extends BaseVoucherAction {
         final List<AppConfigValues> appConfigList = appConfigValueService.getConfigValuesByModuleAndKey(
                 FinancialConstants.MODULE_NAME_APPCONFIG, expType + "BillApprovalStatus");
 
-        if (appConfigList.size() == 0)
+        if (appConfigList.isEmpty())
             throw new ValidationException(Arrays.asList(new ValidationError("Status for bill approval",
                     "App Config value is missing for exp type :" + expType)));
         for (final AppConfigValues appConfigVal : appConfigList) {
