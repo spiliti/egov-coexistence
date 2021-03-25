@@ -366,8 +366,7 @@ public class ReceiptHeaderService extends PersistenceService<ReceiptHeader, Long
         headerdetails.put(VoucherConstant.FUNDSOURCECODE, fundsourceCode);
         headerdetails.put(VoucherConstant.MODULEID, CollectionConstants.COLLECTIONS_EG_MODULES_ID);
         headerdetails.put(VoucherConstant.SOURCEPATH,
-                CollectionConstants.RECEIPT_VIEW_SOURCEPATH + receiptHeader.getId() + receiptHeader.getService());
-
+                CollectionConstants.RECEIPT_VIEW_SOURCEPATH + receiptHeader.getId());
         Set<ReceiptDetail> receiptDetailSet;
 
         /**
