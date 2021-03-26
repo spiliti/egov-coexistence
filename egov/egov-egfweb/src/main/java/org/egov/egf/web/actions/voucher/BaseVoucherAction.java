@@ -766,6 +766,7 @@ public class BaseVoucherAction extends GenericWorkFlowAction {
 	}
 
 	protected void removeEmptyRowsSubledger(final List<VoucherDetails> list) {
+	    if(list!=null && !list.isEmpty())
 		for (final Iterator<VoucherDetails> detail = list.iterator(); detail.hasNext();) {
 			final VoucherDetails next = detail.next();
 			if (next != null && (next.getSubledgerCode() == null || next.getSubledgerCode().equals("")))

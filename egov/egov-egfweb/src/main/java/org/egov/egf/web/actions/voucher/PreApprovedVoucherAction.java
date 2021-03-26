@@ -101,6 +101,7 @@ import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.microservice.models.EmployeeInfo;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
 import org.egov.infra.reporting.util.ReportUtil;
+import org.egov.infra.utils.DateUtils;
 import org.egov.infra.utils.StringUtils;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
@@ -727,6 +728,11 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
             if (egBillregister.getBilldate().after(voucherHeader.getVoucherDate())) {
                 throw new ValidationException("bill.accounting.voucher.date.check",
                         "bill.accounting.voucher.date.check");
+            }
+            final Date cuttDate = DateUtils.parseDate(cutOffDate, "dd/MM/yyyy");
+            if(voucherHeader.getVoucherDate().after(cuttDate)) {
+                throw new ValidationException("cutOffDate", getText("vouchercutoffdate.message",
+                        new String[] {DateUtils.getDefaultFormattedDate(cuttDate)}));
             }
         } catch (ParseException e) {
             LOGGER.error(e.getMessage());
