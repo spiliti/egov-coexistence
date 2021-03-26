@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -299,7 +300,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
     @ValidationErrorPage(value = NEW)
     @Action(value = "/deduction/remitRecovery-search")
     public String search() {
-        listRemitBean = new ArrayList<RemittanceBean>();
+        listRemitBean = new ArrayList<>();
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("RemitRecoveryAction | Search | Start");
         if(remitRecoveryService.isNonControlledCodeTds(remittanceBean)){
@@ -309,16 +310,28 @@ public class RemitRecoveryAction extends BasePaymentAction {
             listRemitBean = remitRecoveryService.getRecoveryDetails(remittanceBean, voucherHeader);
         }
         if (listRemitBean == null || listRemitBean.isEmpty())
-            listRemitBean = new ArrayList<RemittanceBean>();
+            listRemitBean = new ArrayList<>();
         else {
             departmentId = listRemitBean.get(0).getDepartmentId();
             functionId = listRemitBean.get(0).getFunctionId();
         }
         return NEW;
     }
+    
+	public void validateSearch() {
+		if (remittanceBean.getRecoveryId() == null || remittanceBean.getRecoveryId() == -1) {
+			addActionError(getText("msg.please.select.recovery.code"));
+		}
+		if (StringUtils.isEmpty(parameters.get("voucherDate")[0])) {
+			addActionError(getText("msg.please.select.date"));
+		}
+		if (StringUtils.isEmpty(parameters.get("fundId")[0]) || parameters.get("fundId")[0] == "-1") {
+			addActionError(getText("msg.please.select.fund"));
+		}
+	}
 
     public void prepareRemit() {
-        addDropdownData("userList", Collections.EMPTY_LIST);
+        addDropdownData("userList", Collections.emptyList());
         loadDefalutDates();
     }
 

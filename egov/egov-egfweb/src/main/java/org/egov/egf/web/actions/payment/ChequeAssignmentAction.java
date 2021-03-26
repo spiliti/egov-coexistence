@@ -650,6 +650,11 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
     public String searchRTGS() throws ApplicationException, ParseException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting searchRTGS...");
+        if (StringUtils.isEmpty(paymentMode)) {
+        	addActionError(getText("mandatory.paymentMode"));
+            rtgsContractorAssignment = true;
+        	return "rtgsSearch";
+        }
         CopyOnWriteArrayList<ChequeAssignment> rtgsChequeAssignmentList = null;
         List<ChequeAssignment> dbpRtgsAssignmentList = null;
         List<ChequeAssignment> rtgsEntry = new ArrayList<ChequeAssignment>();
@@ -1021,7 +1026,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                 bankBranchMap.put((String) mp.get("bankBranchId"), (String) mp.get("bankBranchName"));
 
         }
-        if (getBankbranch() != null) {
+        if (getBankbranch() != null && voucherHeader.getFundId() != null) {
             setTypeOfAccount(typeOfAccount);
             addDropdownData("bankaccountList",
                     bankAccountService.getBankaccountsHasApprovedPayment(voucherHeader.getFundId().getId(), getBankbranch()));
@@ -1500,7 +1505,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
     public String beforeSearchForSurrender() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting beforeSearchForSurrender...");
-        addDropdownData("bankaccountList", Collections.EMPTY_LIST);
+        addDropdownData("bankaccountList", Collections.emptyList());
         loadBankAndAccounForSurender();
         department = getDefaultDepartmentValueForPayment();
         if (LOGGER.isDebugEnabled())
@@ -1513,7 +1518,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
     public String beforeSearchForRTGSSurrender() {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting beforeSearchForSurrender...");
-        addDropdownData("bankaccountList", Collections.EMPTY_LIST);
+        addDropdownData("bankaccountList", Collections.emptyList());
         loadBankAndAccounForRTGSSurender();
         department = getDefaultDepartmentValueForPayment();
         if (LOGGER.isDebugEnabled())
@@ -1587,7 +1592,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
             getSession().put("instrumentVoucherList", instrumentVoucherList);
             getSession().put("instrumentHeaderList", instrumentHeaderList);
 
-            if (instrumentVoucherList.size() > 0) {
+            if (!instrumentVoucherList.isEmpty()) {
                 loadReasonsForSurrendaring();
                 loadChequeSerialNo(bankaccount);
             }
@@ -2151,6 +2156,9 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                 addFieldError("bankbranch", getMessage("bankbranch.empty"));
             if (getBankaccount() == null || getBankaccount() == -1)
                 addFieldError("bankaccount", getMessage("bankaccount.empty"));
+            if (StringUtils.isEmpty(paymentMode)) {
+            	addFieldError("paymentMode", getMessage("mandatory.paymentMode"));
+            }
         }
 
         if (LOGGER.isDebugEnabled())
