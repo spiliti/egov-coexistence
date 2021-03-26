@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -227,6 +228,9 @@ public class TrialBalanceAction extends BaseFormAction {
 	@Action(value = "/report/trialBalance-search")
 	@ReadOnly
 	public String search() {
+		validateSearch();
+		if (hasErrors())
+			return "new";
 		if (rb.getReportType().equalsIgnoreCase("daterange")) {
 			String sDate = parameters.get("fromDate")[0];
 			String eDate = parameters.get("toDate")[0];
@@ -284,6 +288,30 @@ public class TrialBalanceAction extends BaseFormAction {
 			return "new";
 		}
 
+	}
+
+	private void validateSearch() {
+		if (StringUtils.isEmpty(rb.getReportType())) {
+			addActionError(getText("msg.please.select.reporttype"));
+		} else {
+			if ("daterange".equals(rb.getReportType())) {
+				validateDateRange();
+			} else if ("asondate".equals(rb.getReportType()) && rb.getToDate() == null) {
+				addActionError(getText("msg.please.enter.as.onDate"));
+			}
+		}
+	}
+
+	private void validateDateRange() {
+		if (rb.getFromDate() == null) {
+			addActionError(getText("msg.please.select.from.date"));
+		}
+		if (rb.getToDate() == null) {
+			addActionError(getText("msg.please.select.toDate"));
+		}
+		if (rb.getFundId() == null) {
+			addActionError(getText("msg.please.select.fund"));
+		}
 	}
 
 	private void gererateReportForAsOnDate()

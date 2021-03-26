@@ -50,6 +50,8 @@ package org.egov.egf.web.actions.report;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
@@ -275,6 +277,22 @@ public class BalanceSheetReportAction extends BaseFormAction {
     public String generateBalanceSheetReport() {
         return "report";
     }
+    
+	private void validateMandatoryFields() {
+		if (StringUtils.isEmpty(balanceSheet.getPeriod()) || "Select".equals(balanceSheet.getPeriod())) {
+			addActionError(getText("msg.please.select.period"));
+		} else {
+			if (!"Date".equals(balanceSheet.getPeriod()) && (balanceSheet.getFinancialYear() == null
+					|| balanceSheet.getFinancialYear().getId() == null || balanceSheet.getFinancialYear().getId() == 0))
+				addActionError(getText("msg.please.select.financial.year"));
+			if ("Date".equals(balanceSheet.getPeriod()) && balanceSheet.getAsOndate() == null) {
+				addActionError(getText("msg.please.enter.as.onDate"));
+			}
+		}
+		if (StringUtils.isEmpty(balanceSheet.getCurrency())) {
+			addActionError(getText("msg.please.select.currency"));
+		}
+	}
 
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateBalanceSheetSubReport")
@@ -287,6 +305,10 @@ public class BalanceSheetReportAction extends BaseFormAction {
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-generateScheduleReport")
     public String generateScheduleReport() {
+    	validateMandatoryFields();
+    	if (hasErrors()) {
+    		return "allScheduleResults";
+    	}
         populateDataSourceForAllSchedules();
         return "allScheduleResults";
     }
@@ -296,6 +318,10 @@ public class BalanceSheetReportAction extends BaseFormAction {
     @SkipValidation
     @Action(value = "/report/balanceSheetReport-generateScheduleReportDetailed")
     public String generateScheduleReportDetailed() {
+    	validateMandatoryFields();
+    	if (hasErrors()) {
+    		return "allScheduleDetailedResults";
+    	}
         populateDataSourceForAllSchedulesDetailed();
         return "allScheduleDetailedResults";
     }
@@ -337,6 +363,10 @@ public class BalanceSheetReportAction extends BaseFormAction {
     @ReadOnly
     @Action(value = "/report/balanceSheetReport-printBalanceSheetReport")
     public String printBalanceSheetReport() {
+    	validateMandatoryFields();
+    	if (hasErrors()) {
+    		return "report";
+    	}
         populateDataSource();
         return "report";
     }

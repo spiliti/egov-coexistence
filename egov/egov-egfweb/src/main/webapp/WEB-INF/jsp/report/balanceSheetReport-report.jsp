@@ -156,6 +156,12 @@ th.bluebgheadtd {
 }
 </style>
 <div id="non-printable">
+	<s:if test="%{hasErrors()}">
+		<div id="actionErrorMessages" class="errorstyle">
+			<s:actionerror />
+			<s:fielderror />
+		</div>
+	</s:if>
 	<s:form name="balanceSheetReport" action="balanceSheetReport"
 		theme="simple">
 		<div class="formmainbox">
