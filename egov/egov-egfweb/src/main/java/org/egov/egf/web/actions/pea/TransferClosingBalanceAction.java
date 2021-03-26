@@ -115,7 +115,10 @@ public class TransferClosingBalanceAction extends BaseFormAction {
     @Action(value = "/pea/transferClosingBalance-transfer")
     public String transfer() {
         try {
-
+            if (financialYear == -1 || financialYear == null) {
+                addFieldError("searchCriteria", "Please select FinancialYear");
+                return NEW;
+             }
             fy = financialYearDAO.getFinancialYearById(financialYear);
 
             try {
