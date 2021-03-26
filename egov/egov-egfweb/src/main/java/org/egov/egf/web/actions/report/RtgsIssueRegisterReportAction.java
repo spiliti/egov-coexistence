@@ -50,6 +50,7 @@ package org.egov.egf.web.actions.report;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
@@ -93,6 +94,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -263,11 +265,17 @@ public class RtgsIssueRegisterReportAction extends ReportAction {
 	@ReadOnly
 	@Action(value = "/report/rtgsIssueRegisterReport-search")
 	public String search() {
+		if (parameters.get("fundId") == null || StringUtils.isEmpty(parameters.get("fundId")[0])
+				|| parameters.get("fundId")[0].equals("-1")) {
+			addActionError(getText("msg.please.select.fund"));
+			return NEW;
+		}
 		searchResult = Boolean.TRUE;
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug(" Seraching RTGS result for given criteria ");
+		final Entry<String, Map<String, Object>> entry = getQueryString().entrySet().iterator().next();
 
-		final Query query = persistenceService.getSession().createSQLQuery(getQueryString().toString())
+		final Query query = persistenceService.getSession().createSQLQuery(entry.getKey())
 				.addScalar("ihId", BigDecimalType.INSTANCE).addScalar("rtgsNumber").addScalar("rtgsDate")
 				.addScalar("vhId", BigDecimalType.INSTANCE).addScalar("paymentNumber").addScalar("paymentDate")
 				.addScalar("paymentAmount").addScalar("department").addScalar("status").addScalar("bank")
@@ -278,7 +286,7 @@ public class RtgsIssueRegisterReportAction extends ReportAction {
 			query.setDate("finStartDate", new java.sql.Date(fromDate.getTime()));
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Search Query ------------>" + query);
-
+		persistenceService.populateQueryWithParams(query, entry.getValue());
 		query.setResultTransformer(Transformers.aliasToBean(BankAdviceReportInfo.class));
 		rtgsDisplayList = query.list();
 		populateSubLedgerDetails();
@@ -323,21 +331,22 @@ public class RtgsIssueRegisterReportAction extends ReportAction {
         final StringBuffer instrumentHeaderQry = new StringBuffer("");
         final Map<String, Object> instrumentHeaderQueryParams = new HashMap<>();
         try {
-            if (null != parameters.get("departmentid")[0] && !parameters.get("departmentid")[0].equalsIgnoreCase("-1")) {
+			if (null != parameters.get("departmentid") && null != parameters.get("departmentid")[0]
+					&& !parameters.get("departmentid")[0].equalsIgnoreCase("-1")) {
                 deptQry = " AND vmis.departmentcode =:deptCode";
                 deptQueryParams.put("deptCode", Long.valueOf(parameters.get("departmentcode")[0]));
-            }
+            } 
             if (null != parameters.get("rtgsAssignedFromDate")[0]
                     && !parameters.get("rtgsAssignedFromDate")[0].equalsIgnoreCase("")) {
                 instrumentHeaderQry.append(" and ih.transactiondate >=:rtgsFromDate");
-                instrumentHeaderQueryParams.put("rtgsFromDate", dateFormat.format(formatter.parse(parameters.get("rtgsAssignedFromDate")[0])));
+                instrumentHeaderQueryParams.put("rtgsFromDate", formatter.parse(parameters.get("rtgsAssignedFromDate")[0]));
             } else {
                 instrumentHeaderQry.append(" and ih.transactiondate >=:finStartDate");
                 instrumentHeaderQueryParams.put("finStartDate", new java.sql.Date(fromDate.getTime()));
             }
             if (null != parameters.get("rtgsAssignedToDate")[0] && !parameters.get("rtgsAssignedToDate")[0].equalsIgnoreCase("")) {
                 instrumentHeaderQry.append(" and ih.transactiondate  <=:rtgsToDate");
-                instrumentHeaderQueryParams.put("rtgsToDate", dateFormat.format(formatter.parse(parameters.get("rtgsAssignedToDate")[0])));
+                instrumentHeaderQueryParams.put("rtgsToDate", formatter.parse(parameters.get("rtgsAssignedToDate")[0]));
             }
             if (null != parameters.get("bank")[0] && !parameters.get("bank")[0].equals("-1")
                     && !parameters.get("bank")[0].equalsIgnoreCase("")) {
@@ -376,14 +385,14 @@ public class RtgsIssueRegisterReportAction extends ReportAction {
                     .append(" AND ih.bankaccountid = ba.id and branch.id = ba.branchid and branch.bankid = b.id and vh.status = 0 ")
                     .append(fundQry)
                     .append(phQry)
-                    .append(" and stat.id= ih.id_status AND dept.id = vmis.departmentid ")
+                    .append(" and stat.id= ih.id_status AND dept.code = vmis.departmentcode ")
                     .append(deptQry)
                     .append(" and lower(ph.type)=lower('rtgs') ")
                     .append(instrumentHeaderQry.toString())
                     .append(" AND IV.VOUCHERHEADERID  IS NOT NULL AND iv.voucherheaderid   =vh.id AND ih.instrumentnumber IS NULL ")
                     .append(" AND ih.id = iv.instrumentheaderid ")
                     .append(" AND vh.type   = 'Payment' and gl.voucherheaderid = vh.id and gld.generalledgerid = gl.id GROUP BY ih.id , ih.transactionnumber,")
-                    .append(" ih.transactiondate, vh.id,  vh.vouchernumber,vh.voucherDate, vmis.departmentid,dept.name, b.name,branch.branchname,")
+                    .append(" ih.transactiondate, vh.id,  vh.vouchernumber,vh.voucherDate, vmis.departmentcode,dept.name, b.name,branch.branchname,")
                     .append(" ba.accountnumber,stat.description,gld.detailtypeid,gld.detailkeyid,gld.amount ORDER BY b.name,branch.branchname,")
                     .append(" ba.accountnumber,ih.transactiondate,ih.transactionnumber,dept.name");
             queryParams.putAll(bankQueryParams);

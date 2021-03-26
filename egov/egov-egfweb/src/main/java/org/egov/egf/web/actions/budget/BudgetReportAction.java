@@ -260,6 +260,11 @@ public class BudgetReportAction extends BaseFormAction {
 
     @Action(value = "/budget/budgetReport-getFunctionwiseReport")
     public String getFunctionwiseReport() {
+    	if (budgetReport.getFinancialYear() == null
+    			|| budgetReport.getFinancialYear().getId() == 0) {
+    		addActionError(getText("msg.please.select.financial.year"));
+    		return "functionwise";
+    	}
         return "printFunctionwise";
     }
 
