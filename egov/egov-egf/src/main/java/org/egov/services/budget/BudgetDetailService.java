@@ -78,6 +78,8 @@ import org.egov.commons.Scheme;
 import org.egov.commons.SubScheme;
 import org.egov.commons.dao.EgwStatusHibernateDAO;
 import org.egov.commons.service.ChartOfAccountsService;
+import org.egov.egf.commons.CommonsUtil;
+import org.egov.egf.utils.FinancialUtils;
 import org.egov.eis.entity.Assignment;
 import org.egov.eis.entity.Employee;
 import org.egov.eis.service.AssignmentService;
@@ -145,6 +147,8 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
     @Qualifier("persistenceService")
     private PersistenceService persistenceService;
 
+    @Autowired
+    private FinancialUtils financialUtils;
     
     @Autowired
     @Qualifier("masterDataCache")
@@ -661,9 +665,8 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 				.append(" and (gl.glcode = bg.mincode or gl.glcode=bg.majorcode) group by bd.id");
 
 		final Query qry = getSession().createSQLQuery(query.toString());
-		qry.setParameter("voucherstatusExclude", voucherstatusExclude).setParameter("fromDate", fromDate)
-				.setParameter("toVoucherDate", toVoucherDate)
-				.setParameter("voucherstatusExclude", voucherstatusExclude);
+		qry.setParameterList("voucherstatusExclude", financialUtils.getStatuses(voucherstatusExclude))
+				.setParameter("fromDate", fromDate).setParameter("toVoucherDate", toVoucherDate);
         
         final List<Object[]> result = qry.list();
         if (LOGGER.isDebugEnabled())
@@ -756,10 +759,10 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 		params.put("fyId", fy.getId());
 		params.put("financialyearid", topBudget.getFinancialYear().getId());
 		params.put("topBudgetPath", topBudget.getMaterializedPath() + "%");
-		params.put("voucherstatusExclude", voucherstatusExclude);
+		params.put("voucherstatusExclude", financialUtils.getStatuses(voucherstatusExclude));
 		
 		final Query qry = getSession().createSQLQuery(query.toString());
-		params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(qry, params);
 
         final List<Object[]> result = qry.list();
         if (LOGGER.isInfoEnabled())
@@ -835,10 +838,10 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         params.put("fyId", fy.getId());
         params.put("topBudgetFyId", topBudget.getFinancialYear().getId());
         params.put("topBudgetPath", topBudget.getMaterializedPath() + "%");
-        params.put("voucherstatusExclude", voucherstatusExclude);
+        params.put("voucherstatusExclude", financialUtils.getStatuses(voucherstatusExclude));
         
 		final Query qry = getSession().createSQLQuery(query.toString());
-		params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(qry, params);
 
 		final List<Object[]> result = qry.list();
         if (LOGGER.isInfoEnabled())
@@ -895,12 +898,12 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 		params.put("fyId", financialYear.getId());
 		params.put("topBudgetFyId", topBudget.getFinancialYear().getId());
 		params.put("topBudgetId", topBudget.getId());
-		params.put("voucherstatusExclude", voucherstatusExclude);
+		params.put("voucherstatusExclude", financialUtils.getStatuses(voucherstatusExclude));
 		params.put("execDept", dept);
 		params.put("ownerPos", pos.getId());
 
 		final Query qry = getSession().createSQLQuery(query.toString());
-		params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(qry, params);
 
 		final List<Object[]> result = qry.list();
 		if (LOGGER.isInfoEnabled())
@@ -1393,10 +1396,10 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 		params.put("prevFinYear", prevFinYear.getId());
 		params.put("financialYearId", financialYear.getId());
 		params.put("budgetingType", budgetingType);
-		params.put("voucherstatusExclude", voucherstatusExclude);
+		params.put("voucherstatusExclude", financialUtils.getStatuses(voucherstatusExclude));
 
 		final Query qry = getSession().createSQLQuery(query.toString());
-		params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
+		persistenceService.populateQueryWithParams(qry, params);
 		final List<Object[]> result = qry.list();
         if (LOGGER.isInfoEnabled())
             LOGGER.info("Finished fetchMajorCodeAndActuals");
@@ -1626,7 +1629,7 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 		final Query qry = getSession().createSQLQuery(query.toString())
 				.setParameter("prevFinYearId", prevFinYear.getId())
 				.setParameter("financialYearId", financialYear.getId()).setParameter("budgetingType", budgetingType)
-				.setParameter("voucherstatusExclude", voucherstatusExclude);
+				.setParameterList("voucherstatusExclude", financialUtils.getStatuses(voucherstatusExclude));
 
 		final List<Object[]> result = qry.list();
 		if (LOGGER.isInfoEnabled())
@@ -1835,8 +1838,8 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
 				.append(miscQuery).append(" and (gl.glcode = bg.mincode  or gl.glcode=bg.majorcode ) group by bd.id");
 
 		final Query qry = getSession().createSQLQuery(query.toString());
-		qry.setParameter("voucherstatusExclude", voucherstatusExclude).setParameter("fromDate", fromDate)
-				.setParameter("toVoucherDate", toVoucherDate);
+		qry.setParameterList("voucherstatusExclude", financialUtils.getStatuses(voucherstatusExclude))
+				.setParameter("fromDate", fromDate).setParameter("toVoucherDate", toVoucherDate);
 		miscQueryParams.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
 		final List<Object[]> result = qry.list();
 
