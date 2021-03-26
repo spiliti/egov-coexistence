@@ -48,6 +48,7 @@
 
 package org.egov.egf.web.controller;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -118,9 +119,10 @@ public class CFinancialYearController {
 
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	public String create(@Valid @ModelAttribute CFinancialYear cFinancialYear, final BindingResult errors,
-			final Model model, final RedirectAttributes redirectAttrs) {
+			final Model model, final RedirectAttributes redirectAttrs) throws ParseException {
 		final Boolean flag = false;
 		final Boolean isActive = true;
+		cFinancialYearService.validateMandatoryFields(cFinancialYear,errors);
 		if (errors.hasErrors()) {
 			prepareNewForm(model);
 			model.addAttribute("mode", "create");

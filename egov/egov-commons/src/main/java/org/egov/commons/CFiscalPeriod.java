@@ -61,6 +61,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.egov.infra.persistence.entity.AbstractAuditable;
+import org.egov.infra.persistence.validator.annotation.DateFormat;
 import org.egov.infra.persistence.validator.annotation.Unique;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.SafeHtml;
@@ -84,7 +85,7 @@ public class CFiscalPeriod extends AbstractAuditable {
     @Length(min = 1, max = 25)
     @NotNull
     @SafeHtml
-    private String name = "";
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "financialyearid", updatable = false)
@@ -93,9 +94,11 @@ public class CFiscalPeriod extends AbstractAuditable {
     private Integer parentId = 0;
 
     @NotNull
+    @DateFormat
     private Date startingDate;
 
     @NotNull
+    @DateFormat
     private Date endingDate;
 
     private Boolean isActive;
