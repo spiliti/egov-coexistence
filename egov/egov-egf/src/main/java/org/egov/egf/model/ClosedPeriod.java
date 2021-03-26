@@ -63,6 +63,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 import org.egov.commons.CFinancialYear;
 import org.egov.enums.CloseTypeEnum;
@@ -106,6 +107,7 @@ public class ClosedPeriod extends AbstractAuditable {
     private CFinancialYear financialYear;
 
     @SafeHtml
+    @NotNull
     private String remarks;
 
     public int getFromDate() {
