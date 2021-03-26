@@ -81,6 +81,7 @@ import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.script.service.ScriptService;
 import org.egov.infra.security.utils.SecurityUtils;
+import org.egov.infra.utils.DateUtils;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infra.web.struts.annotation.ValidationErrorPage;
@@ -91,6 +92,7 @@ import org.egov.infra.workflow.service.SimpleWorkflowService;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.model.bills.Miscbilldetail;
 import org.egov.model.instrument.InstrumentHeader;
+import org.egov.model.payment.PaymentBean;
 import org.egov.model.payment.Paymentheader;
 import org.egov.model.voucher.CommonBean;
 import org.egov.model.voucher.VoucherDetails;
@@ -276,7 +278,7 @@ public class DirectBankPaymentAction extends BasePaymentAction {
     @SkipValidation
     @ValidationErrorPage(value = NEW)
     @Action(value = "/payment/directBankPayment-create")
-    public String create() {
+    public String create() throws ParseException {
         CVoucherHeader billVhId = null;
         voucherHeader.setType(FinancialConstants.STANDARD_VOUCHER_TYPE_PAYMENT);
         loadAjaxedDropDowns();
@@ -285,6 +287,7 @@ public class DirectBankPaymentAction extends BasePaymentAction {
         final String voucherDate = formatter1.format(voucherHeader.getVoucherDate());
         String cutOffDate1 = null;
         try {
+            validateCuttofDate(voucherHeader);
             if (!validateDBPData(billDetailslist, subLedgerlist)) {
                 if (commonBean.getModeOfPayment().equalsIgnoreCase(FinancialConstants.MODEOFPAYMENT_RTGS)) {
                     if (LOGGER.isInfoEnabled())
@@ -367,6 +370,14 @@ public class DirectBankPaymentAction extends BasePaymentAction {
         addDropdownData("bankList", Collections.EMPTY_LIST);
         addDropdownData("accNumList", Collections.EMPTY_LIST);
         commonBean.setModeOfPayment(MDP_CHEQUE);
+    }
+    
+    public void validateCuttofDate(CVoucherHeader voucherHeader) throws ParseException {
+        final Date cuttDate = DateUtils.parseDate(cutOffDate, "dd/MM/yyyy");
+        if(voucherHeader.getVoucherDate().after(cuttDate)) {
+            throw new ValidationException("cutOffDate", getText("vouchercutoffdate.message",
+                    new String[] {DateUtils.getDefaultFormattedDate(cuttDate)}));
+        }
     }
 
     @ValidationErrorPage(value = NEW)

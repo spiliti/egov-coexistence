@@ -56,6 +56,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -64,6 +65,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -78,6 +80,7 @@ import org.egov.eis.web.contract.WorkflowContainer;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.filestore.service.FileStoreService;
+import org.egov.infra.utils.DateUtils;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.model.bills.DocumentUpload;
 import org.egov.model.bills.EgBillregister;
@@ -168,7 +171,7 @@ public class CreateExpenseBillController extends BaseBillController {
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public String create(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
                          final BindingResult resultBinder, final HttpServletRequest request, @RequestParam final String workFlowAction)
-            throws IOException {
+            throws IOException, ParseException {
 		LOGGER.info("ExpenseBill is creating with user ::" + ApplicationThreadLocals.getUserId());
 		if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction) && !commonsUtil
 				.isValidApprover(egBillregister, Long.valueOf(request.getParameter(APPROVAL_POSITION)))) {
@@ -195,12 +198,11 @@ public class CreateExpenseBillController extends BaseBillController {
             upload.setFileName(fileName[i]);
             upload.setContentType(contentType[i]);
             list.add(upload);
-        }
-
+            }
         populateBillDetails(egBillregister);
         validateBillNumber(egBillregister, resultBinder);
         validateLedgerAndSubledger(egBillregister, resultBinder);
-
+        validateCuttofDate(egBillregister, resultBinder);
         if (resultBinder.hasErrors()) {
             populateDataOnErrors(egBillregister, model, request);
             return EXPENSEBILL_FORM;

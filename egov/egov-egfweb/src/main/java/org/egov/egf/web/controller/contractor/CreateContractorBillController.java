@@ -57,6 +57,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -204,7 +205,7 @@ public class CreateContractorBillController extends BaseBillController {
     @PostMapping(value = "/create")
     public String create(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
             final BindingResult resultBinder, final HttpServletRequest request, @RequestParam final String workFlowAction)
-            throws IOException {
+            throws IOException, ParseException {
 
     	if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction) && !commonsUtil
 				.isValidApprover(egBillregister, Long.valueOf(request.getParameter(APPROVAL_POSITION)))) {
@@ -237,6 +238,7 @@ public class CreateContractorBillController extends BaseBillController {
         validateBillNumber(egBillregister, resultBinder);
         removeEmptyRows(egBillregister);
         validateLedgerAndSubledger(egBillregister, resultBinder);
+        validateCuttofDate(egBillregister, resultBinder);
 
         if (resultBinder.hasErrors()) {
             return populateDataOnErrors(egBillregister, model, request);

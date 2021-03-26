@@ -63,6 +63,7 @@ import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.script.service.ScriptService;
 import org.egov.infra.security.utils.SecurityUtils;
+import org.egov.infra.utils.DateUtils;
 import org.egov.infra.validation.exception.ValidationError;
 import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infra.web.struts.annotation.ValidationErrorPage;
@@ -199,11 +200,12 @@ public class JournalVoucherAction extends BaseVoucherAction
     /**
      *
      * @return
+     * @throws ParseException 
      * @throws Exception
      */
     @SkipValidation
     @Action(value = "/voucher/journalVoucher-create")
-    public String create() {
+    public String create() throws ParseException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("VoucherAction | create Method | Start");
         populateWorkflowBean();
@@ -217,6 +219,7 @@ public class JournalVoucherAction extends BaseVoucherAction
         String cutOffDate1 = null;
         removeEmptyRowsAccoutDetail(billDetailslist);
         removeEmptyRowsSubledger(subLedgerlist);
+        validateCuttofDate(voucherHeader);
         target = "";
         // for manual voucher number.
         // voucherNumType
@@ -335,6 +338,14 @@ public class JournalVoucherAction extends BaseVoucherAction
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("VoucherAction | create Method | End");
         return NEW;
+    }
+
+    public void validateCuttofDate(CVoucherHeader voucherHeader) throws ParseException {
+        final Date cuttDate = DateUtils.parseDate(cutOffDate, "dd/MM/yyyy");
+        if (voucherHeader.getVoucherDate().after(cuttDate)) {
+            throw new ValidationException("cutOffDate",
+                    getText("vouchercutoffdate.message", new String[] { DateUtils.getDefaultFormattedDate(cuttDate) }));
+        }
     }
 
     public List<String> getValidActions() {
