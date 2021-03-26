@@ -49,6 +49,8 @@ package org.egov.egf.web.actions.budget;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.util.ValueStack;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -236,7 +238,7 @@ public class BudgetReAppropriationAction extends BaseFormAction {
         setupDropdownDataExcluding(Constants.SUB_SCHEME,Constants.EXECUTING_DEPARTMENT);
         finalStatus = getFinalStatus();
         dropdownData.put("financialYearList", getFinancialYearDropDown());
-        if (financialYear != null && financialYear.getId() != 0L)
+        if (financialYear != null && financialYear.getId() != null && financialYear.getId() != 0L)
             dropdownData.put("budgetList", getApprovedBudgetsForFY(financialYear.getId(), finalStatus));
         else
             dropdownData.put("budgetList", Collections.EMPTY_LIST);
@@ -304,7 +306,8 @@ public class BudgetReAppropriationAction extends BaseFormAction {
         if (shouldShowField(Constants.BOUNDARY))
             addRelatedEntity(Constants.BOUNDARY, Boundary.class);
         appropriationMisc.setReAppropriationDate(new Date());
-        if (financialYear != null && financialYear.getId() != 0L && budgetService.hasApprovedReForYear(financialYear.getId()))
+		if (financialYear != null && financialYear.getId() != null && financialYear.getId() != 0L
+				&& budgetService.hasApprovedReForYear(financialYear.getId()))
             beRe = Constants.RE;
         setupDropdownsInHeader();
         dropdownData.put("departmentList", masterDataCache.get("egi-department"));
@@ -450,6 +453,86 @@ public class BudgetReAppropriationAction extends BaseFormAction {
             loadData(newBudgetReAppropriationList);
         return NEW;
     }
+    
+	public void validateLoadActuals() {
+		if (financialYear.getId() == null || financialYear.getId() == 0) {
+			addActionError(getText("msg.please.select.financial.year"));
+		}
+		if (StringUtils.isEmpty(budgetDetail.getExecutingDepartment())) {
+			addActionError(getText("msg.please.select.executing.department"));
+		}
+		for (BudgetReAppropriationView budgetReAppropriationView : budgetReAppropriationList) {
+			if (budgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() == null
+					|| budgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() == 0) {
+				addActionError(getText("msg.please.budget.group"));
+			}
+			if (shouldShowField("function")
+					&& (budgetReAppropriationView.getBudgetDetail().getFunction().getId() == null
+							|| budgetReAppropriationView.getBudgetDetail().getFunction().getId() == 0)) {
+				addActionError(getText("msg.please.select.function"));
+			}
+			if (shouldShowField("fund") && (budgetReAppropriationView.getBudgetDetail().getFund().getId() == null
+					|| budgetReAppropriationView.getBudgetDetail().getFund().getId() == 0)) {
+				addActionError(getText("msg.please.select.fund"));
+			}
+		}
+	}
+	
+	public void validateCreate() {
+		if (financialYear.getId() == null || financialYear.getId() == 0) {
+			addActionError(getText("msg.please.select.financial.year"));
+		}
+		if (StringUtils.isEmpty(budgetDetail.getExecutingDepartment())) {
+			addActionError(getText("msg.please.select.executing.department"));
+		}
+		validateBudgetReAppropriation();
+		validateNewBudgetReAppropriation();
+	}
+
+	private void validateNewBudgetReAppropriation() {
+		for (BudgetReAppropriationView newBudgetReAppropriationView : newBudgetReAppropriationList) {
+			if (newBudgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() != null
+					&& newBudgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() != 0
+					&& (newBudgetReAppropriationView.getDeltaAmount() == null 
+					|| newBudgetReAppropriationView.getDeltaAmount().compareTo(BigDecimal.ZERO) <= 0)) {
+				addActionError(getText("msg.budget.est.amount.gt.zero"));
+			}
+			if (newBudgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() != null
+					&& newBudgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() != 0
+					&& (newBudgetReAppropriationView.getPlanningPercent() == null 
+					|| newBudgetReAppropriationView.getPlanningPercent().compareTo(BigDecimal.ZERO) <= 0)) {
+				addActionError(getText("msg.planning.budget.percentage.gt.zero"));
+			}
+			if (newBudgetReAppropriationView.getDeltaAmount() == null
+					|| newBudgetReAppropriationView.getDeltaAmount().compareTo(BigDecimal.ZERO) < 0) {
+				addActionError(getText("msg.addition.amount.gt.zero"));
+			}
+		}
+	}
+
+	private void validateBudgetReAppropriation() {
+		for (BudgetReAppropriationView budgetReAppropriationView : budgetReAppropriationList) {
+			if (budgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() != null
+					&& budgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() != 0
+					&& (budgetReAppropriationView.getDeltaAmount() == null
+							|| budgetReAppropriationView.getDeltaAmount().compareTo(BigDecimal.ZERO) <= 0)) {
+				addActionError(getText("msg.amount.gt.zero"));
+			}
+			if (budgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() != null
+					&& budgetReAppropriationView.getBudgetDetail().getBudgetGroup().getId() != 0
+					&& (budgetReAppropriationView.getAnticipatoryAmount() == null
+							|| budgetReAppropriationView.getAnticipatoryAmount().compareTo(BigDecimal.ZERO) <= 0)) {
+				addActionError(getText("msg.anticipatory.amount.gt.zero"));
+			}
+			if (!StringUtils.isEmpty(budgetReAppropriationView.getChangeRequestType())
+					&& budgetReAppropriationView.getChangeRequestType().equals("Deduction")
+					&& budgetReAppropriationView.getDeltaAmount() != null
+					&& budgetReAppropriationView.getAvailableAmount() != null && budgetReAppropriationView
+							.getDeltaAmount().compareTo(budgetReAppropriationView.getAvailableAmount()) > 0) {
+				addActionError(getText("msg.deduction.amount.ltoreq.bal.fund"));
+			}
+		}
+	}
 
     private void loadData(final List<BudgetReAppropriationView> reAppList) {
         budgetReAppropriationService.validateMandatoryFields(reAppList);
