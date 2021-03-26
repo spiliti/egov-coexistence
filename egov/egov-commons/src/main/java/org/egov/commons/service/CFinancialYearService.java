@@ -48,15 +48,20 @@
 
 package org.egov.commons.service;
 
+import org.apache.commons.lang.StringUtils;
 import org.egov.commons.CFinancialYear;
 import org.egov.commons.CFiscalPeriod;
 import org.egov.commons.repository.CFinancialYearRepository;
+import org.egov.infra.utils.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -146,5 +151,38 @@ public class CFinancialYearService {
     
     public List<CFinancialYear> getFinancialYearNotClosedAndActive() {
         return cFinancialYearRepository.findByIsClosedFalseAndIsActiveForPostingTrueOrderByFinYearRangeDesc();
+    }
+
+    public void validateMandatoryFields(CFinancialYear financialYear, final BindingResult errors)
+            throws ParseException {
+        final Date nextStartingDate = getNextFinancialYearStartingDate();
+        if (financialYear.getStartingDate().after(financialYear.getEndingDate())) {
+            errors.reject("msg.startdate.enddate.greater",
+                    new String[] { DateUtils.getDefaultFormattedDate(financialYear.getStartingDate()) }, null);
+        }
+        if (financialYear.getStartingDate().equals(nextStartingDate)) {
+            errors.reject("msg.enter.valid.startdate",
+                    new String[] { DateUtils.getDefaultFormattedDate(financialYear.getStartingDate()) }, null);
+        }
+        for (CFiscalPeriod fiscalperiod : financialYear.getcFiscalPeriod()) {
+            if (fiscalperiod.getName() == null || StringUtils.isEmpty(fiscalperiod.getName()))
+                errors.reject("msg.enter.fiscal.period.name",
+                        new String[] { DateUtils.getDefaultFormattedDate(financialYear.getStartingDate()) }, null);
+            if (fiscalperiod.getStartingDate() == null)
+                errors.reject("msg.enter.startdate",
+                        new String[] { DateUtils.getDefaultFormattedDate(fiscalperiod.getStartingDate()) }, null);
+            if (fiscalperiod.getEndingDate() == null)
+                errors.reject("msg.enter.endingdate",
+                        new String[] { DateUtils.getDefaultFormattedDate(fiscalperiod.getEndingDate()) }, null);
+            if (fiscalperiod.getStartingDate() != null && fiscalperiod.getEndingDate() != null) {
+                if (fiscalperiod.getStartingDate().after(fiscalperiod.getEndingDate()))
+                    errors.reject("msg.startdate.enddate.greater",
+                            new String[] { DateUtils.getDefaultFormattedDate(fiscalperiod.getStartingDate()) }, null);
+                if (fiscalperiod.getStartingDate().equals(nextStartingDate)) {
+                    errors.reject("msg.enter.valid.startdate",
+                            new String[] { DateUtils.getDefaultFormattedDate(fiscalperiod.getStartingDate()) }, null);
+                }
+            }
+        }
     }
 }

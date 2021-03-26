@@ -48,6 +48,7 @@
 package org.egov.commons;
 
 import org.egov.infra.persistence.entity.AbstractAuditable;
+import org.egov.infra.persistence.validator.annotation.DateFormat;
 import org.egov.infra.persistence.validator.annotation.Unique;
 import org.hibernate.envers.AuditOverride;
 import org.hibernate.envers.AuditOverrides;
@@ -97,9 +98,11 @@ public class CFinancialYear extends AbstractAuditable {
 
   
     @NotNull
+    @DateFormat
     private Date startingDate;
 
     @NotNull
+    @DateFormat
     private Date endingDate;
     
     private Boolean isActive;
