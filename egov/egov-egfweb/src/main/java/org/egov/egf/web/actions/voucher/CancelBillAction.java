@@ -306,7 +306,7 @@ public class CancelBillAction extends BaseFormAction {
 	}
 
     public void validateFund() throws ParseException {
-        if (fund == null || fund.getId() == -1)
+        if (fund == null || fund.getId() == -1 || fund.getId() == 0 || fund.getId() == null)
             addFieldError("fund.id", getText("voucher.fund.mandatory"));
         if (StringUtils.isNotEmpty(fromDate) || StringUtils.isNotEmpty(toDate)) {
             boolean isDateFrom = false;
