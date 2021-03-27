@@ -143,7 +143,7 @@ public class ClosedPeriodController {
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)
-    public String update(@ModelAttribute final ClosedPeriod closedPeriod, final BindingResult errors, final Model model,
+    public String update(@Valid @ModelAttribute final ClosedPeriod closedPeriod, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors()) {
             prepareSoftClosePeriod(model);
