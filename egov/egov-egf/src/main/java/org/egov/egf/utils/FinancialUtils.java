@@ -48,7 +48,6 @@
 package org.egov.egf.utils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -85,7 +84,6 @@ import org.egov.infra.microservice.models.Department;
 import org.egov.infra.microservice.models.EmployeeInfo;
 import org.egov.infra.microservice.models.RequestInfo;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
-import org.egov.infra.security.utils.SecurityUtils;
 import org.egov.infra.workflow.entity.State;
 import org.egov.infra.workflow.entity.StateHistory;
 import org.egov.model.bills.DocumentUpload;
@@ -122,8 +120,6 @@ public class FinancialUtils {
     private EntityManager entityManager;
     @Autowired
     private AssignmentService assignmentService;
-    @Autowired
-    private SecurityUtils securityUtils;
     @Autowired
     private PositionMasterService positionMasterService;
     @Autowired
@@ -384,11 +380,11 @@ public class FinancialUtils {
     }
     
     public List<Integer> getStatuses(final String status) {
-	return Arrays.stream(status.split(",")).map(Integer::valueOf).collect(Collectors.toList());
+    	return Arrays.stream(status.split(",")).map(Integer::valueOf).collect(Collectors.toList());
     }
 
     public List<Character> getCoaTypes(final String coaType) {
-	return Arrays.stream(coaType.split(",")).map(s -> s.charAt(1)).collect(Collectors.toList());
+    	return Arrays.stream(coaType.split(",")).map(s -> s.charAt(1)).collect(Collectors.toList());
     }
 
     @Transactional
@@ -426,13 +422,4 @@ public class FinancialUtils {
         }
 
     }
-
-    public List<Integer> getStatuses(final String status) {
-	return Arrays.stream(status.split(",")).map(Integer::valueOf).collect(Collectors.toList());
-    }
-
-    public List<Character> getCoaTypes(final String coaType) {
-	return Arrays.stream(coaType.split(",")).map(s -> s.charAt(1)).collect(Collectors.toList());
-    }
-
 }
