@@ -396,11 +396,13 @@ public class CancelVoucherAction extends BaseFormAction {
 			} else
 				filterQuerySql = filter;
 			// BPVs for which no Cheque is issued
-			noChequePaymentQry = new StringBuilder("from CVoucherHeader vh where vh.status not in (:vhStatus)  ").append(filter)
+			noChequePaymentQry = noChequePaymentQry
+					.append("from CVoucherHeader vh where vh.status not in (:vhStatus)  ").append(filter)
 					.append("  and not Exists(select 'true' from InstrumentVoucher iv where iv.voucherHeaderId=vh.id)")
-					.append(" order by vh.voucherNumber)").toString();
+					.append(" order by vh.voucherNumber)");
 
-			final Query noChequePaymentQuery = persistenceService.getSession().createQuery(noChequePaymentQry);
+			final Query noChequePaymentQuery = persistenceService.getSession()
+					.createQuery(noChequePaymentQry.toString());
 			noChequePaymentQuery.setParameterList("vhStatus", Arrays.asList(FinancialConstants.PREAPPROVEDVOUCHERSTATUS,
 					FinancialConstants.CANCELLEDVOUCHERSTATUS));
 			persistenceService.populateQueryWithParams(noChequePaymentQuery, params);
