@@ -64,6 +64,7 @@ import org.egov.infra.admin.master.entity.Location;
 import org.egov.infra.persistence.entity.Auditable;
 import org.egov.infra.workflow.entity.StateAware;
 import org.egov.model.instrument.InstrumentHeader;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.SafeHtml;
 
 public class ReceiptHeader extends StateAware implements Auditable {
@@ -101,6 +102,7 @@ public class ReceiptHeader extends StateAware implements Auditable {
     @SafeHtml
     private String reasonForCancellation;
     @SafeHtml
+    @Length(min = 1,max=64)
     private String paidBy;
     private Boolean overrideAccountHeads;
     private Boolean partPaymentAllowed;
