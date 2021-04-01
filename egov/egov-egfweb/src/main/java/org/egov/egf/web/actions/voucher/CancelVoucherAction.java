@@ -472,7 +472,7 @@ public class CancelVoucherAction extends BaseFormAction {
 	@Action(value = "/voucher/cancelVoucher-update")
 	public String update() {
 		final Map<String, Object> map = cancelVouchers(selectedVhs, loggedInUser, voucherHeader);
-        ((List<String>) map.get("voucherNumbers")).forEach(rec -> addActionMessage(getText("cancel.voucher.failure", new String[] {rec})));
+        ((List<String>) map.get("voucherNumbers")).forEach(rec -> addActionMessage(getText("msg.voucher.cancel.creator", new String[] {rec})));
         if (LOGGER.isDebugEnabled())
             LOGGER.debug(" Cancel Voucher | CancelVoucher | Vouchers Cancelled ");
         if (!map.get("voucherId").equals(""))

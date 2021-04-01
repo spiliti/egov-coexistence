@@ -378,7 +378,7 @@ public class CancelBillAction extends BaseFormAction {
 	@Action(value = "/voucher/cancelBill-cancelBill")
 	public String cancelBill() {
         final Map<String, Object> map = cancelBills(billListDisplay, expType);
-        ((List<String>) map.get("billNumbers")).forEach(rec -> addActionError(getText("Cancellation Failure", new String[] {rec})));
+        ((List<String>) map.get("billNumbers")).forEach(rec -> addActionError(getText("msg.bill.cancel.creator", new String[] {rec})));
         if (!((List<Long>) map.get("ids")).isEmpty())
             addActionMessage(getText("Cancelled Successfully"));
 
