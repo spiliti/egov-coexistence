@@ -567,19 +567,14 @@ public class ContraBTBAction extends BaseVoucherAction {
 	@SkipValidation
 	@Action(value = "/contra/contraBTB-newform")
 	public String newform() {
-		try {
-
-			reset();
-			LoadAjaxedDropDowns();
-			loadDefalutDates();
-			final Date currDate = new Date();
-			final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-			contraBean.setChequeDate(sdf.format(currDate));
-			contraBean.setModeOfCollection(MDC_OTHER);
-			voucherDate = sdf.parse(sdf.format(currDate));
-		} catch (ParseException e) {
-
-		}
+		reset();
+		LoadAjaxedDropDowns();
+		loadDefalutDates();
+		final Date currDate = new Date();
+		final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		contraBean.setChequeDate(sdf.format(currDate));
+		contraBean.setModeOfCollection(MDC_OTHER);
+		voucherDate = new Date();
 		return NEW;
 	}
 
