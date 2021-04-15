@@ -547,6 +547,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
         getMasterDataForBillVoucher();
         getHeaderMandateFields();
         
+
      //   Map<String, Object> cityInfo = cityService.cityDataAsMap();
     //   cityInfo.get(CITY_CODE_KEY);
     //   cityInfo.get(CITY_NAME_KEY);
