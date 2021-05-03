@@ -94,7 +94,7 @@ public class AccountEntityController {
 
 	}
 
-	@GetMapping(value = "/new")
+	@PostMapping(value = "/new")
 	public String newForm(final Model model) {
 		prepareNewForm(model);
 		model.addAttribute("accountEntity", new AccountEntity());
@@ -156,7 +156,7 @@ public class AccountEntityController {
 		return ACCOUNTENTITY_RESULT;
 	}
 
-	@GetMapping(value = "/search/{mode}")
+	@PostMapping(value = "/search/{mode}")
 	public String search(@PathVariable("mode") final String mode, Model model) {
 		AccountEntity accountEntity = new AccountEntity();
 		prepareNewForm(model);

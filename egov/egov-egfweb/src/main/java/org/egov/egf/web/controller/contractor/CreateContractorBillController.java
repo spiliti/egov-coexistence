@@ -188,7 +188,7 @@ public class CreateContractorBillController extends BaseBillController {
         model.addAttribute(NET_PAYABLE_CODES, chartOfAccountsService.getContractorNetPayableAccountCodes());
     }
 
-    @GetMapping(value = "/newform")
+    @PostMapping(value = "/newform")
     public String showNewForm(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
             HttpServletRequest request) {
         setDropDownValues(model);

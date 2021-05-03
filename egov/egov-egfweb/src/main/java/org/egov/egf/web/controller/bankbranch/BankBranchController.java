@@ -98,7 +98,7 @@ public class BankBranchController {
         model.addAttribute("bankbranches", createBankBranchService.getByIsActiveTrueOrderByBranchname());
     }
 
-    @GetMapping(value = "/new")
+    @PostMapping(value = "/new")
     public String newForm(final Model model) {
         setDropDownValues(model);
         model.addAttribute(BANKBRANCH, new Bankbranch());
@@ -129,7 +129,7 @@ public class BankBranchController {
         return "bankbranch-view";
     }
 
-    @GetMapping(value = "/search/{mode}")
+    @PostMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final Bankbranch bankbranch = new Bankbranch();
         setDropDownValues(model);

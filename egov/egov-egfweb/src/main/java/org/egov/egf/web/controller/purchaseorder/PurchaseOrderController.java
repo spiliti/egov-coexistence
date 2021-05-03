@@ -116,7 +116,7 @@ public class PurchaseOrderController {
         model.addAttribute("suppliers", supplierService.getAllActiveEntities(null));
     }
 
-    @GetMapping(value = "/newform")
+    @PostMapping(value = "/newform")
     public String showNewForm(@ModelAttribute("purchaseOrder") final PurchaseOrder purchaseOrder, final Model model) {
         prepareNewForm(model);
         model.addAttribute("purchaseOrder", new PurchaseOrder());
@@ -175,7 +175,7 @@ public class PurchaseOrderController {
         return VIEW;
     }
 
-    @GetMapping(value = "/search/{mode}")
+    @PostMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final PurchaseOrder purchaseOrder = new PurchaseOrder();
         prepareNewForm(model);

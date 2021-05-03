@@ -63,7 +63,7 @@
         <constructor-arg name="sessionRegistry" ref="springSessionBackedSessionRegistry"/>
     </bean>
     
-    <bean id="csrfFilter" class="org.springframework.security.web.csrf.CsrfFilter">
+    <bean id="csrfFilter" class="org.egov.infra.web.filter.CsrfFilter">
         <constructor-arg name="csrfTokenRepository">
             <bean class="org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository"/>
         </constructor-arg>

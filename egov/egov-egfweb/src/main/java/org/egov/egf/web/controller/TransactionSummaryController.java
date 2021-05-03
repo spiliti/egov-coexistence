@@ -126,7 +126,7 @@ public class TransactionSummaryController {
 		model.addAttribute("cFunctions", functionDAO.getAllActiveFunctions());
 	}
 
-	@GetMapping(value = "/new")
+	@PostMapping(value = "/new")
 	public String newForm(final Model model) {
 		prepareNewForm(model);
 		model.addAttribute("transactionSummaryDto", new TransactionSummaryDto());

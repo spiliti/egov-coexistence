@@ -89,7 +89,7 @@ public class BankController {
     @Autowired
     private MessageSource messageSource;
 
-    @GetMapping(value = "/new")
+    @PostMapping(value = "/new")
     public String newForm(final Model model) {
         model.addAttribute(BANK, new Bank());
         return "bank-new";
@@ -110,7 +110,7 @@ public class BankController {
         return "bank-view";
     }
 
-    @GetMapping(value = "/search/{mode}")
+    @PostMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final Bank bank = new Bank();
         model.addAttribute(BANK, bank);

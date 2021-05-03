@@ -107,7 +107,7 @@ public class CreateContractorController {
                 egwStatusHibDAO.getStatusByModule(FinancialConstants.STATUS_MODULE_NAME_CONTRACTOR));
     }
 
-    @GetMapping(value = "/newform")
+    @PostMapping(value = "/newform")
     public String showNewForm(@ModelAttribute("contractor") final Contractor contractor, final Model model) {
         prepareNewForm(model);
         model.addAttribute("contractor", new Contractor());
@@ -162,7 +162,7 @@ public class CreateContractorController {
         return VIEW;
     }
 
-    @GetMapping(value = "/search/{mode}")
+    @PostMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final Contractor contractor = new Contractor();
         prepareNewForm(model);

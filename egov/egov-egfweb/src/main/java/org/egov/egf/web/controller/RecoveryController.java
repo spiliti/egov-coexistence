@@ -113,7 +113,7 @@ public class RecoveryController {
         model.addAttribute("banks", bankService.findAll());
     }
 
-    @GetMapping(value = "/new")
+    @PostMapping(value = "/new")
     public String newForm(final Model model) {
         prepareNewForm(model);
         model.addAttribute("recovery", new Recovery());
@@ -193,7 +193,7 @@ public class RecoveryController {
         return RECOVERY_RESULT;
     }
 
-    @GetMapping(value = "/search/{mode}")
+    @PostMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final Recovery recovery = new Recovery();
         prepareNewForm(model);

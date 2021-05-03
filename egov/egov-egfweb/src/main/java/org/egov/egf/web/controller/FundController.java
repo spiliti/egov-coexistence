@@ -96,7 +96,7 @@ public class FundController {
 		model.addAttribute("funds", fundService.findByIsnotleaf());
 	}
 
-	@GetMapping(value = "/new")
+	@PostMapping(value = "/new")
 	public String newForm(final Model model) {
 		prepareNewForm(model);
 		model.addAttribute("fund", new Fund());
@@ -158,7 +158,7 @@ public class FundController {
 		return FUND_RESULT;
 	}
 
-	@GetMapping(value = "/search/{mode}")
+	@PostMapping(value = "/search/{mode}")
 	public String search(@PathVariable("mode") final String mode, final Model model) {
 		final Fund fund = new Fund();
 		prepareNewForm(model);

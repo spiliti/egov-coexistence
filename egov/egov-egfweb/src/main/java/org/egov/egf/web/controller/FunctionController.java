@@ -95,7 +95,7 @@ public class FunctionController {
 		model.addAttribute("functions", functionService.findAllIsNotLeafTrue());
 	}
 
-	@GetMapping(value = "/new")
+	@PostMapping(value = "/new")
 	public String newForm(final Model model) {
 		prepareNewForm(model);
 		model.addAttribute("CFunction", new CFunction());
@@ -164,7 +164,7 @@ public class FunctionController {
 		return FUNCTION_RESULT;
 	}
 
-	@GetMapping(value = "/search/{mode}")
+	@PostMapping(value = "/search/{mode}")
 	public String search(@PathVariable("mode") final String mode, Model model) {
 		CFunction function = new CFunction();
 		prepareNewForm(model);

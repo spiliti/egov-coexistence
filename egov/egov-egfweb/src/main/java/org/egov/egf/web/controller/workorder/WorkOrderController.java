@@ -116,7 +116,7 @@ public class WorkOrderController {
         model.addAttribute("contractors", contractorService.getAllActiveEntities(null));
     }
 
-    @GetMapping(value = "/newform")
+    @PostMapping(value = "/newform")
     public String showNewForm(@ModelAttribute("workOrder") final WorkOrder workOrder, final Model model) {
         prepareNewForm(model);
         model.addAttribute("workOrder", new WorkOrder());
@@ -175,7 +175,7 @@ public class WorkOrderController {
         return VIEW;
     }
 
-    @GetMapping(value = "/search/{mode}")
+    @PostMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") final String mode, final Model model) {
         final WorkOrder workOrder = new WorkOrder();
         prepareNewForm(model);
