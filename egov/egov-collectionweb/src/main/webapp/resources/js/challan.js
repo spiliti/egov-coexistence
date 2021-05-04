@@ -147,7 +147,7 @@ function validateAccountDetail(){
 				validate=false;
 			}
 			else{
-			credit = eval(document.getElementById('billDetailslist['+i+'].creditAmountDetail').value);
+			credit = document.getElementById('billDetailslist['+i+'].creditAmountDetail').value;
 			}
 			credit = isNaN(credit)?0:credit;
 			if(credit<0){
@@ -174,7 +174,7 @@ function validateAccountDetail(){
 //				validate=false;
 //			}
 //			else{
-//				debit = eval(document.getElementById('billDetailslist['+i+'].debitAmountDetail').value);
+//				debit = document.getElementById('billDetailslist['+i+'].debitAmountDetail').value;
 //				}
 //			debit = isNaN(debit)?0:debit;
 //			if(debit<0){
@@ -269,15 +269,15 @@ function validateSubLedgerDetail(){
 						}
 						if (accountCode == subledgerid.options[subledgerid.selectedIndex].text.trim())
 						{
-							if(eval(document.getElementById('billDetailslist['+i+'].creditAmountDetail').value) > 0){
+							if(document.getElementById('billDetailslist['+i+'].creditAmountDetail').value > 0){
 			
 								accountDetailamount = document.getElementById('billDetailslist['+i+'].creditAmountDetail').value;
 							}
-							//if(eval(document.getElementById('billDetailslist['+i+'].debitAmountDetail').value) > 0){
+							//if(document.getElementById('billDetailslist['+i+'].debitAmountDetail').value > 0){
 								
 								//accountDetailRebateAmount = document.getElementById('billDetailslist['+i+'].debitAmountDetail').value;
 							//}
-							subledgerTotalAmt = subledgerTotalAmt + eval(document.getElementById('subLedgerlist['+j+'].amount').value);
+							subledgerTotalAmt = subledgerTotalAmt + document.getElementById('subLedgerlist['+j+'].amount').value;
 						}
 						if(subledgerselected == 0){
 							subledgerselected[0] = subledgerAccCode;

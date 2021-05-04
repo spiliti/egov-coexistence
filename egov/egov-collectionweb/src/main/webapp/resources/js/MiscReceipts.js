@@ -1256,7 +1256,7 @@ function validateAccountDetail(){
 				document.getElementById('receipt_error_area').innerHTML+='Please enter correct amount in Receipt Heads for account :'+document.getElementById('billCreditDetailslist['+i+'].glcodeDetail').value+'<br>';
 				return false;
 			}
-			credit = eval(document.getElementById('billCreditDetailslist['+i+'].creditAmountDetail').value);
+			credit = document.getElementById('billCreditDetailslist['+i+'].creditAmountDetail').value;
 			credit = isNaN(credit)?0:credit;
 			creditTotal = creditTotal + credit;
 			if(credit<0){
@@ -1314,7 +1314,7 @@ function validateAccountDetail(){
 				document.getElementById('receipt_error_area').innerHTML+='Please enter correct amount in Rebates/Discounts for account :'+document.getElementById('billRebateDetailslist['+i+'].glcodeDetail').value+'<br>';
 				return false;
 			}
-			debit = eval(document.getElementById('billRebateDetailslist['+i+'].debitAmountDetail').value);
+			debit = document.getElementById('billRebateDetailslist['+i+'].debitAmountDetail').value;
 			debit = isNaN(debit)?0:debit;
 			debitTotal = debitTotal + debit;
 			if(debit<0){
@@ -1385,11 +1385,11 @@ var subledgerselected = new Array();
 					}
 					if (accountCode == subledgerid.options[subledgerid.selectedIndex].text.trim())
 					{
-						if(eval(document.getElementById('billCreditDetailslist['+i+'].creditAmountDetail').value) > 0){
+						if(document.getElementById('billCreditDetailslist['+i+'].creditAmountDetail').value > 0){
 		
 							accountDetailamount = document.getElementById('billCreditDetailslist['+i+'].creditAmountDetail').value;
 						}
-						subledgerTotalAmt = subledgerTotalAmt + eval(document.getElementById('subLedgerlist['+j+'].amount').value);
+						subledgerTotalAmt = subledgerTotalAmt + document.getElementById('subLedgerlist['+j+'].amount').value;
 					}
 					if(subledgerselected == 0){
 						subledgerselected[0] = subledgerAccCode;
@@ -1454,12 +1454,12 @@ var subledgerselected = new Array();
 						}
 						if (accountCode == subledgerid.options[subledgerid.selectedIndex].text.trim())
 						{
-							if(eval(document.getElementById('billRebateDetailslist['+i+'].debitAmountDetail').value) >0){
+							if(document.getElementById('billRebateDetailslist['+i+'].debitAmountDetail').value >0){
 			
 								accountDetailamount = document.getElementById('billRebateDetailslist['+i+'].debitAmountDetail').value;
 					
 							} 
-							subledgerTotalAmt = subledgerTotalAmt + eval(document.getElementById('subLedgerlist['+j+'].amount').value);
+							subledgerTotalAmt = subledgerTotalAmt + document.getElementById('subLedgerlist['+j+'].amount').value;
 						}
 						if(subledgerselected == 0){
 							subledgerselected[0] = subledgerAccCode;
