@@ -168,8 +168,8 @@ function populateapportioningamountnew(){
 								
 							var amt1=amounttobecollected-collectiontotal;
 							amt1=Math.round(amt1*100)/100;
-							document.getElementById('receiptDetailList['+j+'].balanceAmount').value=amt1.toFixed(1);
-							document.getElementById('receiptDetailList['+j+'].balanceAmtDisplay').innerHTML=amt1.toFixed(1);
+							document.getElementById('receiptDetailList['+j+'].balanceAmount').value=parseFloat(amt1.toFixed(1));
+							document.getElementById('receiptDetailList['+j+'].balanceAmtDisplay').innerHTML=parseFloat(amt1.toFixed(1));
 						}
 					}
 					else if(check!=0 && remainingamount>0)
@@ -186,15 +186,15 @@ function populateapportioningamountnew(){
 						}
 						else if(remainingamount<=amounttobecollected)
 						{
-							document.getElementById('receiptDetailList['+j+'].cramount').value=remainingamount.toFixed(1);
-								document.getElementById('receiptDetailList['+j+'].cramountDisplay').innerHTML=remainingamount.toFixed(1);
+							document.getElementById('receiptDetailList['+j+'].cramount').value=parseFloat(remainingamount.toFixed(1));
+							document.getElementById('receiptDetailList['+j+'].cramountDisplay').innerHTML=parseFloat(remainingamount.toFixed(1));
 							
 						
 							var amt2=amounttobecollected-remainingamount;
 							amt2=Math.round(amt2*100)/100;
 							remainingamount=remainingamount-document.getElementById('receiptDetailList['+j+'].cramount').value;
-							document.getElementById('receiptDetailList['+j+'].balanceAmount').value=amt2.toFixed(1);
-							document.getElementById('receiptDetailList['+j+'].balanceAmtDisplay').innerHTML=amt2.toFixed(1);
+							document.getElementById('receiptDetailList['+j+'].balanceAmount').value=parseFloat(amt2.toFixed(1));
+							document.getElementById('receiptDetailList['+j+'].balanceAmtDisplay').innerHTML=parseFloat(amt2.toFixed(1));
 						}
 					}
 					else if(check!=0 && remainingamount==0)
