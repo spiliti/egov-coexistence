@@ -58,12 +58,14 @@ import org.egov.egf.masters.services.ContractorService;
 import org.egov.egf.web.adaptor.ContractorJsonAdaptor;
 import org.egov.model.masters.Contractor;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -81,9 +83,11 @@ import com.google.gson.GsonBuilder;
 
 @Controller
 @RequestMapping(value = "/contractor")
+@Validated
 public class CreateContractorController {
 
-    private static final String NEW = "contractor-new";
+    private static final String STR_CONTRACTOR = "contractor";
+	private static final String NEW = "contractor-new";
     private static final String RESULT = "contractor-result";
     private static final String EDIT = "contractor-edit";
     private static final String VIEW = "contractor-view";
@@ -108,9 +112,9 @@ public class CreateContractorController {
     }
 
     @PostMapping(value = "/newform")
-    public String showNewForm(@ModelAttribute("contractor") final Contractor contractor, final Model model) {
+    public String showNewForm(@ModelAttribute(STR_CONTRACTOR) final Contractor contractor, final Model model) {
         prepareNewForm(model);
-        model.addAttribute("contractor", new Contractor());
+        model.addAttribute(STR_CONTRACTOR, new Contractor());
         return NEW;
     }
 
@@ -122,10 +126,10 @@ public class CreateContractorController {
             prepareNewForm(model);
             return NEW;
         }
-        String GSTState=contractor.getGstRegisteredState().toUpperCase();
-        contractor.setGstRegisteredState(GSTState);
-        String GST=contractor.getTinNumber().toUpperCase();
-        contractor.setTinNumber(GST);
+        String gstState=contractor.getGstRegisteredState().toUpperCase();
+        contractor.setGstRegisteredState(gstState);
+        String gst = contractor.getTinNumber().toUpperCase();
+        contractor.setTinNumber(gst);
         contractorService.create(contractor);
 
         redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.contractor.success", null, null));
@@ -137,7 +141,7 @@ public class CreateContractorController {
     public String edit(@PathVariable("id") final Long id, final Model model) {
         final Contractor contractor = contractorService.getById(id);
         prepareNewForm(model);
-        model.addAttribute("contractor", contractor);
+        model.addAttribute(STR_CONTRACTOR, contractor);
         return EDIT;
     }
 
@@ -157,24 +161,24 @@ public class CreateContractorController {
     public String view(@PathVariable("id") final Long id, final Model model) {
         final Contractor contractor = contractorService.getById(id);
         prepareNewForm(model);
-        model.addAttribute("contractor", contractor);
+        model.addAttribute(STR_CONTRACTOR, contractor);
         model.addAttribute("mode", "view");
         return VIEW;
     }
 
     @PostMapping(value = "/search/{mode}")
-    public String search(@PathVariable("mode") final String mode, final Model model) {
+    public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final Contractor contractor = new Contractor();
         prepareNewForm(model);
-        model.addAttribute("contractor", contractor);
+        model.addAttribute(STR_CONTRACTOR, contractor);
         return SEARCH;
 
     }
 
     @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
-            @ModelAttribute final Contractor contractor) {
+    public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+        @Valid @ModelAttribute final Contractor contractor) {
         final List<Contractor> searchResultList = contractorService.search(contractor);
         return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
     }
@@ -186,9 +190,9 @@ public class CreateContractorController {
     }
 
     @GetMapping(value = "/result/{id}/{mode}")
-    public String result(@PathVariable("id") final Long id, @PathVariable("mode") final String mode, final Model model) {
+    public String result(@PathVariable("id") final Long id, @PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final Contractor contractor = contractorService.getById(id);
-        model.addAttribute("contractor", contractor);
+        model.addAttribute(STR_CONTRACTOR, contractor);
         model.addAttribute("mode", mode);
         return RESULT;
     }

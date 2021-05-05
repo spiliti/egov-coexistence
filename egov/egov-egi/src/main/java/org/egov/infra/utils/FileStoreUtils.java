@@ -55,6 +55,7 @@ import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.filestore.entity.FileStoreMapper;
 import org.egov.infra.filestore.repository.FileStoreMapperRepository;
 import org.egov.infra.filestore.service.FileStoreService;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -94,6 +96,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.http.MediaType.parseMediaType;
 
 @Service
+@Validated
 public class FileStoreUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileStoreUtils.class);
 
@@ -112,7 +115,7 @@ public class FileStoreUtils {
         return Optional.ofNullable(this.fileStoreMapperRepository.findByFileStoreId(fileStoreId));
     }
 
-    public ResponseEntity<InputStreamResource> fileAsResponseEntity(String fileStoreId, String moduleName, boolean toSave) {
+    public ResponseEntity<InputStreamResource> fileAsResponseEntity(@SafeHtml String fileStoreId, @SafeHtml String moduleName, boolean toSave) {
         try {
             Optional<FileStoreMapper> fileStoreMapper = getFileStoreMapper(fileStoreId);
             if (fileStoreMapper.isPresent()) {

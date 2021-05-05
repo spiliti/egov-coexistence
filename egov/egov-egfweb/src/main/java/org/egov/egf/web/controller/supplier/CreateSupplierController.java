@@ -58,12 +58,14 @@ import org.egov.egf.masters.services.SupplierService;
 import org.egov.egf.web.adaptor.SupplierJsonAdaptor;
 import org.egov.model.masters.Supplier;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -81,9 +83,11 @@ import com.google.gson.GsonBuilder;
 
 @Controller
 @RequestMapping(value = "/supplier")
+@Validated
 public class CreateSupplierController {
 
-    private static final String NEW = "supplier-new";
+    private static final String STR_SUPPLIER = "supplier";
+	private static final String NEW = "supplier-new";
     private static final String RESULT = "supplier-result";
     private static final String EDIT = "supplier-edit";
     private static final String VIEW = "supplier-view";
@@ -108,9 +112,9 @@ public class CreateSupplierController {
     }
 
     @PostMapping(value = "/newform")
-    public String showNewForm(@ModelAttribute("supplier") final Supplier supplier, final Model model) {
+    public String showNewForm(@ModelAttribute(STR_SUPPLIER) final Supplier supplier, final Model model) {
         prepareNewForm(model);
-        model.addAttribute("supplier", new Supplier());
+        model.addAttribute(STR_SUPPLIER, new Supplier());
         return NEW;
     }
 
@@ -134,7 +138,7 @@ public class CreateSupplierController {
     public String edit(@PathVariable("id") final Long id, final Model model) {
         final Supplier supplier = supplierService.getById(id);
         prepareNewForm(model);
-        model.addAttribute("supplier", supplier);
+        model.addAttribute(STR_SUPPLIER, supplier);
         return EDIT;
     }
 
@@ -154,24 +158,24 @@ public class CreateSupplierController {
     public String view(@PathVariable("id") final Long id, final Model model) {
         final Supplier supplier = supplierService.getById(id);
         prepareNewForm(model);
-        model.addAttribute("supplier", supplier);
+        model.addAttribute(STR_SUPPLIER, supplier);
         model.addAttribute("mode", "view");
         return VIEW;
     }
 
     @PostMapping(value = "/search/{mode}")
-    public String search(@PathVariable("mode") final String mode, final Model model) {
+    public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final Supplier supplier = new Supplier();
         prepareNewForm(model);
-        model.addAttribute("supplier", supplier);
+        model.addAttribute(STR_SUPPLIER, supplier);
         return SEARCH;
 
     }
 
     @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
-            @ModelAttribute final Supplier supplier) {
+    public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+        @Valid @ModelAttribute final Supplier supplier) {
         final List<Supplier> searchResultList = supplierService.search(supplier);
         return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
     }
@@ -183,9 +187,9 @@ public class CreateSupplierController {
     }
 
     @GetMapping(value = "/result/{id}/{mode}")
-    public String result(@PathVariable("id") final Long id, @PathVariable("mode") final String mode, final Model model) {
+    public String result(@PathVariable("id") final Long id, @PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final Supplier supplier = supplierService.getById(id);
-        model.addAttribute("supplier", supplier);
+        model.addAttribute(STR_SUPPLIER, supplier);
         model.addAttribute("mode", mode);
         return RESULT;
     }

@@ -62,6 +62,7 @@ import org.egov.model.recoveries.Recovery;
 import org.egov.model.service.RecoveryService;
 import org.egov.services.masters.BankService;
 import org.egov.services.masters.EgPartyTypeService;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -69,6 +70,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -83,12 +85,14 @@ import com.google.gson.GsonBuilder;
 
 @Controller
 @RequestMapping("/recovery")
+@Validated
 public class RecoveryController {
-    private final static String RECOVERY_NEW = "recovery-new";
-    private final static String RECOVERY_RESULT = "recovery-result";
-    private final static String RECOVERY_EDIT = "recovery-edit";
-    private final static String RECOVERY_VIEW = "recovery-view";
-    private final static String RECOVERY_SEARCH = "recovery-search";
+    private static final String RECOVERY = "recovery";
+	private static final String RECOVERY_NEW = "recovery-new";
+    private static final String RECOVERY_RESULT = "recovery-result";
+    private static final String RECOVERY_EDIT = "recovery-edit";
+    private static final String RECOVERY_VIEW = "recovery-view";
+    private static final String RECOVERY_SEARCH = "recovery-search";
     @Autowired
     @Qualifier("remittanceRecoveryService")
     private RecoveryService recoveryService;
@@ -106,7 +110,8 @@ public class RecoveryController {
     @Autowired
     private ChartOfAccountsDAO chartOfAccountsDAO;
 
-    private void prepareNewForm(final Model model) {
+    @SuppressWarnings("deprecation")
+	private void prepareNewForm(final Model model) {
         model.addAttribute("chartOfAccountss", chartOfAccountsDAO.getNonControlledGlcode());
         model.addAttribute("chartOfAccounts", chartOfAccountsDAO.getForRecovery());
         model.addAttribute("egPartytypes", egPartyTypeService.findAll());
@@ -116,11 +121,12 @@ public class RecoveryController {
     @PostMapping(value = "/new")
     public String newForm(final Model model) {
         prepareNewForm(model);
-        model.addAttribute("recovery", new Recovery());
+        model.addAttribute(RECOVERY, new Recovery());
         return RECOVERY_NEW;
     }
 
-    @PostMapping(value = "/create")
+    @SuppressWarnings("deprecation")
+	@PostMapping(value = "/create")
     public String create(@Valid @ModelAttribute final Recovery recovery, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors()) {
@@ -134,13 +140,14 @@ public class RecoveryController {
 
         recovery.setChartofaccounts(chartOfAccountsService.findById(recovery.getChartofaccounts().getId(), false));
         recovery.setEgPartytype(egPartyTypeService.findById(recovery.getEgPartytype().getId(), false));
-        recovery.setCreatedBy(ApplicationThreadLocals.getUserId().longValue());
+        recovery.setCreatedBy(ApplicationThreadLocals.getUserId());
         recoveryService.create(recovery);
         redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.recovery.success", null, null));
         return "redirect:/recovery/result/" + recovery.getId() + "/create";
     }
 
-    @GetMapping(value = "/edit/{id}")
+    @SuppressWarnings("deprecation")
+	@GetMapping(value = "/edit/{id}")
     public String edit(@PathVariable("id") final Long id, final Model model) {
         final Recovery recovery = recoveryService.findOne(id);
         if (recovery.getBank() != null && recovery.getBank().getId() != null)
@@ -151,11 +158,12 @@ public class RecoveryController {
         prepareNewForm(model);
         recovery.setChartofaccounts(coa);
         model.addAttribute("chartOfAccountss", coas);
-        model.addAttribute("recovery", recovery);
+        model.addAttribute(RECOVERY, recovery);
         return RECOVERY_EDIT;
     }
 
-    @PostMapping(value = "/update")
+    @SuppressWarnings("deprecation")
+	@PostMapping(value = "/update")
     public String update(@Valid @ModelAttribute final Recovery recovery, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors()) {
@@ -180,43 +188,43 @@ public class RecoveryController {
         if (recovery.getBank() != null && recovery.getBank().getId() != null)
             recovery.setBankLoan(true);
         prepareNewForm(model);
-        model.addAttribute("recovery", recovery);
+        model.addAttribute(RECOVERY, recovery);
         return RECOVERY_VIEW;
     }
 
     @GetMapping(value = "/result/{id}/{mode}")
-    public String result(@PathVariable("id") final Long id, @PathVariable("mode") final String mode,
+    public String result(@PathVariable("id") final Long id, @PathVariable("mode") @SafeHtml final String mode,
             final Model model) {
         final Recovery recovery = recoveryService.findOne(id);
-        model.addAttribute("recovery", recovery);
+        model.addAttribute(RECOVERY, recovery);
         model.addAttribute("mode", mode);
         return RECOVERY_RESULT;
     }
 
     @PostMapping(value = "/search/{mode}")
-    public String search(@PathVariable("mode") final String mode, final Model model) {
+    public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final Recovery recovery = new Recovery();
         prepareNewForm(model);
-        model.addAttribute("recovery", recovery);
+        model.addAttribute(RECOVERY, recovery);
         return RECOVERY_SEARCH;
 
     }
 
-    @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
-    public @ResponseBody String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
-            @ModelAttribute final Recovery recovery) {
+    @SuppressWarnings("deprecation")
+	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public @ResponseBody String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+            @Valid @ModelAttribute final Recovery recovery) {
         if (recovery != null && recovery.getChartofaccounts().getId() != null)
             recovery.setChartofaccounts(chartOfAccountsService.findById(recovery.getChartofaccounts().getId(), false));
         final List<Recovery> searchResultList = recoveryService.search(recovery, recovery.getType(),
                 recovery.getRecoveryName());
-        final String result = new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}")
+        return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}")
                 .toString();
-        return result;
     }
 
     @GetMapping(value = "/ajax/getAccountCodes")
     public @ResponseBody List<CChartOfAccounts> getAccountCodes(
-            @RequestParam("subLedgerCode") final String subLedgerCode) {
+            @RequestParam("subLedgerCode") @SafeHtml final String subLedgerCode) {
         List<CChartOfAccounts> accounts = null;
         if (subLedgerCode.equalsIgnoreCase("Select"))
             accounts = chartOfAccountsDAO.getNonControlledGlcode();
@@ -228,7 +236,6 @@ public class RecoveryController {
     public Object toSearchResultJson(final Object object) {
         final GsonBuilder gsonBuilder = new GsonBuilder();
         final Gson gson = gsonBuilder.registerTypeAdapter(Recovery.class, new RecoveryJsonAdaptor()).create();
-        final String json = gson.toJson(object);
-        return json;
+        return gson.toJson(object);
     }
 }

@@ -18,6 +18,7 @@ import org.egov.infra.microservice.models.BankAccountServiceMapping;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.infstr.utils.EgovMasterDataCaching;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,12 +38,13 @@ import org.springframework.web.client.HttpClientErrorException;
 
 @Controller
 @RequestMapping("/report/dishonouredcheque")
+@Validated
 public class ChequeDishonouredReportController {
     
-    private final static String DISHONOURED_CHECQUE_REPORT = "dishonouredchequesearchreport";
+    private static final String DISHONOURED_CHECQUE_REPORT = "dishonouredchequesearchreport";
     private static final Logger LOGGER = Logger.getLogger(ChequeDishonouredReportController.class);
     
-  @Autowired
+    @Autowired
     protected EgovMasterDataCaching masterDataCache;
     @Autowired
     public MicroserviceUtils microserviceUtils;
@@ -64,19 +69,17 @@ public class ChequeDishonouredReportController {
         return DISHONOURED_CHECQUE_REPORT;
     }
     
-    @RequestMapping(value = "/_search", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/_search", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<DishonoredChequeBean> getDishonouredChequeSearch(@Valid @ModelAttribute final DishonoredChequeBean dishonoredChequeBean)
-            throws ParseException {
-        List<DishonoredChequeBean> resultList = new ArrayList<>();
-        resultList = dishonorChequeService.getDishonouredChequeReport(dishonoredChequeBean);
-        return resultList;
+	public List<DishonoredChequeBean> getDishonouredChequeSearch(
+			@Valid @ModelAttribute final DishonoredChequeBean dishonoredChequeBean, final BindingResult errors)
+			throws ParseException {
+		return dishonorChequeService.getDishonouredChequeReport(dishonoredChequeBean);
+	}
 
-    }
-
-    @RequestMapping(method = { RequestMethod.GET }, value = "/service/{accountNumber}")
+    @GetMapping(value = "/service/{accountNumber}")
     public @ResponseBody ResponseEntity getServiceByAccountNumber(
-            @PathVariable(name = "accountNumber", required = true) String accountNumber) {
+            @PathVariable(name = "accountNumber", required = true) @SafeHtml String accountNumber) {
         try {
             List<BankAccountServiceMapping> bankAcntServiceMappings = microserviceUtils
                     .getBankAcntServiceMappings(accountNumber, null);

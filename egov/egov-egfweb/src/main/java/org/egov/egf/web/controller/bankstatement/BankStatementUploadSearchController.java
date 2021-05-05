@@ -49,8 +49,20 @@
 package org.egov.egf.web.controller.bankstatement;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 import org.egov.egf.commons.bank.service.CreateBankService;
 import org.egov.egf.commons.bankbranch.service.CreateBankBranchService;
 import org.egov.egf.web.actions.brs.AutoReconcileHelper;
@@ -63,25 +75,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Controller
 @RequestMapping("/bankstatement")
+@Validated
 public class BankStatementUploadSearchController {
 
     private static final int BUFFER_SIZE = 4096;
@@ -107,9 +114,9 @@ public class BankStatementUploadSearchController {
 
     }
 
-    @RequestMapping(value = "/ajaxsearch", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/ajaxsearch", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public String ajaxsearch(final Model model, @ModelAttribute final BankStatementUploadFile bankStatementUploadFile) {
+    public String ajaxsearch(final Model model, @Valid @ModelAttribute final BankStatementUploadFile bankStatementUploadFile) {
 
         List<DocumentUpload> list = autoReconcileHelper.getUploadedFiles(bankStatementUploadFile);
         List<DocumentUpload> sortedList = list.stream()
@@ -126,7 +133,7 @@ public class BankStatementUploadSearchController {
         return gson.toJson(object);
     }
 
-    @RequestMapping(value = "/downloadDoc", method = RequestMethod.GET)
+    @GetMapping(value = "/downloadDoc")
     public void getBillDoc(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, FileNotFoundException {
         final ServletContext context = request.getServletContext();

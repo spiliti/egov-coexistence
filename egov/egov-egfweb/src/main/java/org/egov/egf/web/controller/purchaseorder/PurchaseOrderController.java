@@ -61,12 +61,14 @@ import org.egov.infra.microservice.utils.MicroserviceUtils;
 import org.egov.model.bills.EgBillregister;
 import org.egov.model.masters.PurchaseOrder;
 import org.egov.services.bills.EgBillRegisterService;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -84,9 +86,11 @@ import com.google.gson.GsonBuilder;
 
 @Controller
 @RequestMapping(value = "/purchaseorder")
+@Validated
 public class PurchaseOrderController {
 
-    private static final String NEW = "purchaseorder-new";
+    private static final String PURCHASE_ORDER = "purchaseOrder";
+	private static final String NEW = "purchaseorder-new";
     private static final String RESULT = "purchaseorder-result";
     private static final String EDIT = "purchaseorder-edit";
     private static final String VIEW = "purchaseorder-view";
@@ -117,9 +121,9 @@ public class PurchaseOrderController {
     }
 
     @PostMapping(value = "/newform")
-    public String showNewForm(@ModelAttribute("purchaseOrder") final PurchaseOrder purchaseOrder, final Model model) {
+    public String showNewForm(@ModelAttribute(PURCHASE_ORDER) final PurchaseOrder purchaseOrder, final Model model) {
         prepareNewForm(model);
-        model.addAttribute("purchaseOrder", new PurchaseOrder());
+        model.addAttribute(PURCHASE_ORDER, new PurchaseOrder());
         return NEW;
     }
 
@@ -149,7 +153,7 @@ public class PurchaseOrderController {
             purchaseOrder.setEditAllFields(true);
         }
         prepareNewForm(model);
-        model.addAttribute("purchaseOrder", purchaseOrder);
+        model.addAttribute(PURCHASE_ORDER, purchaseOrder);
         return EDIT;
     }
 
@@ -170,24 +174,24 @@ public class PurchaseOrderController {
         final PurchaseOrder purchaseOrder = purchaseOrderService.getById(id);
         populateDepartmentName(purchaseOrder);
         prepareNewForm(model);
-        model.addAttribute("purchaseOrder", purchaseOrder);
+        model.addAttribute(PURCHASE_ORDER, purchaseOrder);
         model.addAttribute("mode", "view");
         return VIEW;
     }
 
     @PostMapping(value = "/search/{mode}")
-    public String search(@PathVariable("mode") final String mode, final Model model) {
+    public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final PurchaseOrder purchaseOrder = new PurchaseOrder();
         prepareNewForm(model);
-        model.addAttribute("purchaseOrder", purchaseOrder);
+        model.addAttribute(PURCHASE_ORDER, purchaseOrder);
         return SEARCH;
 
     }
 
     @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
-            @ModelAttribute final PurchaseOrder purchaseOrder) {
+    public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+        @Valid @ModelAttribute final PurchaseOrder purchaseOrder) {
         final List<PurchaseOrder> searchResultList = purchaseOrderService.search(purchaseOrder);
         return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
     }
@@ -199,10 +203,10 @@ public class PurchaseOrderController {
     }
 
     @GetMapping(value = "/result/{id}/{mode}")
-    public String result(@PathVariable("id") final Long id, @PathVariable("mode") final String mode, final Model model) {
+    public String result(@PathVariable("id") final Long id, @PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final PurchaseOrder purchaseOrder = purchaseOrderService.getById(id);
         populateDepartmentName(purchaseOrder);
-        model.addAttribute("purchaseOrder", purchaseOrder);
+        model.addAttribute(PURCHASE_ORDER, purchaseOrder);
         model.addAttribute("mode", mode);
         return RESULT;
     }

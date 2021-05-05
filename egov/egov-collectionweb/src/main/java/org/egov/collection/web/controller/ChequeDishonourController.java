@@ -47,7 +47,6 @@
  */
 package org.egov.collection.web.controller;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -63,6 +62,7 @@ import org.egov.collection.integration.services.DishonorChequeService;
 import org.egov.commons.dao.BankBranchHibernateDAO;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.services.instrument.InstrumentService;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +72,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -81,11 +82,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@SuppressWarnings("deprecation")
 @Controller
 @RequestMapping(value = { "/dishonour/cheque" })
+@Validated
 public class ChequeDishonourController {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChequeDishonourController.class);
+    private static final String ERROR_MESSAGE = "errorMessage";
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChequeDishonourController.class);
 
     public ChequeDishonourController() {
         LOGGER.debug("ChequeDishonourController class initialized");
@@ -98,17 +102,18 @@ public class ChequeDishonourController {
     @Autowired
     @Qualifier("instrumentService")
     private InstrumentService instrumentService;
-    @Autowired
+    @SuppressWarnings("rawtypes")
+	@Autowired
     @Qualifier("persistenceService")
-    protected transient PersistenceService persistenceService;
+    protected PersistenceService persistenceService;
 
-    @RequestMapping(method = { RequestMethod.POST, RequestMethod.GET }, value = "/form")
-    public String getDishonourChequeForm(final Model model, @ModelAttribute("errorMessage") final String errorMessage) {
+	@RequestMapping(method = { RequestMethod.POST, RequestMethod.GET }, value = "/form")
+    public String getDishonourChequeForm(final Model model, @ModelAttribute(ERROR_MESSAGE) @SafeHtml final String errorMessage) {
         if (errorMessage != null)
-            model.addAttribute("errorMessage", errorMessage);
+            model.addAttribute(ERROR_MESSAGE, errorMessage);
         model.addAttribute(CollectionConstants.DROPDOWN_DATA_BANKBRANCH_LIST,
                 bankBranchHibernateDAO.getAllBankBranchs());
-        model.addAttribute(CollectionConstants.DROPDOWN_DATA_ACCOUNT_NO_LIST, Collections.EMPTY_LIST);
+        model.addAttribute(CollectionConstants.DROPDOWN_DATA_ACCOUNT_NO_LIST, Collections.emptyList());
         model.addAttribute(CollectionConstants.DROPDOWN_DATA_DISHONOR_REASONS_LIST,
                 persistenceService.getSession().createSQLQuery("select * from egf_instrument_dishonor_reason").list());
         final DishonoredChequeBean attributeValue = new DishonoredChequeBean();
@@ -125,7 +130,8 @@ public class ChequeDishonourController {
         return instMap;
     }
 
-    @RequestMapping(method = { RequestMethod.GET }, value = "/_search")
+    @SuppressWarnings("rawtypes")
+	@GetMapping(value = "/_search")
     public @ResponseBody ResponseEntity getDishonorChequeSearch(@Valid @ModelAttribute final DishonoredChequeBean model,final BindingResult errors){
         try {
             dishonorChequeService.validateBeforeSearch(model, errors);
@@ -152,7 +158,7 @@ public class ChequeDishonourController {
         final String returnPage = "dishonor_cheque_success";
             dishonorChequeService.validateManadatoryFields(chequeBean,errors);
             if(errors.hasErrors()) {
-                redAttribute.addFlashAttribute("errorMessage",
+                redAttribute.addFlashAttribute(ERROR_MESSAGE,
                         "Error occurred while doing dishonoring of Instrument Number " + chequeBean.getInstrumentNumber()
                                 + ". Please contact to Administration.");
             return "redirect:/dishonour/cheque/form";
@@ -164,7 +170,7 @@ public class ChequeDishonourController {
         } catch (final NoResultException e) {
             LOGGER.error("Error Occurred while doing dishonoring of Instrument Number : {}",
                     chequeBean.getInstrumentNumber());
-            redAttribute.addFlashAttribute("errorMessage",
+            redAttribute.addFlashAttribute(ERROR_MESSAGE,
                     "Error occurred while doing dishonoring of Instrument Number " + chequeBean.getInstrumentNumber()
                             + ". Please contact to Administration.");
             return "redirect:/dishonour/cheque/form";
@@ -172,14 +178,12 @@ public class ChequeDishonourController {
     }
 
     private List<DishonoredChequeBean> getDishonorCheque(final DishonoredChequeBean model) {
-        List<DishonoredChequeBean> resultList = new ArrayList<>();
         final String bankBranch = model.getBankBranch();
         String bankId = null;
         if (StringUtils.isNotBlank(bankBranch))
             bankId = bankBranch.split("-")[0].trim();
-        resultList = dishonorChequeService.getCollectionListForDishonorInstrument(model.getInstrumentMode(), bankId,
+        return dishonorChequeService.getCollectionListForDishonorInstrument(model.getInstrumentMode(), bankId,
                 model.getAccountNumber(), model.getInstrumentNumber(), model.getTransactionDate());
-        return resultList;
     }
 
 }

@@ -21,6 +21,7 @@ import org.egov.infra.workflow.entity.StateAware;
 import org.egov.infra.workflow.inbox.InboxRenderServiceDelegate;
 import org.egov.infra.workflow.matrix.entity.WorkFlowMatrix;
 import org.egov.infra.workflow.service.WorkflowService;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 
 @Controller
+@Validated
 public class MSCommController {
 	
 	private static final String SELECT = "Select";
@@ -80,8 +83,8 @@ public class MSCommController {
 
 	@GetMapping(value = "/approvers/{deptId}/{desgId}")
 	@ResponseBody
-	public List<EmployeeInfo> getApprovers(@PathVariable(name = "deptId") String deptId,
-			@PathVariable(name = "desgId") String desgnId) {
+	public List<EmployeeInfo> getApprovers(@PathVariable(name = "deptId") @SafeHtml String deptId,
+			@PathVariable(name = "desgId") @SafeHtml String desgnId) {
 		return microserviceUtils.getApprovers(deptId, desgnId);
 	}
 
@@ -108,8 +111,8 @@ public class MSCommController {
 
     @PostMapping(value = "/rest/refreshToken")
     @ResponseBody
-    public ResponseEntity<Object> refreshToken(@RequestParam(value = "oldToken") String oldToken,
-            @RequestParam(value = "newToken") String newToken) {
+    public ResponseEntity<Object> refreshToken(@RequestParam(value = "oldToken") @SafeHtml String oldToken,
+            @RequestParam(value = "newToken") @SafeHtml String newToken) {
 
         try {
             if (null != oldToken && null != newToken) {

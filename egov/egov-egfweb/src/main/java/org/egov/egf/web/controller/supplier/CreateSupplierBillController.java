@@ -67,6 +67,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.dispatcher.multipart.MultiPartRequestWrapper;
@@ -95,10 +96,12 @@ import org.egov.model.bills.EgBilldetails;
 import org.egov.model.bills.EgBillregister;
 import org.egov.model.masters.PurchaseOrder;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -111,6 +114,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping(value = "/supplierbill")
+@Validated
 public class CreateSupplierBillController extends BaseBillController {
 
 	private static final String INVALID_APPROVER = "invalid.approver";
@@ -146,8 +150,6 @@ public class CreateSupplierBillController extends BaseBillController {
     private static final String APPROVAL_POSITION = "approvalPosition";
 
     private static final String APPROVAL_DESIGNATION = "approvalDesignation";
-
-    private static final String PASSEDAMOUNT = "supplierBillTotalDebitAmount";
 
     private static final int BUFFER_SIZE = 4096;
 
@@ -205,8 +207,8 @@ public class CreateSupplierBillController extends BaseBillController {
     }
 
     @PostMapping(value = "/create")
-    public String create(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
-            final BindingResult resultBinder, final HttpServletRequest request, @RequestParam final String workFlowAction)
+    public String create(@Valid @ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
+            final BindingResult resultBinder, final HttpServletRequest request, @RequestParam @SafeHtml final String workFlowAction)
             throws IOException, ParseException {
     	if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction) && !commonsUtil
 			.isValidApprover(egBillregister, Long.valueOf(request.getParameter(APPROVAL_POSITION)))) {
@@ -319,8 +321,10 @@ public class CreateSupplierBillController extends BaseBillController {
         Boolean check = false;
         Boolean poExist = false;
         Boolean supplierExist = false;
-        Integer poAccountDetailTypeId, supplierAccountDetailTypeId = null;
-        String poAccountDetailTypeName, supplierAccountDetailTypeName = null;
+        Integer poAccountDetailTypeId;
+        Integer supplierAccountDetailTypeId = null;
+        String poAccountDetailTypeName;
+        String supplierAccountDetailTypeName = null;
         PurchaseOrder po = null;
         Accountdetailtype poAccountdetailtype = accountdetailtypeService.findByName(PURCHASE_ORDER);
         poAccountDetailTypeId = poAccountdetailtype.getId();
@@ -352,19 +356,19 @@ public class CreateSupplierBillController extends BaseBillController {
 
                 }
 
-                if (check && !supplierExist && !poExist) {
+                if (check.booleanValue() && !supplierExist.booleanValue() && !poExist.booleanValue()) {
                     resultBinder.reject("msg.supplier.bill.wrong.sub.ledger.mapped",
                             new String[] { details.getChartOfAccounts().getGlcode() }, null);
                 }
 
-                if (details.getDebitamount() != null && details.getDebitamount().compareTo(BigDecimal.ZERO) == 1) {
-                    if (poExist || (poExist && supplierExist)) {
+                if (details.getDebitamount() != null && details.getDebitamount().compareTo(BigDecimal.ZERO) > 0) {
+                    if (poExist.booleanValue() || (poExist && supplierExist)) {
                         payeeDetail = prepareBillPayeeDetails(details, details.getDebitamount(), BigDecimal.ZERO,
                                 poAccountDetailTypeId,
                                 po.getId().intValue(),poAccountDetailTypeName,po.getName());
                         egBillregister.getEgBillregistermis().setPayto(po.getName());
                         details.getEgBillPaydetailes().add(payeeDetail);
-                    } else if (supplierExist) {
+                    } else if (supplierExist.booleanValue()) {
                         payeeDetail = prepareBillPayeeDetails(details, details.getDebitamount(), BigDecimal.ZERO,
                                 supplierAccountDetailTypeId, po.getSupplier().getId().intValue(), supplierAccountDetailTypeName, po.getSupplier().getName());
                         egBillregister.getEgBillregistermis().setPayto(po.getSupplier().getName());
@@ -373,13 +377,13 @@ public class CreateSupplierBillController extends BaseBillController {
 
                 }
 
-                if (details.getCreditamount() != null && details.getCreditamount().compareTo(BigDecimal.ZERO) == 1) {
-                    if (supplierExist || (poExist && supplierExist)) {
+                if (details.getCreditamount() != null && details.getCreditamount().compareTo(BigDecimal.ZERO) > 0) {
+                    if (supplierExist.booleanValue() || (poExist && supplierExist)) {
                         payeeDetail = prepareBillPayeeDetails(details, BigDecimal.ZERO, details.getCreditamount(),
                                 supplierAccountDetailTypeId, po.getSupplier().getId().intValue(), supplierAccountDetailTypeName,po.getSupplier().getName());
                         egBillregister.getEgBillregistermis().setPayto(po.getSupplier().getName());
                         details.getEgBillPaydetailes().add(payeeDetail);
-                    } else if (poExist) {
+                    } else if (poExist.booleanValue()) {
                         payeeDetail = prepareBillPayeeDetails(details, BigDecimal.ZERO, details.getCreditamount(),
                                 poAccountDetailTypeId, po.getId().intValue(), poAccountDetailTypeName, po.getName());
                         egBillregister.getEgBillregistermis().setPayto(po.getName());
@@ -409,22 +413,20 @@ public class CreateSupplierBillController extends BaseBillController {
     }
 
     @GetMapping(value = "/success")
-    public String showSuccessPage(@RequestParam("billNumber") final String billNumber, final Model model,
+    public String showSuccessPage(@RequestParam("billNumber") @SafeHtml final String billNumber, final Model model,
             final HttpServletRequest request) {
         final String[] keyNameArray = request.getParameter(APPROVER_DETAILS).split(",");
         Long id = 0L;
         String approverName = "";
         String nextDesign = "";
-        if (keyNameArray.length != 0 && keyNameArray.length > 0)
-            if (keyNameArray.length == 1)
-                id = Long.parseLong(keyNameArray[0].trim());
-            else if (keyNameArray.length == 3) {
-                id = Long.parseLong(keyNameArray[0].trim());
-                approverName = keyNameArray[1];
-            } else {
-                id = Long.parseLong(keyNameArray[0].trim());
-                approverName = keyNameArray[1];
-            }
+		if (keyNameArray.length != 0 && keyNameArray.length > 0) {
+			if (keyNameArray.length == 1)
+				id = Long.parseLong(keyNameArray[0].trim());
+			else {
+				id = Long.parseLong(keyNameArray[0].trim());
+				approverName = keyNameArray[1];
+			}
+		}
         if (id != null)
             model.addAttribute(APPROVER_NAME, approverName);
 
@@ -479,7 +481,7 @@ public class CreateSupplierBillController extends BaseBillController {
         
         final FileInputStream inputStream = new FileInputStream(downloadFile);
         EgBillregister egBillregister = supplierBillService.getById(Long.parseLong(request.getParameter("egBillRegisterId")));
-        egBillregister = getBillDocuments(egBillregister);
+        getBillDocuments(egBillregister);
 
         for (final DocumentUpload doc : egBillregister.getDocumentDetail())
             if (doc.getFileStore().getFileStoreId().equalsIgnoreCase(fileStoreId))

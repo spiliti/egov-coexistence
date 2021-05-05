@@ -61,12 +61,14 @@ import org.egov.infra.microservice.utils.MicroserviceUtils;
 import org.egov.model.bills.EgBillregister;
 import org.egov.model.masters.WorkOrder;
 import org.egov.services.bills.EgBillRegisterService;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -84,9 +86,11 @@ import com.google.gson.GsonBuilder;
 
 @Controller
 @RequestMapping(value = "/workorder")
+@Validated
 public class WorkOrderController {
 
-    private static final String NEW = "workorder-new";
+    private static final String WORK_ORDER = "workOrder";
+	private static final String NEW = "workorder-new";
     private static final String RESULT = "workorder-result";
     private static final String EDIT = "workorder-edit";
     private static final String VIEW = "workorder-view";
@@ -117,9 +121,9 @@ public class WorkOrderController {
     }
 
     @PostMapping(value = "/newform")
-    public String showNewForm(@ModelAttribute("workOrder") final WorkOrder workOrder, final Model model) {
+    public String showNewForm(@ModelAttribute(WORK_ORDER) final WorkOrder workOrder, final Model model) {
         prepareNewForm(model);
-        model.addAttribute("workOrder", new WorkOrder());
+        model.addAttribute(WORK_ORDER, new WorkOrder());
         return NEW;
     }
 
@@ -139,19 +143,15 @@ public class WorkOrderController {
         return "redirect:/workorder/result/" + workOrder.getId() + "/create";
     }
 
-    @GetMapping(value = "/edit/{id}")
-    public String edit(@PathVariable("id") final Long id, final Model model) {
-        final WorkOrder workOrder = workOrderService.getById(id);
-        List<EgBillregister> bills = egBillRegisterService.getBillsByWorkOrderNumber(workOrder.getOrderNumber());
-        if (bills != null && !bills.isEmpty()) {
-            workOrder.setEditAllFields(false);
-        } else {
-            workOrder.setEditAllFields(true);
-        }
-        prepareNewForm(model);
-        model.addAttribute("workOrder", workOrder);
-        return EDIT;
-    }
+	@GetMapping(value = "/edit/{id}")
+	public String edit(@PathVariable("id") final Long id, final Model model) {
+		final WorkOrder workOrder = workOrderService.getById(id);
+		List<EgBillregister> bills = egBillRegisterService.getBillsByWorkOrderNumber(workOrder.getOrderNumber());
+		workOrder.setEditAllFields(bills.isEmpty());
+		prepareNewForm(model);
+		model.addAttribute(WORK_ORDER, workOrder);
+		return EDIT;
+	}
 
     @PostMapping(value = "/update")
     public String update(@Valid @ModelAttribute final WorkOrder workOrder, final BindingResult errors,
@@ -170,24 +170,24 @@ public class WorkOrderController {
         final WorkOrder workOrder = workOrderService.getById(id);
         populateDepartmentName(workOrder);
         prepareNewForm(model);
-        model.addAttribute("workOrder", workOrder);
+        model.addAttribute(WORK_ORDER, workOrder);
         model.addAttribute("mode", "view");
         return VIEW;
     }
 
     @PostMapping(value = "/search/{mode}")
-    public String search(@PathVariable("mode") final String mode, final Model model) {
+    public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final WorkOrder workOrder = new WorkOrder();
         prepareNewForm(model);
-        model.addAttribute("workOrder", workOrder);
+        model.addAttribute(WORK_ORDER, workOrder);
         return SEARCH;
 
     }
 
     @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
-            @ModelAttribute final WorkOrder workOrder) {
+    public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+         @Valid @ModelAttribute final WorkOrder workOrder) {
         final List<WorkOrder> searchResultList = workOrderService.search(workOrder);
         return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
     }
@@ -199,10 +199,10 @@ public class WorkOrderController {
     }
 
     @GetMapping(value = "/result/{id}/{mode}")
-    public String result(@PathVariable("id") final Long id, @PathVariable("mode") final String mode, final Model model) {
+    public String result(@PathVariable("id") final Long id, @PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final WorkOrder workOrder = workOrderService.getById(id);
         populateDepartmentName(workOrder);
-        model.addAttribute("workOrder", workOrder);
+        model.addAttribute(WORK_ORDER, workOrder);
         model.addAttribute("mode", mode);
         return RESULT;
     }

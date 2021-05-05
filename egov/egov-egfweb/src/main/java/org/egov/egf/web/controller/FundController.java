@@ -59,18 +59,19 @@ import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.security.utils.SecurityUtils;
 import org.egov.infra.utils.DateUtils;
 import org.egov.infstr.utils.EgovMasterDataCaching;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -79,6 +80,7 @@ import com.google.gson.GsonBuilder;
 
 @Controller
 @RequestMapping("/fund")
+@Validated
 public class FundController {
 	private static final String FUND_NEW = "fund-new";
 	private static final String FUND_RESULT = "fund-result";
@@ -103,6 +105,7 @@ public class FundController {
 		return FUND_NEW;
 	}
 
+	@SuppressWarnings("deprecation")
 	@PostMapping(value = "/create")
 	public String create(@Valid @ModelAttribute final Fund fund, final BindingResult errors, final Model model,
 			final RedirectAttributes redirectAttrs) {
@@ -126,6 +129,7 @@ public class FundController {
 		return FUND_EDIT;
 	}
 
+	@SuppressWarnings("deprecation")
 	@PostMapping(value = "/update")
 	public String update(@Valid @ModelAttribute final Fund fund, final BindingResult errors, final Model model,
 			final RedirectAttributes redirectAttrs) {
@@ -151,7 +155,7 @@ public class FundController {
 	}
 
 	@GetMapping(value = "/result/{id}/{mode}")
-	public String result(@PathVariable("id") final Long id,@PathVariable("mode") final String mode, final Model model) {
+	public String result(@PathVariable("id") final Long id,@PathVariable("mode") @SafeHtml final String mode, final Model model) {
 		final Fund fund = fundService.findOne(id);
 		model.addAttribute("fund", fund);
 		model.addAttribute("mode", mode);
@@ -159,7 +163,7 @@ public class FundController {
 	}
 
 	@PostMapping(value = "/search/{mode}")
-	public String search(@PathVariable("mode") final String mode, final Model model) {
+	public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
 		final Fund fund = new Fund();
 		prepareNewForm(model);
 		model.addAttribute("fund", fund);
@@ -169,8 +173,8 @@ public class FundController {
 
 	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
 	@ResponseBody
-	public String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
-			@ModelAttribute final Fund fund) {
+	public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+		@Valid @ModelAttribute final Fund fund) {
 		final List<Fund> searchResultList = fundService.search(fund);
 		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
 	}

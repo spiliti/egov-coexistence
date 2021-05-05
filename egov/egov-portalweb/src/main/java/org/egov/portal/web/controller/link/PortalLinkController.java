@@ -135,9 +135,10 @@ public class PortalLinkController {
                 response.setModuleName(portalLinkRequest.getModuleName());
 
         }
-        return new StringBuilder("{ \"data\":")
+        /*return new StringBuilder("{ \"data\":")
                 .append(toJSON(response, PortallinkJsonAdaptor.class)).append("}")
-                .toString();
+                .toString();*/
+        return null;
     }
 
     @RequestMapping(value = "/citizen/linkconnection/", method = RequestMethod.POST)

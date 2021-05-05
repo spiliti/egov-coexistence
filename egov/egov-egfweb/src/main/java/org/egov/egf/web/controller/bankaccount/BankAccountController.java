@@ -65,6 +65,7 @@ import org.egov.egf.utils.FinancialUtils;
 import org.egov.egf.web.controller.bankaccount.adaptor.BankAccountJsonAdaptor;
 import org.egov.model.masters.AccountCodePurpose;
 import org.egov.services.voucher.GeneralLedgerService;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -72,6 +73,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,6 +92,7 @@ import com.google.gson.GsonBuilder;
 
 @Controller
 @RequestMapping("/bankaccount")
+@Validated
 public class BankAccountController {
 
     private static final String BANKACCOUNT = "bankaccount";
@@ -154,7 +157,7 @@ public class BankAccountController {
     }
 
     @PostMapping(value = "/search/{mode}")
-    public String search(@PathVariable("mode") final String mode, final Model model) {
+    public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final Bankaccount bankaccount = new Bankaccount();
         setDropDownValues(model);
         model.addAttribute(BANKACCOUNT, bankaccount);
@@ -163,7 +166,7 @@ public class BankAccountController {
     }
 
     @GetMapping(value = "/success/{id}/{mode}")
-    public String success(@PathVariable("id") final Long id,@PathVariable("mode") final String mode, final Model model) {
+    public String success(@PathVariable("id") final Long id, @PathVariable("mode") @SafeHtml final String mode, final Model model) {
         final Bankaccount bankaccount = createBankAccountService.getById(id);
         model.addAttribute(BANKACCOUNT, bankaccount);
         model.addAttribute("mode", mode);
@@ -202,8 +205,8 @@ public class BankAccountController {
 
     @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public String ajaxsearch(@PathVariable("mode") final String mode, final Model model,
-            @ModelAttribute final Bankaccount bankaccount) {
+    public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+           @Valid @ModelAttribute final Bankaccount bankaccount) {
         final List<Bankaccount> searchResultList = createBankAccountService.search(bankaccount);
         return new StringBuilder("{ \"data\":")
                 .append(toSearchResultJson(searchResultList)).append("}")

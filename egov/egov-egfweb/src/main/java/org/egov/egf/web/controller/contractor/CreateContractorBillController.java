@@ -67,6 +67,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.dispatcher.multipart.MultiPartRequestWrapper;
@@ -95,10 +96,12 @@ import org.egov.model.bills.EgBilldetails;
 import org.egov.model.bills.EgBillregister;
 import org.egov.model.masters.WorkOrder;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -111,6 +114,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping(value = "/contractorbill")
+@Validated
 public class CreateContractorBillController extends BaseBillController {
 
     private static final String NET_PAYABLE_CODES = "netPayableCodes";
@@ -203,8 +207,8 @@ public class CreateContractorBillController extends BaseBillController {
     }
 
     @PostMapping(value = "/create")
-    public String create(@ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
-            final BindingResult resultBinder, final HttpServletRequest request, @RequestParam final String workFlowAction)
+    public String create(@Valid @ModelAttribute("egBillregister") final EgBillregister egBillregister, final Model model,
+            final BindingResult resultBinder, final HttpServletRequest request, @RequestParam @SafeHtml final String workFlowAction)
             throws IOException, ParseException {
 
     	if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workFlowAction) && !commonsUtil
@@ -407,7 +411,7 @@ public class CreateContractorBillController extends BaseBillController {
     }
 
     @GetMapping(value = "/success")
-    public String showSuccessPage(@RequestParam("billNumber") final String billNumber, final Model model,
+    public String showSuccessPage(@RequestParam("billNumber") @SafeHtml final String billNumber, final Model model,
             final HttpServletRequest request) {
         final String[] keyNameArray = request.getParameter(APPROVER_DETAILS).split(",");
         Long id = 0L;
@@ -477,7 +481,7 @@ public class CreateContractorBillController extends BaseBillController {
         
         final FileInputStream inputStream = new FileInputStream(downloadFile);
         EgBillregister egBillregister = contractorBillService.getById(Long.parseLong(request.getParameter("egBillRegisterId")));
-        egBillregister = getBillDocuments(egBillregister);
+        getBillDocuments(egBillregister);
 
         for (final DocumentUpload doc : egBillregister.getDocumentDetail())
             if (doc.getFileStore().getFileStoreId().equalsIgnoreCase(fileStoreId))
