@@ -54,7 +54,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -188,7 +187,12 @@ public class XMLLoader extends DefaultHandler {
             // node
             objectToLoad = rootObject; // load the root node to root object
         else
-            objectToLoad = createChild(qName, atts);
+            try {
+                objectToLoad = createChild(qName, atts);
+            } catch (IllegalArgumentException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
 
         if (objectToLoad != null) { // if it is null, the node is not loaded at
             // all..
@@ -263,7 +267,7 @@ public class XMLLoader extends DefaultHandler {
      * Whenevr a child node is detected by the parser, a new Object is to be supplied to set all the attributes. This helper class
      * tries different conventions to create a child object
      */
-    private Object createChild(final String tag, final Attributes atts) {
+    private Object createChild(final String tag, final Attributes atts){
         if (openNodes.size() == 0)
             return null;
 
@@ -274,44 +278,59 @@ public class XMLLoader extends DefaultHandler {
         ChildInfo childInfo = null;
 
         if (stackedObject.childInfos.size() > 0)
-            try {
-                childInfo = (ChildInfo) stackedObject.childInfos.get(tag);
-            } catch (final Exception e) {
-                LOGGER.error("Error in getting child info" + e.getMessage());
-            }
+            childInfo = (ChildInfo) stackedObject.childInfos.get(tag);
 
         if (null == childInfo) {// no info. Probably this tag is encountered for
             // the first time
             childInfo = new ChildInfo(tag);
-            childInfo.addInfo(parentObject);
+            try {
+                try {
+                    childInfo.addInfo(parentObject);
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } catch (NoSuchFieldException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             stackedObject.childInfos.put(tag, childInfo);
         }
         // is there a key to this node? name=key or name=id or name=name are
         // considered to be keys
         String key = null;
+        key = atts.getValue("id");
+
+        if (null == key)
+            key = atts.getValue("key");
+
+        if (null == key)
+            key = atts.getValue("name");
+
         try {
-            key = atts.getValue("id");
-        } catch (final Exception e) {
-            LOGGER.error("Exp=" + e.getMessage());
+            try {
+                return childInfo.createChild(parentObject, key);
+            } catch (IllegalAccessException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } catch (InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-
-        if (null == key)
-            try {
-                key = atts.getValue("key");
-            } catch (final Exception e) {
-                if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("Exp=" + e.getMessage());
-            }
-
-        if (null == key)
-            try {
-                key = atts.getValue("name");
-            } catch (final Exception e) {
-                if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("Exp=" + e.getMessage());
-            }
-
-        return childInfo.createChild(parentObject, key);
+        return key;
 
     }
 
@@ -386,7 +405,7 @@ public class XMLLoader extends DefaultHandler {
          * Extracts information about the way the child Object is to be created. Uses reflection to check what the parentObject
          * has planned to create add child nodes This method is long, as we explore different options..
          */
-        public void addInfo(final Object parentObject) {
+        public void addInfo(final Object parentObject) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, InstantiationException {
 
             // class arrays required for getMethod() calls
             final Class[] stringClass = { String.class };
@@ -411,14 +430,14 @@ public class XMLLoader extends DefaultHandler {
                 try {
                     endChildMethod = parentObject.getClass().getMethod(
                             "endChild", stringClass);
-                } catch (final Exception e) {
+                } catch (final NoSuchMethodException e) {
                     LOGGER.error("Exp=" + e.getMessage());
                 }
 
                 return; // if this method is available, we do not look for
                 // anything else.
 
-            } catch (final Exception e) {
+            } catch (final NoSuchMethodException e) {
                 LOGGER.error("Exp=" + e.getMessage());
             }
 
@@ -439,7 +458,7 @@ public class XMLLoader extends DefaultHandler {
                 // this will be over-ridden subsequently if collection is
                 // discovered..
                 // no return. We should explore further....
-            } catch (final Exception e) {
+            } catch (final NoSuchFieldException e) {
                 LOGGER.error("Exp=" + e.getMessage());
             }
 
@@ -481,19 +500,19 @@ public class XMLLoader extends DefaultHandler {
                         collectionObject = o; // o stores all children
                         addRequiresKey = false;
                         storageType = 4;
-                    } catch (final Exception e) {
+                    } catch (final NoSuchMethodException e) {
                         try {// may be it has put(key, Object) method..
                             addMethod = c.getMethod("put", objClass2);
                             collectionObject = o;
                             addRequiresKey = true;
                             storageType = 4;
-                        } catch (final Exception e1) {
+                        } catch (final NoSuchMethodException e1) {
                             LOGGER.error("Exp=" + e1.getMessage());
                         }
                         LOGGER.error("Exp ObjectGetSetter=" + e.getMessage());
                     }
                 }
-            } catch (final Exception e) {
+            } catch (final NoSuchMethodException e) {
                 LOGGER.error("Exp=" + e.getMessage());
             }
             // if all exploration failed, storageType will continue to be 0
@@ -503,7 +522,7 @@ public class XMLLoader extends DefaultHandler {
         /*
          * Instantiate a child object based on this info for the supplied parentObject
          */
-        public Object createChild(final Object parentObject, final String key) {
+        public Object createChild(final Object parentObject, final String key) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
 
             Object childObject = null;
             final Object[] arr1 = { null }; // for method.invoke()..
@@ -511,44 +530,31 @@ public class XMLLoader extends DefaultHandler {
 
             switch (storageType) {
             case 1: // newChild(tag) method
-                try {
-                    arr2[0] = tag;
-                    arr2[1] = key;
-                    childObject = newChildMethod
-                            .invoke(parentObject, arr2);
-                } catch (final Exception e) {
-                    LOGGER.error("Exp=" + e.getMessage());
-                }
+                arr2[0] = tag;
+                arr2[1] = key;
+                childObject = newChildMethod
+                        .invoke(parentObject, arr2);
                 break;
 
             case 2: // field - single child . get it, and instantiate it if
-                // required
-                try {
-                    childObject = field.get(parentObject);
-                    if (childObject == null) {
-                        childObject = fieldType.newInstance();
-                        field.set(parentObject, childObject);
-                    }
-                } catch (final Exception e) {
-                    LOGGER.error("Exp=" + e.getMessage());
+                childObject = field.get(parentObject);
+                if (childObject == null) {
+                    childObject = fieldType.newInstance();
+                    field.set(parentObject, childObject);
                 }
                 break;
 
             case 3: // array. But a temporary ArrayList is created, and hence
                 // adding is same as 4
             case 4:
-                try { // instantaite an object and add it to the collection
-                    childObject = fieldType.newInstance();
-                    if (addRequiresKey) {
-                        arr2[0] = key;
-                        arr2[1] = childObject; // arr2[0] is already set to tag
-                        addMethod.invoke(collectionObject, arr2);
-                    } else {
-                        arr1[0] = childObject;
-                        addMethod.invoke(collectionObject, arr1);
-                    }
-                } catch (final Exception e) {
-                    LOGGER.error("Exp=" + e.getMessage());
+                childObject = fieldType.newInstance();
+                if (addRequiresKey) {
+                    arr2[0] = key;
+                    arr2[1] = childObject; // arr2[0] is already set to tag
+                    addMethod.invoke(collectionObject, arr2);
+                } else {
+                    arr1[0] = childObject;
+                    addMethod.invoke(collectionObject, arr1);
                 }
                 break;
             default:
@@ -563,27 +569,39 @@ public class XMLLoader extends DefaultHandler {
         void endChild(final Object parentObject) {
             switch (storageType) {
             case 1: // see if there is endChild() method
-                if (endChildMethod != null)
+                if (endChildMethod != null) {
+                    final Object[] a = { tag };
                     try {
-                        final Object[] a = { tag };
                         endChildMethod.invoke(parentObject, a);
-                    } catch (final Exception e) {
-                        LOGGER.error("Exp in endChild=" + e.getMessage());
+                    } catch (IllegalAccessException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IllegalArgumentException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
+                }
                 break;
 
             case 3: // array. convert ArrayList to array
+                final ArrayList al = (ArrayList) collectionObject;
+                final int len = al.size();
+                final int[] a = { len };
+                final Object o = Array.newInstance(fieldType, a);
+                for (int i = 0; i < len; i++)
+                    Array.set(o, i, al.get(i));
+                field.setAccessible(true);
                 try {
-                    final ArrayList al = (ArrayList) collectionObject;
-                    final int len = al.size();
-                    final int[] a = { len };
-                    final Object o = Array.newInstance(fieldType, a);
-                    for (int i = 0; i < len; i++)
-                        Array.set(o, i, al.get(i));
-                    field.setAccessible(true);
                     field.set(parentObject, o);
-                } catch (final Exception e) {
-                    LOGGER.error("Exp in end Child=" + e.getMessage());
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
                 break;
 

@@ -143,15 +143,11 @@ public class ScheduleMapping {
     }
 
     @Transactional
-    public void update() throws SQLException, TaskFailedException {
-        try {
-            newUpdate();
-        } catch (final Exception e) {
-            LOGGER.error("Error inside update" + e.getMessage(), e);
-        }
+    public void update() {
+        newUpdate();
     }
 
-    public void newUpdate() throws TaskFailedException{
+    public void newUpdate(){
         lastModifiedDate = eGovernCommon.getCurrentDate();
         Query pstmt = null;
         try {

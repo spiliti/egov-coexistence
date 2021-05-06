@@ -168,7 +168,7 @@ public class DishonoredChequeAction extends SearchFormAction {
     }
 
     @Action(value = "/receipts/dishonoredCheque-list")
-    public String list() throws Exception {
+    public String list() {
         setPageSize(30);
         super.search();
         prepareResults();
@@ -202,7 +202,7 @@ public class DishonoredChequeAction extends SearchFormAction {
 
     @ValidationErrorPage(value = "process")
     @Action(value = "/receipts/dishonoredCheque-create")
-    public String create() throws Exception {
+    public String create() {
         try {
             final DishonoredChequeBean chequeForm = new DishonoredChequeBean();
             chequeForm.setTransactionDate(transactionDate);
@@ -221,12 +221,13 @@ public class DishonoredChequeAction extends SearchFormAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            LOGGER.error("Error in DishonorCheque >>>>" + e);
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Error in DishonorCheque >>>>" + e); final
+           * List<ValidationError> errors = new ArrayList<ValidationError>();
+           * errors.add(new ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
         return SUCCESS;
     }
 
@@ -267,7 +268,7 @@ public class DishonoredChequeAction extends SearchFormAction {
     }
 
     @Action(value = "/receipts/dishonoredCheque-process")
-    public String process() throws Exception {
+    public String process() {
         getReversalGlCodes();
         return "process";
     }

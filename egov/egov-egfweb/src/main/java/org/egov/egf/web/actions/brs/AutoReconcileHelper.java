@@ -110,6 +110,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1164,15 +1165,13 @@ public class AutoReconcileHelper{
     @Action(value = "/brs/autoReconciliation-generateReport")
     @SuppressWarnings({"unchecked", "deprecation"})
     @Transactional(readOnly = true)
-    public String generateReport() {
+    public String generateReport() throws ParseException {
         // bankStatments not in BankBook
 
         try {
             bankBookBalance = eGovernCommon.getAccountBalance(dateFormatter.format(toDate), accountId.toString()).setScale(2,
                     BigDecimal.ROUND_HALF_UP);
         } catch (final HibernateException e) {
-            throw new ApplicationRuntimeException(e.getMessage());
-        } catch (final TaskFailedException e) {
             throw new ApplicationRuntimeException(e.getMessage());
         }
         bankAccount = (Bankaccount) persistenceService.find("from Bankaccount ba where id=?", Long.valueOf(accountId));

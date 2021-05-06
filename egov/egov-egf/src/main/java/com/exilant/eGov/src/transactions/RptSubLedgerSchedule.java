@@ -308,7 +308,7 @@ public class RptSubLedgerSchedule {
         			entity = (EntityType) persistenceService.find(
         					" from " + accountdetailtype.getFullQualifiedName() + " where id = ?",
         					element[0].toString());
-        		} catch (final Exception ee) {
+        		} catch (final HibernateException ee) {
         			LOGGER.error(ee.getMessage(), ee);
         			entity = (EntityType) persistenceService.find(
         					" from " + accountdetailtype.getFullQualifiedName() + " where id = ?",

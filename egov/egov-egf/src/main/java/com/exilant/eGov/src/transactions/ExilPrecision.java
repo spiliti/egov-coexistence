@@ -102,7 +102,7 @@ public class ExilPrecision
         double dNum = 0;
         try {
             dNum = Double.parseDouble(sNum);
-        } catch (final Exception e) {
+        } catch (final NumberFormatException e) {
             LOGGER.error("There is error " + e.getMessage());
             return 0;
         }

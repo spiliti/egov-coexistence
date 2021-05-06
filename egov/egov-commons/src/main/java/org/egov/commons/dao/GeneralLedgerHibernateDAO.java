@@ -116,10 +116,10 @@ public class GeneralLedgerHibernateDAO  implements GeneralLedgerDAO {
 
 	/**
 	 * This method will calculate the Actuals for the previous year.
+	 * @throws ApplicationException 
 	 */
 	@Override
-	public String getActualsPrev(final String accCode, final String functionId, final String budgetingType)
-			throws Exception {
+	public String getActualsPrev(final String accCode, final String functionId, final String budgetingType) throws ApplicationException {
 		final FinancialYearDAO fiscal = financialYearHibernateDAO;
 		final String financialperiodId = fiscal.getPrevYearFiscalId();
 		final FiscalPeriodDAO fiscalperiod = fiscalPeriodHibernateDAO;
@@ -214,10 +214,10 @@ public class GeneralLedgerHibernateDAO  implements GeneralLedgerDAO {
 
 	/**
 	 * This method will calculate the Actuals upto december of the current year.
+	 * @throws ApplicationException 
 	 */
 	@Override
-	public String getActualsDecCurr(final String accCode, final String functionId, final String budgetingType)
-			throws Exception {
+	public String getActualsDecCurr(final String accCode, final String functionId, final String budgetingType) throws ApplicationException{
 		final FinancialYearDAO fiscal = financialYearHibernateDAO;
 		String startdate = fiscal.getCurrYearStartDate();
 		final String temp[] = startdate.split("-");
@@ -362,8 +362,7 @@ public class GeneralLedgerHibernateDAO  implements GeneralLedgerDAO {
 
 	@Override
 	public BigDecimal getGlAmountForBudgetingType(final Long budType, final List glcodeList, final String finYearID,
-			final String functionId, final String schemeId, final String subSchemeId, final String asOnDate)
-			throws Exception {
+			final String functionId, final String schemeId, final String subSchemeId, final String asOnDate) throws ApplicationException {
 		try {
 			Query qry = null;
 			final StringBuffer qryStr = new StringBuffer(1000);
@@ -451,7 +450,7 @@ public class GeneralLedgerHibernateDAO  implements GeneralLedgerDAO {
 	}
 
     @Override
-    public BigDecimal getGlAmountbyGlcodeList(final List glCodeList, final BigDecimal glAmount) throws Exception {
+    public BigDecimal getGlAmountbyGlcodeList(final List glCodeList, final BigDecimal glAmount) throws ApplicationException{
         BigDecimal amount = glAmount;
         Query qry = null;
       

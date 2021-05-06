@@ -182,12 +182,7 @@ public class ChartOfAccounts {
 			LOGGER.debug("loadAccountData called");
 
 		HashMap<String, HashMap> hm = null;
-		try {
-			hm = (HashMap<String, HashMap>) applicationCacheManager.get(ROOTNODE);
-
-		} catch (Exception e1) {
-
-		}
+		hm = (HashMap<String, HashMap>) applicationCacheManager.get(ROOTNODE);
 		if (hm == null) {
 
 			coaCache.loadAccountData();
@@ -407,7 +402,7 @@ public class ChartOfAccounts {
 				dbAmt += Double.parseDouble(txn.getDrAmount());
 				crAmt += Double.parseDouble(txn.getCrAmount());
 			}
-		} catch (final Exception e) {
+		} catch (final NumberFormatException e) {
 			dc.addMessage(EXILRPERROR, e.toString());
 			LOGGER.error(e.getMessage(), e);
 			throw new TaskFailedException();
@@ -523,7 +518,7 @@ public class ChartOfAccounts {
 		return true;
 	}
 
-	private void checkfuctreqd(final String glcode, final String fuctid, final DataCollection dc) throws Exception {
+	private void checkfuctreqd(final String glcode, final String fuctid, final DataCollection dc) throws TaskFailedException {
 
 		final String sql = "select FUNCTIONREQD from chartofaccounts where glcode = ?";
 		final Query pst = persistenceService.getSession().createSQLQuery(sql);
@@ -591,7 +586,7 @@ public class ChartOfAccounts {
 
 					try {
 						checkfuctreqd(txn.getGlCode(), txn.getFunctionId(), dc);
-					} catch (final Exception e) {
+					} catch (final TaskFailedException e) {
 						LOGGER.error("Inside checkfuctreqd" + e.getMessage(), e);
 						return false;
 					}

@@ -79,9 +79,11 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -276,7 +278,7 @@ public class AxisAdaptor implements PaymentGatewayAdaptor {
         return preparePaymentResponse(fields);
     }
 
-    private PaymentResponse preparePaymentResponse(final Map<String, String> fields) {
+    private PaymentResponse preparePaymentResponse(final Map<String, String> fields){
         final PaymentResponse axisResponse = new DefaultPaymentResponse();
         try {
             // AXIS Payment Gateway returns Response Code 0(Zero) for successful
@@ -305,7 +307,7 @@ public class AxisAdaptor implements PaymentGatewayAdaptor {
                 axisResponse.setTxnReferenceNo(fields.get(CollectionConstants.AXIS_TXN_NO));
                 axisResponse.setTxnDate(getTransactionDate(fields.get(CollectionConstants.AXIS_BATCH_NO)));
             }
-        } catch (final Exception exp) {
+        } catch (final ApplicationException exp) {
             LOGGER.error(exp);
             throw new ApplicationRuntimeException("Exception during prepare payment response" + exp.getMessage());
         }
@@ -399,9 +401,15 @@ public class AxisAdaptor implements PaymentGatewayAdaptor {
             }
             LOGGER.debug(
                     "receiptid=" + axisResponse.getReceiptId() + "consumercode=" + axisResponse.getAdditionalInfo6());
-        } catch (final Exception exp) {
+        } catch (final ApplicationException exp) {
             LOGGER.error(exp);
             throw new ApplicationRuntimeException("Exception during create offline requests" + exp.getMessage());
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         return axisResponse;
     }

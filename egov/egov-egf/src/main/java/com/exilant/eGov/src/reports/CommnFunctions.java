@@ -441,20 +441,12 @@ public class CommnFunctions
     {
         String startDate = "" ;
         final String query = "SELECT TO_CHAR(startingdate,'DD/MM/YYYY') FROM FINANCIALYEAR WHERE id= ?";
-        try
-        {
-            pstmt = persistenceService.getSession().createSQLQuery(query);
-            pstmt.setInteger(0, finYearId);
+        pstmt = persistenceService.getSession().createSQLQuery(query);
+        pstmt.setInteger(0, finYearId);
 
-            List list = pstmt.list();
-            if(list!=null)
-            	startDate = list.get(0).toString();
-
-        } catch (final Exception sql)
-        {
-            LOGGER.error("Exp in getStartDate :" + sql.getMessage(), sql);
-            throw taskExc;
-        }
+        List list = pstmt.list();
+        if(list!=null)
+        	startDate = list.get(0).toString();
         return startDate;
     }
 
@@ -469,18 +461,11 @@ public class CommnFunctions
     {
         String endDate = "";
         final String query = "SELECT TO_CHAR(endingdate,'DD/MM/YYYY') FROM FINANCIALYEAR WHERE id= ?";
-        try
-        {
-            pstmt = persistenceService.getSession().createSQLQuery(query);
-            pstmt.setInteger(0, finYearId);
-            resultset = pstmt.list();
-            for (final Object[] element : resultset)
-                endDate = element[0].toString();
-        } catch (final Exception sql)
-        {
-            LOGGER.error("error inside getEndDate" + sql.getMessage(), sql);
-            throw taskExc;
-        }
+        pstmt = persistenceService.getSession().createSQLQuery(query);
+        pstmt.setInteger(0, finYearId);
+        resultset = pstmt.list();
+        for (final Object[] element : resultset)
+            endDate = element[0].toString();
         return endDate;
     }
 

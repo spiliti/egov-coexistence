@@ -48,8 +48,10 @@
 package org.egov.collection.integration.pgi;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,6 +66,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
@@ -71,6 +74,7 @@ import javax.xml.transform.sax.SAXSource;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -92,6 +96,7 @@ import org.egov.infstr.models.ServiceDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.xml.sax.InputSource;
 
 /**
@@ -247,7 +252,7 @@ public class AtomAdaptor implements PaymentGatewayAdaptor {
     }
 
     @Transactional
-    public PaymentResponse createOfflinePaymentRequest(final OnlinePayment onlinePayment) {
+    public PaymentResponse createOfflinePaymentRequest(final OnlinePayment onlinePayment) throws ApplicationException, ClientProtocolException, IOException, JAXBException {
         LOGGER.debug("Inside AtomAdaptor createOfflinePaymentRequest");
         PaymentResponse atomResponse = new DefaultPaymentResponse();
         try {
@@ -306,7 +311,7 @@ public class AtomAdaptor implements PaymentGatewayAdaptor {
                         .setAdditionalInfo6(onlinePayment.getReceiptHeader().getConsumerCode().replace("-", "").replace("/", ""));
                 atomResponse.setAdditionalInfo2(ApplicationThreadLocals.getCityCode());
             }
-        } catch (Exception exp) {
+        } catch (HttpClientErrorException exp) {
             exp.printStackTrace();
         }
         return atomResponse;

@@ -486,19 +486,14 @@ public class ChallanAction extends BaseFormAction {
             final ReceiptHeader[] receipts = new ReceiptHeader[1];
             receipts[0] = receiptHeader;
 
-            try {
-                reportId = collectionCommon.generateReport(receipts, true);
-            } catch (final Exception e) {
-                LOGGER.error(CollectionConstants.REPORT_GENERATION_ERROR, e);
-                throw new ApplicationRuntimeException(CollectionConstants.REPORT_GENERATION_ERROR, e);
-            }
+            reportId = collectionCommon.generateReport(receipts, true);
             return CollectionConstants.REPORT;
         } catch (final StaleObjectStateException exp) {
             errors.add(new ValidationError(getText("challanreceipt.created.staleobjectstate"),
                     "Receipt Already Created For this Challan.Go to Search Receipt screen to Re-print the receipt."));
             LOGGER.error("Receipt Already Created For this Challan", exp);
             throw new ValidationException(errors);
-        } catch (final Exception exp) {
+        } catch (final ValidationException exp) {
             errors.add(new ValidationError(getText("challanreceipt.create.errorincreate"),
                     "Error occured in Challan Receipt creation, please try again."));
             LOGGER.error("Error occured in Challan Receipt creation, please try again", exp);
@@ -514,12 +509,7 @@ public class ChallanAction extends BaseFormAction {
     @Action(value = "/receipts/challan-printChallan")
     public String printChallan() {
 
-        try {
-            reportId = collectionCommon.generateChallan(receiptHeader, true);
-        } catch (final Exception e) {
-            LOGGER.error(CollectionConstants.REPORT_GENERATION_ERROR, e);
-            throw new ApplicationRuntimeException(CollectionConstants.REPORT_GENERATION_ERROR, e);
-        }
+        reportId = collectionCommon.generateChallan(receiptHeader, true);
         setSourcePage("viewChallan");
         return CollectionConstants.REPORT;
     }

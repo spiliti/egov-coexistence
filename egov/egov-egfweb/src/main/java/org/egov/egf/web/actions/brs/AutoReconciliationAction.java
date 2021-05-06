@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -254,7 +255,7 @@ public class AutoReconciliationAction extends BaseFormAction {
 
 	@Action(value = "/brs/autoReconciliation-generateReport")
 	@SuppressWarnings({ "unchecked", "deprecation" })
-	public String generateReport() {
+	public String generateReport() throws ParseException {
 		setup();
 		autoReconcileHelper.generateReport();
 		return "report";
@@ -377,7 +378,7 @@ public class AutoReconciliationAction extends BaseFormAction {
 	}
 
 	@Action(value = "/brs/autoReconciliation-generatePDF")
-	public String generatePDF() throws JRException, IOException {
+	public String generatePDF() throws JRException, IOException, ParseException {
 		final List<Object> dataSource = new ArrayList<Object>();
 		final AutoReconcileBean AutoReconcileObj = new AutoReconcileBean();
 
@@ -393,7 +394,7 @@ public class AutoReconciliationAction extends BaseFormAction {
 	}
 
 	@Action(value = "/brs/autoReconciliation-generateXLS")
-	public String generateXLS() throws JRException, IOException {
+	public String generateXLS() throws JRException, IOException, ParseException {
 		final List<Object> dataSource = new ArrayList<Object>();
 		final AutoReconcileBean AutoReconcileObj = new AutoReconcileBean();
 		generateReport();

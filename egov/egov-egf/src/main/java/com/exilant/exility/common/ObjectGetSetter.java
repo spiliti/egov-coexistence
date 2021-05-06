@@ -78,14 +78,16 @@ public class ObjectGetSetter {
      * @param object : object whose field value is to be returned
      * @param fieldName : Name of the field
      * @return String representing the String value of the field
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
      */
-    public static Object get(final Object object, final String fieldName) {
+    public static Object get(final Object object, final String fieldName) throws IllegalArgumentException, IllegalAccessException {
 
         try {
             final Field field = ObjectGetSetter.getField(object, fieldName);
             field.setAccessible(true);
             return field.get(object).toString();
-        } catch (final Exception e) {
+        } catch (final NoSuchFieldException e) {
             // logger.error("Problem in get()"+object+"for Fiels"+fieldName);
         } // let us not worry about any exception. We only promised that we will TRY :-)
         return null;

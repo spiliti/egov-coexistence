@@ -198,10 +198,11 @@ public class AjaxReceiptCreateAction extends BaseFormAction {
      * This method is accessed from challan.js and MiscReceipts.js
      *
      * @return
+     * @throws ClassNotFoundException 
      * @throws Exception
      */
     @Action(value = "/receipts/ajaxReceiptCreate-ajaxValidateDetailCodeNew")
-    public String ajaxValidateDetailCodeNew() throws Exception {
+    public String ajaxValidateDetailCodeNew() throws ClassNotFoundException {
         final String code = parameters.get("code")[0];
         final String index = parameters.get(INDEX)[0];
         final String codeorname = parameters.get("codeorname")[0];
@@ -259,7 +260,7 @@ public class AjaxReceiptCreateAction extends BaseFormAction {
     }
 
     @Action(value = "/receipts/ajaxReceiptCreate-getCodeNew")
-    public String getCodeNew() throws Exception {
+    public String getCodeNew() throws ClassNotFoundException{
         value = "";
         final String detailTypeId = parameters.get("detailTypeId")[0];
         final String filterKey = parameters.get("filterKey")[0];

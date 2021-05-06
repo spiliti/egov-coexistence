@@ -52,6 +52,7 @@ import com.exilant.exility.common.ExilityParameters;
 import com.exilant.exility.common.ObjectGetSetter;
 import com.exilant.exility.common.TaskFailedException;
 import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
@@ -127,7 +128,7 @@ public class DataExtractor {
                 metaData = rs.getMetaData();
                 columnCount = metaData.getColumnCount();// Gets the Column Count in the ResultSet
                 columnNames = new String[columnCount];
-            } catch (final Exception e) {
+            } catch (final HibernateException e) {
                 LOGGER.error("Exception while analysing Result set in extract", e);
                 return;
             }
@@ -153,7 +154,7 @@ public class DataExtractor {
                     /*
                      * if(errorOnNoData){ dc.addMessage("exilNoData"); throw new TaskFailedException(); }
                      */
-                } catch (final Exception e) {
+                } catch (final NumberFormatException e) {
                     LOGGER.error("Exception while analysing Result set in extract", e);
                     return;
                 }
@@ -162,7 +163,7 @@ public class DataExtractor {
                 try {
                     rs.next();
                     rs.getString(1);
-                } catch (final Exception eee) {
+                } catch (final NumberFormatException eee) {
                     LOGGER.error("Error while analysing Result set in extract", eee);
                     rowCount = 0;
                 }
@@ -173,7 +174,7 @@ public class DataExtractor {
                         rowCount = rs.getRow();
                         rs.beforeFirst();				// brings back the cursor to the start in the ResultSet
                     }
-                } catch (final Exception e) {
+                } catch (final NumberFormatException e) {
                     LOGGER.error("Error while analysing Result set in extract", e);
                     rowCount = 0;
                 }
@@ -201,13 +202,13 @@ public class DataExtractor {
                         }
                         rowid++; // Row wise increment;
                     }
-                } catch (final Exception e) {
+                } catch (final NumberFormatException e) {
                     LOGGER.error("Inside extract", e);
                     try {
                         if (gridName != null && dataValues != null && addColumnHeading)
                             dc.addGrid(gridName, dataValues);
 
-                    } catch (final Exception ee) {
+                    } catch (final NumberFormatException ee) {
                         LOGGER.error("Error while adding grid in extract", ee);
                     }
                     return;

@@ -292,7 +292,7 @@ public class ChartOfAccountsService extends PersistenceService<CChartOfAccounts,
                             "SELECT coa FROM CChartOfAccounts coa,EgfAccountcodePurpose purpose WHERE coa.purposeId=purpose.id and purpose.name = :purposeName AND coa.classification=4 AND coa.isActiveForPosting=true ");
             query.setString("purposeName", purposeName);
             accountCodeList.addAll(query.list());
-        } catch (final Exception e) {
+        } catch (final ApplicationException e) {
             throw new ApplicationRuntimeException("Error occurred while getting Account Code by purpose name", e);
         }
         return accountCodeList;
@@ -307,7 +307,7 @@ public class ChartOfAccountsService extends PersistenceService<CChartOfAccounts,
             try {
                 accountCodeByPurpose = getAccountCodeByPurpose(Integer
                         .valueOf(configValuesByModuleAndKey.get(i).getValue()));
-            } catch (final Exception e) {
+            } catch (final ApplicationException e) {
                 // Ignore
             }
 
@@ -339,7 +339,7 @@ public class ChartOfAccountsService extends PersistenceService<CChartOfAccounts,
             try {
                 accountCodeByPurpose = getAccountCodeByPurpose(Integer
                         .valueOf(configValuesByModuleAndKey.get(i).getValue()));
-            } catch (final Exception e) {
+            } catch (final ApplicationException e) {
                 // Ignore
             }
 

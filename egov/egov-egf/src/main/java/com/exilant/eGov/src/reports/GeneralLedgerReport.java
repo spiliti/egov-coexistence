@@ -141,7 +141,7 @@ public class GeneralLedgerReport {
                 effTime = new HashMap<>();
             else
                 effTime = eGovernCommon.getEffectiveDateFilter(snapShotDateTime);
-        } catch (final Exception e) {
+        } catch (final TaskFailedException e) {
             LOGGER.error(e.getMessage(), e);
             throw taskExc;
         }
@@ -162,7 +162,7 @@ public class GeneralLedgerReport {
             endDate = reportBean.getEndDate();
             dt = sdf.parse(endDate);
             formendDate = formatter1.format(dt);
-        } catch (final Exception e) {
+        } catch (final ParseException e) {
             LOGGER.error("inside the try-startdate" + e, e);
             throw taskExc;
         }
@@ -999,19 +999,13 @@ public class GeneralLedgerReport {
         params.put("glCode", Arrays.asList(glCode.split(",")));
         if (LOGGER.isInfoEnabled())
             LOGGER.info("**********************: OPBAL: " + queryYearOpBal);
-        try {
-            int i = 0;
-            pstmt = persistenceService.getSession().createSQLQuery(queryYearOpBal.toString());
-            persistenceService.populateQueryWithParams(pstmt, params);
-            resultset = pstmt.list();
-            for (final Object[] element : resultset) {
-                opDebit = Double.parseDouble(element[0] != null ? element[0].toString() : "0");
-                opCredit = Double.parseDouble(element[1] != null ? element[1].toString() : "0");
-            }
-
-        } catch (final Exception ex) {
-            LOGGER.error("Error GeneralLedger->getOpeningBalance() For the year: " + ex.toString(), ex);
-            throw taskExc;
+        int i = 0;
+        pstmt = persistenceService.getSession().createSQLQuery(queryYearOpBal.toString());
+        persistenceService.populateQueryWithParams(pstmt, params);
+        resultset = pstmt.list();
+        for (final Object[] element : resultset) {
+            opDebit = Double.parseDouble(element[0] != null ? element[0].toString() : "0");
+            opCredit = Double.parseDouble(element[1] != null ? element[1].toString() : "0");
         }
 
         params = new HashMap<>();
@@ -1093,29 +1087,24 @@ public class GeneralLedgerReport {
         params.put("glcode", Arrays.asList(glCode.split(",")));
         if (LOGGER.isInfoEnabled())
             LOGGER.info("***********: OPBAL: " + queryTillDateOpBal);
-        try {
-            pstmt = persistenceService.getSession().createSQLQuery(queryTillDateOpBal.toString());
-            persistenceService.populateQueryWithParams(pstmt, params);
-            
-            resultset = pstmt.list();
-            if (!accEntityId.equalsIgnoreCase("") && !accEntityKey.equalsIgnoreCase(""))
-                for (final Object[] element : resultset) {
-                    if (element[1] != null)
-                        opDebit = opDebit + Double.parseDouble(element[1].toString());
-                    if (element[2] != null)
-                        opCredit = opCredit + Double.parseDouble(element[2].toString());
-                }
-            else
-                for (final Object[] element : resultset) {
-                    if (element[0] != null)
-                        opDebit = opDebit + Double.parseDouble(element[0].toString());
-                    if (element[1] != null)
-                        opCredit = opCredit + Double.parseDouble(element[1].toString());
-                }
-        } catch (final Exception ex) {
-            LOGGER.error("Error GeneralLedger->getOpeningBalance() till the date: " + ex.toString(), ex);
-            throw taskExc;
-        }
+        pstmt = persistenceService.getSession().createSQLQuery(queryTillDateOpBal.toString());
+        persistenceService.populateQueryWithParams(pstmt, params);
+        
+        resultset = pstmt.list();
+        if (!accEntityId.equalsIgnoreCase("") && !accEntityKey.equalsIgnoreCase(""))
+            for (final Object[] element : resultset) {
+                if (element[1] != null)
+                    opDebit = opDebit + Double.parseDouble(element[1].toString());
+                if (element[2] != null)
+                    opCredit = opCredit + Double.parseDouble(element[2].toString());
+            }
+        else
+            for (final Object[] element : resultset) {
+                if (element[0] != null)
+                    opDebit = opDebit + Double.parseDouble(element[0].toString());
+                if (element[1] != null)
+                    opCredit = opCredit + Double.parseDouble(element[1].toString());
+            }
         final OpBal opBal = new OpBal();
         opBal.dr = opDebit;
         opBal.cr = opCredit;
@@ -1123,46 +1112,35 @@ public class GeneralLedgerReport {
         return opBal;
     }
 
-	private String getAccountName(final String glCode) throws TaskFailedException {
+	private String getAccountName(final String glCode) {
 		String accountName = "";
 		Query pst = null;
-		try {
-			final String query = "select name as \"name\" from  CHARTOFACCOUNTS where GLCODE=?";
-			pst = persistenceService.getSession().createSQLQuery(query);
-			pst.setString(0, glCode);
-			final List list = pst.list();
-			if (list != null && !list.isEmpty()) {
-				final Object[] objects = list.toArray();
-				accountName = objects[0].toString();
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Exp in getAccountName:" + e.getMessage(), e);
-			throw taskExc;
-		}
+		final String query = "select name as \"name\" from  CHARTOFACCOUNTS where GLCODE=?";
+        pst = persistenceService.getSession().createSQLQuery(query);
+        pst.setString(0, glCode);
+        final List list = pst.list();
+        if (list != null && !list.isEmpty()) {
+        	final Object[] objects = list.toArray();
+        	accountName = objects[0].toString();
+        }
 		return accountName;
 	}
 
-    private String getFundName(final String fundId) throws TaskFailedException {
+    private String getFundName(final String fundId){
         String fundName = "";
         Query pst = null;
-        try {
-            final String query = "select name  as \"name\" from fund where id=?";
-            pst = persistenceService.getSession().createSQLQuery(query);
-            if (fundId.isEmpty())
-                pst.setInteger(0, 0);
-            else
-                pst.setInteger(0, Integer.valueOf(fundId));
-            final List<Object[]> list = pst.list();
-            final Object[] objects = list.toArray();
-            if (objects.length == 0)
-                fundName = "";
-            else
-                fundName = objects[0].toString();
-
-        } catch (final Exception e) {
-            LOGGER.error("Exp in getFundName" + e.getMessage(), e);
-            throw taskExc;
-        }
+        final String query = "select name  as \"name\" from fund where id=?";
+        pst = persistenceService.getSession().createSQLQuery(query);
+        if (fundId.isEmpty())
+            pst.setInteger(0, 0);
+        else
+            pst.setInteger(0, Integer.valueOf(fundId));
+        final List<Object[]> list = pst.list();
+        final Object[] objects = list.toArray();
+        if (objects.length == 0)
+            fundName = "";
+        else
+            fundName = objects[0].toString();
         return fundName;
     }
 
@@ -1200,7 +1178,7 @@ public class GeneralLedgerReport {
                                     if (ret == -1)
                                         throw taskExc;
 
-        } catch (final Exception ex) {
+        } catch (final TaskFailedException ex) {
             LOGGER.error("Exception in isCurDate():" + ex, ex);
             throw new TaskFailedException("Date Should be within the today's date");
         }

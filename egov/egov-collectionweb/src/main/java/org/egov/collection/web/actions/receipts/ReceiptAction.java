@@ -1309,7 +1309,7 @@ public class ReceiptAction extends BaseFormAction {
 
         try {
             reportId = collectionCommon.generateReport(receipts, printReceipts);
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             final String errMsg = "Error during report generation!";
             LOGGER.error(errMsg, e);
             throw new ApplicationRuntimeException(errMsg, e);

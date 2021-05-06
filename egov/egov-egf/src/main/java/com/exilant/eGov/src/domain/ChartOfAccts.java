@@ -442,9 +442,7 @@ public class ChartOfAccts {
             pstmt.executeUpdate();
         } catch (final HibernateException e) {
             LOGGER.error("Exception occured while getting the data  " + e.getMessage(), new HibernateException(e.getMessage()));
-        } catch (final Exception e) {
-            LOGGER.error("Exception occured while getting the data  " + e.getMessage(), new Exception(e.getMessage()));
-        }
+        } 
     }
 
 }

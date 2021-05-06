@@ -47,6 +47,7 @@
  */
 package org.egov.collection.integration.services;
 
+import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.egov.collection.constants.CollectionConstants;
 import org.egov.collection.entity.OnlinePayment;
@@ -56,6 +57,7 @@ import org.egov.collection.integration.pgi.AxisAdaptor;
 import org.egov.collection.integration.pgi.PaymentResponse;
 import org.egov.collection.integration.pgi.SbimopsAdaptor;
 import org.egov.infra.config.core.ApplicationThreadLocals;
+import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.utils.DateUtils;
 import org.egov.infra.validation.exception.ValidationError;
@@ -67,10 +69,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import javax.xml.bind.JAXBException;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -236,6 +241,18 @@ public class SchedularService {
                 }
             } catch (final ApplicationRuntimeException exp) {
                 LOGGER.error("ATOM payment reconciliation failed", exp);
+            } catch (ClientProtocolException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ApplicationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (JAXBException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
     }
