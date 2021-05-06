@@ -76,7 +76,6 @@ public class EgBillregister extends StateAware implements java.io.Serializable {
     @GeneratedValue(generator = SEQ_EG_BILLREGISTER, strategy = GenerationType.SEQUENCE)
     private Long id;
     
-    @NotNull
     @Length(min = 1,max=50)
     @SafeHtml
     @Column(updatable = false)
@@ -101,7 +100,6 @@ public class EgBillregister extends StateAware implements java.io.Serializable {
     @SafeHtml
     @Length(max = 50)
     private String billtype;
-    @NotNull
     @SafeHtml
     @Length(max = 20)
     private String expendituretype;

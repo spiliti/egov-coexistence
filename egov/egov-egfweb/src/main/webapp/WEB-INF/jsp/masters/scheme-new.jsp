@@ -144,7 +144,7 @@
 			</div>
 			<s:token />
 			<s:hidden name="mode" id="mode" value="%{mode}" />
-			<s:hidden id="id" name="id" />
+			<s:hidden name="schemeId" id="schemeId" value="%{schemeId}" />
 			<div style="color: red">
 				<s:actionerror />
 				<s:fielderror />

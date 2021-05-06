@@ -46,6 +46,6 @@
   ~
   --%>
 
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%-- <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <script src='https://www.google.com/recaptcha/api.js' async defer></script>
-<div id="g-recaptcha" class="g-recaptcha" data-sitekey="${sessionScope.siteKey}"></div>
+<div id="g-recaptcha" class="g-recaptcha" data-sitekey="${sessionScope.siteKey}"></div> --%>

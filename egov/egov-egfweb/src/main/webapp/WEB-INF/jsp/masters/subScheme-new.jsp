@@ -164,7 +164,7 @@
 						<td class="bluebox">&nbsp;</td>
 						<td class="bluebox" width="20%"><strong><s:text name="lbl.scheme"/><span
 								class="mandatory1"> *</span></strong></td>
-						<td class="bluebox"><s:select name="scheme" id="scheme"
+						<td class="bluebox"><s:select name="schemeId" id="scheme"
 								list="dropdownData.schemeList" listKey="id" listValue="name"
 								headerKey="" headerValue="%{getText('lbl.choose.options')}"
 								value="%{subScheme.scheme.id}" /></td>

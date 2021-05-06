@@ -759,7 +759,7 @@ public class ReceiptHeader extends StateAware implements Auditable {
     }
 
     @Override
-    protected void setId(final Long id) {
+    private void setId(final Long id) {
         this.id = id;
     }
 
