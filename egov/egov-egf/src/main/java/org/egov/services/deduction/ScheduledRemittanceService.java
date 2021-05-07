@@ -351,14 +351,13 @@ public class ScheduledRemittanceService {
 
                         }
 
-                    catch (final Exception e) {
-
-                        errorMessage.append(dept + ":" + e.getMessage() + "\n");
-                        successForAutoRemittance = false;
-
-                        // updateScheduleLog(errorMessage.toString(),jobName,glcode,false);
-
-                    }
+                    /*
+                     * catch (final Exception e) { errorMessage.append(dept +
+                     * ":" + e.getMessage() + "\n"); successForAutoRemittance =
+                     * false; //
+                     * updateScheduleLog(errorMessage.toString(),jobName,glcode,
+                     * false); }
+                     */
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Done for Department :" + deptMap.get(dept));
                         LOGGER.debug("**********************************************");
@@ -376,11 +375,10 @@ public class ScheduledRemittanceService {
 
         }
 
-        catch (final Exception e) {
-            successForAutoRemittance = false;
-            errorMessage.append(e.getMessage() + "\n");
-
-        } finally
+        /*
+         * catch (final Exception e) { successForAutoRemittance = false;
+         * errorMessage.append(e.getMessage() + "\n"); }
+         */ finally
         {
             updateScheduleLog(errorMessage.toString(), jobName, glcode, true, schedularLogId);
 
@@ -459,12 +457,12 @@ public class ScheduledRemittanceService {
                 errorMessage.append(dept + ":" + e.getErrors() + "\n");
                 // updateScheduleLog(errorMessage.toString(),jobName,glcode,false);
 
-            } catch (final Exception e) {
-
-                errorMessage.append(dept + ":" + e.getMessage() + "\n");
-                // updateScheduleLog(errorMessage.toString(),jobName,glcode,false);
-
-            }
+            } /*
+               * catch (final Exception e) { errorMessage.append(dept + ":" +
+               * e.getMessage() + "\n"); //
+               * updateScheduleLog(errorMessage.toString(),jobName,glcode,false)
+               * ; }
+               */
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Done for Department :" + deptMap.get(dept));
             LOGGER.debug("**********************************************");

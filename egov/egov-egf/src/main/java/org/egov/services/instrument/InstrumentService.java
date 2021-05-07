@@ -760,8 +760,7 @@ public class InstrumentService {
     }
 
     @Transactional
-    public boolean cancelInstrument(final InstrumentHeader ih)
-            throws ApplicationRuntimeException {
+    public boolean cancelInstrument(final InstrumentHeader ih){
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Cancelling " + ih);
         boolean result = false;
@@ -775,11 +774,11 @@ public class InstrumentService {
             result = true;
         } catch (final HibernateException e) {
             LOGGER.error(e.getMessage(), e);
-            throw new ApplicationRuntimeException(e.getMessage());
-        } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new ApplicationRuntimeException(e.getMessage());
-        }
+            throw new HibernateException(e.getMessage());
+        } /*
+           * catch (final Exception e) { LOGGER.error(e.getMessage(), e); throw
+           * new ApplicationRuntimeException(e.getMessage()); }
+           */
         return result;
     }
 
@@ -858,8 +857,7 @@ public class InstrumentService {
         return iType;
     }
 
-    public InstrumentType getInstrumentTypeByType(final String type)
-            throws ApplicationRuntimeException {
+    public InstrumentType getInstrumentTypeByType(final String type) {
         InstrumentType iType = null;
         if (type == null)
             throw new ApplicationRuntimeException(INSTRUMENT_TYPE + IS_NULL);
@@ -870,7 +868,7 @@ public class InstrumentService {
             try {
                 qry = "from InstrumentType  where type=? and isActive=true";
                 iType = instrumentTypeService.find(qry, type);
-            } catch (final Exception e) {
+            } catch (final HibernateException e) {
                 LOGGER.error("Error while getting InstrumentType from database"
                         + e.getMessage(), e);
             }

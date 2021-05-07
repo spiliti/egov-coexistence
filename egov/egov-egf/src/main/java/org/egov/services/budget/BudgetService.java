@@ -75,6 +75,7 @@ import org.egov.model.budget.BudgetDetail;
 import org.egov.model.budget.BudgetGroup;
 import org.egov.pims.commons.Position;
 import org.egov.pims.model.PersonalInformation;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -163,12 +164,13 @@ public class BudgetService extends PersistenceService<Budget, Long> {
 //            final Assignment empAssignment = eisCommonService.getLatestAssignmentForEmployeeByToDate(emp.getId(), currDate);
 //            dept = empAssignment.getDepartment();
             return dept;
-        } catch (final NullPointerException ne)
-        {
-            throw new ApplicationRuntimeException(ne.getMessage());
-        } catch (final Exception e) {
+        } catch (final NullPointerException ne){
             throw new ApplicationRuntimeException("Error while getting Department fort the employee" + emp.getName());
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ApplicationRuntimeException("Error while getting Department fort the employee"
+           * + emp.getName()); }
+           */
     }
 
     public boolean hasReForYear(final Long financialYear) {
@@ -361,8 +363,8 @@ public class BudgetService extends PersistenceService<Budget, Long> {
         Budget refBudget = null;
         try {
             refBudget = find("from Budget where referenceBudget.id=?", budget.getId());
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
+        } catch (final HibernateException e) {
+            throw new HibernateException(e.getMessage());
         }
         return refBudget;
     }

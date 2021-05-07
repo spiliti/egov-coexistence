@@ -48,6 +48,7 @@
 package org.egov.egf.web.actions.voucher;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -808,7 +809,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
         workflowBean.setCurrentState(currentState);
     }
 
-    public String saveAsWorkingCopy() throws ValidationException {
+    public String saveAsWorkingCopy() throws ValidationException, SQLException {
         methodName = "saveAsWorkingCopy";
         if (parameters.get(VHID)[0].equals("")) {
             egBillregister = (EgBillregister) getPersistenceService().find(" from EgBillregister where id=?",

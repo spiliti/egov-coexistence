@@ -181,7 +181,7 @@ public class AutoRemittanceReportAction extends BaseFormAction {
     }
 
     @Action(value = "/report/autoRemittanceReport-ajaxLoadData")
-    public String ajaxLoadData() {
+    public String ajaxLoadData() throws NumberFormatException, NoSuchMethodException, SecurityException {
 
         populateData();
         boolean addList = false;
@@ -283,7 +283,7 @@ public class AutoRemittanceReportAction extends BaseFormAction {
     }
 
     @Action(value = "/report/autoRemittanceReport-exportXls")
-    public String exportXls() throws JRException, IOException {
+    public String exportXls() throws JRException, IOException, NumberFormatException, NoSuchMethodException, SecurityException {
         populateData();
         if (level.equals("atcoc"))
         {
@@ -315,7 +315,7 @@ public class AutoRemittanceReportAction extends BaseFormAction {
     }
 
     @Action(value = "/report/autoRemittanceReport-exportPdf")
-    public String exportPdf()
+    public String exportPdf() throws NumberFormatException, NoSuchMethodException, SecurityException
     {
         populateData();
         if (level.equals("atcoc"))
@@ -429,7 +429,7 @@ public class AutoRemittanceReportAction extends BaseFormAction {
         return paramMap;
     }
 
-    private void populateData()
+    private void populateData() throws NumberFormatException, NoSuchMethodException, SecurityException
     {
         final StringBuffer query = new StringBuffer("");
         final Date currentDate = new Date();

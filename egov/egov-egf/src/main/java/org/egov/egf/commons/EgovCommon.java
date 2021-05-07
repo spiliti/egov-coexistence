@@ -212,7 +212,7 @@ public class EgovCommon {
                         if (object[0].toString().equals("N"))
                             return (Department) persistenceService.getSession().load(Department.class,
                                     Integer.valueOf(employeeViewList.get(0)[1].toString()));
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             LOGGER.error("Could not get list of assignments", e);
             throw new HibernateException(e);
         }
@@ -371,7 +371,7 @@ public class EgovCommon {
             LOGGER
             .debug("Total payment amount that are approved by FM Unit but voucher not yet created :"
                     + bankBalance);
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("exception occuered while geeting cash balance"
                         + e.getMessage(), e);
@@ -433,7 +433,7 @@ public class EgovCommon {
 			bankBalance = amount == null ? BigDecimal.ZERO : amount;
 			LOGGER.debug(
 					"Total payment amount that are approved by FM Unit but cheque not yet assigned:" + bankBalance);
-		} catch (final Exception e) {
+		} catch (final HibernateException e) {
 			if (LOGGER.isDebugEnabled())
 				LOGGER.debug("exception occuered while getting cash balance" + e.getMessage(), e);
 			throw new HibernateException(e);
@@ -499,7 +499,7 @@ public class EgovCommon {
                     instrumentMap.put("amount", ih.getInstrumentAmount());
                     resultList.add(instrumentMap);
                 }
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             LOGGER.error("Exception occured while getting Instrument details-" + e.getMessage(), e);
             throw new ApplicationRuntimeException("Exception occured while getting Instrument details-" + e.getMessage());
         }
@@ -731,7 +731,7 @@ public class EgovCommon {
             }
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("bankBalance :" + bankBalance);
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("exception occuered while geeting cash balance"
                         + e.getMessage(), e);
@@ -1827,7 +1827,7 @@ public class EgovCommon {
 	}
 
 	public BigDecimal getAccCodeBalanceForIndirectExpense(final Date asondate, final String glcode,
-			final Integer accountdetailType, final String accountdetailkey) throws ValidationException, Exception {
+			final Integer accountdetailType, final String accountdetailkey) throws ValidationException {
 		LOGGER.debug("EgovCommon | getAccCodeBalanceForIndirectExpense | Start");
 		validateParameterData(asondate, glcode, accountdetailType, accountdetailkey);
 		final StringBuilder glCodeBalQry = new StringBuilder();

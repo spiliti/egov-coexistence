@@ -89,6 +89,7 @@ import org.egov.infstr.services.PersistenceService;
 import org.egov.model.recoveries.Recovery;
 import org.egov.services.voucher.VoucherService;
 import org.egov.utils.FinancialConstants;
+import org.elasticsearch.index.mapper.MapperException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +100,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.exilant.eGov.src.transactions.ExilPrecision;
 import com.exilant.exility.common.DataCollection;
 import com.exilant.exility.common.TaskFailedException;
+import com.jayway.jsonpath.spi.mapper.MappingException;
 
 /**
  * This Singleton class contains all the account codes for the organization
@@ -600,7 +602,7 @@ public class ChartOfAccounts {
 					// LOGGER.info("inside the postin gl function before insert
 					// ----");
 					generalLedgerPersistenceService.persist(gLedger);
-				} catch (final Exception e) {
+				} catch (final HibernateException e) {
 					if (LOGGER.isInfoEnabled())
 						LOGGER.info("error in the gl++++++++++" + e, e);
 					return false;
@@ -670,7 +672,7 @@ public class ChartOfAccounts {
 
 											remitanceDetPersistenceService.persist(egRemitGldtl);
 										}
-									} catch (final Exception e) {
+									} catch (final TaskFailedException e) {
 										LOGGER.error("Error while inserting to eg_remittance_gldtl " + e, e);
 										return false;
 									}
@@ -691,7 +693,7 @@ public class ChartOfAccounts {
 						 * "Error while inserting to eg_remittance_gldtl " +e);
 						 * return false; }
 						 */
-					} catch (final Exception e) {
+					} catch (final HibernateException e) {
 						LOGGER.error("Inside postInGL " + e.getMessage(), e);
 						dc.addMessage(EXILRPERROR, "General Ledger Details Error " + e.toString());
 						return false;
@@ -931,7 +933,7 @@ public class ChartOfAccounts {
 					if (LOGGER.isInfoEnabled())
 						LOGGER.info("DELETE FROM generalledger WHERE voucherheaderid=" + VoucherHeaderId);
 
-			} catch (final Exception e) {
+			} catch (final HibernateException e) {
 				if (LOGGER.isInfoEnabled())
 					LOGGER.info("Exp in reading from generalledger: " + e, e);
 			}
@@ -958,7 +960,7 @@ public class ChartOfAccounts {
 				// LOGGER.info("inside the postin gl function before insert
 				// ----");
 				generalLedgerPersistenceService.persist(gLedger);
-			} catch (final Exception e) {
+			} catch (final HibernateException e) {
 				if (LOGGER.isInfoEnabled())
 					LOGGER.info("error in the gl++++++++++" + e, e);
 				dc.addMessage("exilSQLError", e.toString());
@@ -1024,7 +1026,7 @@ public class ChartOfAccounts {
 										egRemitGldtl.setRecovery(tdsentry);
 										remitanceDetPersistenceService.persist(egRemitGldtl);
 									}
-								} catch (final Exception e) {
+								} catch (final HibernateException e) {
 									LOGGER.error("Error while inserting to eg_remittance_gldtl " + e, e);
 									return false;
 								}
@@ -1044,7 +1046,7 @@ public class ChartOfAccounts {
 					 * "Error while inserting to eg_remittance_gldtl "+e);
 					 * return false; }
 					 */
-				} catch (final Exception e) {
+				} catch (final TaskFailedException e) {
 					LOGGER.error("Inside updateInGl" + e.getMessage(), e);
 					throw new TaskFailedException();
 				}
@@ -1053,8 +1055,7 @@ public class ChartOfAccounts {
 		return true;
 	}
 
-	public String getGLCode(final String detailName, final String detailKey, final Connection con)
-			throws TaskFailedException {
+	public String getGLCode(final String detailName, final String detailKey, final Connection con) {
 		String code = "";
 		try {
 			final StringBuilder str = new StringBuilder("select glcode as \"code\" from chartofaccounts,bankaccount")
@@ -1065,7 +1066,7 @@ public class ChartOfAccounts {
 
 			if (resultset.next())
 				code = resultset.getString("code");
-		} catch (final Exception e) {
+		} catch (final SQLException e) {
 			LOGGER.error("error" + e.toString(), e);
 		}
 		return code;
@@ -1081,17 +1082,17 @@ public class ChartOfAccounts {
 			final ResultSet rs = pst.executeQuery();
 			if (rs.next())
 				fiscalyearid = rs.getString("fiscalperiodID");
-		} catch (final Exception e) {
+		} catch (final SQLException e) {
 			LOGGER.error("Excepion in getFiscalYearID() " + e, e);
 		}
 		return fiscalyearid;
 	}
 
-	private boolean validPeriod(final String vDate) throws TaskFailedException {
+	private boolean validPeriod(final String vDate) throws TaskFailedException  {
 		try {
 			if (isClosedForPosting(vDate))
 				return false;
-		} catch (final Exception e) {
+		} catch (final HibernateException e) {
 			LOGGER.error("Inside validPeriod " + e.getMessage(), e);
 			throw new TaskFailedException();
 		}
@@ -1120,14 +1121,14 @@ public class ChartOfAccounts {
 			HashMap cacheValuesHashMap = new HashMap<Object, Object>();
 			try {
 				cacheValuesHashMap = (HashMap) applicationCacheManager.get(ROOTNODE);
-			} catch (Exception e) {
+			} catch (MappingException e) {
 				// return null;
 
 			}
 			if (cacheValuesHashMap != null && !cacheValuesHashMap.isEmpty())
 				retMap = (HashMap) cacheValuesHashMap.get(ACCOUNTDETAILTYPENODE);
 
-		} catch (final Exception e) {
+		} catch (final MappingException e) {
 			LOGGER.debug(EXP + e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
@@ -1144,7 +1145,7 @@ public class ChartOfAccounts {
 			HashMap cacheValuesHashMap = new HashMap<Object, Object>();
 			try {
 				cacheValuesHashMap = (HashMap) applicationCacheManager.get(ROOTNODE);
-			} catch (Exception e) {
+			} catch (MappingException e) {
 				// return null;
 			}
 			if (cacheValuesHashMap != null && !cacheValuesHashMap.isEmpty())
@@ -1152,7 +1153,7 @@ public class ChartOfAccounts {
 			if (retMap != null)
 				LOGGER.debug("in getGlAccountCodes() size is :" + retMap.size());
 
-		} catch (final Exception e) {
+		} catch (final MappingException e) {
 			LOGGER.debug(EXP + e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
@@ -1169,14 +1170,14 @@ public class ChartOfAccounts {
 			HashMap cacheValuesHashMap = new HashMap<Object, Object>();
 			try {
 				cacheValuesHashMap = (HashMap) applicationCacheManager.get(ROOTNODE);
-			} catch (Exception e) {
+			} catch (MappingException e) {
 				// not yet initialised
 				// return null;
 			}
 			if (cacheValuesHashMap != null && !cacheValuesHashMap.isEmpty())
 				retMap = (HashMap) cacheValuesHashMap.get(GLACCIDNODE);
 
-		} catch (final Exception e) {
+		} catch (final MappingException e) {
 			LOGGER.debug(EXP + e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
@@ -1219,23 +1220,24 @@ public class ChartOfAccounts {
 					isClosed = true;
 			}
 
-		} catch (final HibernateException e) {
+		} catch (final HibernateException | ParseException e) {
 			isClosed = true;
 			LOGGER.error("Exception occured while getting the data " + e.getMessage(),
 					new HibernateException(e.getMessage()));
-		} catch (final Exception e) {
-			isClosed = true;
-			LOGGER.error("Exception occured while getting the data " + e.getMessage(), new Exception(e.getMessage()));
-		}
+        } /*
+           * catch (final Exception e) { isClosed = true;
+           * LOGGER.error("Exception occured while getting the data " +
+           * e.getMessage(), new Exception(e.getMessage())); }
+           */
 		return isClosed;
 	}
 	
-	  public boolean checkClosedPeriods(final String vDate) throws Exception, ValidationException {
+	  public boolean checkClosedPeriods(final String vDate) throws TaskFailedException {
                try {
                        if (!validPeriod(vDate))
                                throw new TaskFailedException(
                                                "Voucher Date is not within an open period. Please use an open period for posting");
-               } catch (final Exception e) {
+               } catch (final ValidationException e) {
                        LOGGER.error(e.getMessage(), e);
                        throw new TaskFailedException(e.getMessage());
                }

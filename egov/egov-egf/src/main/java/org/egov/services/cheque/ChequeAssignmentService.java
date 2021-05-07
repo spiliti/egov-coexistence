@@ -78,6 +78,7 @@ import org.egov.model.payment.ChequeAssignment;
 import org.egov.model.payment.Paymentheader;
 import org.egov.utils.Constants;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.BigDecimalType;
@@ -1334,7 +1335,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 		return map;
 	}
 
-	public void getGlcodeIds() throws ApplicationRuntimeException {
+	public void getGlcodeIds() {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Starting getGlcodeIds...");
 		try {
@@ -1365,7 +1366,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 					// contingentBillGlcodeList"+coa1.getGlcode()+":::"+coa1.getPurposeId());
 					cBillGlcodeIdList.add(BigDecimal.valueOf(coa1.getId()));
 			}
-		} catch (final Exception e) {
+		} catch (final ApplicationException e) {
 			LOGGER.error(e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
@@ -1394,8 +1395,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 		return glCodeList;
 	}
 
-	public EntityType getEntity(final Integer detailTypeId, final Serializable detailKeyId)
-			throws ApplicationException {
+	public EntityType getEntity(final Integer detailTypeId, final Serializable detailKeyId) throws ApplicationException {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Starting getEntity...");
 		EntityType entity;
@@ -1416,7 +1416,7 @@ public class ChequeAssignmentService extends PersistenceService<Paymentheader, L
 				entity = (EntityType) persistenceService.find(
 						String.format("from %s where id=? order by name", detailTypeName),
 						Integer.valueOf(detailKeyId.toString()));
-		} catch (final Exception e) {
+		} catch (final HibernateException | ClassNotFoundException | NoSuchMethodException | SecurityException e) {
 			LOGGER.error("Exception to get EntityType=" + e.getMessage() + "for detailTypeId=" + detailTypeId
 					+ "  for Detail key " + detailKeyId);
 			throw new ApplicationException("Exception to get EntityType=" + e.getMessage());

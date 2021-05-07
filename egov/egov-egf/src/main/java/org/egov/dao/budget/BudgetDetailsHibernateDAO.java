@@ -2631,7 +2631,7 @@ public class BudgetDetailsHibernateDAO implements BudgetDetailsDAO {
 		try {
 			final List<AppConfigValues> list = appConfigValuesService.getConfigValuesByModuleAndKey(module, key);
 			return list.get(0).getValue().toString();
-		} catch (final Exception e) {
+		} catch (final ValidationException e) {
 			throw new ValidationException(Arrays
 					.asList(new ValidationError(key + " not defined in appconfig", key + " not defined in appconfig")));
 		}

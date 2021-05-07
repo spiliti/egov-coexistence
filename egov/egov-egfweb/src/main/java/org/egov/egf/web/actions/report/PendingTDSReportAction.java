@@ -82,6 +82,7 @@ import org.egov.infra.reporting.engine.ReportOutput;
 import org.egov.infra.reporting.engine.ReportRequest;
 import org.egov.infra.reporting.engine.ReportService;
 import org.egov.infra.utils.DateUtils;
+import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infra.web.struts.actions.BaseFormAction;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.infstr.utils.EgovMasterDataCaching;
@@ -194,7 +195,7 @@ public class PendingTDSReportAction extends BaseFormAction {
     }
 
     @Action(value = "/report/pendingTDSReport-ajaxLoadData")
-    public String ajaxLoadData() {
+    public String ajaxLoadData() throws NumberFormatException, ValidationException, NoSuchMethodException, SecurityException {
         populateData();
         return "results";
     }
@@ -218,7 +219,7 @@ public class PendingTDSReportAction extends BaseFormAction {
     }
 
     @Action(value = "/report/pendingTDSReport-exportPdf")
-    public String exportPdf() throws JRException, IOException {
+    public String exportPdf() throws JRException, IOException, NumberFormatException, ValidationException, NoSuchMethodException, SecurityException {
         generateReport();
         return "PDF";
     }
@@ -229,7 +230,7 @@ public class PendingTDSReportAction extends BaseFormAction {
         return "summary-PDF";
     }
 
-    private void generateReport() {
+    private void generateReport() throws NumberFormatException, ValidationException, NoSuchMethodException, SecurityException {
         populateData();
         final ReportRequest reportInput = new ReportRequest(jasperpath, pendingTDS, getParamMap());
         final ReportOutput reportOutput = reportService.createReport(reportInput);
@@ -282,7 +283,7 @@ public class PendingTDSReportAction extends BaseFormAction {
     }
 
     @ReadOnly
-    private void populateData() {
+    private void populateData() throws NumberFormatException, ValidationException, NoSuchMethodException, SecurityException {
         validateFinYear();
         if (getFieldErrors().size() > 0)
             return;
@@ -693,7 +694,7 @@ public class PendingTDSReportAction extends BaseFormAction {
     }
 
     @Action(value = "/report/pendingTDSReport-exportXls")
-    public String exportXls() throws JRException, IOException {
+    public String exportXls() throws JRException, IOException, NumberFormatException, ValidationException, NoSuchMethodException, SecurityException {
         populateData();
         final ReportRequest reportInput = new ReportRequest(jasperpath, pendingTDS, getParamMap());
         reportInput.setReportFormat(ReportFormat.XLS);

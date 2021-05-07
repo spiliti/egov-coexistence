@@ -299,7 +299,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
 
     @ValidationErrorPage(value = NEW)
     @Action(value = "/deduction/remitRecovery-search")
-    public String search() {
+    public String search() throws NumberFormatException, ValidationException, NoSuchMethodException, SecurityException {
         listRemitBean = new ArrayList<>();
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("RemitRecoveryAction | Search | Start");
@@ -337,7 +337,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
 
     @ValidationErrorPage(value = "new")
     @Action(value = "/deduction/remitRecovery-remit")
-    public String remit() {
+    public String remit() throws NumberFormatException, ValidationException, NoSuchMethodException, SecurityException {
         try{
             prepareListRemitBean(selectedRows);
             final List<AppConfigValues> cutOffDateconfigValue = appConfigValuesService.getConfigValuesByModuleAndKey("EGF",
@@ -388,7 +388,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
         return "remitDetail";
     }
 
-    private void prepareListRemitBean(final String selectedRows) {
+    private void prepareListRemitBean(final String selectedRows) throws NumberFormatException, ValidationException, NoSuchMethodException, SecurityException {
         setDefaultPaymentMode(modeOfPayment);
         if(modeOfPayment.equals(FinancialConstants.MODEOFPAYMENT_RTGS)){
             remitRecoveryService.validateRtgsForRemittedBean(remittanceBean);
@@ -406,7 +406,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
 
     @ValidationErrorPage(value = "remitDetail")
     @Action(value = "/deduction/remitRecovery-create")
-    public String create() {
+    public String create() throws NumberFormatException, NoSuchMethodException, SecurityException {
         try {
             final String vdate = parameters.get("voucherDate")[0];
             final Date date1 = sdf1.parse(vdate);
@@ -555,7 +555,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
     @ValidationErrorPage(value = VIEW)
     @SkipValidation
     @Action(value = "/deduction/remitRecovery-sendForApproval")
-    public String sendForApproval() {
+    public String sendForApproval() throws NoSuchMethodException, SecurityException {
         paymentheader = paymentService.find("from Paymentheader where id=?", Long.valueOf(paymentid));
         populateWorkflowBean();
         if (FinancialConstants.BUTTONFORWARD.equalsIgnoreCase(workflowBean.getWorkFlowAction())) {
@@ -587,7 +587,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
     @ValidationErrorPage(value = VIEW)
     @SkipValidation
     @Action(value = "/deduction/remitRecovery-viewInboxItem")
-    public String viewInboxItem() {
+    public String viewInboxItem() throws NoSuchMethodException, SecurityException {
         paymentheader = paymentService.find("from Paymentheader where id=?", Long.valueOf(paymentid));
         if (!commonsUtil.isApplicationOwner(securityUtils.getCurrentUser(), paymentheader))
 			return UNAUTHORIZED;
@@ -595,7 +595,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
         return VIEW;
     }
 
-	private void view() {
+	private void view() throws NoSuchMethodException, SecurityException {
 		showApprove = true;
         voucherHeader.setId(paymentheader.getVoucherheader().getId());
         if(paymentheader.getVoucherheader().getVoucherDate()!=null) {
@@ -609,8 +609,10 @@ public class RemitRecoveryAction extends BasePaymentAction {
 
     /**
      * @return
+     * @throws SecurityException 
+     * @throws NoSuchMethodException 
      */
-    public String beforeEdit() {
+    public String beforeEdit() throws NoSuchMethodException, SecurityException {
         showApprove = true;
         // voucherHeader.setId(paymentheader.getVoucherheader().getId());
         prepareForViewModifyReverse();
@@ -620,7 +622,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
 
     @ValidationErrorPage(value = EDIT)
     @Action(value = "/deduction/remitRecovery-edit")
-    public String edit() {
+    public String edit() throws NoSuchMethodException, SecurityException {
         try {
             validateFields();
             voucherHeader = voucherService.updateVoucherHeader(voucherHeader);
@@ -706,7 +708,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
     }
 
     @Action(value = "/deduction/remitRecovery-beforeView")
-    public String beforeView() {
+    public String beforeView() throws NoSuchMethodException, SecurityException {
         prepareForViewModifyReverse();
         wfitemstate = "END"; // requird to hide the approver drop down when view
                              // is form source
@@ -717,7 +719,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
     }
 
     @SuppressWarnings(UNCHECKED)
-    private void prepareForViewModifyReverse() {
+    private void prepareForViewModifyReverse() throws NoSuchMethodException, SecurityException {
         final StringBuffer instrumentQuery = new StringBuffer(100);
         instrumentQuery
                 .append("select  distinct ih from InstrumentHeader ih join ih.instrumentVouchers iv where iv.voucherHeaderId.id=?")
@@ -755,7 +757,7 @@ public class RemitRecoveryAction extends BasePaymentAction {
         }
     }
 
-    private void getRemittanceFromVoucher() {
+    private void getRemittanceFromVoucher() throws NoSuchMethodException, SecurityException {
         listRemitBean = new ArrayList<RemittanceBean>();
 
         final List<EgRemittance> remitList = persistenceService.findAllBy("from EgRemittance where voucherheader=?",

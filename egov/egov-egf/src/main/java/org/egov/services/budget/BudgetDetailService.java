@@ -561,9 +561,11 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
             return dept;
         } catch (final NullPointerException ne) {
             throw new ApplicationRuntimeException(ne.getMessage());
-        } catch (final Exception e) {
-            throw new ApplicationRuntimeException("Error while getting Department fort the employee" + emp.getName());
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ApplicationRuntimeException("Error while getting Department fort the employee"
+           * + emp.getName()); }
+           */
 
     }
 
@@ -2089,9 +2091,11 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         } catch (final ValidationException e) {
             throw new ValidationException(Arrays
                     .asList(new ValidationError(e.getErrors().get(0).getMessage(), e.getErrors().get(0).getMessage())));
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         return budgetUploadList;
     }
 
@@ -2170,9 +2174,11 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         } catch (final ValidationException e) {
             throw new ValidationException(Arrays
                     .asList(new ValidationError(e.getErrors().get(0).getMessage(), e.getErrors().get(0).getMessage())));
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         return tempList;
     }
 
@@ -2245,9 +2251,11 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         } catch (final ValidationException e) {
             throw new ValidationException(Arrays
                     .asList(new ValidationError(e.getErrors().get(0).getMessage(), e.getErrors().get(0).getMessage())));
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         return budgetGroup;
     }
 
@@ -2308,9 +2316,11 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         } catch (final ValidationException e) {
             throw new ValidationException(Arrays
                     .asList(new ValidationError(e.getErrors().get(0).getMessage(), e.getErrors().get(0).getMessage())));
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
     }
 
     private String getNewRootMaterializedPath() {
@@ -2393,9 +2403,11 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         } catch (final ValidationException e) {
             throw new ValidationException(Arrays
                     .asList(new ValidationError(e.getErrors().get(0).getMessage(), e.getErrors().get(0).getMessage())));
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
     }
 
     @Transactional
@@ -2466,9 +2478,11 @@ public class BudgetDetailService extends PersistenceService<BudgetDetail, Long> 
         } catch (final ValidationException e) {
             throw new ValidationException(Arrays
                     .asList(new ValidationError(e.getErrors().get(0).getMessage(), e.getErrors().get(0).getMessage())));
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
     }
 
 	public BudgetDetail getBudgetDetail(final Long fundId, final Long functionId, final String deptCode,

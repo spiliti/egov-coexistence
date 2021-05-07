@@ -50,6 +50,7 @@ package org.egov.services.payment;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -122,6 +123,7 @@ import org.egov.services.report.FundFlowService;
 import org.egov.services.voucher.VoucherService;
 import org.egov.utils.Constants;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
@@ -137,6 +139,7 @@ import com.exilant.GLEngine.ChartOfAccounts;
 import com.exilant.GLEngine.Transaxtion;
 import com.exilant.eGov.src.common.EGovernCommon;
 import com.exilant.eGov.src.transactions.VoucherTypeForULB;
+import com.exilant.exility.common.TaskFailedException;
 
 public class PaymentService extends PersistenceService<Paymentheader, Long> {
     private static final Logger LOGGER = Logger.getLogger(PaymentService.class);
@@ -407,19 +410,18 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
             }
             update(paymentheader);
             entityManager.flush();
-        } catch (final ValidationException e) {
+        } catch (final ValidationException | ParseException e) {
 
             LOGGER.error(e.getMessage(), e);
             final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("createPayment", e.getErrors().get(0).getMessage()));
+            errors.add(new ValidationError("createPayment", ((ValidationException) e).getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-
-            LOGGER.error(e.getMessage(), e);
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("createPayment", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.error(e.getMessage(), e); final
+           * List<ValidationError> errors = new ArrayList<ValidationError>();
+           * errors.add(new ValidationError("createPayment", e.getMessage()));
+           * throw new ValidationException(errors); }
+           */
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Completed createPayment.");
         return paymentheader;
@@ -504,7 +506,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
             miscBillList = miscbilldetailService.findAllBy(
                     " from Miscbilldetail where payVoucherHeader.id = ? order by paidto",
                     paymentheader.getVoucherheader().getId());
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             throw new ValidationException("", "Total Paid Amount Exceeding Net Amount For This Bill");
         }
         if (LOGGER.isDebugEnabled())
@@ -748,9 +750,9 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
                 miscbilldetailService.create(miscbilldetail);
 
             }
-        } catch (final ValidationException e) {
-            throw e;
-        } catch (final Exception e) {
+        } /*
+           * catch (final ValidationException e) { throw e; }
+           */catch (final ValidationException | TaskFailedException | SQLException e) {
             LOGGER.error(e.getMessage());
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("createPayment", e.getMessage()));
@@ -762,7 +764,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
     }
 
     private CVoucherHeader updateVoucher(final Map<String, String[]> parameters, final List<PaymentBean> billList,
-            final Bankaccount ba, final Paymentheader paymentheader) throws Exception {
+            final Bankaccount ba, final Paymentheader paymentheader) throws TaskFailedException, SQLException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting updateVoucher...");
         final CVoucherHeader existingVH = (CVoucherHeader) persistenceService.find(" from CVoucherHeader where id=?",
@@ -785,7 +787,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
     }
 
     private void updateVoucherHeader(final Map<String, String[]> parameters, final CVoucherHeader existingVH,
-            final CVoucherHeader voucherHeader) throws Exception {
+            final CVoucherHeader voucherHeader) throws TaskFailedException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting updateVoucherHeader...");
 
@@ -961,7 +963,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 			final Query st = getSession().createSQLQuery("delete from miscbilldetail where PAYVHID = :payVHId")
 					.setParameter("payVHId", payVHId);
 			st.executeUpdate();
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             LOGGER.error("Inside exception deleteMiscBill" + e.getMessage());
             throw new ApplicationRuntimeException(e.getMessage());
         }
@@ -1008,7 +1010,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
                     // contingentBillGlcodeList"+coa1.getGlcode()+":::"+coa1.getPurposeId());
                     cBillGlcodeIdList.add(BigDecimal.valueOf(coa1.getId()));
             }
-        } catch (final Exception e) {
+        } catch (final ApplicationException e) {
             LOGGER.error(e.getMessage());
             throw new ApplicationRuntimeException(e.getMessage());
         }
@@ -1495,8 +1497,8 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
             LOGGER.debug("Completed validateRTGSPaymentForModify.");
     }
 
-    public EntityType getEntity(final Integer detailTypeId, final Serializable detailKeyId)
-            throws ApplicationException {
+    public EntityType getEntity(final Integer detailTypeId, final Serializable detailKeyId) throws ApplicationException
+             {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting getEntity...");
         EntityType entity;
@@ -1517,7 +1519,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 						String.format("from %s where id=? order by name", detailTypeName),
 						Integer.valueOf(detailKeyId + ""));
 
-        } catch (final Exception e) {
+        } catch (final HibernateException | ClassNotFoundException | NoSuchMethodException | SecurityException e) {
             LOGGER.error("Exception to get EntityType=" + e.getMessage());
             throw new ApplicationException("Exception to get EntityType=" + e.getMessage());
         }
@@ -1834,7 +1836,7 @@ public class PaymentService extends PersistenceService<Paymentheader, Long> {
 
 			for (final AppConfigValues appConfigVal : configValues)
 				payTo = appConfigVal.getValue();
-		} catch (final Exception e) {
+		} catch (final HibernateException e) {
 			throw new ApplicationRuntimeException(
 					"Appconfig value for EB Voucher propartys is not defined in the system");
 		}

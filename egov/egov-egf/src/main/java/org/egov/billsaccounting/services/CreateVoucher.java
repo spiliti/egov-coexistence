@@ -49,7 +49,6 @@ package org.egov.billsaccounting.services;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -114,6 +113,7 @@ import org.egov.infra.admin.master.service.DepartmentService;
 import org.egov.infra.admin.master.service.HierarchyTypeService;
 import org.egov.infra.admin.master.service.UserService;
 import org.egov.infra.config.core.ApplicationThreadLocals;
+import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
 import org.egov.infra.persistence.utils.GenericSequenceNumberGenerator;
@@ -427,7 +427,7 @@ public class CreateVoucher {
 
 				for (final AppConfigValues appConfigVal : configValues)
 					purposeValueVN = appConfigVal.getValue();
-			} catch (final Exception e) {
+			} catch (final ApplicationRuntimeException e) {
 				throw new ApplicationRuntimeException(
 						"Appconfig value for VOUCHERDATE_FROM_UI is not defined in the system");
 			}
@@ -448,7 +448,7 @@ public class CreateVoucher {
 
 					for (final AppConfigValues appConfigVal : configValues)
 						purposeValueVN = appConfigVal.getValue();
-				} catch (final Exception e) {
+				} catch (final ApplicationRuntimeException e) {
 					throw new ApplicationRuntimeException(
 							"Appconfig value for USE BILLDATE IN CREATE VOUCHER FROM BILL is not defined in the system");
 				}
@@ -635,7 +635,7 @@ public class CreateVoucher {
 			vh.setStatus(Integer.valueOf(status));
 			voucherHeaderDAO.update(vh);
 
-		} catch (final Exception e) {
+		} catch (final HibernateException e) {
 			LOGGER.error(e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());
 
@@ -768,9 +768,6 @@ public class CreateVoucher {
 			final List<ValidationError> errors = new ArrayList<ValidationError>();
 			errors.add(new ValidationError("exp", ve.getErrors().get(0).getMessage()));
 			throw new ValidationException(errors);
-		} catch (final Exception e) {
-			LOGGER.error(ERR, e);
-			throw new ApplicationRuntimeException(e.getMessage());
 		}
 		return vh;
 	}
@@ -829,7 +826,7 @@ public class CreateVoucher {
 			 * // action name need to pass }
 			 */
 
-		} catch (final Exception e) {
+		} catch (final ValidationException e) {
 			final List<ValidationError> errors = new ArrayList<ValidationError>();
 			LOGGER.error(ERR, e);
 			errors.add(new ValidationError("Exp in startWorkflow for JV/Receipt voucher=", e.getMessage()));
@@ -934,7 +931,7 @@ public class CreateVoucher {
 				cjv.transition().progressWithStateCopy().withStateValue("WORKFLOW INITIATED").withOwner(nextPosition)
 						.withComments("WORKFLOW STARTED");
 			}
-		} catch (final Exception e) {
+		} catch (final ValidationException e) {
 			final List<ValidationError> errors = new ArrayList<ValidationError>();
 			LOGGER.error(ERR, e);
 			errors.add(new ValidationError("Exp in startWorkflow for Contra=", e.getMessage()));
@@ -975,7 +972,7 @@ public class CreateVoucher {
 			voucherHeader.transition().progressWithStateCopy().withStateValue("Forwarded").withOwner(nextPosition)
 					.withComments("Forwarded");
 
-		} catch (final Exception e) {
+		} catch (final ValidationException e) {
 			final List<ValidationError> errors = new ArrayList<ValidationError>();
 			LOGGER.error(ERR, e);
 			errors.add(new ValidationError("Exp in startWorkflow for Contra=", e.getMessage()));
@@ -1360,7 +1357,7 @@ public class CreateVoucher {
 
 	// used for reversal
 
-	protected void insertIntoVoucherHeader(final CVoucherHeader vh) throws ApplicationRuntimeException {
+	protected void insertIntoVoucherHeader(final CVoucherHeader vh) {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("start | insertIntoVoucherHeader");
 		final String vdt = formatter.format(vh.getVoucherDate());
@@ -1370,7 +1367,7 @@ public class CreateVoucher {
 			if (fis != null)
 				fiscalPeriod = fis.getId().toString();
 
-		} catch (final Exception e) {
+		} catch (final ApplicationRuntimeException e) {
 			throw new ApplicationRuntimeException("error while getting fiscal period");
 		}
 		if (null == fiscalPeriod)
@@ -1385,7 +1382,7 @@ public class CreateVoucher {
 			if (!isUniqueVN(vh.getVoucherNumber(), vdt))
 				throw new ValidationException(
 						Arrays.asList(new ValidationError("Duplicate Voucher Number", "Duplicate Voucher Number")));
-		} catch (final Exception e) {
+		} catch (final ApplicationRuntimeException e) {
 			LOGGER.error(ERR, e);
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
@@ -2178,7 +2175,7 @@ public class CreateVoucher {
 					transaction.setTransaxtionParam(reqParams);
 				transaxtionList.add(transaction);
 			}
-		} catch (final Exception e) {
+		} catch (final ApplicationRuntimeException e) {
 			LOGGER.error("Exception occured while posting data into voucher detail and transaction");
 			throw new ApplicationRuntimeException(
 					"Exception occured while posting data into voucher detail and transaction" + e.getMessage());
@@ -2331,7 +2328,7 @@ public class CreateVoucher {
 				collectionMode = modeOfCollectionEnum.Bank.toString();
 				break;
 			}
-		} catch (final Exception e) {
+		} catch (final ApplicationRuntimeException e) {
 			LOGGER.error(ERR, e);
 			throw new ApplicationRuntimeException("Not a valid modeofcollection");
 		}
@@ -2340,7 +2337,7 @@ public class CreateVoucher {
 	}
 
 	public void updatePJV(final CVoucherHeader vh, final List<PreApprovedVoucher> detailList,
-			final List<PreApprovedVoucher> subledgerlist) throws ApplicationRuntimeException {
+			final List<PreApprovedVoucher> subledgerlist) throws SQLException {
 		try {
 			// delete the existing voucherdetail, gl entries.
 			deleteVoucherdetailAndGL(vh);
@@ -2383,14 +2380,14 @@ public class CreateVoucher {
 			txnList = transactions.toArray(txnList);
 			final SimpleDateFormat formatter = new SimpleDateFormat(DD_MMM_YYYY);
 			if (!chartOfAccounts.postTransaxtions(txnList, formatter.format(vh.getVoucherDate())))
-				throw new ApplicationRuntimeException("Voucher creation Failed");
-		} catch (final Exception e) {
+				throw new TaskFailedException("Voucher creation Failed");
+		} catch (final TaskFailedException e) {
 			LOGGER.error("Inside exception updatePJV" + e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
 	}
 
-	public void deleteVoucherdetailAndGL(final CVoucherHeader vh) throws SQLException, ApplicationRuntimeException {
+	public void deleteVoucherdetailAndGL(final CVoucherHeader vh) throws SQLException {
 		try {
 			Query pstmt1 = null;
 			Query pstmt2 = null;
@@ -2433,7 +2430,7 @@ public class CreateVoucher {
 			pstmt1.setLong(0, vh.getId());
 			pstmt1.executeUpdate();
 
-		} catch (final Exception e) {
+		} catch (final HibernateException e) {
 			LOGGER.error("Inside exception deleteVoucherdetailAndGL" + e.getMessage());
 			throw new ApplicationRuntimeException(e.getMessage());
 		}
@@ -2472,7 +2469,7 @@ public class CreateVoucher {
 					originalVocher = voucherService.find("from CVoucherHeader where id=?",
 							(Long) paramMap.get(VOUCHER_HEADER_ID));
 
-				} catch (final Exception e) {
+				} catch (final HibernateException e) {
 					throw new ApplicationRuntimeException("cannot find " + VOUCHER_HEADER_ID + "in the system");
 				}
 				reversalVoucherObj.setOriginalvcId(originalVocher.getId());
@@ -2564,10 +2561,11 @@ public class CreateVoucher {
 		} catch (final ValidationException e) {
 			LOGGER.error(e.getMessage(), e);
 			throw e;
-		} catch (final Exception e) {
-			LOGGER.error(e.getMessage(), e);
-			throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-		}
+        } /*
+           * catch (final Exception e) { LOGGER.error(e.getMessage(), e); throw
+           * new ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
 
 		originalVocher.setStatus(1);
 		originalVocher.setEffectiveDate(new Date());
@@ -2593,7 +2591,7 @@ public class CreateVoucher {
 				try {
 					originalVoucher = (CVoucherHeader) voucherHeaderDAO.findById((Long) paramMap.get(VOUCHER_HEADER_ID),
 							false);
-				} catch (final Exception e) {
+				} catch (final HibernateException e) {
 					throw new ApplicationRuntimeException("cannot find " + VOUCHER_HEADER_ID + "in the system");
 				}
 				reversalVoucher.setOriginalvcId(originalVoucher.getId());
@@ -2799,7 +2797,7 @@ public class CreateVoucher {
 					.setParameter(0, formatter.parse(vDate));
 			final List<CFiscalPeriod> rset = pst.list();
 			fiscalPeriod = rset != null ? rset.get(0) : null;
-		} catch (final Exception e) {
+		} catch (final HibernateException | ParseException e) {
 			LOGGER.error("Exception..." + e.getMessage());
 			throw new TaskFailedException(e.getMessage());
 		}

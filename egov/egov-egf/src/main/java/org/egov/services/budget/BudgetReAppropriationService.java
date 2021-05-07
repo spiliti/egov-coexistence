@@ -48,6 +48,7 @@
 package org.egov.services.budget;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -528,11 +529,11 @@ public class BudgetReAppropriationService extends PersistenceService<BudgetReApp
         {
             throw new ValidationException(Arrays.asList(new ValidationError(e.getErrors().get(0).getMessage(),
                     e.getErrors().get(0).getMessage())));
-        } catch (final Exception e)
-        {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(),
-                    e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         return true;
     }
 
@@ -553,7 +554,7 @@ public class BudgetReAppropriationService extends PersistenceService<BudgetReApp
         appropriation.setAnticipatoryAmount(reAppView.getAnticipatoryAmount());
         try {
             appropriation.setAsOnDate(Constants.DDMMYYYYFORMAT2.parse(asOnDate));
-        } catch (final Exception e) {
+        } catch (final ParseException e) {
             LOGGER.error("Error while parsing date");
         }
         if ("Addition".equalsIgnoreCase(reAppView.getChangeRequestType()))
@@ -610,18 +611,18 @@ public class BudgetReAppropriationService extends PersistenceService<BudgetReApp
                         throw new ValidationException(Arrays.asList(new ValidationError("budgetDetail.duplicate",
                                 "budgetdetail.exists")));
                 }
-            } catch (final Exception e) {
+            } catch (final ValidationException e) {
                 throw new ValidationException(Arrays.asList(new ValidationError("budgetDetail.duplicate", "budgetdetail.exists")));
             }
         } catch (final ValidationException e)
         {
             throw new ValidationException(Arrays.asList(new ValidationError(e.getErrors().get(0).getMessage(),
                     e.getErrors().get(0).getMessage())));
-        } catch (final Exception e)
-        {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(),
-                    e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         return true;
     }
 

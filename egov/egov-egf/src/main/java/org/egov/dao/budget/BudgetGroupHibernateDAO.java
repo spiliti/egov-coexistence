@@ -126,12 +126,13 @@ public class BudgetGroupHibernateDAO implements BudgetGroupDAO {
                 LOGGER.info("budgetGroup saved id" + budgetGroup.getName());
         } catch (final ValidationException v) {
             LOGGER.error("Error in createBudgetGroup===" + v.getErrors());
-            throw new ValidationException(v.getErrors());
-        } catch (final Exception e) {
-            LOGGER.error(e.getCause() + " Error in createBudgetGroup");
-            throw new ValidationException(EMPTY_STRING, "egovexception in creation of budgetGroup" + e);
-        }
-
+            throw new ValidationException(EMPTY_STRING, "egovexception in creation of budgetGroup" + v);
+        } /*
+           * catch (final Exception e) { LOGGER.error(e.getCause() +
+           * " Error in createBudgetGroup"); throw new
+           * ValidationException(EMPTY_STRING,
+           * "egovexception in creation of budgetGroup" + e); }
+           */
         return budgetGroup;
     }
 

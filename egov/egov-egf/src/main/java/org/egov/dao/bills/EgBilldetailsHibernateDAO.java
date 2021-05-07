@@ -102,7 +102,7 @@ public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
 	@Override
 	public BigDecimal getOtherBillsAmount(final Long minGlCodeId, final Long maxGlCodeId, final Long majGlCodeId,
 			final String finYearID, final String functionId, final String schemeId, final String subSchemeId,
-			final String asOnDate, final String billType) throws SQLException {
+			final String asOnDate, final String billType) {
 		final StringBuilder qryStr = new StringBuilder();
 		final BigDecimal result = new BigDecimal("0.00");
 		String dateCond = "";
@@ -164,7 +164,7 @@ public class EgBilldetailsHibernateDAO implements EgBilldetailsDAO {
 	}
 
     @Override
-    public EgBilldetails getBillDetails(final Long billId, final List glcodeIdList) throws SQLException {
+    public EgBilldetails getBillDetails(final Long billId, final List glcodeIdList) {
         
         StringBuilder qryStr = new StringBuilder();
         qryStr.append("from EgBilldetails bd where bd.creditamount>0 AND bd.glcodeid IN (:glcodeIds) AND billid=:billId ");

@@ -64,6 +64,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -213,7 +214,7 @@ public class BillsAccountingService {
     @Transactional
     public void updatePJV(final CVoucherHeader vh, final List<PreApprovedVoucher> detailList,
             final List<PreApprovedVoucher> subledgerlist)
-            throws ApplicationRuntimeException
+            throws SQLException
     {
         createVoucher.updatePJV(vh, detailList, subledgerlist);
     }

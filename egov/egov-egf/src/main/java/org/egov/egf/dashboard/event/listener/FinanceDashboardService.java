@@ -228,7 +228,7 @@ public class FinanceDashboardService {
         List<CVoucherHeader> list = null;
         try {
             list =  this.getSession().createCriteria(CVoucherHeader.class).add(Restrictions.in("id", ids)).list();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             LOG.error("ERROR occurred while fetching the voucherHeader for ID : {}",ids);
         }
         return list;

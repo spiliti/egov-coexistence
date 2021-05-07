@@ -100,7 +100,7 @@ public class RemitRecoveryService {
     private FinancialUtils financialUtils;
 
 	public List<RemittanceBean> getPendingRecoveryDetails(final RemittanceBean remittanceBean,
-			final CVoucherHeader voucherHeader, final Integer detailKeyId) throws ValidationException {
+			final CVoucherHeader voucherHeader, final Integer detailKeyId) throws ValidationException, NumberFormatException, NoSuchMethodException, SecurityException {
 		final List<RemittanceBean> listRemitBean = new ArrayList<>();
 		final StringBuilder query = new StringBuilder();
 		final Map<String, Object> params = new HashMap<>();
@@ -134,7 +134,7 @@ public class RemitRecoveryService {
 	}
 
     public List<RemittanceBean> getRecoveryDetails(final RemittanceBean remittanceBean, final CVoucherHeader voucherHeader)
-            throws ValidationException {
+            throws ValidationException, NumberFormatException, NoSuchMethodException, SecurityException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("RemitRecoveryService | getRecoveryDetails | Start");
         final List<RemittanceBean> listRemitBean = new ArrayList<>();
@@ -294,7 +294,7 @@ public class RemitRecoveryService {
 	}
 
     public List<RemittanceBean> getRecoveryDetails(final String selectedRows)
-            throws ValidationException {
+            throws ValidationException, NumberFormatException, NoSuchMethodException, SecurityException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("RemitRecoveryService | getRecoveryDetails | Start");
         final List<RemittanceBean> listRemitBean = new ArrayList<RemittanceBean>();
@@ -333,7 +333,7 @@ public class RemitRecoveryService {
     }
 
 	public List<RemittanceBean> getRecoveryDetailsForReport(final RemittanceBean remittanceBean,
-			final CVoucherHeader voucherHeader, final Integer detailKeyId) throws ValidationException {
+			final CVoucherHeader voucherHeader, final Integer detailKeyId) throws ValidationException, NumberFormatException, NoSuchMethodException, SecurityException {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("RemitRecoveryService | getRecoveryDetails | Start");
 		final List<RemittanceBean> listRemitBean = new ArrayList<RemittanceBean>();
@@ -438,7 +438,7 @@ public class RemitRecoveryService {
 	}
 
     private void populateDetailsBySQL(final CVoucherHeader voucherHeader, final List<RemittanceBean> listRemitBean,
-            final StringBuilder query, Map<String, Object> params) {
+            final StringBuilder query, Map<String, Object> params) throws NumberFormatException, NoSuchMethodException, SecurityException {
         RemittanceBean remitBean;
 		final SQLQuery searchSQLQuery = persistenceService.getSession().createSQLQuery(query.toString());
 		params.entrySet().forEach(entry -> searchSQLQuery.setParameter(entry.getKey(), entry.getValue()));
@@ -533,7 +533,7 @@ public class RemitRecoveryService {
     }
 
     private void populateDetails(final CVoucherHeader voucherHeader, final List<RemittanceBean> listRemitBean,
-            final String query, Map<String, Object> params) {
+            final String query, Map<String, Object> params) throws NumberFormatException, NoSuchMethodException, SecurityException {
         RemittanceBean remitBean;
         final Query qry = persistenceService.getSession().createQuery(query);
         params.entrySet().forEach(entry -> qry.setParameter(entry.getKey(), entry.getValue()));
@@ -568,7 +568,7 @@ public class RemitRecoveryService {
         this.voucherHibDAO = voucherHibDAO;
     }
 
-    public List<AutoRemittanceBeanReport> populateAutoRemittanceDetailbySQL(final Query sqlQuery) {
+    public List<AutoRemittanceBeanReport> populateAutoRemittanceDetailbySQL(final Query sqlQuery) throws NumberFormatException, NoSuchMethodException, SecurityException {
         final List<AutoRemittanceBeanReport> remittanceList = sqlQuery.list();
         final List<AutoRemittanceBeanReport> autoRemittance = new ArrayList<AutoRemittanceBeanReport>(0);
 

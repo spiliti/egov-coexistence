@@ -208,7 +208,7 @@ public class VoucherHibernateDAO extends PersistenceService<CVoucherHeader, Long
 
     }
 
-	public EntityType getEntityInfo(final Integer detailKeyId, final Integer detailtypeId) throws ValidationException {
+	public EntityType getEntityInfo(final Integer detailKeyId, final Integer detailtypeId) throws NoSuchMethodException, SecurityException {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("VoucherHibernateDAO | getDetailCodeName | start");
 		EntityType entity = null;
@@ -226,7 +226,7 @@ public class VoucherHibernateDAO extends PersistenceService<CVoucherHeader, Long
 			else
 				entity = (EntityType) persistenceService
 						.find(String.format("from %s where id=? order by name", detailTypeName), detailKeyId);
-		} catch (final Exception e) {
+		} catch (final ValidationException | ClassNotFoundException e) {
 			final List<ValidationError> errors = new ArrayList<ValidationError>();
 			errors.add(new ValidationError("exp", e.getMessage()));
 			throw new ValidationException(errors);
