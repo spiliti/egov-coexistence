@@ -47,58 +47,86 @@
  */
 package org.egov.model.instrument;
 
-import org.egov.infstr.models.BaseModel;
-
 import java.util.HashSet;
 import java.util.Set;
 
+import org.egov.infstr.models.BaseModel;
+
+@SuppressWarnings("deprecation")
 public class InstrumentType extends BaseModel {
-    /**
-     *
-     */
-    private static final long serialVersionUID = 8681244690485333431L;
-    private Long id;
-    private String type;
-    private Boolean isActive;
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 8681244690485333431L;
+	private String type;
+	private Boolean isActive;
+	private Set<InstrumentAccountCodes> instrumentAccountCodes = new HashSet<>();
 
-   
+	public String getType() {
+		return type;
+	}
 
-    private Set instrumentAccountCodes = new HashSet<InstrumentAccountCodes>();
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((instrumentAccountCodes == null) ? 0 : instrumentAccountCodes.hashCode());
+		result = prime * result + ((isActive == null) ? 0 : isActive.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
 
-    @Override
-    public Long getId() {
-        return id;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InstrumentType other = (InstrumentType) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (instrumentAccountCodes == null) {
+			if (other.instrumentAccountCodes != null)
+				return false;
+		} else if (!instrumentAccountCodes.equals(other.instrumentAccountCodes))
+			return false;
+		if (isActive == null) {
+			if (other.isActive != null)
+				return false;
+		} else if (!isActive.equals(other.isActive))
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		return true;
+	}
 
-    @Override
-    public void setId(final Long id) {
-        this.id = id;
-    }
+	public void setType(final String type) {
+		this.type = type;
+	}
 
-    public String getType() {
-        return type;
-    }
+	public Set<InstrumentAccountCodes> getInstrumentAccountCodes() {
+		return instrumentAccountCodes;
+	}
 
-    public void setType(final String type) {
-        this.type = type;
-    }
+	public void setInstrumentAccountCodes(final Set<InstrumentAccountCodes> instrumentAccountCodes) {
+		this.instrumentAccountCodes = instrumentAccountCodes;
+	}
 
-    public Set<InstrumentAccountCodes> getInstrumentAccountCodes() {
-        return instrumentAccountCodes;
-    }
-
-    public void setInstrumentAccountCodes(
-            final Set<InstrumentAccountCodes> instrumentAccountCodes) {
-        this.instrumentAccountCodes = instrumentAccountCodes;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuffer itBuffer = new StringBuffer();
-        itBuffer.append("[id=" + id).append(",type=" + type).append(
-                ",isActive=" + isActive).append("]");
-        return itBuffer.toString();
-    }
+	@Override
+	public String toString() {
+		final StringBuilder itBuffer = new StringBuilder();
+		itBuffer.append("[id=" + id).append(",type=" + type).append(",isActive=" + isActive).append("]");
+		return itBuffer.toString();
+	}
 
 	public Boolean getIsActive() {
 		return isActive;

@@ -61,7 +61,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 
 import org.egov.commons.EgwStatus;
 import org.egov.commons.Fund;
@@ -70,11 +69,9 @@ import org.egov.commons.SubScheme;
 import org.egov.commons.utils.EntityType;
 import org.egov.infra.persistence.entity.AbstractAuditable;
 import org.egov.infra.persistence.validator.annotation.OptionalPattern;
-import org.egov.infra.persistence.validator.annotation.Required;
 import org.egov.infra.persistence.validator.annotation.Unique;
 import org.egov.utils.FinancialConstants;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.SafeHtml;
 
 @Entity
@@ -94,26 +91,20 @@ public class PurchaseOrder extends AbstractAuditable implements EntityType {
     @SafeHtml
     @Length(max = 100, message = "Maximum of 100 Characters allowed for Order Number")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialcharForContraWOAndSupplierName, message = "Special Characters are not allowed in Order Number")
-    @NotNull
     @Column(updatable = false)
     private String orderNumber;
 
     @SafeHtml
-    @Required(message = "Please Enter the Name")
     @Length(max = 100, message = "Maximum of 100 Characters allowed for Name")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialcharForContraWOAndSupplierName, message = "Special Characters are not allowed in Name")
-    @NotNull
     private String name;
 
-    @NotNull
     private Date orderDate;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "supplier")
     private Supplier supplier;
 
-    @NotNull
     @Min(1)
     private BigDecimal orderValue;
 
@@ -123,12 +114,10 @@ public class PurchaseOrder extends AbstractAuditable implements EntityType {
     @SafeHtml
     private String description;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "fund")
     private Fund fund;
 
-    @NotEmpty
     @SafeHtml
     private String department;
 
@@ -145,7 +134,6 @@ public class PurchaseOrder extends AbstractAuditable implements EntityType {
 
     private Date sanctionDate;
 
-    @NotNull
     private Boolean active;
 
     @Transient
@@ -156,79 +144,67 @@ public class PurchaseOrder extends AbstractAuditable implements EntityType {
 
     @Override
     public String getBankname() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getBankaccount() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getPanno() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getTinno() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getIfsccode() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
         return name;
     }
 
     @Override
     public String getModeofpay() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getCode() {
-        // TODO Auto-generated method stub
         return orderNumber;
     }
 
     @Override
     public Integer getEntityId() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getEntityDescription() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public EgwStatus getEgwStatus() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Long getId() {
-        // TODO Auto-generated method stub
         return id;
     }
 
     @Override
     protected void setId(Long id) {
-
+    	this.id = id;
     }
 
     public String getOrderNumber() {
