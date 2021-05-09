@@ -1351,7 +1351,7 @@ public class MicroserviceUtils {
         try {
             StringBuilder uri = new StringBuilder(appConfigManager.getEgovIndexerSerHost()).append(egovIndexerUrl);
             Object postForObject = restTemplate.postForObject(uri.toString(), data, Object.class, topicName);
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             Log.error("ERROR occurred while trying to push the data to indexer : ", e);
         }
     }
@@ -1698,7 +1698,7 @@ public class MicroserviceUtils {
         return restTemplate.postForObject(uri.toString(), request, StorageResponse.class);
     }
     
-    public ResponseEntity<byte[]> fetchFilesFromDigitService(String fileStoreId) throws RuntimeException {
+    public ResponseEntity<byte[]> fetchFilesFromDigitService(String fileStoreId) {
         Map<String, String> request = new HashMap<String, String>();
         String tenantId=getTenentId();
         request.put("tenantId", tenantId);

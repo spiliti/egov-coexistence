@@ -77,9 +77,11 @@ public interface PersonalInformationDAO
 	  * @param functionaryId
 	  * @param onDate
 	  * @return Employee
+	 * @throws NoSuchObjectException 
+	 * @throws TooManyValuesException 
 	  * @throws Exception 
 	  */
-	 public PersonalInformation getTempAssignedEmployeeByDeptDesigFunctionaryDate(Integer deptId, Integer desigId, Integer functionaryId, Date onDate) throws Exception;
+	 public PersonalInformation getTempAssignedEmployeeByDeptDesigFunctionaryDate(Integer deptId, Integer desigId, Integer functionaryId, Date onDate) throws NoSuchObjectException, TooManyValuesException;
 	 
 	 public abstract List getAllDesignationByDept(Integer deptId)throws TooManyValuesException, NoSuchObjectException;
 	 public abstract List getAllActiveUsersByGivenDesg(Integer DesgId);

@@ -159,7 +159,7 @@ public class RemittanceReportController {
 	@SuppressWarnings("rawtypes")
 	@GetMapping("/pending/_search")
 	public @ResponseBody ResponseEntity getRemittancePendingSearch(
-			@Valid @ModelAttribute RemittanceReportModel remittanceReportModel, final BindingResult errors) throws Exception {
+			@Valid @ModelAttribute RemittanceReportModel remittanceReportModel, final BindingResult errors) {
 		try {
 			validateRemittancePendingSearch(remittanceReportModel, errors);
 			if (errors.hasErrors()) {

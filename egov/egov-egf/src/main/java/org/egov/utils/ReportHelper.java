@@ -476,8 +476,8 @@ public class ReportHelper {
 
     public JasperPrint generateReceiptPaymentReportJasperPrint(final Statement receiptPaymentObj, final String heading,
             final String subtitle,
-            final String currentYearDate, final String PreviousYearDate, final boolean showScheduleColumn)
-                    throws Exception {
+            final String currentYearDate, final String PreviousYearDate, final boolean showScheduleColumn) throws ColumnBuilderException, ClassNotFoundException, JRException
+                     {
         final Style detailAmountStyle = getDetailAmountStyle();
         final Style columnStyle = getColumnStyle();
         FastReportBuilder drb = new FastReportBuilder();
@@ -487,8 +487,24 @@ public class ReportHelper {
         drb = drb;
         if (!showScheduleColumn)
         {
-            drb.addColumn("Schedule Number", "accountName", String.class.getName(), 100, columnStyle);
-            drb.addColumn("Account Code", "glCode", String.class.getName(), 55, columnStyle);
+            try {
+                drb.addColumn("Schedule Number", "accountName", String.class.getName(), 100, columnStyle);
+            } catch (ColumnBuilderException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            try {
+                drb.addColumn("Account Code", "glCode", String.class.getName(), 55, columnStyle);
+            } catch (ColumnBuilderException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
         if (showScheduleColumn) {

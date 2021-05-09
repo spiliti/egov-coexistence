@@ -388,10 +388,9 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
      * @param finParams
      *            department,functionary,function optional
      * @return
-     * @throws Exception
      */
     public List<EmployeeView> searchEmployee(Integer designationId, String code, String name, Integer status,
-            Integer empType, Map<String, Integer> finParams) throws Exception {
+            Integer empType, Map<String, Integer> finParams) {
 
         List<EmployeeView> employeeList = new ArrayList<EmployeeView>();
         Integer departmentId = finParams.get("departmentId") == null ? 0 : finParams.get("departmentId");
@@ -569,7 +568,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
      * @throws Exception
      */
     public List searchEmployee(Integer departmentId, Integer designationId, Integer functionaryId, String code,
-            String name, Integer status, Integer empType) throws Exception {
+            String name, Integer status, Integer empType) {
 
         List<EmployeeView> employeeList = null;
         try {
@@ -640,7 +639,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         return employeeList;
     }
 
-    public List<EmployeeView> searchEmployeeByGrouping(LinkedList<String> groupingByOrder) throws Exception {
+    public List<EmployeeView> searchEmployeeByGrouping(LinkedList<String> groupingByOrder) {
         List<EmployeeView> employeeList = null;
         try {
             String mainStr = "from EmployeeView ev where ";
@@ -1090,24 +1089,12 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
     }
 
     public void updateAssignment(Assignment assignment) {
-        try {
-            if (assignment != null)
-                assignmentDAO.update(assignment);
-        } catch (RuntimeException e) {
-
-            LOGGER.error(e);
-            throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
-        }
+        if (assignment != null)
+            assignmentDAO.update(assignment);
     }
 
     public void addLangKnown(PersonalInformation personalInformation, LangKnown langKnown) {
-        try {
-            personalInformation.addLangKnown(langKnown);
-        } catch (RuntimeException e) {
-
-            LOGGER.error(e);
-            throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
-        }
+        personalInformation.addLangKnown(langKnown);
     }
 
     public List getListOfEmpforDept(Integer deptId) {
@@ -1125,7 +1112,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
                 }
             }
 
-        } catch (RuntimeException e) {
+        } catch (ApplicationRuntimeException e) {
             LOGGER.error(e);
             throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
         }
@@ -1137,48 +1124,36 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
         PersonalInformation personalInformation = null;
         List listOfEmpOfSameDesig = new ArrayList();
 
-        try {
-            Collection employeeList = searchEmployee(Integer.valueOf(0), Integer.valueOf(desigId), "", "", "false");
-            if (!employeeList.isEmpty()) {
-                Iterator iter = employeeList.iterator();
-                while (iter.hasNext()) {
-                    EmployeeView cataEl = (EmployeeView) iter.next();
-                    personalInformation = (PersonalInformation) getEmloyeeById(cataEl.getId().intValue());
-                    listOfEmpOfSameDesig.add(personalInformation);
+        Collection employeeList = searchEmployee(Integer.valueOf(0), Integer.valueOf(desigId), "", "", "false");
+        if (!employeeList.isEmpty()) {
+            Iterator iter = employeeList.iterator();
+            while (iter.hasNext()) {
+                EmployeeView cataEl = (EmployeeView) iter.next();
+                personalInformation = (PersonalInformation) getEmloyeeById(cataEl.getId().intValue());
+                listOfEmpOfSameDesig.add(personalInformation);
 
-                }
             }
-
-        } catch (RuntimeException e) {
-            LOGGER.error(e);
-            throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
         }
         return listOfEmpOfSameDesig;
     }
 
     public EmployeeNamePoJo getNameOfEmployee(Integer empId) {
-        try {
-            EmployeeNamePoJo employeeNamePoJo = null;
-            PersonalInformation personalInformation = getEmloyeeById(Integer.valueOf(empId));
-            String fn = "";
-            String mn = "";
-            String ln = "";
-            if (personalInformation.getEmployeeFirstName() != null) {
-                fn = personalInformation.getEmployeeFirstName();
-            }
-            if (personalInformation.getEmployeeMiddleName() != null) {
-                mn = personalInformation.getEmployeeMiddleName();
-            }
-            if (personalInformation.getEmployeeLastName() != null) {
-                ln = personalInformation.getEmployeeLastName();
-            }
-            employeeNamePoJo = new EmployeeNamePoJo(fn, mn, ln);
-            return employeeNamePoJo;
-        } catch (RuntimeException e) {
-
-            LOGGER.error(e);
-            throw new ApplicationRuntimeException("Exception:" + e.getMessage(), e);
+        EmployeeNamePoJo employeeNamePoJo = null;
+        PersonalInformation personalInformation = getEmloyeeById(Integer.valueOf(empId));
+        String fn = "";
+        String mn = "";
+        String ln = "";
+        if (personalInformation.getEmployeeFirstName() != null) {
+            fn = personalInformation.getEmployeeFirstName();
         }
+        if (personalInformation.getEmployeeMiddleName() != null) {
+            mn = personalInformation.getEmployeeMiddleName();
+        }
+        if (personalInformation.getEmployeeLastName() != null) {
+            ln = personalInformation.getEmployeeLastName();
+        }
+        employeeNamePoJo = new EmployeeNamePoJo(fn, mn, ln);
+        return employeeNamePoJo;
 
     }
 
@@ -1671,7 +1646,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
 
         } catch (HibernateException he) {
 
-            throw new ApplicationRuntimeException("Exception:" + he.getMessage(), he);
+            throw new ApplicationRuntimeException("HibernateException:" + he.getMessage(), he);
         } /*
            * catch (Exception he) { throw new
            * ApplicationRuntimeException("Exception:" + he.getMessage(), he); }
@@ -1927,7 +1902,7 @@ public class EmployeeServiceImpl implements EmployeeServiceOld {
      * @return List of Assignment
      * @throws Exception
      */
-    public List searchEmployee(Integer status, Date fromDate, Date toDate) throws Exception {
+    public List searchEmployee(Integer status, Date fromDate, Date toDate) {
         List<Assignment> employeeList = new ArrayList<Assignment>();
         String mainStr = "";
         try {

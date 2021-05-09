@@ -59,6 +59,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.access.InvalidInvocationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -267,7 +268,7 @@ public class ScriptService  {
                 evalResult = ((Invocable) engine).invokeFunction(functionName, args);
                 if (evalResult == null)
                     evalResult = engine.get("result");
-            } catch (final Exception e) {
+            } catch (final NoSuchMethodException | ScriptException e) {
                 final String errMsg = "Exception while invoking function [" + functionName + "]";
                 LOG.error(errMsg, e);
                 throw new ApplicationRuntimeException(errMsg, e);

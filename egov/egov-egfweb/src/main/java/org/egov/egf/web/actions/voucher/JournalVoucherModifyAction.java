@@ -224,7 +224,7 @@ public class JournalVoucherModifyAction extends BaseVoucherAction {
     }
 
     @ValidationErrorPage(value = "editVoucher")
-    public String saveAndPrint() throws Exception {
+    public String saveAndPrint() {
         try {
             saveMode = "saveprint";
             return update();

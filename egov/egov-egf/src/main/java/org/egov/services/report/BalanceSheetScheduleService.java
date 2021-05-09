@@ -57,6 +57,7 @@ import org.egov.egf.model.Statement;
 import org.egov.egf.model.StatementEntry;
 import org.egov.egf.utils.FinancialUtils;
 import org.egov.infra.admin.master.entity.AppConfigValues;
+import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.utils.Constants;
@@ -622,7 +623,7 @@ public class BalanceSheetScheduleService extends ScheduleService {
 
             for (final AppConfigValues appConfigVal : configValues)
                 removeEntrysWithZeroAmount = appConfigVal.getValue();
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             throw new ApplicationRuntimeException(
                     "Appconfig value for remove entries with zero amount in report is not defined in the system");
         }

@@ -58,6 +58,7 @@ import org.egov.infra.admin.master.service.BoundaryService;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.pims.commons.Designation;
 import org.egov.pims.model.PersonalInformation;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,9 +114,9 @@ public class PersonalInformationHibernateDAO implements PersonalInformationDAO
 
 			return retMap;
 		}
-		catch (Exception e)
+		catch (HibernateException e)
 		{
-				throw new ApplicationRuntimeException("Hibernate Exception : "+e.getMessage(),e);
+				throw new HibernateException("Hibernate Exception : "+e.getMessage(),e);
 		}
 	}
 
@@ -320,9 +321,9 @@ public class PersonalInformationHibernateDAO implements PersonalInformationDAO
 		return (personalInformation);
 
 		}
-		 catch(Exception e)
+		 catch(HibernateException e)
         {
-           throw new ApplicationRuntimeException(e.getMessage(),e);
+           throw new HibernateException(e.getMessage(),e);
         }
 
 
@@ -418,10 +419,10 @@ public class PersonalInformationHibernateDAO implements PersonalInformationDAO
 		return (personalInformation);
 
 		}
-		 catch(Exception e)
+		 catch(HibernateException e)
         {
 			
-           throw new ApplicationRuntimeException(e.getMessage(),e);
+           throw new HibernateException(e.getMessage(),e);
         }
 
 
@@ -439,7 +440,7 @@ public class PersonalInformationHibernateDAO implements PersonalInformationDAO
 	  * @return Employee
 	 * @throws NoSuchObjectException 
 	 * @throws TooManyValuesException 
-	  * @throws Exception 
+	 * @throws Exception 
 	  */
 	 public PersonalInformation getTempAssignedEmployeeByDeptDesigFunctionaryDate(Integer deptId, Integer desigId, Integer functionaryId, Date onDate) throws NoSuchObjectException, TooManyValuesException{
 		 PersonalInformation tempAssignedEemployee = null;
@@ -484,10 +485,10 @@ public class PersonalInformationHibernateDAO implements PersonalInformationDAO
 				
 				
 			}
-			 catch(Exception e)
+			 catch(HibernateException e)
 		        {
 					
-		           throw new ApplicationRuntimeException("system.error", e);
+		           throw new HibernateException("system.error", e);
 		        }
 			 
 
@@ -506,8 +507,8 @@ public class PersonalInformationHibernateDAO implements PersonalInformationDAO
 						userList = qry.list();
 						
 					
-				} catch (RuntimeException e) {
-					throw new ApplicationRuntimeException("Exception while getting users for given designation",e);
+				} catch (HibernateException e) {
+					throw new HibernateException("Exception while getting users for given designation",e);
 					
 				}
 		

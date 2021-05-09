@@ -613,7 +613,7 @@ public class VoucherStatusReportAction extends BaseFormAction {
 
 	@SkipValidation
 	@Action(value = "/report/voucherStatusReport-generatePdf")
-	public String generatePdf() throws Exception {
+	public String generatePdf() throws ParseException, ApplicationException, JRException, IOException {
 		populateData();
 		inputStream = reportHelper.exportPdf(inputStream, JASPERPATH, getParamMap(), voucherReportList);
 		return "PDF";

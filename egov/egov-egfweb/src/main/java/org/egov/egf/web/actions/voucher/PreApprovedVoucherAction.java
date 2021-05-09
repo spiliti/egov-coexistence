@@ -460,7 +460,7 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
         try {
             // loading the bill detail info.
             getMasterDataForBillVoucher();
-        } catch (final Exception e) {
+        } catch (final ValidationException | ApplicationException e) {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getMessage()));
             throw new ValidationException(errors);

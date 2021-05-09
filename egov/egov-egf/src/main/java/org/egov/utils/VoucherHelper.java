@@ -283,7 +283,7 @@ public class VoucherHelper {
 	}
 
 	public String getEg_Voucher(final String vouType, final String fiscalPeriodIdStr)
-			throws TaskFailedException, Exception {
+			throws TaskFailedException {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug(" In EGovernCommon :getEg_Voucher method ");
 		final Query query = persistenceService.getSession()

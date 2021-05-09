@@ -71,6 +71,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -170,7 +171,7 @@ public class FileStoreUtils {
                             else
                                 return this.fileStoreService.store(file.getInputStream(), file.getOriginalFilename(),
                                         file.getContentType(), moduleName);
-                        } catch (Exception e) {
+                        } catch (IOException e) {
                             throw new ApplicationRuntimeException("err.input.stream", e);
                         }
                     }).collect(Collectors.toSet());

@@ -110,9 +110,9 @@ public class EisUtilService implements OwnerGroupService<Position> {
 			positionList = (List) persistenceService.findAllBy(mainStr.toString(), user, givenDate, givenDate,
 					givenDate);
 
-		} catch (Exception e) {
+		} catch (HibernateException e) {
 			LOGGER.error("Exception while getting the getPositionsForUser=" + e.getMessage());
-			throw new ApplicationRuntimeException(e.getMessage(), e);
+			throw new HibernateException(e.getMessage(), e);
 
 		}
         return positionList;

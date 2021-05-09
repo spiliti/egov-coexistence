@@ -80,6 +80,7 @@ import org.egov.infra.admin.master.entity.City;
 import org.egov.infra.admin.master.service.AppConfigValueService;
 import org.egov.infra.admin.master.service.CityService;
 import org.egov.infra.config.persistence.datasource.routing.annotation.ReadOnly;
+import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.microservice.models.Department;
 import org.egov.infra.microservice.utils.MicroserviceUtils;
@@ -265,7 +266,7 @@ public class TrialBalanceAction extends BaseFormAction {
 
 			for (final AppConfigValues appConfigVal : configValues)
 				removeEntrysWithZeroAmount = appConfigVal.getValue();
-		} catch (final Exception e) {
+		} catch (final ApplicationRuntimeException e) {
 			throw new ApplicationRuntimeException(
 					"Appconfig value for remove entries with zero amount in report is not defined in the system");
 		}
@@ -632,7 +633,7 @@ public class TrialBalanceAction extends BaseFormAction {
 
             al.add(tbTotal);
 
-        } catch (final Exception e) {
+        } catch (final NumberFormatException e) {
 
 
         }

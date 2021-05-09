@@ -65,6 +65,8 @@ import org.hibernate.type.BooleanType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -394,7 +396,7 @@ public class FundFlowService extends PersistenceService {
             calfrom.set(Calendar.AM_PM, Calendar.AM);
             asPerDate = calfrom.getTime();
 
-        } catch (final Exception e) {
+        } catch (final ParseException e) {
             throw new ValidationException(Arrays.asList(new ValidationError("cannot.format.date",
                     "Failed during date Formatting ")));
         }

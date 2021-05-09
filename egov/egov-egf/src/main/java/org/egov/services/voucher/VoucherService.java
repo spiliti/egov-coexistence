@@ -500,10 +500,17 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
 			}
 		} catch (final HibernateException e) {
 			LOGGER.error("Exception occured in VoucherSerive |getVoucherInfo " + e);
-		} catch (final Exception e) {
-			LOGGER.error("Exception occured in VoucherSerive |getVoucherInfo " + e);
-		}
-
+        } /*
+           * catch (final Exception e) {
+           * LOGGER.error("Exception occured in VoucherSerive |getVoucherInfo "
+           * + e); }
+           */ catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 		voucherMap.put(Constants.GLDEATILLIST, billDetailslist);
 		/**
 		 * create empty sub ledger row
@@ -662,7 +669,7 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
 
 			}
 			// conn.close();
-		} catch (final Exception e) {
+		} catch (final ApplicationRuntimeException | TaskFailedException e) {
 			LOGGER.error(e);
 			throw new ApplicationRuntimeException(
 					"Exception occured while getting upadetd voucher number and cgvn number" + e);

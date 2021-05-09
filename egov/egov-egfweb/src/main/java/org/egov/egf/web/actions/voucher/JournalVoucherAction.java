@@ -432,7 +432,7 @@ public class JournalVoucherAction extends BaseVoucherAction
     }
 
     @ValidationErrorPage(value = "new")
-    public String saveAndView() throws Exception {
+    public String saveAndView() throws ParseException {
         try {
             buttonValue = "view";
             return create();
@@ -442,7 +442,7 @@ public class JournalVoucherAction extends BaseVoucherAction
     }
 
     @ValidationErrorPage(value = "new")
-    public String saveAndPrint() throws Exception {
+    public String saveAndPrint() throws ParseException {
         try {
             buttonValue = "print";
             return create();
@@ -452,7 +452,7 @@ public class JournalVoucherAction extends BaseVoucherAction
     }
 
     @ValidationErrorPage(value = "new")
-    public String saveAndNew() throws Exception {
+    public String saveAndNew() throws ParseException {
         try {
             buttonValue = "new";
             return create();
@@ -462,7 +462,7 @@ public class JournalVoucherAction extends BaseVoucherAction
     }
 
     @ValidationErrorPage(value = "new")
-    public String saveAndClose() throws Exception {
+    public String saveAndClose() throws ParseException {
         buttonValue = "close";
         return create();
     }

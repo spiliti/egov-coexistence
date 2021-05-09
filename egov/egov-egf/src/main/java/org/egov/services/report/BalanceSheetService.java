@@ -72,6 +72,7 @@ import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.utils.Constants;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -167,7 +168,7 @@ public class BalanceSheetService extends ReportService {
                             entry.setPreviousYearTotal(prevYrTotal.add(divideAndRound(total, divisor)));
                         }
                 }
-        } catch (final Exception exp)
+        } catch (final HibernateException exp)
         {
 
         }
@@ -269,7 +270,7 @@ public class BalanceSheetService extends ReportService {
 
             for (final AppConfigValues appConfigVal : configValues)
                 removeEntrysWithZeroAmount = appConfigVal.getValue();
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             throw new ApplicationRuntimeException(
                     "Appconfig value for remove entries with zero amount in report is not defined in the system");
         }

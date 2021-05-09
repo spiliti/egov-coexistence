@@ -210,7 +210,7 @@ public abstract class ReportService {
             return appConfigValuesService
                     .getConfigValuesByModuleAndKey(module, key).get(0)
                     .getValue();
-        } catch (final Exception e) {
+        } catch (final ValidationException e) {
             LOGGER.error(e.getMessage(), e);
             new ValidationException(Arrays.asList(new ValidationError(key
                     + "is not defined in appconfig", key

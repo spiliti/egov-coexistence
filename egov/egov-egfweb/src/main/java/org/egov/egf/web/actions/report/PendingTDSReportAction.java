@@ -177,7 +177,7 @@ public class PendingTDSReportAction extends BaseFormAction {
     }
 
     @Action(value = "/report/pendingTDSReport-summaryReport")
-    public String summaryReport() throws Exception {
+    public String summaryReport() {
         return "summaryForm";
     }
 
