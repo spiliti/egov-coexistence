@@ -543,8 +543,7 @@ public class ReportHelper {
     public JasperPrint generateBudgetAppropriationJasperPrint(final List<BudgetReAppReportBean> BudgetAppDisplay,
             final String heading,
             final String subtitle, final String budName, final String showFundColumn, final String showFunctionColumn,
-            final String showDepartmentColumn)
-                    throws Exception {
+            final String showDepartmentColumn) throws ColumnBuilderException, ClassNotFoundException, JRException{
         final Style detailAmountStyle = getDetailAmountStyle();
         final Style columnStyle = getColumnStyle();
         FastReportBuilder drb = new FastReportBuilder();
@@ -587,8 +586,7 @@ public class ReportHelper {
             final String subtitle,
             final String beforePreviousYearRange, final String previousYearRange, final String currentYearRange,
             final String nextYearRange,
-            final boolean isConsolidated)
-                    throws Exception {
+            final boolean isConsolidated) throws ColumnBuilderException, ClassNotFoundException, JRException {
         getDetailAmountStyle();
         final Style columnStyle = getBudgetColumnStyle();
         final String conSubtitle = isConsolidated ? subtitle

@@ -420,10 +420,12 @@ public class BudgetReAppropriationAction extends BaseFormAction {
         } catch (final ValidationException e) {
             throw new ValidationException(Arrays.asList(new ValidationError(e.getErrors().get(0).getMessage(),
                     e.getErrors().get(0).getMessage())));
-        } catch (final Exception e) {
-            throw new ValidationException(Arrays.asList(new ValidationError("Do transaction with proper user",
-                    "Do transaction with proper user")));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError("Do transaction with proper user",
+           * "Do transaction with proper user"))); }
+           */
     }
 
     public void removeEmptyReAppropriation(final List<BudgetReAppropriationView> reAppropriationList) {

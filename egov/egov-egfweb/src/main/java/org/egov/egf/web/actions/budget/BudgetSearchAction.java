@@ -585,7 +585,7 @@ public class BudgetSearchAction extends BaseFormAction {
         try {
             // TODO: Now employee is extending user so passing userid to get assingment -- changes done by Vaibhav
             pos = eisCommonService.getPrimaryAssignmentPositionForEmp(ApplicationThreadLocals.getUserId());
-        } catch (final Exception e) {
+        } catch (final ObjectNotFoundException e) {
             throw new ApplicationRuntimeException("Unable to get Position for the user");
         }
         return pos;

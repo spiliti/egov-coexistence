@@ -67,6 +67,7 @@ import org.egov.infra.web.struts.actions.BaseFormAction;
 import org.egov.infra.web.struts.annotation.ValidationErrorPage;
 import org.egov.infstr.utils.EgovMasterDataCaching;
 import org.egov.services.masters.SchemeService;
+import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -211,7 +212,7 @@ public class SchemeAction extends BaseFormAction {
 		} catch (final ValidationException e) {
 			LOGGER.error("ValidationException in creating Scheme" + e.getMessage());
 			throw e;
-		} catch (final Exception e) {
+		} catch (final HibernateException e) {
 			LOGGER.error("Exception while creating Scheme" + e.getMessage());
 			throw new ValidationException(Arrays.asList(new ValidationError(AN_ERROR_OCCURED_CONTACT_ADMINISTRATOR,
 					AN_ERROR_OCCURED_CONTACT_ADMINISTRATOR)));

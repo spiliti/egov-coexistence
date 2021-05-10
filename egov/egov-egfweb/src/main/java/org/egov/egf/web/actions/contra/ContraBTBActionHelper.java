@@ -487,9 +487,11 @@ public class ContraBTBActionHelper {
 		} catch (final ValidationException e) {
 			throw new ValidationException(Arrays
 					.asList(new ValidationError(e.getErrors().get(0).getMessage(), e.getErrors().get(0).getMessage())));
-		} catch (final Exception e) {
-			throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-		}
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
 	}
 
 	@Transactional

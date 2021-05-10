@@ -363,7 +363,7 @@ public class DishonorChequeWorkflowAction extends BaseFormAction {
                 }
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug("Completed  integrated system update.");
-            } catch (final RuntimeException e) {
+            } catch (final ValidationException e) {
                 LOGGER.error("Error in updating integrated system  " + e.getMessage(), e);
                 final List<ValidationError> errors = new ArrayList<ValidationError>();
                 errors.add(new ValidationError("exception", e.getMessage()));
@@ -659,10 +659,11 @@ public class DishonorChequeWorkflowAction extends BaseFormAction {
             throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
         } catch (final ValidationException e) {
             throw e;
-        } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { LOGGER.error(e.getMessage(), e); throw
+           * new ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         return voucherHeader;
     }
 

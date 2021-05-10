@@ -66,6 +66,7 @@ import org.egov.infra.web.struts.actions.BaseFormAction;
 import org.egov.infra.web.struts.annotation.ValidationErrorPage;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.infstr.utils.EgovMasterDataCaching;
+import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -148,7 +149,7 @@ public class PartyTypeAction extends BaseFormAction {
             persistenceService.getSession().flush();
             persistenceService.getSession().clear();
             setSuccess("yes");
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             setSuccess("no");
             LOGGER.error("Exception occurred in PartyTypeAction-create ", e);
 
@@ -190,7 +191,7 @@ public class PartyTypeAction extends BaseFormAction {
             persistenceService.persist(partyType);
             // showMode = "view";
             setSuccess("yes");
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             setSuccess("no");
             LOGGER.error("Exception occurred in PartyTypeAction-edit ", e);
 

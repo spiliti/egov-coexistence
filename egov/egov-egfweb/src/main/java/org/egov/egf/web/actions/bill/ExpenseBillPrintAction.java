@@ -99,6 +99,7 @@ import org.egov.model.voucher.VoucherDetails;
 import org.egov.pims.commons.Position;
 import org.egov.utils.Constants;
 import org.egov.utils.ReportHelper;
+import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import net.sf.jasperreports.engine.JRException;
@@ -586,7 +587,7 @@ public class ExpenseBillPrintAction extends BaseFormAction {
                                     String.format("from %s where id=? order by name", detailTypeName), payeedetail.getAccountDetailKeyId());
                         vd.setDetailKey(entity.getCode());
                         vd.setDetailName(entity.getName());
-                    } catch (final Exception e) {
+                    } catch (final HibernateException e) {
                         final List<ValidationError> errors = new ArrayList<>();
                         errors.add(new ValidationError("exp", e.getMessage()));
                         throw new ValidationException(errors);

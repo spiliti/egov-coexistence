@@ -189,10 +189,11 @@ public class VoucherHelper {
 		} catch (final ParseException e) {
 			if (LOGGER.isDebugEnabled())
 				LOGGER.debug("Exception occured while parsing date" + e);
-		} catch (final Exception e) {
-			LOGGER.error(e);
-			throw new ApplicationRuntimeException("Error occured while executing search instrument query");
-		}
+        } /*
+           * catch (final Exception e) { LOGGER.error(e); throw new
+           * ApplicationRuntimeException("Error occured while executing search instrument query"
+           * ); }
+           */
 		return queryMap;
 	}
 
@@ -275,10 +276,11 @@ public class VoucherHelper {
 		} catch (final ParseException e) {
 			if (LOGGER.isDebugEnabled())
 				LOGGER.debug("Exception occured while parsing date" + e);
-		} catch (final Exception e) {
-			LOGGER.error(e);
-			throw new ApplicationRuntimeException("Error occured while executing search instrument query");
-		}
+        } /*
+           * catch (final Exception e) { LOGGER.error(e); throw new
+           * ApplicationRuntimeException("Error occured while executing search instrument query"
+           * ); }
+           */
 		return queryMap;
 	}
 

@@ -99,6 +99,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.orm.hibernate4.HibernateQueryException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -773,7 +774,7 @@ public class AutoReconcileHelper{
                 try {
                     numericCellValue = Double.parseDouble(strValue);
                     bigDecimalValue = BigDecimal.valueOf(numericCellValue);
-                } catch (final Exception e) {
+                } catch (final NumberFormatException e) {
                     if (LOGGER.isDebugEnabled())
                         LOGGER.debug("Found : Non numeric value in Numeric Field :" + strValue + ":");
                 }
@@ -808,7 +809,7 @@ public class AutoReconcileHelper{
         List<Instrument> instLists = null;
         try {
             instLists = this.getRecieptInstruments(accountId,fromDate,toDate);
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             LOGGER.error(String.format("ERROR occurred while fetching the Receipt Instruments for accountId : %1$s and for date range from %2$s to %3$s", accountId,fromDate,toDate));
         }
         Map<String, Instrument> instChequeMap = new HashMap<String, Instrument>();
@@ -941,7 +942,7 @@ public class AutoReconcileHelper{
                 backupdateFailureQuery.setLong("id", bean.getId());
                 backupdateFailureQuery.executeUpdate();
 
-            } catch (final Exception e) {
+            } catch (final HibernateQueryException e) {
                 backupdateFailureQuery.setLong("id", bean.getId());
                 backupdateFailureQuery.setString("e", e.getMessage());
                 backupdateFailureQuery.executeUpdate();
@@ -961,9 +962,9 @@ public class AutoReconcileHelper{
                     backupdateQuery.executeUpdate();
                 }else{
                     count -= recInsIds.size();
-                    throw new Exception("Error while doing conciliation for receipt voucher instruments");
+                    throw new ApplicationRuntimeException("Error while doing conciliation for receipt voucher instruments");
                 }
-            } catch (Exception e) {
+            } catch (HibernateException e) {
                 backupdateFailureQuery.setParameterList("id", recInsIds);
                 backupdateFailureQuery.setString("e", e.getMessage());
                 backupdateFailureQuery.executeUpdate();

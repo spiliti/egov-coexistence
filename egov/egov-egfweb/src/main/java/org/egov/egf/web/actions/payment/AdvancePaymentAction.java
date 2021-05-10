@@ -347,7 +347,7 @@ public class AdvancePaymentAction extends BasePaymentAction {
                         .getBankaccount().getChartofaccounts().getId()));
                 balance = commonBean.getAvailableBalance();
                 return true;
-            } catch (final Exception e) {
+            } catch (final NumberFormatException e) {
                 balance = BigDecimal.valueOf(-1);
                 return true;
             }

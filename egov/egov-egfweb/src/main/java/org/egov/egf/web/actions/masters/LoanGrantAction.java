@@ -70,6 +70,7 @@ import org.egov.infra.validation.exception.ValidationException;
 import org.egov.infra.web.struts.annotation.ValidationErrorPage;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.services.masters.BankService;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.IntegerType;
@@ -432,7 +433,7 @@ public class LoanGrantAction extends LoanGrantBaseAction {
         } catch (final ValidationException e) {
             prepareBeforeEdit();
             throw e;
-        } catch (final Exception e) {
+        } catch (final HibernateException e) {
             prepareBeforeEdit();
             throw new ValidationException(Arrays.asList(new ValidationError("An error occured contact Administrator",
                     "An error occured contact Administrator")));

@@ -456,7 +456,7 @@ public class DirectBankPaymentAction extends BasePaymentAction {
                 final Class aClass = Class.forName(table);
                 final java.lang.reflect.Method method = aClass.getMethod("getId");
                 dataType = method.getReturnType().getSimpleName();
-            } catch (final Exception e) {
+            } catch (final ClassNotFoundException | NoSuchMethodException | SecurityException e) {
                 throw new ApplicationRuntimeException(e.getMessage());
             }
             EntityType entity = null;

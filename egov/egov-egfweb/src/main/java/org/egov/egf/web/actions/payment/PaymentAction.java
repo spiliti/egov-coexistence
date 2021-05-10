@@ -341,7 +341,7 @@ public class PaymentAction extends BasePaymentAction {
 
                 for (final AppConfigValues appConfigVal : configValues)
                     bankCode = appConfigVal.getValue();
-            } catch (final Exception e) {
+            } catch (final ApplicationRuntimeException e) {
                 throw new ApplicationRuntimeException(
                         "Appconfig value for EB Voucher propartys is not defined in the system");
             }
@@ -400,7 +400,7 @@ public class PaymentAction extends BasePaymentAction {
                     value = appConfigVal.getValue();
                     propartyAppConfigResultList.put(key, value);
                 }
-            } catch (final Exception e) {
+            } catch (final ApplicationRuntimeException e) {
                 throw new ApplicationRuntimeException(
                         "Appconfig value for EB Voucher propartys is not defined in the system");
             }

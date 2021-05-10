@@ -1060,13 +1060,13 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getMessage()));
             throw new ValidationException(e.getErrors());
-        } catch (final Exception e) {
-            // searchRTGS();
-            LOGGER.error(e.getMessage());
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) { // searchRTGS();
+           * LOGGER.error(e.getMessage()); final List<ValidationError> errors =
+           * new ArrayList<ValidationError>(); errors.add(new
+           * ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
         addActionMessage(getMessage("rtgs.transaction.success"));
 
         if (LOGGER.isDebugEnabled())
@@ -1422,12 +1422,13 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                 loadChequeSerialNo(bankaccount);
                 return "searchpensionpayment";
             }
-        } catch (final ValidationException e) {
-            throw new ValidationException(e.getErrors());
-        } catch (final Exception e) {
-            LOGGER.error(e.getMessage());
+        } /*
+           * catch (final ValidationException e) { throw new
+           * ValidationException(e.getErrors()); }
+           */catch (final ValidationException ex) {
+            LOGGER.error(ex.getMessage());
             final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
+            errors.add(new ValidationError("exp", ex.getMessage()));
             throw new ValidationException(errors);
         }
         if (LOGGER.isDebugEnabled())
@@ -1441,7 +1442,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
             return "view";
     }
 
-    public void generateAdvice() throws Exception {
+    public void generateAdvice() throws ApplicationException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting generateAdvice...");
         BankAdviceForm baf;
@@ -2188,7 +2189,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
     }
 
     @SkipValidation
-    public String ajaxGenerateAdviceHtml() throws Exception {
+    public String ajaxGenerateAdviceHtml() throws ApplicationException{
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting ajaxGenerateAdviceHtml...");
         generateAdvice();
@@ -2199,7 +2200,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
     }
 
     @SkipValidation
-    public String generateAdvicePdf() throws Exception {
+    public String generateAdvicePdf() throws ApplicationException, JRException, IOException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting generateAdvicePdf...");
         generateAdvice();
@@ -2234,7 +2235,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
     }
 
     @SkipValidation
-    public String generateAdviceXls() throws Exception {
+    public String generateAdviceXls() throws ApplicationException, JRException, IOException {
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("Starting generateAdviceXls...");
         generateAdvice();

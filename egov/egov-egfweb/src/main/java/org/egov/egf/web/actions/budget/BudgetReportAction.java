@@ -830,7 +830,7 @@ public class BudgetReportAction extends BaseFormAction {
         try {
             // TODO: Now employee is extending user so passing userid to get assingment -- changes done by Vaibhav
             pos = eisCommonService.getPrimaryAssignmentPositionForEmp(ApplicationThreadLocals.getUserId());
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             throw new ApplicationRuntimeException("Unable to get Position for the user");
         }
         return pos;
@@ -1197,11 +1197,11 @@ public class BudgetReportAction extends BaseFormAction {
         {
             throw new ValidationException(Arrays.asList(new ValidationError(e.getErrors().get(0).getMessage(),
                     e.getErrors().get(0).getMessage())));
-        } catch (final Exception e)
-        {
-            throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(),
-                    e.getMessage())));
-        }
+        } /*
+           * catch (final Exception e) { throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
         return "print";
     }
 
@@ -1214,7 +1214,7 @@ public class BudgetReportAction extends BaseFormAction {
     }
 
     @Action(value = "/budget/budgetReport-generateDepartmentWisePdf")
-    public String generateDepartmentWisePdf() throws Exception {
+    public String generateDepartmentWisePdf() throws JRException, IOException {
         validateFinancialYear();
         populateData();
         inputStream = reportHelper.exportPdf(inputStream, DEPTWISEPATH, getParamMap(), budgetReportList);
@@ -1222,7 +1222,7 @@ public class BudgetReportAction extends BaseFormAction {
     }
 
     @Action(value = "/budget/budgetReport-ajaxGenerateDepartmentWiseHtml")
-    public String ajaxGenerateDepartmentWiseHtml() throws Exception {
+    public String ajaxGenerateDepartmentWiseHtml() {
         populateData();
         inputStream = reportHelper.exportHtml(inputStream, DEPTWISEPATH, getParamMap(), budgetReportList, "pt");
         return "department-HTML";

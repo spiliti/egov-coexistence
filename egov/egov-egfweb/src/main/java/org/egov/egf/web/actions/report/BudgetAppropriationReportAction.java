@@ -47,6 +47,7 @@
  */
 package org.egov.egf.web.actions.report;
 
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
@@ -70,6 +71,9 @@ import org.hibernate.type.BigDecimalType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import ar.com.fdvs.dj.domain.builders.ColumnBuilderException;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -277,7 +281,7 @@ public class BudgetAppropriationReportAction extends BaseFormAction {
 	}
 
 	@Action(value = "/report/budgetAppropriationReport-ajaxGenerateReportXls")
-	public String ajaxGenerateReportXls() throws Exception {
+	public String ajaxGenerateReportXls() throws ColumnBuilderException, ClassNotFoundException, JRException, IOException {
 		populateReAppropriationData();
 		prepareFormattedList();
 		final String title = ReportUtil.getCityName() +" "+(cityService.getCityGrade()==null ? "" :cityService.getCityGrade());
@@ -292,7 +296,7 @@ public class BudgetAppropriationReportAction extends BaseFormAction {
 	}
 
 	@Action(value = "/report/budgetAppropriationReport-ajaxGenerateReportPdf")
-	public String ajaxGenerateReportPdf() throws Exception {
+	public String ajaxGenerateReportPdf() throws ColumnBuilderException, ClassNotFoundException, JRException, IOException {
 		populateReAppropriationData();
 		prepareFormattedList();
 		final String title = ReportUtil.getCityName() +" "+(cityService.getCityGrade()==null ? "" :cityService.getCityGrade());

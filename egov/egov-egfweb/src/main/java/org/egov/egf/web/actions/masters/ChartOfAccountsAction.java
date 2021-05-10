@@ -81,6 +81,7 @@ import org.egov.services.voucher.GeneralLedgerService;
 import org.egov.utils.Constants;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hibernate.cache.CacheException;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +89,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.exilant.GLEngine.ChartOfAccounts;
 import com.exilant.GLEngine.CoaCache;
+import com.mchange.v1.cachedstore.CacheFlushException;
 
 @ParentPackage("egov")
 @Results({
@@ -757,7 +759,7 @@ public class ChartOfAccountsAction extends BaseFormAction {
     void clearCache() {
         try {
         	coaCache.reLoad();
-        }catch(Exception e)
+        }catch(CacheException e)
         {
         	LOGGER.error("Error while reloading coa cache");  
         }

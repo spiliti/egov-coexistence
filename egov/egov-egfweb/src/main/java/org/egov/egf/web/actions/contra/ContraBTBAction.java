@@ -838,11 +838,12 @@ public class ContraBTBAction extends BaseVoucherAction {
 		} catch (final ValidationException e) {
 			LOGGER.error(e.getMessage());
 			throw e;
-		} catch (final Exception e) {
-			// handle engine exception
-			LOGGER.error(e.getMessage());
-			throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-		}
+        } /*
+           * catch (final Exception e) { // handle engine exception
+           * LOGGER.error(e.getMessage()); throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Posted to Ledger " + voucherHeader.getId());
 		return voucherHeader;
@@ -943,11 +944,12 @@ public class ContraBTBAction extends BaseVoucherAction {
 		} catch (final ValidationException e) {
 			LOGGER.error(e.getMessage(), e);
 			throw e;
-		} catch (final Exception e) {
-			// handle engine exception
-			LOGGER.error(e.getMessage());
-			throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-		}
+        } /*
+           * catch (final Exception e) { // handle engine exception
+           * LOGGER.error(e.getMessage()); throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Posted to Ledger " + voucherHeader.getId());
 		return voucherHeader;
@@ -1250,11 +1252,12 @@ public class ContraBTBAction extends BaseVoucherAction {
 			throw new ValidationException(
 					Arrays.asList(new ValidationError(EXCEPTION_WHILE_SAVING_DATA, TRANSACTION_FAILED)));
 
-		} catch (final Exception e) {
-			// handle engine exception
-			LOGGER.error(e.getMessage());
-			throw new ValidationException(Arrays.asList(new ValidationError(e.getMessage(), e.getMessage())));
-		}
+        } /*
+           * catch (final Exception e) { // handle engine exception
+           * LOGGER.error(e.getMessage()); throw new
+           * ValidationException(Arrays.asList(new
+           * ValidationError(e.getMessage(), e.getMessage()))); }
+           */
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Posted to Ledger ");
 	}
@@ -1382,7 +1385,7 @@ public class ContraBTBAction extends BaseVoucherAction {
 			try {
 				fromBalance = egovCommon.getAccountBalance(voucherHeader.getVoucherDate(),
 						contraVoucher.getFromBankAccountId().getId());
-			} catch (final Exception e) {
+			} catch (final NumberFormatException e) {
 				LOGGER.error(e.getMessage());
 				fromBalance = BigDecimal.valueOf(-1);
 			}
@@ -1396,7 +1399,7 @@ public class ContraBTBAction extends BaseVoucherAction {
 			try {
 				toBalance = egovCommon.getAccountBalance(voucherHeader.getVoucherDate(),
 						contraVoucher.getToBankAccountId().getId());
-			} catch (final Exception e) {
+			} catch (final NumberFormatException e) {
 				LOGGER.error(e.getMessage());
 				toBalance = BigDecimal.valueOf(-1);
 			}

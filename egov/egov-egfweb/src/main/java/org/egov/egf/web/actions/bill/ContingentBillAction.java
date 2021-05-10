@@ -92,6 +92,8 @@ import org.egov.model.voucher.VoucherDetails;
 import org.egov.model.voucher.WorkflowBean;
 import org.egov.utils.CheckListHelper;
 import org.egov.utils.FinancialConstants;
+import org.hibernate.HibernateException;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -320,12 +322,12 @@ public class ContingentBillAction extends BaseBillAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) { final List<ValidationError> errors =
+           * new ArrayList<ValidationError>(); errors.add(new
+           * ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
 
         return "messages";
     }
@@ -655,7 +657,7 @@ public class ContingentBillAction extends BaseBillAction {
                 billDet = (EgBilldetails) billDetItr.next();
                 // if(LOGGER.isDebugEnabled()) LOGGER.debug(" billDet "+ billDet.getId());
                 billDetItr.remove();
-            } catch (final Exception e) {
+            } catch (final ObjectNotFoundException e) {
                 LOGGER.error("Inside updateBill" + e.getMessage(), e);
 
             }
@@ -678,11 +680,12 @@ public class ContingentBillAction extends BaseBillAction {
             final List<ValidationError> errors = new ArrayList<ValidationError>();
             errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
             throw new ValidationException(errors);
-        } catch (final Exception e) {
-            final List<ValidationError> errors = new ArrayList<ValidationError>();
-            errors.add(new ValidationError("exp", e.getMessage()));
-            throw new ValidationException(errors);
-        }
+        } /*
+           * catch (final Exception e) { final List<ValidationError> errors =
+           * new ArrayList<ValidationError>(); errors.add(new
+           * ValidationError("exp", e.getMessage())); throw new
+           * ValidationException(errors); }
+           */
         return bill;
     }
 
@@ -808,7 +811,7 @@ public class ContingentBillAction extends BaseBillAction {
                     else
                         entity = (EntityType) persistenceService.find(
                                 "from " + tableName + " where id=? order by name", payeedetail.getAccountDetailKeyId());
-                } catch (final Exception e) {
+                } catch (final HibernateException | NoSuchMethodException | SecurityException e) {
                     LOGGER.error("prepareForViewModifyReverse" + e.getMessage(), e);
                     throw new ApplicationRuntimeException(e.getMessage());
                 }

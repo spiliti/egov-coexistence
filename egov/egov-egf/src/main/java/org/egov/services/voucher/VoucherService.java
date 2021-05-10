@@ -133,6 +133,7 @@ import org.egov.utils.FinancialConstants;
 import org.egov.utils.VoucherHelper;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -766,7 +767,7 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
 					transaction.setTransaxtionParam(reqParams);
 				transaxtionList.add(transaction);
 			}
-		} catch (final Exception e) {
+		} catch (final ObjectNotFoundException e) {
 			LOGGER.error("Exception occured while posting data into voucher detail and transaction");
 			throw new ApplicationRuntimeException(
 					"Exception occured while posting data into voucher detail and transaction" + e.getMessage());
@@ -923,10 +924,10 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
 		} catch (final HibernateException he) {
 			LOGGER.error(he.getMessage());
 			throw new HibernateException(he);
-		} catch (final Exception e) {
-			LOGGER.error(e.getMessage());
-			throw new HibernateException(e);
-		}
+        } /*
+           * catch (final Exception e) { LOGGER.error(e.getMessage()); throw new
+           * HibernateException(e); }
+           */
 
 	}
 
@@ -1229,11 +1230,11 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
 			final List<ValidationError> errors = new ArrayList<>();
 			errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
 			throw new ValidationException(errors);
-		} catch (final Exception e) {
-			final List<ValidationError> errors = new ArrayList<>();
-			errors.add(new ValidationError("exp", e.getMessage()));
-			throw new ValidationException(errors);
-		}
+        } /*
+           * catch (final Exception e) { final List<ValidationError> errors =
+           * new ArrayList<>(); errors.add(new ValidationError("exp",
+           * e.getMessage())); throw new ValidationException(errors); }
+           */
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("VoucherService | createBillForVoucherSubType | End | bill number : = "
 					+ egBillregister.getBillnumber());
@@ -1309,11 +1310,11 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
 			final List<ValidationError> errors = new ArrayList<>();
 			errors.add(new ValidationError("exp", e.getErrors().get(0).getMessage()));
 			throw new ValidationException(errors);
-		} catch (final Exception e) {
-			final List<ValidationError> errors = new ArrayList<>();
-			errors.add(new ValidationError("exp", e.getMessage()));
-			throw new ValidationException(errors);
-		}
+        } /*
+           * catch (final Exception e) { final List<ValidationError> errors =
+           * new ArrayList<>(); errors.add(new ValidationError("exp",
+           * e.getMessage())); throw new ValidationException(errors); }
+           */
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Voucher Service | updateBillForVSubType | End");
 		return egBillregister;
