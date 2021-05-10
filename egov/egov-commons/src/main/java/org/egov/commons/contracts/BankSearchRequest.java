@@ -45,50 +45,24 @@
  *   In case of any queries, you can reach eGovernments Foundation at contact@egovernments.org.
  *
  */
-package org.egov.commons;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+package org.egov.commons.contracts;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.egov.infra.persistence.entity.AbstractPersistable;
-import org.egov.infra.persistence.validator.annotation.Unique;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.SafeHtml;
 
-@Entity
-@Table(name = "BANK")
-@SequenceGenerator(name = Bank.SEQ_BANK, sequenceName = Bank.SEQ_BANK, allocationSize = 1)
-@Unique(fields = { "code", "name" }, enableDfltMsg = true)
-public class Bank extends AbstractPersistable<Integer> {
+/**
+ * 
+ * @author subhash
+ *
+ */
+public class BankSearchRequest {
 
-	private static final long serialVersionUID = -2839424467289504649L;
-
-	public static final String SEQ_BANK = "SEQ_BANK";
-
-	@Id
-	@GeneratedValue(generator = SEQ_BANK, strategy = GenerationType.SEQUENCE)
-	@JsonIgnore
-	private Integer id;
-
-	@NotNull
 	@Length(max = 50)
 	@SafeHtml
 	private String code;
 
-	@NotNull
 	@Length(max = 100)
 	@SafeHtml
 	private String name;
@@ -99,45 +73,13 @@ public class Bank extends AbstractPersistable<Integer> {
 	private String narration;
 
 	@JsonIgnore
-	@NotNull
 	private Boolean isactive;
-
-	@JsonIgnore
-	@Length(max = 50)
-	@SafeHtml
-	private String type;
-
-	@JsonIgnore
-	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "bank", targetEntity = Bankbranch.class)
-	private Set<Bankbranch> bankbranchs = new HashSet<>(0);
-
-	@JsonIgnore
-	private Long createdBy;
-
-	@JsonIgnore
-	private Date createdDate;
-
-	@JsonIgnore
-	private Long lastModifiedBy;
-
-	@JsonIgnore
-	private Date lastModifiedDate;
-
-	@Override
-	public Integer getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(final Integer id) {
-		this.id = id;
-	}
 
 	public String getCode() {
 		return code;
 	}
 
-	public void setCode(final String code) {
+	public void setCode(String code) {
 		this.code = code;
 	}
 
@@ -145,7 +87,7 @@ public class Bank extends AbstractPersistable<Integer> {
 		return name;
 	}
 
-	public void setName(final String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
@@ -153,64 +95,16 @@ public class Bank extends AbstractPersistable<Integer> {
 		return narration;
 	}
 
-	public void setNarration(final String narration) {
+	public void setNarration(String narration) {
 		this.narration = narration;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(final String type) {
-		this.type = type;
-	}
-
-	public Set<Bankbranch> getBankbranchs() {
-		return bankbranchs;
-	}
-
-	public void setBankbranchs(final Set<Bankbranch> bankbranchs) {
-		this.bankbranchs = bankbranchs;
 	}
 
 	public Boolean getIsactive() {
 		return isactive;
 	}
 
-	public void setIsactive(final Boolean isactive) {
+	public void setIsactive(Boolean isactive) {
 		this.isactive = isactive;
-	}
-
-	public Long getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(final Long createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public Date getCreatedDate() {
-		return createdDate;
-	}
-
-	public void setCreatedDate(final Date createdDate) {
-		this.createdDate = createdDate;
-	}
-
-	public Long getLastModifiedBy() {
-		return lastModifiedBy;
-	}
-
-	public void setLastModifiedBy(final Long lastModifiedBy) {
-		this.lastModifiedBy = lastModifiedBy;
-	}
-
-	public Date getLastModifiedDate() {
-		return lastModifiedDate;
-	}
-
-	public void setLastModifiedDate(final Date lastModifiedDate) {
-		this.lastModifiedDate = lastModifiedDate;
 	}
 
 }

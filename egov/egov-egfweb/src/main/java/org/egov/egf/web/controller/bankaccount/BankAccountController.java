@@ -55,6 +55,7 @@ import javax.validation.Valid;
 import org.egov.commons.Bankaccount;
 import org.egov.commons.CChartOfAccounts;
 import org.egov.commons.CGeneralLedger;
+import org.egov.commons.contracts.BankAccountSearchRequest;
 import org.egov.commons.service.ChartOfAccountsService;
 import org.egov.commons.service.FundService;
 import org.egov.commons.utils.BankAccountType;
@@ -93,7 +94,11 @@ import com.google.gson.GsonBuilder;
 @RequestMapping("/bankaccount")
 public class BankAccountController {
 
-    private static final String BANKACCOUNT = "bankaccount";
+    private static final String AUTOGLCODE = "autoglcode";
+
+	private static final String BANKACCOUNT = "bankaccount";
+    
+    private static final String BANKACCOUNT_SEARCH_REQUEST = "bankaccountSearchRequest";
 
     @Autowired
     private CreateBankAccountService createBankAccountService;
@@ -127,7 +132,7 @@ public class BankAccountController {
         model.addAttribute("funds", fundService.getByIsActive(true));
         model.addAttribute("usagetypes", BankAccountType.values());
         model.addAttribute("accounttypes", chartOfAccountsService.getAccountTypes());
-        model.addAttribute("autoglcode", createBankAccountService.autoBankAccountGLCodeEnabled());
+        model.addAttribute(AUTOGLCODE, createBankAccountService.autoBankAccountGLCodeEnabled());
     }
 
     @PostMapping(value = "/new")
@@ -141,7 +146,7 @@ public class BankAccountController {
     public String edit(@PathVariable("id") final Long id, final Model model) {
         final Bankaccount bankaccount = createBankAccountService.getById(id);
         setDropDownValues(model);
-        model.addAttribute("autoglcode", true);
+        model.addAttribute(AUTOGLCODE, true);
         model.addAttribute(BANKACCOUNT, bankaccount);
         return "bankaccount-update";
     }
@@ -156,9 +161,9 @@ public class BankAccountController {
 
     @PostMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
-        final Bankaccount bankaccount = new Bankaccount();
+        final BankAccountSearchRequest bankAccountSearchRequest = new BankAccountSearchRequest();
         setDropDownValues(model);
-        model.addAttribute(BANKACCOUNT, bankaccount);
+        model.addAttribute(BANKACCOUNT_SEARCH_REQUEST, bankAccountSearchRequest);
         return "bankaccount-search";
 
     }
@@ -174,7 +179,7 @@ public class BankAccountController {
     @PostMapping(value = "/create")
     public String create(@Valid @ModelAttribute final Bankaccount bankaccount, final BindingResult errors, final Model model,
             final RedirectAttributes redirectAttrs) {
-        if (!createBankAccountService.autoBankAccountGLCodeEnabled())
+        if (!createBankAccountService.autoBankAccountGLCodeEnabled().booleanValue())
             validateGlCode(bankaccount.getChartofaccounts().getGlcode(), errors);
         if (errors.hasErrors()) {
             setDropDownValues(model);
@@ -192,7 +197,7 @@ public class BankAccountController {
             final RedirectAttributes redirectAttrs) {
         if (errors.hasErrors()) {
             setDropDownValues(model);
-            model.addAttribute("autoglcode", true);
+            model.addAttribute(AUTOGLCODE, true);
             model.addAttribute(BANKACCOUNT, bankaccount);
             return "bankaccount-update";
         }
@@ -204,8 +209,8 @@ public class BankAccountController {
     @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
-           @Valid @ModelAttribute final Bankaccount bankaccount) {
-        final List<Bankaccount> searchResultList = createBankAccountService.search(bankaccount);
+           @Valid @ModelAttribute final BankAccountSearchRequest bankAccountSearchRequest) {
+        final List<Bankaccount> searchResultList = createBankAccountService.search(bankAccountSearchRequest);
         return new StringBuilder("{ \"data\":")
                 .append(toSearchResultJson(searchResultList)).append("}")
                 .toString();

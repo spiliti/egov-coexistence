@@ -110,9 +110,9 @@ public class SubSchemeAction extends BaseFormAction {
 
 	@Override
 	public Object getModel() {
-		if (subSchemeId != null)
+		if (subSchemeId != null && subSchemeId != -1)
 			subScheme = (SubScheme) persistenceService.find("from SubScheme where id=?", subSchemeId);
-		if (schemeId != null)
+		if (schemeId != null && schemeId != -1)
 			subScheme.setScheme((Scheme) persistenceService.find("from Scheme where id=?", schemeId));
 		return subScheme;
 	}

@@ -53,6 +53,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.commons.Fund;
+import org.egov.commons.contracts.FundSearchRequest;
 import org.egov.commons.service.FundService;
 import org.egov.egf.web.adaptor.FundJsonAdaptor;
 import org.egov.infra.config.core.ApplicationThreadLocals;
@@ -77,6 +78,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+@SuppressWarnings("deprecation")
 @Controller
 @RequestMapping("/fund")
 public class FundController {
@@ -103,7 +105,6 @@ public class FundController {
 		return FUND_NEW;
 	}
 
-	@SuppressWarnings("deprecation")
 	@PostMapping(value = "/create")
 	public String create(@Valid @ModelAttribute final Fund fund, final BindingResult errors, final Model model,
 			final RedirectAttributes redirectAttrs) {
@@ -127,7 +128,6 @@ public class FundController {
 		return FUND_EDIT;
 	}
 
-	@SuppressWarnings("deprecation")
 	@PostMapping(value = "/update")
 	public String update(@Valid @ModelAttribute final Fund fund, final BindingResult errors, final Model model,
 			final RedirectAttributes redirectAttrs) {
@@ -162,9 +162,9 @@ public class FundController {
 
 	@PostMapping(value = "/search/{mode}")
 	public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
-		final Fund fund = new Fund();
+		final FundSearchRequest fundSearchRequest = new FundSearchRequest();
 		prepareNewForm(model);
-		model.addAttribute("fund", fund);
+		model.addAttribute("fundSearchRequest", fundSearchRequest);
 		return FUND_SEARCH;
 
 	}
@@ -172,8 +172,8 @@ public class FundController {
 	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
 	@ResponseBody
 	public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
-		@Valid @ModelAttribute final Fund fund) {
-		final List<Fund> searchResultList = fundService.search(fund);
+		@Valid @ModelAttribute final FundSearchRequest fundSearchRequest) {
+		final List<Fund> searchResultList = fundService.search(fundSearchRequest);
 		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
 	}
 

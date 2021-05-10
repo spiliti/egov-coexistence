@@ -52,6 +52,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.egov.commons.contracts.AccountEntitySearchRequest;
 import org.egov.commons.service.AccountEntityService;
 import org.egov.commons.service.AccountdetailtypeService;
 import org.egov.egf.web.adaptor.AccountEntityJsonAdaptor;
@@ -78,6 +79,7 @@ import com.google.gson.GsonBuilder;
 @RequestMapping("/accountentity")
 public class AccountEntityController {
 	private static final String ACCOUNT_ENTITY = "accountEntity";
+	private static final String ACCOUNT_ENTITY_SEARCH_REQUEST = "accountEntitySearchRequest";
 	private static final String ACCOUNTENTITY_NEW = "accountentity-new";
 	private static final String ACCOUNTENTITY_RESULT = "accountentity-result";
 	private static final String ACCOUNTENTITY_EDIT = "accountentity-edit";
@@ -111,7 +113,7 @@ public class AccountEntityController {
 		}
 		accountEntityService.create(accountEntity);
 		redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.accountentity.success", null, null));
-		return "redirect:/accountentity/result/" + accountEntity.getId()+"/create";
+		return "redirect:/accountentity/result/" + accountEntity.getId() + "/create";
 	}
 
 	@GetMapping(value = "/edit/{id}")
@@ -132,7 +134,7 @@ public class AccountEntityController {
 
 		accountEntityService.update(accountEntity);
 		redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.accountentity.success", null, null));
-		return "redirect:/accountentity/result/" + accountEntity.getId()+"/view";
+		return "redirect:/accountentity/result/" + accountEntity.getId() + "/view";
 	}
 
 	@GetMapping(value = "/view/{id}")
@@ -140,33 +142,33 @@ public class AccountEntityController {
 		AccountEntity accountEntity = accountEntityService.findOne(id);
 		prepareNewForm(model);
 		model.addAttribute(ACCOUNT_ENTITY, accountEntity);
-		model.addAttribute("mode","view");
+		model.addAttribute("mode", "view");
 		return ACCOUNTENTITY_VIEW;
 	}
 
 	@GetMapping(value = "/result/{id}/{mode}")
-	public String result(@PathVariable("id") final Integer id, @PathVariable("mode") @SafeHtml final String mode, Model model) {
+	public String result(@PathVariable("id") final Integer id, @PathVariable("mode") @SafeHtml final String mode,
+			Model model) {
 		AccountEntity accountEntity = accountEntityService.findOne(id);
 		model.addAttribute(ACCOUNT_ENTITY, accountEntity);
-		model.addAttribute("mode",mode);
+		model.addAttribute("mode", mode);
 		return ACCOUNTENTITY_RESULT;
 	}
 
 	@PostMapping(value = "/search/{mode}")
 	public String search(@PathVariable("mode") @SafeHtml final String mode, Model model) {
-		AccountEntity accountEntity = new AccountEntity();
+		AccountEntitySearchRequest accountEntitySearchRequest = new AccountEntitySearchRequest();
 		prepareNewForm(model);
-		model.addAttribute(ACCOUNT_ENTITY, accountEntity);
+		model.addAttribute(ACCOUNT_ENTITY_SEARCH_REQUEST, accountEntitySearchRequest);
 		return ACCOUNTENTITY_SEARCH;
- 
+
 	}
 
 	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
 	public @ResponseBody String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, Model model,
-		@Valid @ModelAttribute final AccountEntity accountEntity) {
-		List<AccountEntity> searchResultList = accountEntityService.search(accountEntity);
-		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}")
-				.toString();
+			@Valid @ModelAttribute final AccountEntitySearchRequest accountEntitySearchRequest) {
+		List<AccountEntity> searchResultList = accountEntityService.search(accountEntitySearchRequest);
+		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
 	}
 
 	public Object toSearchResultJson(final Object object) {

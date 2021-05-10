@@ -62,6 +62,7 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import org.egov.commons.Bankbranch;
+import org.egov.commons.contracts.BankBranchSearchRequest;
 import org.egov.egf.commons.bankbranch.repository.BankBranchRepository;
 import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.hibernate.Session;
@@ -77,98 +78,98 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CreateBankBranchService {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+	@PersistenceContext
+	private EntityManager entityManager;
 
-    private final BankBranchRepository bankBranchRepository;
+	private final BankBranchRepository bankBranchRepository;
 
-    public Session getCurrentSession() {
-        return entityManager.unwrap(Session.class);
-    }
+	public Session getCurrentSession() {
+		return entityManager.unwrap(Session.class);
+	}
 
-    @Autowired
-    public CreateBankBranchService(final BankBranchRepository bankBranchRepository) {
-        this.bankBranchRepository = bankBranchRepository;
-    }
+	@Autowired
+	public CreateBankBranchService(final BankBranchRepository bankBranchRepository) {
+		this.bankBranchRepository = bankBranchRepository;
+	}
 
-    public Bankbranch getById(final Integer id) {
-        return bankBranchRepository.findOne(id);
-    }
+	public Bankbranch getById(final Integer id) {
+		return bankBranchRepository.findOne(id);
+	}
 
-    public List<Bankbranch> getByBankId(final Integer bankId) {
-        return bankBranchRepository.findByBank_Id(bankId);
-    }
+	public List<Bankbranch> getByBankId(final Integer bankId) {
+		return bankBranchRepository.findByBank_Id(bankId);
+	}
 
-    public List<Bankbranch> getByIsActive(final Boolean isActive) {
-        return bankBranchRepository.findByIsactive(isActive);
-    }
+	public List<Bankbranch> getByIsActive(final Boolean isActive) {
+		return bankBranchRepository.findByIsactive(isActive);
+	}
 
-    public List<Bankbranch> getByIsActiveTrueOrderByBranchname() {
-        return bankBranchRepository.findByIsactiveTrueOrderByBranchnameAsc();
-    }
+	public List<Bankbranch> getByIsActiveTrueOrderByBranchname() {
+		return bankBranchRepository.findByIsactiveTrueOrderByBranchnameAsc();
+	}
 
-    @Transactional
-    public Bankbranch create(final Bankbranch bankBranch) {
+	@Transactional
+	public Bankbranch create(final Bankbranch bankBranch) {
 
-        bankBranch.setCreatedDate(new Date());
-        bankBranch.setCreatedBy(ApplicationThreadLocals.getUserId());
+		bankBranch.setCreatedDate(new Date());
+		bankBranch.setCreatedBy(ApplicationThreadLocals.getUserId());
 
-        return bankBranchRepository.save(bankBranch);
-    }
+		return bankBranchRepository.save(bankBranch);
+	}
 
-    @Transactional
-    public Bankbranch update(final Bankbranch bankbranch) {
+	@Transactional
+	public Bankbranch update(final Bankbranch bankbranch) {
 
-        bankbranch.setLastModifiedDate(new Date());
-        bankbranch.setLastModifiedBy(ApplicationThreadLocals.getUserId());
-        return bankBranchRepository.save(bankbranch);
-    }
+		bankbranch.setLastModifiedDate(new Date());
+		bankbranch.setLastModifiedBy(ApplicationThreadLocals.getUserId());
+		return bankBranchRepository.save(bankbranch);
+	}
 
-    public List<Bankbranch> search(final Bankbranch bankBranch) {
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Bankbranch> createQuery = cb.createQuery(Bankbranch.class);
-        final Root<Bankbranch> bankBranchs = createQuery.from(Bankbranch.class);
-        createQuery.select(bankBranchs);
-        final Metamodel m = entityManager.getMetamodel();
-        final EntityType<Bankbranch> tempBankBranch = m.entity(Bankbranch.class);
+	public List<Bankbranch> search(final BankBranchSearchRequest bankBranchSearchRequest) {
+		final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		final CriteriaQuery<Bankbranch> createQuery = cb.createQuery(Bankbranch.class);
+		final Root<Bankbranch> bankBranchs = createQuery.from(Bankbranch.class);
+		createQuery.select(bankBranchs);
+		final Metamodel m = entityManager.getMetamodel();
+		final EntityType<Bankbranch> tempBankBranch = m.entity(Bankbranch.class);
 
-        final List<Predicate> predicates = new ArrayList<>();
-        if (bankBranch.getBranchcode() != null) {
-            final String code = "%" + bankBranch.getBranchcode().toLowerCase() + "%";
-            predicates.add(cb.isNotNull(bankBranchs.get("branchcode")));
-            predicates.add(cb.like(
-                    cb.lower(bankBranchs.get(tempBankBranch.getDeclaredSingularAttribute("branchcode", String.class))),
-                    code));
-        }
+		final List<Predicate> predicates = new ArrayList<>();
+		if (bankBranchSearchRequest.getBranchcode() != null) {
+			final String code = "%" + bankBranchSearchRequest.getBranchcode().toLowerCase() + "%";
+			predicates.add(cb.isNotNull(bankBranchs.get("branchcode")));
+			predicates.add(cb.like(
+					cb.lower(bankBranchs.get(tempBankBranch.getDeclaredSingularAttribute("branchcode", String.class))),
+					code));
+		}
 
-        if (bankBranch.getBranchMICR() != null)
-            predicates.add(cb.equal(bankBranchs.get("branchMICR"), bankBranch.getBranchMICR()));
+		if (bankBranchSearchRequest.getBranchMICR() != null)
+			predicates.add(cb.equal(bankBranchs.get("branchMICR"), bankBranchSearchRequest.getBranchMICR()));
 
-        if (bankBranch.getBranchaddress1() != null)
-            predicates.add(cb.equal(bankBranchs.get("branchaddress1"), bankBranch.getBranchaddress1()));
+		if (bankBranchSearchRequest.getBranchaddress1() != null)
+			predicates.add(cb.equal(bankBranchs.get("branchaddress1"), bankBranchSearchRequest.getBranchaddress1()));
 
-        if (bankBranch.getContactperson() != null)
-            predicates.add(cb.equal(bankBranchs.get("contactperson"), bankBranch.getContactperson()));
+		if (bankBranchSearchRequest.getContactperson() != null)
+			predicates.add(cb.equal(bankBranchs.get("contactperson"), bankBranchSearchRequest.getContactperson()));
 
-        if (bankBranch.getBranchphone() != null)
-            predicates.add(cb.equal(bankBranchs.get("branchphone"), bankBranch.getBranchphone()));
+		if (bankBranchSearchRequest.getBranchphone() != null)
+			predicates.add(cb.equal(bankBranchs.get("branchphone"), bankBranchSearchRequest.getBranchphone()));
 
-        if (bankBranch.getNarration() != null)
-            predicates.add(cb.equal(bankBranchs.get("narration"), bankBranch.getNarration()));
+		if (bankBranchSearchRequest.getNarration() != null)
+			predicates.add(cb.equal(bankBranchs.get("narration"), bankBranchSearchRequest.getNarration()));
 
-        if (bankBranch.getIsactive())
-            predicates.add(cb.equal(bankBranchs.get("isactive"), true));
+		if (bankBranchSearchRequest.getIsactive().booleanValue())
+			predicates.add(cb.equal(bankBranchs.get("isactive"), true));
 
-        if (bankBranch.getBank() != null && bankBranch.getBank().getId() != null)
-            predicates.add(cb.equal(bankBranchs.get("bank").get("id"), bankBranch.getBank().getId()));
+		if (bankBranchSearchRequest.getBankId() != null)
+			predicates.add(cb.equal(bankBranchs.get("bank").get("id"), bankBranchSearchRequest.getBankId()));
 
-        if (bankBranch.getId() != null)
-            predicates.add(cb.equal(bankBranchs.get("id"), bankBranch.getId()));
+		if (bankBranchSearchRequest.getBankBranchId() != null)
+			predicates.add(cb.equal(bankBranchs.get("id"), bankBranchSearchRequest.getBankBranchId()));
 
-        createQuery.where(predicates.toArray(new Predicate[] {}));
-        final TypedQuery<Bankbranch> query = entityManager.createQuery(createQuery);
-        return query.getResultList();
+		createQuery.where(predicates.toArray(new Predicate[] {}));
+		final TypedQuery<Bankbranch> query = entityManager.createQuery(createQuery);
+		return query.getResultList();
 
-    }
+	}
 
 }

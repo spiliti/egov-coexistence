@@ -45,120 +45,122 @@
  *   In case of any queries, you can reach eGovernments Foundation at contact@egovernments.org.
  *
  */
-package org.egov.commons;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+package org.egov.commons.contracts;
 
-import org.egov.infra.persistence.entity.AbstractAuditable;
-import org.egov.infra.persistence.validator.annotation.Unique;
+import org.egov.infra.persistence.validator.annotation.OptionalPattern;
+import org.egov.infra.validation.regex.Constants;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.SafeHtml;
 
-@Entity
-@Table(name = "Function")
-@SequenceGenerator(name = CFunction.SEQ, sequenceName = CFunction.SEQ, allocationSize = 1)
-@Unique(id = "id", tableName = "Function", fields = { "code", "name" }, columnName = { "code", "name" }, enableDfltMsg = true)
-public class CFunction extends AbstractAuditable {
+/**
+ * 
+ * @author subhash
+ *
+ */
+public class BankBranchSearchRequest {
 
-    private static final long serialVersionUID = 1L;
-    public static final String SEQ = "SEQ_FUNCTION";
+	private Integer bankId;
 
-    @Id
-    @GeneratedValue(generator = SEQ, strategy = GenerationType.SEQUENCE)
-    private Long id;
+	private Integer bankBranchId;
 
-    @Length(max = 100, min = 2)
-    @SafeHtml
-    private String name;
+	@Length(max = 50)
+	@SafeHtml
+	private String branchcode;
 
-    @Length(max = 50, min = 2)
-    @SafeHtml
-    private String code;
+	@Length(max = 50)
+	@SafeHtml
+	private String branchMICR;
 
-    @Length(max = 50)
-    @SafeHtml
-    private String type;
+	@Length(max = 50)
+	@SafeHtml
+	private String branchaddress1;
 
-    private int llevel;
+	@SafeHtml
+	@Length(max = 50)
+	private String contactperson;
 
-    private Boolean isActive;
+	@SafeHtml
+	@Length(max = 15)
+	@OptionalPattern(regex = Constants.MOBILE_NUM, message = "Please enter valid mobile number")
+	private String branchphone;
 
-    private Boolean isNotLeaf;
+	@Length(max = 250)
+	@SafeHtml
+	private String narration;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parentId")
-    private CFunction parentId;
+	private Boolean isactive;
 
-    public Long getId() {
-        return id;
-    }
+	public Integer getBankId() {
+		return bankId;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setBankId(Integer bankId) {
+		this.bankId = bankId;
+	}
 
-    public String getCode() {
-        return code;
-    }
+	public Integer getBankBranchId() {
+		return bankBranchId;
+	}
 
-    public String getType() {
-        return type;
-    }
+	public void setBankBranchId(Integer bankBranchId) {
+		this.bankBranchId = bankBranchId;
+	}
 
-    public int getLlevel() {
-        return llevel;
-    }
+	public String getBranchcode() {
+		return branchcode;
+	}
 
-    public Boolean getIsActive() {
-        return isActive;
-    }
+	public void setBranchcode(String branchcode) {
+		this.branchcode = branchcode;
+	}
 
-    public Boolean getIsNotLeaf() {
-        return isNotLeaf;
-    }
+	public String getBranchMICR() {
+		return branchMICR;
+	}
 
-    public CFunction getParentId() {
-        return parentId;
-    }
+	public void setBranchMICR(String branchMICR) {
+		this.branchMICR = branchMICR;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public String getBranchaddress1() {
+		return branchaddress1;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setBranchaddress1(String branchaddress1) {
+		this.branchaddress1 = branchaddress1;
+	}
 
-    public void setCode(String code) {
-        this.code = code;
-    }
+	public String getContactperson() {
+		return contactperson;
+	}
 
-    public void setType(String type) {
-        this.type = type;
-    }
+	public void setContactperson(String contactperson) {
+		this.contactperson = contactperson;
+	}
 
-    public void setLlevel(int llevel) {
-        this.llevel = llevel;
-    }
+	public String getBranchphone() {
+		return branchphone;
+	}
 
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
+	public void setBranchphone(String branchphone) {
+		this.branchphone = branchphone;
+	}
 
-    public void setIsNotLeaf(Boolean isNotLeaf) {
-        this.isNotLeaf = isNotLeaf;
-    }
+	public String getNarration() {
+		return narration;
+	}
 
-    public void setParentId(CFunction parentId) {
-        this.parentId = parentId;
-    }
+	public void setNarration(String narration) {
+		this.narration = narration;
+	}
+
+	public Boolean getIsactive() {
+		return isactive;
+	}
+
+	public void setIsactive(Boolean isactive) {
+		this.isactive = isactive;
+	}
 
 }

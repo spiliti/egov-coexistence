@@ -45,120 +45,44 @@
  *   In case of any queries, you can reach eGovernments Foundation at contact@egovernments.org.
  *
  */
-package org.egov.commons;
+package org.egov.model.masters;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
-import org.egov.infra.persistence.entity.AbstractAuditable;
-import org.egov.infra.persistence.validator.annotation.Unique;
+import org.egov.infra.persistence.validator.annotation.OptionalPattern;
+import org.egov.utils.FinancialConstants;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.SafeHtml;
 
-@Entity
-@Table(name = "Function")
-@SequenceGenerator(name = CFunction.SEQ, sequenceName = CFunction.SEQ, allocationSize = 1)
-@Unique(id = "id", tableName = "Function", fields = { "code", "name" }, columnName = { "code", "name" }, enableDfltMsg = true)
-public class CFunction extends AbstractAuditable {
+/**
+ * 
+ * @author subhash
+ *
+ */
+public class ContractorSearchRequest {
 
-    private static final long serialVersionUID = 1L;
-    public static final String SEQ = "SEQ_FUNCTION";
+	@SafeHtml
+	@OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialcharForContraWOAndSupplierName, message = "Special Characters are not allowed in Name")
+	@Length(max = 100, message = "Maximum of 100 Characters allowed for Name")
+	private String name;
 
-    @Id
-    @GeneratedValue(generator = SEQ, strategy = GenerationType.SEQUENCE)
-    private Long id;
+	@SafeHtml
+	@Length(max = 50, message = "Maximum of 50 Characters allowed for Code")
+	@OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialchar, message = "Special Characters are not allowed in Code")
+	private String code;
 
-    @Length(max = 100, min = 2)
-    @SafeHtml
-    private String name;
+	public String getName() {
+		return name;
+	}
 
-    @Length(max = 50, min = 2)
-    @SafeHtml
-    private String code;
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    @Length(max = 50)
-    @SafeHtml
-    private String type;
+	public String getCode() {
+		return code;
+	}
 
-    private int llevel;
-
-    private Boolean isActive;
-
-    private Boolean isNotLeaf;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parentId")
-    private CFunction parentId;
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public int getLlevel() {
-        return llevel;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public Boolean getIsNotLeaf() {
-        return isNotLeaf;
-    }
-
-    public CFunction getParentId() {
-        return parentId;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setLlevel(int llevel) {
-        this.llevel = llevel;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
-    public void setIsNotLeaf(Boolean isNotLeaf) {
-        this.isNotLeaf = isNotLeaf;
-    }
-
-    public void setParentId(CFunction parentId) {
-        this.parentId = parentId;
-    }
+	public void setCode(String code) {
+		this.code = code;
+	}
 
 }

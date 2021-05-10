@@ -57,6 +57,7 @@ import org.egov.egf.commons.bank.service.CreateBankService;
 import org.egov.egf.masters.services.ContractorService;
 import org.egov.egf.web.adaptor.ContractorJsonAdaptor;
 import org.egov.model.masters.Contractor;
+import org.egov.model.masters.ContractorSearchRequest;
 import org.egov.utils.FinancialConstants;
 import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,120 +87,122 @@ import com.google.gson.GsonBuilder;
 @RequestMapping(value = "/contractor")
 public class CreateContractorController {
 
-    private static final String STR_CONTRACTOR = "contractor";
+	private static final String STR_CONTRACTOR = "contractor";
+	private static final String STR_CONTRACTOR_SEARCH_REQUEST = "contractorSearchRequest";
 	private static final String NEW = "contractor-new";
-    private static final String RESULT = "contractor-result";
-    private static final String EDIT = "contractor-edit";
-    private static final String VIEW = "contractor-view";
-    private static final String SEARCH = "contractor-search";
+	private static final String RESULT = "contractor-result";
+	private static final String EDIT = "contractor-edit";
+	private static final String VIEW = "contractor-view";
+	private static final String SEARCH = "contractor-search";
 
-    @Autowired
-    private CreateBankService createBankService;
+	@Autowired
+	private CreateBankService createBankService;
 
-    @Autowired
-    private EgwStatusHibernateDAO egwStatusHibDAO;
+	@Autowired
+	private EgwStatusHibernateDAO egwStatusHibDAO;
 
-    @Autowired
-    private ContractorService contractorService;
+	@Autowired
+	private ContractorService contractorService;
 
-    @Autowired
-    private MessageSource messageSource;
-    
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-    	binder.setDisallowedFields("id");
-    }
+	@Autowired
+	private MessageSource messageSource;
 
-    private void prepareNewForm(final Model model) {
-        model.addAttribute("banks", createBankService.getByIsActiveTrueOrderByName());
-        model.addAttribute("statuses",
-                egwStatusHibDAO.getStatusByModule(FinancialConstants.STATUS_MODULE_NAME_CONTRACTOR));
-    }
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.setDisallowedFields("id");
+	}
 
-    @PostMapping(value = "/newform")
-    public String showNewForm(@ModelAttribute(STR_CONTRACTOR) final Contractor contractor, final Model model) {
-        prepareNewForm(model);
-        model.addAttribute(STR_CONTRACTOR, new Contractor());
-        return NEW;
-    }
+	private void prepareNewForm(final Model model) {
+		model.addAttribute("banks", createBankService.getByIsActiveTrueOrderByName());
+		model.addAttribute("statuses",
+				egwStatusHibDAO.getStatusByModule(FinancialConstants.STATUS_MODULE_NAME_CONTRACTOR));
+	}
 
-    @PostMapping(value = "/create")
-    public String create(@Valid @ModelAttribute final Contractor contractor, final BindingResult errors,
-            final Model model, final RedirectAttributes redirectAttrs) throws IOException {
+	@PostMapping(value = "/newform")
+	public String showNewForm(@ModelAttribute(STR_CONTRACTOR) final Contractor contractor, final Model model) {
+		prepareNewForm(model);
+		model.addAttribute(STR_CONTRACTOR, new Contractor());
+		return NEW;
+	}
 
-        if (errors.hasErrors()) {
-            prepareNewForm(model);
-            return NEW;
-        }
-        String gstState=contractor.getGstRegisteredState().toUpperCase();
-        contractor.setGstRegisteredState(gstState);
-        String gst = contractor.getTinNumber().toUpperCase();
-        contractor.setTinNumber(gst);
-        contractorService.create(contractor);
+	@PostMapping(value = "/create")
+	public String create(@Valid @ModelAttribute final Contractor contractor, final BindingResult errors,
+			final Model model, final RedirectAttributes redirectAttrs) throws IOException {
 
-        redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.contractor.success", null, null));
+		if (errors.hasErrors()) {
+			prepareNewForm(model);
+			return NEW;
+		}
+		String gstState = contractor.getGstRegisteredState().toUpperCase();
+		contractor.setGstRegisteredState(gstState);
+		String gst = contractor.getTinNumber().toUpperCase();
+		contractor.setTinNumber(gst);
+		contractorService.create(contractor);
 
-        return "redirect:/contractor/result/" + contractor.getId() + "/create";
-    }
+		redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.contractor.success", null, null));
 
-    @GetMapping(value = "/edit/{id}")
-    public String edit(@PathVariable("id") final Long id, final Model model) {
-        final Contractor contractor = contractorService.getById(id);
-        prepareNewForm(model);
-        model.addAttribute(STR_CONTRACTOR, contractor);
-        return EDIT;
-    }
+		return "redirect:/contractor/result/" + contractor.getId() + "/create";
+	}
 
-    @PostMapping(value = "/update")
-    public String update(@Valid @ModelAttribute final Contractor contractor, final BindingResult errors,
-            final Model model, final RedirectAttributes redirectAttrs) {
-        if (errors.hasErrors()) {
-            prepareNewForm(model);
-            return EDIT;
-        }
-        contractorService.update(contractor);
-        redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.contractor.success", null, null));
-        return "redirect:/contractor/result/" + contractor.getId() + "/view";
-    }
+	@GetMapping(value = "/edit/{id}")
+	public String edit(@PathVariable("id") final Long id, final Model model) {
+		final Contractor contractor = contractorService.getById(id);
+		prepareNewForm(model);
+		model.addAttribute(STR_CONTRACTOR, contractor);
+		return EDIT;
+	}
 
-    @GetMapping(value = "/view/{id}")
-    public String view(@PathVariable("id") final Long id, final Model model) {
-        final Contractor contractor = contractorService.getById(id);
-        prepareNewForm(model);
-        model.addAttribute(STR_CONTRACTOR, contractor);
-        model.addAttribute("mode", "view");
-        return VIEW;
-    }
+	@PostMapping(value = "/update")
+	public String update(@Valid @ModelAttribute final Contractor contractor, final BindingResult errors,
+			final Model model, final RedirectAttributes redirectAttrs) {
+		if (errors.hasErrors()) {
+			prepareNewForm(model);
+			return EDIT;
+		}
+		contractorService.update(contractor);
+		redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.contractor.success", null, null));
+		return "redirect:/contractor/result/" + contractor.getId() + "/view";
+	}
 
-    @PostMapping(value = "/search/{mode}")
-    public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
-        final Contractor contractor = new Contractor();
-        prepareNewForm(model);
-        model.addAttribute(STR_CONTRACTOR, contractor);
-        return SEARCH;
+	@GetMapping(value = "/view/{id}")
+	public String view(@PathVariable("id") final Long id, final Model model) {
+		final Contractor contractor = contractorService.getById(id);
+		prepareNewForm(model);
+		model.addAttribute(STR_CONTRACTOR, contractor);
+		model.addAttribute("mode", "view");
+		return VIEW;
+	}
 
-    }
+	@PostMapping(value = "/search/{mode}")
+	public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
+		final ContractorSearchRequest contractorSearchRequest = new ContractorSearchRequest();
+		prepareNewForm(model);
+		model.addAttribute(STR_CONTRACTOR_SEARCH_REQUEST, contractorSearchRequest);
+		return SEARCH;
 
-    @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
-    @ResponseBody
-    public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
-        @Valid @ModelAttribute final Contractor contractor) {
-        final List<Contractor> searchResultList = contractorService.search(contractor);
-        return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
-    }
+	}
 
-    public Object toSearchResultJson(final Object object) {
-        final GsonBuilder gsonBuilder = new GsonBuilder();
-        final Gson gson = gsonBuilder.registerTypeAdapter(Contractor.class, new ContractorJsonAdaptor()).create();
-        return gson.toJson(object);
-    }
+	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
+	@ResponseBody
+	public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+			@Valid @ModelAttribute final ContractorSearchRequest contractorSearchRequest) {
+		final List<Contractor> searchResultList = contractorService.search(contractorSearchRequest);
+		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
+	}
 
-    @GetMapping(value = "/result/{id}/{mode}")
-    public String result(@PathVariable("id") final Long id, @PathVariable("mode") @SafeHtml final String mode, final Model model) {
-        final Contractor contractor = contractorService.getById(id);
-        model.addAttribute(STR_CONTRACTOR, contractor);
-        model.addAttribute("mode", mode);
-        return RESULT;
-    }
+	public Object toSearchResultJson(final Object object) {
+		final GsonBuilder gsonBuilder = new GsonBuilder();
+		final Gson gson = gsonBuilder.registerTypeAdapter(Contractor.class, new ContractorJsonAdaptor()).create();
+		return gson.toJson(object);
+	}
+
+	@GetMapping(value = "/result/{id}/{mode}")
+	public String result(@PathVariable("id") final Long id, @PathVariable("mode") @SafeHtml final String mode,
+			final Model model) {
+		final Contractor contractor = contractorService.getById(id);
+		model.addAttribute(STR_CONTRACTOR, contractor);
+		model.addAttribute("mode", mode);
+		return RESULT;
+	}
 
 }

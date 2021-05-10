@@ -53,6 +53,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.commons.CFunction;
+import org.egov.commons.contracts.FunctionSearchRequest;
 import org.egov.commons.service.FunctionService;
 import org.egov.egf.web.adaptor.FunctionJsonAdaptor;
 import org.egov.infstr.utils.EgovMasterDataCaching;
@@ -79,6 +80,7 @@ import com.google.gson.GsonBuilder;
 @RequestMapping("/function")
 public class FunctionController {
 	private static final String STR_FUNCTION = "function";
+	private static final String STR_FUNCTION_REQUEST = "functionSearchRequest";
 	private static final String FUNCTION_NEW = "function-new";
 	private static final String FUNCTION_RESULT = "function-result";
 	private static final String FUNCTION_EDIT = "function-edit";
@@ -164,9 +166,9 @@ public class FunctionController {
 
 	@PostMapping(value = "/search/{mode}")
 	public String search(@PathVariable("mode") @SafeHtml final String mode, Model model) {
-		CFunction function = new CFunction();
+		FunctionSearchRequest functionSearchRequest = new FunctionSearchRequest();
 		prepareNewForm(model);
-		model.addAttribute(STR_FUNCTION, function);
+		model.addAttribute(STR_FUNCTION_REQUEST, functionSearchRequest);
 		return FUNCTION_SEARCH;
 
 	}
@@ -174,8 +176,8 @@ public class FunctionController {
 	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
 	public @ResponseBody String ajaxsearch(
 			@PathVariable("mode") @SafeHtml final String mode, Model model,
-			@Valid @ModelAttribute final CFunction function) {
-		List<CFunction> searchResultList = functionService.search(function);
+			@Valid @ModelAttribute final FunctionSearchRequest functionSearchRequest) {
+		List<CFunction> searchResultList = functionService.search(functionSearchRequest);
 		return new StringBuilder("{ \"data\":")
 				.append(toSearchResultJson(searchResultList)).append("}")
 				.toString();

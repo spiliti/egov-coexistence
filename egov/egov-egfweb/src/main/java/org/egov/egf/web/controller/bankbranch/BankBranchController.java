@@ -53,6 +53,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.commons.Bankbranch;
+import org.egov.commons.contracts.BankBranchSearchRequest;
 import org.egov.egf.commons.bank.service.CreateBankService;
 import org.egov.egf.commons.bankbranch.service.CreateBankBranchService;
 import org.egov.egf.web.controller.bankbranch.adaptor.BankBranchJsonAdaptor;
@@ -83,103 +84,104 @@ import com.google.gson.GsonBuilder;
 @RequestMapping("/bankbranch")
 public class BankBranchController {
 
-    private static final String BANKBRANCH = "bankbranch";
+	private static final String BANKBRANCH = "bankbranch";
 
-    @Autowired
-    private CreateBankBranchService createBankBranchService;
+	private static final String BANKBRANCH_SEARCH_REQUEST = "bankbranchSearchRequest";
 
-    @Autowired
-    private CreateBankService createBankService;
+	@Autowired
+	private CreateBankBranchService createBankBranchService;
 
-    @Autowired
-    private MessageSource messageSource;
+	@Autowired
+	private CreateBankService createBankService;
 
-    private void setDropDownValues(final Model model) {
-        model.addAttribute("banks", createBankService.getByIsActiveTrueOrderByName());
-        model.addAttribute("bankbranches", createBankBranchService.getByIsActiveTrueOrderByBranchname());
-    }
+	@Autowired
+	private MessageSource messageSource;
 
-    @PostMapping(value = "/new")
-    public String newForm(final Model model) {
-        setDropDownValues(model);
-        model.addAttribute(BANKBRANCH, new Bankbranch());
-        return "bankbranch-new";
-    }
+	private void setDropDownValues(final Model model) {
+		model.addAttribute("banks", createBankService.getByIsActiveTrueOrderByName());
+		model.addAttribute("bankbranches", createBankBranchService.getByIsActiveTrueOrderByBranchname());
+	}
 
-    @GetMapping(value = "/edit/{id}")
-    public String edit(@PathVariable("id") final Integer id, final Model model) {
-        final Bankbranch bankbranch = createBankBranchService.getById(id);
-        setDropDownValues(model);
-        model.addAttribute(BANKBRANCH, bankbranch);
-        return "bankbranch-update";
-    }
+	@PostMapping(value = "/new")
+	public String newForm(final Model model) {
+		setDropDownValues(model);
+		model.addAttribute(BANKBRANCH, new Bankbranch());
+		return "bankbranch-new";
+	}
 
-    @GetMapping(value = "/success/{id}/{mode}")
-    public String success(@PathVariable("id") final Integer id, @PathVariable("mode") @SafeHtml final String mode, final Model model) {
-        final Bankbranch bankbranch = createBankBranchService.getById(id);
-        model.addAttribute(BANKBRANCH, bankbranch);
-        model.addAttribute("mode", mode);
-        return "bankbranch-success";
-    }
+	@GetMapping(value = "/edit/{id}")
+	public String edit(@PathVariable("id") final Integer id, final Model model) {
+		final Bankbranch bankbranch = createBankBranchService.getById(id);
+		setDropDownValues(model);
+		model.addAttribute(BANKBRANCH, bankbranch);
+		return "bankbranch-update";
+	}
 
-    @GetMapping(value = "/view/{id}")
-    public String view(@PathVariable("id") final Integer id, final Model model) {
-        final Bankbranch bankbranch = createBankBranchService.getById(id);
+	@GetMapping(value = "/success/{id}/{mode}")
+	public String success(@PathVariable("id") final Integer id, @PathVariable("mode") @SafeHtml final String mode,
+			final Model model) {
+		final Bankbranch bankbranch = createBankBranchService.getById(id);
+		model.addAttribute(BANKBRANCH, bankbranch);
+		model.addAttribute("mode", mode);
+		return "bankbranch-success";
+	}
+
+	@GetMapping(value = "/view/{id}")
+	public String view(@PathVariable("id") final Integer id, final Model model) {
+		final Bankbranch bankbranch = createBankBranchService.getById(id);
 		model.addAttribute(BANKBRANCH, bankbranch);
 		model.addAttribute("mode", "view");
-        return "bankbranch-view";
-    }
+		return "bankbranch-view";
+	}
 
-    @PostMapping(value = "/search/{mode}")
-    public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
-        final Bankbranch bankbranch = new Bankbranch();
-        setDropDownValues(model);
-        model.addAttribute(BANKBRANCH, bankbranch);
-        return "bankbranch-search";
+	@PostMapping(value = "/search/{mode}")
+	public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
+		final BankBranchSearchRequest bankBranchSearchRequest = new BankBranchSearchRequest();
+		setDropDownValues(model);
+		model.addAttribute(BANKBRANCH_SEARCH_REQUEST, bankBranchSearchRequest);
+		return "bankbranch-search";
 
-    }
+	}
 
-    @PostMapping(value = "/create")
-    public String create(@Valid @ModelAttribute final Bankbranch bankbranch, final BindingResult errors, final Model model,
-            final RedirectAttributes redirectAttrs) {
-        if (errors.hasErrors()) {
-            final Model model2 = model;
-            setDropDownValues(model2);
-            model.addAttribute(BANKBRANCH, bankbranch);
-            return "bankbranch-new";
-        }
-        createBankBranchService.create(bankbranch);
-        redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.bankbranch.success", null, null));
-        return "redirect:/bankbranch/success/" + bankbranch.getId()+"/create";
-    }
+	@PostMapping(value = "/create")
+	public String create(@Valid @ModelAttribute final Bankbranch bankbranch, final BindingResult errors,
+			final Model model, final RedirectAttributes redirectAttrs) {
+		if (errors.hasErrors()) {
+			final Model model2 = model;
+			setDropDownValues(model2);
+			model.addAttribute(BANKBRANCH, bankbranch);
+			return "bankbranch-new";
+		}
+		createBankBranchService.create(bankbranch);
+		redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.bankbranch.success", null, null));
+		return "redirect:/bankbranch/success/" + bankbranch.getId() + "/create";
+	}
 
-    @PostMapping(value = "/update")
-    public String update(@Valid @ModelAttribute final Bankbranch bankbranch, final BindingResult errors, final Model model,
-            final RedirectAttributes redirectAttrs) {
-        if (errors.hasErrors()) {
-            setDropDownValues(model);
-            model.addAttribute(BANKBRANCH, bankbranch);
-            return "bankbranch-update";
-        }
-        createBankBranchService.update(bankbranch);
-        redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.bankbranch.success", null, null));
-        return "redirect:/bankbranch/success/" + bankbranch.getId()+"/view";
-    }
+	@PostMapping(value = "/update")
+	public String update(@Valid @ModelAttribute final Bankbranch bankbranch, final BindingResult errors,
+			final Model model, final RedirectAttributes redirectAttrs) {
+		if (errors.hasErrors()) {
+			setDropDownValues(model);
+			model.addAttribute(BANKBRANCH, bankbranch);
+			return "bankbranch-update";
+		}
+		createBankBranchService.update(bankbranch);
+		redirectAttrs.addFlashAttribute("message", messageSource.getMessage("msg.bankbranch.success", null, null));
+		return "redirect:/bankbranch/success/" + bankbranch.getId() + "/view";
+	}
 
-    @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
-    @ResponseBody
-    public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
-        @Valid @ModelAttribute final Bankbranch bankbranch) {
-        final List<Bankbranch> searchResultList = createBankBranchService.search(bankbranch);
-        return new StringBuilder("{ \"data\":")
-                .append(toSearchResultJson(searchResultList)).append("}")
-                .toString();
-    }
+	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
+	@ResponseBody
+	public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+			@Valid @ModelAttribute final BankBranchSearchRequest bankBranchSearchRequest) {
+		final List<Bankbranch> searchResultList = createBankBranchService.search(bankBranchSearchRequest);
+		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
+	}
 
-    public Object toSearchResultJson(final Object object) {
-        final GsonBuilder gsonBuilder = new GsonBuilder();
-        final Gson gson = gsonBuilder.registerTypeAdapter(Bankbranch.class, new BankBranchJsonAdaptor()).create();
-        return gson.toJson(object);
-    }
+	public Object toSearchResultJson(final Object object) {
+		final GsonBuilder gsonBuilder = new GsonBuilder();
+		final Gson gson = gsonBuilder.registerTypeAdapter(Bankbranch.class, new BankBranchJsonAdaptor()).create();
+		return gson.toJson(object);
+	}
 
 }

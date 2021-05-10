@@ -59,6 +59,7 @@ import org.egov.commons.service.ChartOfAccountsService;
 import org.egov.egf.web.adaptor.RecoveryJsonAdaptor;
 import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.model.recoveries.Recovery;
+import org.egov.model.recoveries.RecoverySearchRequest;
 import org.egov.model.service.RecoveryService;
 import org.egov.services.masters.BankService;
 import org.egov.services.masters.EgPartyTypeService;
@@ -86,6 +87,7 @@ import com.google.gson.GsonBuilder;
 @RequestMapping("/recovery")
 public class RecoveryController {
     private static final String RECOVERY = "recovery";
+    private static final String RECOVERY_SEARCH_REQUEST = "recoverySearchRequest";
 	private static final String RECOVERY_NEW = "recovery-new";
     private static final String RECOVERY_RESULT = "recovery-result";
     private static final String RECOVERY_EDIT = "recovery-edit";
@@ -201,24 +203,24 @@ public class RecoveryController {
 
     @PostMapping(value = "/search/{mode}")
     public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
-        final Recovery recovery = new Recovery();
+        final RecoverySearchRequest recoverySearchRequest = new RecoverySearchRequest();
         prepareNewForm(model);
-        model.addAttribute(RECOVERY, recovery);
+        model.addAttribute(RECOVERY_SEARCH_REQUEST, recoverySearchRequest);
         return RECOVERY_SEARCH;
 
     }
 
-    @SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")
 	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
-    public @ResponseBody String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
-            @Valid @ModelAttribute final Recovery recovery) {
-        if (recovery != null && recovery.getChartofaccounts().getId() != null)
-            recovery.setChartofaccounts(chartOfAccountsService.findById(recovery.getChartofaccounts().getId(), false));
-        final List<Recovery> searchResultList = recoveryService.search(recovery, recovery.getType(),
-                recovery.getRecoveryName());
-        return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}")
-                .toString();
-    }
+	public @ResponseBody String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
+			@Valid @ModelAttribute final RecoverySearchRequest recoverySearchRequest) {
+		CChartOfAccounts chartOfAccounts = null;
+		if (recoverySearchRequest != null && recoverySearchRequest.getChartofaccountsId() != null)
+			chartOfAccounts = chartOfAccountsService.findById(recoverySearchRequest.getChartofaccountsId(), false);
+		final List<Recovery> searchResultList = recoveryService.search(chartOfAccounts, recoverySearchRequest.getType(),
+				recoverySearchRequest.getRecoveryName());
+		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
+	}
 
     @GetMapping(value = "/ajax/getAccountCodes")
     public @ResponseBody List<CChartOfAccounts> getAccountCodes(

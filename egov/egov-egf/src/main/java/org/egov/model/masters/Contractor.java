@@ -88,17 +88,21 @@ public class Contractor extends AbstractAuditable implements EntityType {
     @GeneratedValue(generator = SEQ_EGF_CONTRACTOR, strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @NotNull
     @SafeHtml
     @Length(max = 50, message = "Maximum of 50 Characters allowed for Code")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialchar, message = "Special Characters are not allowed in Code")
     @Column(updatable = false)
     private String code;
 
+    @NotNull
     @SafeHtml
+    @Required(message = "Please Enter the Name")
     @OptionalPattern(regex = FinancialConstants.alphaNumericwithspecialcharForContraWOAndSupplierName, message = "Special Characters are not allowed in Name")
     @Length(max = 100, message = "Maximum of 100 Characters allowed for Name")
     private String name;
 
+    @NotNull
     @SafeHtml
     @Length(max = 250, message = "Maximum of 250 Characters allowed for Correspondence Address")
     @OptionalPattern(regex = FinancialConstants.ALPHANUMERICWITHALLSPECIALCHAR, message = "Special characters are not allowed in correspondence address")
@@ -109,6 +113,7 @@ public class Contractor extends AbstractAuditable implements EntityType {
     @OptionalPattern(regex = FinancialConstants.ALPHANUMERICWITHALLSPECIALCHAR, message = "Special characters are not allowed in payment address")
     private String paymentAddress;
 
+    @NotNull
     @SafeHtml
     @Length(max = 100, message = "Maximum of 100 Characters allowed for Contact Person")
     @OptionalPattern(regex = Constants.ALPHANUMERIC_WITHSPACE, message = "Special Characters are not allowed in Contact Person")
@@ -130,6 +135,7 @@ public class Contractor extends AbstractAuditable implements EntityType {
     @Column(updatable = false)
     private String panNumber;
 
+    @NotNull
     @SafeHtml
     @Length(min = 15, max = 15, message = "Maximum of 15 Characters allowed for TIN/GST No")
     @OptionalPattern(regex = Constants.ALPHANUMERIC, message = "Special Characters are not allowed in TIN/GST No")
@@ -151,6 +157,7 @@ public class Contractor extends AbstractAuditable implements EntityType {
     private String bankAccount;
 
     @SafeHtml
+    @NotNull
     @Length(max = 10)
     @OptionalPattern(regex = Constants.MOBILE_NUM, message = "Please enter valid mobile number")
     private String mobileNumber;
@@ -171,6 +178,7 @@ public class Contractor extends AbstractAuditable implements EntityType {
     private String esiNumber;
 
     @SafeHtml
+    @NotNull
     @Length(max = 250, message = "Maximum of 250 Characters allowed for GST Registered State")
     private String gstRegisteredState;
 
@@ -178,6 +186,7 @@ public class Contractor extends AbstractAuditable implements EntityType {
     @Column(name = "contractortype")
     private ContractorTypeEnum contractorType;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "status")
     private EgwStatus status;

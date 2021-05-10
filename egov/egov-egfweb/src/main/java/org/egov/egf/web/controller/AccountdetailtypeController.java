@@ -56,6 +56,7 @@ import java.util.Locale;
 import javax.validation.Valid;
 
 import org.egov.commons.Accountdetailtype;
+import org.egov.commons.contracts.AccountDetailTypeSearchRequest;
 import org.egov.commons.service.AccountdetailtypeService;
 import org.egov.egf.web.adaptor.AccountdetailtypeJsonAdaptor;
 import org.egov.infra.security.utils.SecurityUtils;
@@ -81,6 +82,7 @@ import com.google.gson.GsonBuilder;
 @RequestMapping("/accountdetailtype")
 public class AccountdetailtypeController {
 	private static final String ACCOUNTDETAILTYPE = "accountdetailtype";
+	private static final String ACCOUNTDETAILTYPE_SEARCH_REQUEST = "accountdetailtypeSearchRequest";
 	private static final String ACCOUNTDETAILTYPE_NEW = "accountdetailtype-new";
 	private static final String ACCOUNTDETAILTYPE_RESULT = "accountdetailtype-result";
 	private static final String ACCOUNTDETAILTYPE_EDIT = "accountdetailtype-edit";
@@ -122,7 +124,7 @@ public class AccountdetailtypeController {
 		accountdetailtypeService.create(accountdetailtype);
 		redirectAttrs.addFlashAttribute("message",
 				messageSource.getMessage("msg.accountdetailtype.success", null, null));
-		return "redirect:/accountdetailtype/result/" + accountdetailtype.getId()+"/create";
+		return "redirect:/accountdetailtype/result/" + accountdetailtype.getId() + "/create";
 	}
 
 	@GetMapping(value = "/edit/{id}")
@@ -150,7 +152,7 @@ public class AccountdetailtypeController {
 		accountdetailtypeService.update(accountdetailtype);
 		redirectAttrs.addFlashAttribute("message",
 				messageSource.getMessage("msg.accountdetailtype.success", null, Locale.ENGLISH));
-		return "redirect:/accountdetailtype/result/" + accountdetailtype.getId()+"/update";
+		return "redirect:/accountdetailtype/result/" + accountdetailtype.getId() + "/update";
 	}
 
 	@GetMapping(value = "/view/{id}")
@@ -162,7 +164,8 @@ public class AccountdetailtypeController {
 	}
 
 	@GetMapping(value = "/result/{id}/{mode}")
-	public String result(@PathVariable("id") final Integer id, @PathVariable("mode") @SafeHtml final String mode, Model model) {
+	public String result(@PathVariable("id") final Integer id, @PathVariable("mode") @SafeHtml final String mode,
+			Model model) {
 		Accountdetailtype accountdetailtype = accountdetailtypeService.findOne(id);
 		model.addAttribute(ACCOUNTDETAILTYPE, accountdetailtype);
 		model.addAttribute("mode", mode);
@@ -171,17 +174,18 @@ public class AccountdetailtypeController {
 
 	@PostMapping(value = "/search/{mode}")
 	public String search(@PathVariable("mode") @SafeHtml final String mode, Model model) {
-		Accountdetailtype accountdetailtype = new Accountdetailtype();
+		AccountDetailTypeSearchRequest accountDetailTypeSearchRequest = new AccountDetailTypeSearchRequest();
 		prepareNewForm(model);
-		model.addAttribute(ACCOUNTDETAILTYPE, accountdetailtype);
+		model.addAttribute(ACCOUNTDETAILTYPE_SEARCH_REQUEST, accountDetailTypeSearchRequest);
 		return ACCOUNTDETAILTYPE_SEARCH;
 
 	}
 
 	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
 	public @ResponseBody String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, Model model,
-			@Valid @ModelAttribute final Accountdetailtype accountdetailtype) {
-		List<Accountdetailtype> searchResultList = accountdetailtypeService.search(accountdetailtype, mode);
+			@Valid @ModelAttribute final AccountDetailTypeSearchRequest accountDetailTypeSearchRequest) {
+		List<Accountdetailtype> searchResultList = accountdetailtypeService.search(accountDetailTypeSearchRequest,
+				mode);
 		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
 	}
 
