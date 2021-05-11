@@ -245,7 +245,7 @@ public class TransactionSummaryController {
 	}
 
 	@GetMapping(value = "/ajax/getMajorHeads")
-	public @ResponseBody List<CChartOfAccounts> getMajorHeads(@RequestParam("type") @SafeHtml Character type) {
+	public @ResponseBody List<CChartOfAccounts> getMajorHeads(@RequestParam("type") Character type) {
 		return chartOfAccountsDAO.findByType(type); 
 	}
 

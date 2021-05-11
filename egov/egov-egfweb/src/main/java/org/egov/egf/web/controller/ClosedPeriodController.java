@@ -56,6 +56,7 @@ import javax.validation.Valid;
 
 import org.egov.commons.service.CFinancialYearService;
 import org.egov.egf.model.ClosedPeriod;
+import org.egov.egf.model.ClosedPeriodSearchRequest;
 import org.egov.egf.web.adaptor.ClosedPeriodJsonAdaptor;
 import org.egov.enums.CloseTypeEnum;
 import org.egov.infra.utils.DateUtils;
@@ -86,6 +87,7 @@ import com.google.gson.GsonBuilder;
 @Validated
 public class ClosedPeriodController {
     private static final String CLOSED_PERIOD = "closedPeriod";
+    private static final String CLOSED_PERIOD_SEARCH_REQUEST = "closedPeriodSearchRequest";
 	private static final String CLOSEDPERIOD_RESULT = "closedperiod-result";
     private static final String CLOSEDPERIOD_REOPEN = "closedperiod-reopen";
     private static final String CLOSEDPERIOD_SEARCH = "closedperiod-search";
@@ -181,13 +183,13 @@ public class ClosedPeriodController {
 
     @RequestMapping(value = "/search/{mode}", method = { RequestMethod.GET, RequestMethod.POST })
     public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
-        final ClosedPeriod closedPeriod = new ClosedPeriod();
+        final ClosedPeriodSearchRequest closedPeriodSearchRequest = new ClosedPeriodSearchRequest();
 
         if (mode.equalsIgnoreCase("reopen"))
             prepareSoftClosePeriod(model);
         else
             prepareNewForm(model);
-        model.addAttribute(CLOSEDPERIOD, closedPeriod);
+        model.addAttribute(CLOSED_PERIOD_SEARCH_REQUEST, closedPeriodSearchRequest);
         return CLOSEDPERIOD_SEARCH;
 
     }
@@ -195,11 +197,11 @@ public class ClosedPeriodController {
     @PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
-        @Valid @ModelAttribute final ClosedPeriod closedPeriod) {
+        @Valid @ModelAttribute final ClosedPeriodSearchRequest closedPeriodSearchRequest) {
         if (mode.equalsIgnoreCase("reopen"))
-            closedPeriod.setCloseType(CloseTypeEnum.SOFTCLOSE);
-        closedPeriod.setIsClosed(true);
-        final List<ClosedPeriod> searchResultList = closedPeriodService.search(closedPeriod);
+            closedPeriodSearchRequest.setCloseType(CloseTypeEnum.SOFTCLOSE);
+        closedPeriodSearchRequest.setIsClosed(true);
+        final List<ClosedPeriod> searchResultList = closedPeriodService.search(closedPeriodSearchRequest);
         return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
     }
 

@@ -58,6 +58,7 @@ import org.apache.commons.lang.StringUtils;
 import org.egov.commons.service.CFinancialYearService;
 import org.egov.egf.web.adaptor.BudgetJsonAdaptor;
 import org.egov.model.budget.Budget;
+import org.egov.model.budget.BudgetDefinitionSearchRequest;
 import org.egov.model.budget.BudgetDetail;
 import org.egov.model.service.BudgetDefinitionService;
 import org.egov.utils.BeReType;
@@ -68,7 +69,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -84,10 +84,10 @@ import com.google.gson.GsonBuilder;
 
 @Controller
 @RequestMapping("/budgetdefinition")
-@Validated
 public class BudgetDefinitionController {
 	private static final String MODIFY = "modify";
 	private static final String BUDGET = "budget";
+	private static final String BUDGET_DEFINITION_SEARCH_REQUEST = "budgetDefinitionSearchRequest";
 	private static final String BUDGET_NEW = "budgetdefinition-new";
 	private static final String BUDGET_RESULT = "budgetdefinition-result";
 	private static final String BUDGET_EDIT = "budgetdefinition-edit";
@@ -105,7 +105,7 @@ public class BudgetDefinitionController {
 		model.addAttribute("isBereList", Arrays.asList(BeReType.values()));
 	}
 
-	@RequestMapping(value = "/new", method = {RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value = "/new", method = { RequestMethod.GET, RequestMethod.POST })
 	public String newForm(final Model model) {
 		model.addAttribute(BUDGET, new Budget());
 		prepareNewForm(model);
@@ -171,19 +171,19 @@ public class BudgetDefinitionController {
 		return BUDGET_RESULT;
 	}
 
-	@RequestMapping(value = "/search/{mode}", method = {RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value = "/search/{mode}", method = { RequestMethod.GET, RequestMethod.POST })
 	public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
-		final Budget budget = new Budget();
+		final BudgetDefinitionSearchRequest budgetDefinitionSearchRequest = new BudgetDefinitionSearchRequest();
 		prepareNewForm(model);
-		model.addAttribute(BUDGET, budget);
+		model.addAttribute(BUDGET_DEFINITION_SEARCH_REQUEST, budgetDefinitionSearchRequest);
 		return BUDGET_SEARCH;
 
 	}
 
 	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
 	public @ResponseBody String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
-		@Valid @ModelAttribute final Budget budget) {
-		final List<Budget> searchResultList = budgetDefinitionService.search(budget);
+			@Valid @ModelAttribute final BudgetDefinitionSearchRequest budgetDefinitionSearchRequest) {
+		final List<Budget> searchResultList = budgetDefinitionService.search(budgetDefinitionSearchRequest);
 		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
 	}
 
@@ -201,7 +201,8 @@ public class BudgetDefinitionController {
 	}
 
 	@GetMapping(value = "/referencebudget", produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody String getRefencebudget(@RequestParam("financialYearId") @SafeHtml final String financialYearId) {
+	public @ResponseBody String getRefencebudget(
+			@RequestParam("financialYearId") @SafeHtml final String financialYearId) {
 		final List<Budget> referenceBudgetList = budgetDefinitionService
 				.referenceBudgetList(Long.parseLong(financialYearId));
 		return toSearchResultJson(referenceBudgetList).toString();

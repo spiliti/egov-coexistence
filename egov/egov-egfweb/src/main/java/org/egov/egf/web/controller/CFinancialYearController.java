@@ -61,6 +61,7 @@ import javax.validation.Valid;
 
 import org.egov.commons.CFinancialYear;
 import org.egov.commons.CFiscalPeriod;
+import org.egov.commons.contracts.CFinanancialYearSearchRequest;
 import org.egov.commons.service.CFinancialYearService;
 import org.egov.egf.web.adaptor.CFinancialYearJsonAdaptor;
 import org.hibernate.validator.constraints.SafeHtml;
@@ -87,6 +88,7 @@ import com.google.gson.GsonBuilder;
 public class CFinancialYearController {
 	private static final String CREATE = "create";
 	private static final String C_FINANCIAL_YEAR = "CFinancialYear";
+	private static final String C_FINANCIAL_YEAR_SEARCH_REQUEST = "CFinancialYearSearchRequest";
 	private static final String MESSAGE = "message";
 	private static final String CFINANCIALYEAR_NEW = "cfinancialyear-new";
 	private static final String CFINANCIALYEAR_RESULT = "cfinancialyear-result";
@@ -102,10 +104,10 @@ public class CFinancialYearController {
 	private MessageSource messageSource;
 
 	private void prepareNewForm(final Model model) {
-            model.addAttribute("cFinancialYears", cFinancialYearService.findAll());
-    }
+		model.addAttribute("cFinancialYears", cFinancialYearService.findAll());
+	}
 
-	@RequestMapping(value = "/new", method = {RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value = "/new", method = { RequestMethod.GET, RequestMethod.POST })
 	public String newForm(final Model model) {
 		prepareNewForm(model);
 		final SimpleDateFormat dtFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -124,7 +126,7 @@ public class CFinancialYearController {
 			final Model model, final RedirectAttributes redirectAttrs) throws ParseException {
 		final Boolean flag = false;
 		final Boolean isActive = true;
-		cFinancialYearService.validateMandatoryFields(cFinancialYear,errors);
+		cFinancialYearService.validateMandatoryFields(cFinancialYear, errors);
 		if (errors.hasErrors()) {
 			prepareNewForm(model);
 			model.addAttribute("mode", CREATE);
@@ -137,8 +139,7 @@ public class CFinancialYearController {
 			if (fiscalPeriod != null) {
 				prepareNewForm(model);
 				redirectAttrs.addFlashAttribute("financialYear", cFinancialYear);
-				model.addAttribute(MESSAGE,
-						"Entered Fiscal Period Name " + fiscalPeriod.getName() + " already Exists");
+				model.addAttribute(MESSAGE, "Entered Fiscal Period Name " + fiscalPeriod.getName() + " already Exists");
 				model.addAttribute("mode", CREATE);
 				return CFINANCIALYEAR_NEW;
 			}
@@ -164,23 +165,22 @@ public class CFinancialYearController {
 
 	@PostMapping(value = "/update")
 	public String update(@Valid @ModelAttribute final CFinancialYear cFinancialYear, final BindingResult errors,
-			final Model model, final RedirectAttributes redirectAttrs,HttpServletRequest request) {
+			final Model model, final RedirectAttributes redirectAttrs, HttpServletRequest request) {
 		if (errors.hasErrors()) {
 			prepareNewForm(model);
 			return CFINANCIALYEAR_EDIT;
 		}
 		String mode = request.getParameter("mode");
 		String message = "msg.cFinancialYear.success";
-		
-		if("close".equalsIgnoreCase(mode)) {
-		    message = "msg.closedFinancialYear.success";
-		    if(cFinancialYear.getIsClosed() && cFinancialYear.getTransferClosingBalance()) {
-                        cFinancialYear.setIsActiveForPosting(false);
-                    }
+
+		if ("close".equalsIgnoreCase(mode)) {
+			message = "msg.closedFinancialYear.success";
+			if (cFinancialYear.getIsClosed() && cFinancialYear.getTransferClosingBalance()) {
+				cFinancialYear.setIsActiveForPosting(false);
+			}
 		}
 		cFinancialYearService.update(cFinancialYear);
-		redirectAttrs.addFlashAttribute(MESSAGE,
-		        messageSource.getMessage(message, null, Locale.ENGLISH));
+		redirectAttrs.addFlashAttribute(MESSAGE, messageSource.getMessage(message, null, Locale.ENGLISH));
 		redirectAttrs.addFlashAttribute("mode", mode);
 		return "redirect:/cfinancialyear/result/" + cFinancialYear.getId();
 	}
@@ -192,7 +192,7 @@ public class CFinancialYearController {
 		model.addAttribute(C_FINANCIAL_YEAR, cFinancialYear);
 		return CFINANCIALYEAR_VIEW;
 	}
-	
+
 	@GetMapping(value = "/close/{id}")
 	public String close(@PathVariable("id") final Long id, final Model model) {
 		final CFinancialYear cFinancialYear = cFinancialYearService.findOne(id);
@@ -202,7 +202,6 @@ public class CFinancialYearController {
 		return CFINANCIALYEAR_CLOSE;
 	}
 
-
 	@GetMapping(value = "/result/{id}")
 	public String result(@PathVariable("id") final Long id, final Model model) {
 		final CFinancialYear cFinancialYear = cFinancialYearService.findOne(id);
@@ -210,20 +209,20 @@ public class CFinancialYearController {
 		return CFINANCIALYEAR_RESULT;
 	}
 
-	@RequestMapping(value = "/search/{mode}", method = {RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value = "/search/{mode}", method = { RequestMethod.GET, RequestMethod.POST })
 	public String search(@PathVariable("mode") @SafeHtml final String mode, final Model model) {
-		final CFinancialYear cFinancialYear = new CFinancialYear();
+		final CFinanancialYearSearchRequest cFinanancialYearSearchRequest = new CFinanancialYearSearchRequest();
 		model.addAttribute("financialYears", cFinancialYearService.findAll());
 		prepareNewForm(model);
-		model.addAttribute(C_FINANCIAL_YEAR, cFinancialYear);
+		model.addAttribute(C_FINANCIAL_YEAR_SEARCH_REQUEST, cFinanancialYearSearchRequest);
 		return CFINANCIALYEAR_SEARCH;
 
 	}
 
 	@PostMapping(value = "/ajaxsearch/{mode}", produces = MediaType.TEXT_PLAIN_VALUE)
 	public @ResponseBody String ajaxsearch(@PathVariable("mode") @SafeHtml final String mode, final Model model,
-			@Valid @ModelAttribute final CFinancialYear cFinancialYear) {
-		final List<CFinancialYear> searchResultList = cFinancialYearService.search(cFinancialYear);
+			@Valid @ModelAttribute final CFinanancialYearSearchRequest cFinanancialYearSearchRequest) {
+		final List<CFinancialYear> searchResultList = cFinancialYearService.search(cFinanancialYearSearchRequest);
 		return new StringBuilder("{ \"data\":").append(toSearchResultJson(searchResultList)).append("}").toString();
 	}
 
