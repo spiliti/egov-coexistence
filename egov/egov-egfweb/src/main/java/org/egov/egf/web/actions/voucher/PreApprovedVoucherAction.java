@@ -525,6 +525,10 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
 
        //heading = ReportUtil.getCityName();
        heading = microserviceUtils.getHeaderNameForTenant().toUpperCase();
+       final EgBillregister billRegister = (EgBillregister) persistenceService
+               .find("from EgBillregister br where br.egBillregistermis.voucherHeader.id=" + voucherHeader.getId());
+       voucherHeader.setBillNumber(billRegister.getBillnumber());
+       voucherHeader.setBillDate(billRegister.getBilldate());
         getMasterDataForBillVoucher();
         getHeaderMandateFields();
         

@@ -144,6 +144,14 @@
 					<td width="25%" class="greybox"><s:date
 							name="voucherHeader.voucherDate" format="dd/MM/yyyy" /></td>
 				</tr>
+				<tr>
+					<td width="10%" class="greybox"><b>Bill Number :  </b></td>
+					<td width="25%" class="greybox"><s:property
+							value="%{voucherHeader.billnumber}" /></td>
+					<td width="10%" class="greybox"><b> Bill Date :</b></td>
+					<td width="25%" class="greybox"><s:date
+							name="voucherHeader.voucherDate" format="dd/MM/yyyy" /></td>
+				</tr>
 			</table>
 			<jsp:include page="voucherViewHeader.jsp" />
 			<table align="center" id="sourceIcon">
