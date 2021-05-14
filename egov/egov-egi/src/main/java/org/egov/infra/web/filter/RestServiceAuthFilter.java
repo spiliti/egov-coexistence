@@ -237,14 +237,11 @@ public class RestServiceAuthFilter implements Filter {
 
             return authToken;
         } catch (JsonParseException e) {
-            e.printStackTrace();
-            throw new ApplicationRuntimeException("Request parsing failed");
+            throw new ApplicationRuntimeException("Request parsing failed" +e.getMessage());
         } catch (JsonMappingException e) {
-            e.printStackTrace();
-            throw new ApplicationRuntimeException("Request object Mapping failed");
+            throw new ApplicationRuntimeException("Request object Mapping failed" +e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new ApplicationRuntimeException("Request processing failed");
+            throw new ApplicationRuntimeException("Request processing failed" +e.getMessage());
         }
     }
     
@@ -269,14 +266,11 @@ public class RestServiceAuthFilter implements Filter {
 
             return tenantId;
         } catch (JsonParseException e) {
-            e.printStackTrace();
-            throw new ApplicationRuntimeException("Request parsing failed");
+            throw new ApplicationRuntimeException("Request parsing failed" +e.getMessage());
         } catch (JsonMappingException e) {
-            e.printStackTrace();
-            throw new ApplicationRuntimeException("Request object Mapping failed");
+            throw new ApplicationRuntimeException("Request object Mapping failed" +e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new ApplicationRuntimeException("Request processing failed");
+            throw new ApplicationRuntimeException("Request processing failed" + e.getMessage());
         }
 
         

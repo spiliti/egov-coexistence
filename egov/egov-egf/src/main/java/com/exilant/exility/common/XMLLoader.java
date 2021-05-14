@@ -190,8 +190,7 @@ public class XMLLoader extends DefaultHandler {
             try {
                 objectToLoad = createChild(qName, atts);
             } catch (IllegalArgumentException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                LOGGER.error("Exp=" + e1.getMessage());
             }
 
         if (objectToLoad != null) { // if it is null, the node is not loaded at
@@ -200,20 +199,20 @@ public class XMLLoader extends DefaultHandler {
                 try {
                     ObjectGetSetter.set(objectToLoad, "type", qName);
                 } catch (InstantiationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Exp=" + e.getMessage());
+
                 } catch (InvocationTargetException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Exp=" + e.getMessage());
+
                 } catch (NoSuchMethodException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Exp=" + e.getMessage());
+
                 } catch (SecurityException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Exp=" + e.getMessage());
+
                 } catch (NoSuchFieldException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Exp=" + e.getMessage());
+
                 } // try saving
             // tag as
             // 'type'
@@ -221,20 +220,20 @@ public class XMLLoader extends DefaultHandler {
             try {
                 ObjectGetSetter.setAll(objectToLoad, atts);
             } catch (InstantiationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             } catch (InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             } catch (NoSuchMethodException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             } catch (NoSuchFieldException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             } // set all attributes
             // from atts to members
             // of childobject
@@ -287,18 +286,18 @@ public class XMLLoader extends DefaultHandler {
                 try {
                     childInfo.addInfo(parentObject);
                 } catch (IllegalArgumentException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Exp=" + e.getMessage());
+
                 } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Exp=" + e.getMessage());
+
                 }
             } catch (NoSuchFieldException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             } catch (InstantiationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             }
             stackedObject.childInfos.put(tag, childInfo);
         }
@@ -317,18 +316,18 @@ public class XMLLoader extends DefaultHandler {
             try {
                 return childInfo.createChild(parentObject, key);
             } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             } catch (InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Exp=" + e.getMessage());
+
             }
         } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Exp=" + e.getMessage());
+
         }
         return key;
 
@@ -574,14 +573,11 @@ public class XMLLoader extends DefaultHandler {
                     try {
                         endChildMethod.invoke(parentObject, a);
                     } catch (IllegalAccessException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        LOGGER.error("Exp=" + e.getMessage());
                     } catch (IllegalArgumentException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        LOGGER.error("Exp=" + e.getMessage());
                     } catch (InvocationTargetException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        LOGGER.error("Exp=" + e.getMessage());
                     }
                 }
                 break;
@@ -597,11 +593,9 @@ public class XMLLoader extends DefaultHandler {
                 try {
                     field.set(parentObject, o);
                 } catch (IllegalArgumentException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Exp=" + e.getMessage());
                 } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Exp=" + e.getMessage());
                 }
                 break;
 

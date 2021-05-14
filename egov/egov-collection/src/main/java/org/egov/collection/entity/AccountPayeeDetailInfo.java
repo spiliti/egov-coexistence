@@ -47,12 +47,12 @@
  */
 package org.egov.collection.entity;
 
+import org.apache.log4j.Logger;
 import org.egov.commons.Accountdetailkey;
 import org.egov.commons.Accountdetailtype;
 import org.egov.commons.utils.EntityType;
 import org.egov.egf.commons.EgovCommon;
 import org.egov.infra.exception.ApplicationException;
-import org.egov.infra.exception.ApplicationRuntimeException;
 
 import java.math.BigDecimal;
 
@@ -61,6 +61,8 @@ import java.math.BigDecimal;
  * AccountPayeeDetail in subledger detail.
  */
 public class AccountPayeeDetailInfo {
+     
+    private static final Logger LOGGER = Logger.getLogger(AccountPayeeDetailInfo.class);
     private AccountPayeeDetail accountPayeeDetail = null;
     private EntityType entityType;
 
@@ -74,8 +76,7 @@ public class AccountPayeeDetailInfo {
             entityType = egovCommon.getEntityType(accountPayeeDetail.getAccountDetailType(), accountPayeeDetail
                     .getAccountDetailKey().getDetailkey());
         } catch (ApplicationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("error occured while getting entity type details" +e.getMessage());
         }
     }
 

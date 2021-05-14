@@ -1161,7 +1161,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                 chequeAssignment.setChequeDate(formatter.parse(items[4]));
                 chequeAssignment.setVoucherDate(formatter.parse(items[6]));
             } catch (ParseException e) {
-                e.printStackTrace();
+                LOGGER.error("Error occured parsing the date" + e.getMessage());
             }
             chequeAssignment.setVoucherNumber(items[5]);
             String item = items[7];
@@ -1191,7 +1191,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                 chequeAssignment.setVoucherDate(formatter.parse(items[3]));
                 chequeAssignment.setChequeDate(formatter.parse(items[9]));
             } catch (ParseException e) {
-                e.printStackTrace();
+                LOGGER.error("Error occured parsing the date" + e.getMessage());
             }
             String item = items[11];
             if (item.contains(";"))
@@ -1941,7 +1941,7 @@ public class ChequeAssignmentAction extends BaseVoucherAction {
                         newInstrumentDate[i]=items[2];
                     }
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    LOGGER.error("Error occured parsing the date" + e.getMessage());
                 }
                 if (items[3] != null && !items[3].isEmpty()) {
                     instrumentsHeader.setSerialNo(financialYearDAO.findById(Long.valueOf(items[3]), false));

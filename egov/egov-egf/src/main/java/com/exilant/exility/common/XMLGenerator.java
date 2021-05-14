@@ -130,30 +130,29 @@ public class XMLGenerator {
                 sbf.append(arrayToXML(object, tag, tabs));
             } catch (ArrayIndexOutOfBoundsException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e);
             }
         else if (objclass.equals(HashMap.class))
             try {
                 sbf.append(hashMapToXML((HashMap) object, tag, tabs));
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e);
+
             }
         else if (objclass.equals(ArrayList.class))
             try {
                 sbf.append(arrayListToXML((ArrayList) object, tag, tabs));
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e);
+
             }
         else {
             final HashMap values = ObjectGetSetter.getAll(object, false);
             try {
                 sbf.append(hashMapToXML(values, tag, tabs));
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e);
+
             }
         }
         return sbf.toString();

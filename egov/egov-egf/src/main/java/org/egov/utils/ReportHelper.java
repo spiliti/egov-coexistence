@@ -261,8 +261,7 @@ public class ReportHelper {
         try {
             drb = drb.addColumn("Sl No", "slNo", Integer.class.getName(), 8, columnStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
         try {
             drb
@@ -271,8 +270,7 @@ public class ReportHelper {
                     "Concurrence given \\n upto " + FORMATDDMMYYYY.format(deReport.getCurrentYearConcurrenceGivenUptoDate()),
                     "concurrenceGiven", BigDecimal.class.getName(), 35, detailAmountStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
 
         for (final String dt : deReport.getConcurrenceDateSet())
@@ -287,8 +285,8 @@ public class ReportHelper {
                     "totalConcurrenceGivenTillDate",
                     BigDecimal.class.getName(), 22, detailAmountStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
+
         }
 
         // Added Blank Space for painting subtitle left and right aligned
@@ -333,8 +331,7 @@ public class ReportHelper {
         try {
             drb = drb.addColumn("Sl No", "slNo", Integer.class.getName(), 8, columnStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
         try {
             drb
@@ -344,8 +341,7 @@ public class ReportHelper {
                     "concurrenceGiven",
                     BigDecimal.class.getName(), 35, detailAmountStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
 
         for (final String dt : deReport.getPreviousConcurrenceDateSet())
@@ -360,8 +356,7 @@ public class ReportHelper {
                     "Total Concurrence Given\\n till" + FORMATDDMMYYYY.format(deReport.getPreviousYearConcurrenceGivenTillDate()),
                     "totalConcurrenceGivenTillDate", BigDecimal.class.getName(), 22, detailAmountStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
 
         // Added Blank Space for painting subtitle left and right aligned
@@ -402,16 +397,14 @@ public class ReportHelper {
                                     "Head of Account", "accountName", String.class.getName(), 100,
                                     columnStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
         if (showScheduleColumn)
             try {
                 drb.addColumn("Schedule No", "scheduleNo", String.class.getName(),
                         60, columnStyle);
             } catch (ColumnBuilderException | ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error" + e.getMessage());
             }
 //        drb.addColumn("Revised Estimate" + balanceSheet.getFinancialYear().getFinYearRange(), "budgetAmount", BigDecimal.class
 //                .getName(), 70, false, "0.00", detailAmountStyle);
@@ -435,16 +428,14 @@ public class ReportHelper {
                             "netAmount." + fund.getName(), BigDecimal.class.getName(),
                             70, false, "0.00", detailAmountStyle);
                 } catch (ColumnBuilderException | ClassNotFoundException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                    LOGGER.error("Error" + e1.getMessage());
                 }
                 try {
                     drb.addColumn(fromDate + "(Rs)",
                             "previousYearAmount." + fund.getName(), BigDecimal.class
                             .getName(), 70, false, "0.00", detailAmountStyle);
                 } catch (ColumnBuilderException | ClassNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Error" + e.getMessage());
                 }
             }
         else
@@ -454,8 +445,7 @@ public class ReportHelper {
                             "netAmount." + fund.getName(), BigDecimal.class.getName(),
                             70, false, "0.00", detailAmountStyle);
                 } catch (ColumnBuilderException | ClassNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Error" + e.getMessage());
                 }
                 try {
                     drb.addColumn(
@@ -463,8 +453,7 @@ public class ReportHelper {
                             "previousYearAmount." + fund.getName(), BigDecimal.class
                             .getName(), 70, false, "0.00", detailAmountStyle);
                 } catch (ColumnBuilderException | ClassNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.error("Error" + e.getMessage());
                 }
             }
 
@@ -490,20 +479,16 @@ public class ReportHelper {
             try {
                 drb.addColumn("Schedule Number", "accountName", String.class.getName(), 100, columnStyle);
             } catch (ColumnBuilderException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error" + e.getMessage());
             } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error" + e.getMessage());
             }
             try {
                 drb.addColumn("Account Code", "glCode", String.class.getName(), 55, columnStyle);
             } catch (ColumnBuilderException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error" + e.getMessage());
             } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error" + e.getMessage());
             }
         }
 
@@ -653,16 +638,14 @@ public class ReportHelper {
                     String.class.getName(), 50, columnStyle).addColumn("Head of Account",
                             "accountName", String.class.getName(), 100, columnStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
         if (showScheduleColumn)
             try {
                 drb.addColumn("Schedule No", "scheduleNo", String.class.getName(),
                         60, columnStyle);
             } catch (ColumnBuilderException | ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error" + e.getMessage());
             }
         // Added Blank Space for painting subtitle left and right aligned
         drb.setTitle(heading + " " + balanceSheet.getFinancialYear().getFinYearRange() + " " + addheading)
@@ -694,8 +677,7 @@ public class ReportHelper {
             .addColumn(toDate + "(Rs)", "previousYearTotal", BigDecimal.class.getName(), 55, false, "0.00",
                     detailAmountStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
         final DynamicReport dr = drb.build();
         final JRDataSource ds = new JRBeanCollectionDataSource(balanceSheet
@@ -726,8 +708,7 @@ public class ReportHelper {
                                                             "reCurrentYearOriginal", BigDecimal.class.getName(),
                                                             100, false, "0.00", detailAmountStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
         if (enableReApproved)
             try {
@@ -735,16 +716,14 @@ public class ReportHelper {
                         "reCurrentYearApproved", BigDecimal.class.getName(), 100,
                         false, "0.00", detailAmountStyle);
             } catch (ColumnBuilderException | ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error" + e.getMessage());
             }
         try {
             drb.addColumn("BE Proposed " + nextYearRange + "(Rs)",
                     "beNextYearOriginal", BigDecimal.class.getName(), 100, false,
                     "0.00", detailAmountStyle);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
         if (enableBeApproved)
             try {
@@ -752,8 +731,7 @@ public class ReportHelper {
                         "beNextYearApproved", BigDecimal.class.getName(), 100,
                         false, "0.00", detailAmountStyle);
             } catch (ColumnBuilderException | ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error" + e.getMessage());
             }
         drb.setTitle(heading).setWhenNoData("No data", null).setDefaultStyles(
                 getTitleStyle(), getSubTitleStyle(), getHeaderStyle(),
@@ -786,8 +764,7 @@ public class ReportHelper {
                                                                     .setOddRowBackgroundStyle(getOddRowStyle()).setDetailHeight(20)
                                                                     .setUseFullPageWidth(true).setTitleHeight(50).setSubtitleHeight(35);
         } catch (ColumnBuilderException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error" + e.getMessage());
         }
 
         for (final String s : functionwiseIE.getMajorCodeList())
@@ -795,8 +772,7 @@ public class ReportHelper {
                 drb.addColumn(s, "majorcodeWiseAmount." + s, BigDecimal.class
                         .getName(), 35, false, "0.00", detailAmountStyle);
             } catch (ColumnBuilderException | ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error" + e.getMessage());
             }
         final DynamicReport dr = drb.build();
         final JRDataSource ds = new JRBeanCollectionDataSource(functionwiseIE

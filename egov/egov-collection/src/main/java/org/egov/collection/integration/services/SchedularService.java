@@ -242,17 +242,13 @@ public class SchedularService {
             } catch (final ApplicationRuntimeException exp) {
                 LOGGER.error("ATOM payment reconciliation failed", exp);
             } catch (ClientProtocolException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e);
             } catch (ApplicationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e);
             } catch (JAXBException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e);
             }
         }
     }

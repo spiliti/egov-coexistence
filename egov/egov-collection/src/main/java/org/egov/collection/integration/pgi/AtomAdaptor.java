@@ -51,7 +51,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -68,6 +67,7 @@ import javax.persistence.Query;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
@@ -98,6 +98,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * The PaymentRequestAdaptor class frames the request object for the payment service.
@@ -189,8 +190,8 @@ public class AtomAdaptor implements PaymentGatewayAdaptor {
                 }
             }
 
-        } catch (Exception exp) {
-            exp.printStackTrace();
+        } catch (IOException | ParserConfigurationException | JAXBException | SAXException exp) {
+            LOGGER.error("error occured while doing methods" + exp.getMessage());
         }
         String secondRequestStr = paymentServiceDetails.getServiceUrl() + "?ttype=" + ttype + "&tempTxnId=" + tempTxnId
                 + "&token=" + token + "&txnStage=" + txnStage;

@@ -1125,7 +1125,7 @@ public class PaymentAction extends BasePaymentAction {
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug("Exception caught in prepareBillTypeList method : "+e.getMessage());
                 else{
-                    e.printStackTrace();
+                    LOGGER.error("Error occured parsing the date" + e.getMessage());
                 }
             }
             typeOfBillList.add(paymentBean);
@@ -1991,7 +1991,7 @@ public class PaymentAction extends BasePaymentAction {
                 parse = formatter1.parse(substring);
                 return sdf1.format(parse);
             } catch (ParseException e) {
-                e.printStackTrace();
+                LOGGER.error("Error occured parsing the date" + e.getMessage());
             }
         }
         return null;

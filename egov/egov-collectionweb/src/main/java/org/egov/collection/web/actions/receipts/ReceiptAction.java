@@ -134,6 +134,7 @@ import org.egov.infstr.services.PersistenceService;
 import org.egov.infstr.utils.EgovMasterDataCaching;
 import org.egov.model.instrument.InstrumentHeader;
 import org.egov.model.instrument.InstrumentType;
+import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -381,7 +382,7 @@ public class ReceiptAction extends BaseFormAction {
                 } else
                     setTotalAmntToBeCollected(totalAmntToBeCollected
                             .setScale(CollectionConstants.AMOUNT_PRECISION_DEFAULT, BigDecimal.ROUND_UP));
-            } catch (final Exception e) {
+            } catch (final HibernateException e) {
                 LOGGER.error(getText("billreceipt.error.improperbilldata"), e);
                 addActionError(getText("billreceipt.error.improperbilldata"));
             }

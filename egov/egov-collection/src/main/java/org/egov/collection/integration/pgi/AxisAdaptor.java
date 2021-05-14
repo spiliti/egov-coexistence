@@ -202,17 +202,13 @@ public class AxisAdaptor implements PaymentGatewayAdaptor {
             byte[] hashingMessageBytes = hashingMessage.toString().getBytes(UTF8);
             hashValue = mac.doFinal(hashingMessageBytes);
         } catch (DecoderException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            LOGGER.error("error ocured duing decoded key" + e1.getMessage());
         } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("error occured while mac function" + e.getMessage());
         } catch (InvalidKeyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("error occured while key is invalid + exp.getMessage()" + e.getMessage());
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("error occured itd not supported encoding" + e.getMessage());
         }
         return DatatypeConverter.printHexBinary(hashValue);
     } // end hashAllFields()
@@ -309,7 +305,7 @@ public class AxisAdaptor implements PaymentGatewayAdaptor {
             }
         } catch (final ApplicationException exp) {
             LOGGER.error(exp);
-            throw new ApplicationRuntimeException("Exception during prepare payment response" + exp.getMessage());
+            throw new ApplicationRuntimeException("ecpe during prepare payment response" + exp.getMessage());
         }
         return axisResponse;
     }
@@ -405,11 +401,9 @@ public class AxisAdaptor implements PaymentGatewayAdaptor {
             LOGGER.error(exp);
             throw new ApplicationRuntimeException("Exception during create offline requests" + exp.getMessage());
         } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
         return axisResponse;
     }

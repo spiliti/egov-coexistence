@@ -506,11 +506,9 @@ public class VoucherService extends PersistenceService<CVoucherHeader, Long> {
            * LOGGER.error("Exception occured in VoucherSerive |getVoucherInfo "
            * + e); }
            */ catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+               LOGGER.error("Exception occured in VoucherSerive |getVoucherInfo " + e);
         } catch (SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Exception occured in VoucherSerive |getVoucherInfo " + e);
         }
 		voucherMap.put(Constants.GLDEATILLIST, billDetailslist);
 		/**

@@ -65,6 +65,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
+import org.apache.log4j.Logger;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.persistence.entity.AbstractAuditable;
 import org.egov.infra.utils.JsonUtils;
@@ -78,6 +79,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @MappedSuperclass
 public abstract class StateAware extends AbstractAuditable {
     private static final long serialVersionUID = 5776408218810221246L;
+    private static final Logger LOGGER = Logger.getLogger(StateAware.class);
 
     @ManyToOne(targetEntity = State.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "STATE_ID")
@@ -379,7 +381,7 @@ public abstract class StateAware extends AbstractAuditable {
                         value = method.invoke(obj);
                     }
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    e.printStackTrace();
+                    LOGGER.error("error  to get method=" + e.getMessage(), e);
                 }
             }
             return (long) value;

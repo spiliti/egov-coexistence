@@ -562,7 +562,8 @@ public class MicroserviceUtils {
                 return mdmsmap.get(name);
             }
         } catch (RestClientException e) {
-            e.printStackTrace();
+            LOGGER.error("ERROR occurred while fetching finance mdms method: ",
+                    e);
         }
         return null;
     }
@@ -1553,7 +1554,9 @@ public class MicroserviceUtils {
                     fieldValue = (String) field.get(criteria);
                 }
             } catch (IllegalArgumentException | IllegalAccessException e) {
-                e.printStackTrace();
+                LOGGER.error(
+                        "ERROR occurred while fetching business service mapping details in getBusinessServiceMappingBySearchCriteria method: ",
+                        e);
             }
             if (StringUtils.isNotBlank(fieldValue)) {
                 for (String str : StringUtils.split(fieldValue, ",")) {

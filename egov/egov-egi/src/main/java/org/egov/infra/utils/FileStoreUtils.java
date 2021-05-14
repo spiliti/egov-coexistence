@@ -218,12 +218,10 @@ public class FileStoreUtils {
                 }
                 return output.toByteArray();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error("Error occurred while converting byte"+e.getMessage());
             }
         } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error occurred while getting imageUrl"+e.getMessage());
         }
         return new byte[0];
     }

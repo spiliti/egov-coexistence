@@ -60,6 +60,7 @@ import org.egov.commons.CChartOfAccounts;
 import org.egov.commons.CVoucherHeader;
 import org.egov.commons.EgwStatus;
 import org.egov.commons.dao.ChartOfAccountsHibernateDAO;
+import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infstr.services.PersistenceService;
 import org.egov.model.instrument.InstrumentHeader;
@@ -113,7 +114,7 @@ public class FinancialsUtil {
         try {
             voucherHeaderCash = financialsVoucherUtil.createApprovedVoucher(headerdetails, accountCodeList,
                     subledgerList);
-        } catch (final Exception e) {
+        } catch (final ApplicationRuntimeException e) {
             LOGGER.error("Error in createBankRemittance createPreApprovalVoucher when cash amount>0");
             throw new ApplicationRuntimeException(
                     "Error in createBankRemittance createPreApprovalVoucher when cash amount>0", e);

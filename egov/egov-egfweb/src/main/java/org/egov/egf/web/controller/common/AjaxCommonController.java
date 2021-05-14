@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.egov.commons.Accountdetailtype;
 import org.egov.commons.Bankaccount;
 import org.egov.commons.Bankbranch;
@@ -110,6 +111,8 @@ import com.google.gson.JsonSerializer;
 @RequestMapping(value = "/common")
 @Validated
 public class AjaxCommonController {
+    private static final Logger LOGGER = Logger.getLogger(AjaxCommonController.class);
+
     @Autowired
     @Qualifier("schemeService")
     private SchemeService schemeService;
@@ -239,7 +242,7 @@ public class AjaxCommonController {
             final EntityTypeService entityService = (EntityTypeService) applicationContext.getBean(simpleName);
             entitiesList = (List<EntityType>) entityService.filterActiveEntities(name, 20, detailType.getId());
         } catch (final ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error("Error occured entity is not found" + e.getMessage());
             entitiesList = new ArrayList<>();
         }
         for (final EntityType entity : entitiesList)
