@@ -488,9 +488,6 @@ public class CreateSupplierBillController extends BaseBillController {
 		final String fileStoreId = request.getParameter("fileStoreId");
 		String fileName = "";
 		final File downloadFile = fileStoreService.fetch(fileStoreId, FinancialConstants.FILESTORE_MODULECODE);
-		String canonicalPath = downloadFile.getCanonicalPath();
-		if (!canonicalPath.equals(downloadFile.getPath()))
-			throw new FileNotFoundException("Invalid file path, please try again.");
 
 		try (final FileInputStream inputStream = new FileInputStream(downloadFile);
 				final OutputStream outStream = response.getOutputStream();) {
