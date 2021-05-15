@@ -66,49 +66,6 @@ public class InstrumentType extends BaseModel {
 		return type;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((instrumentAccountCodes == null) ? 0 : instrumentAccountCodes.hashCode());
-		result = prime * result + ((isActive == null) ? 0 : isActive.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		InstrumentType other = (InstrumentType) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (instrumentAccountCodes == null) {
-			if (other.instrumentAccountCodes != null)
-				return false;
-		} else if (!instrumentAccountCodes.equals(other.instrumentAccountCodes))
-			return false;
-		if (isActive == null) {
-			if (other.isActive != null)
-				return false;
-		} else if (!isActive.equals(other.isActive))
-			return false;
-		if (type == null) {
-			if (other.type != null)
-				return false;
-		} else if (!type.equals(other.type))
-			return false;
-		return true;
-	}
-
 	public void setType(final String type) {
 		this.type = type;
 	}
