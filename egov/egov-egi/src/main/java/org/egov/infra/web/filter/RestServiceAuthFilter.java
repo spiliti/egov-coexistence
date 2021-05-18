@@ -86,7 +86,7 @@ public class RestServiceAuthFilter implements Filter {
 			try {
 				RestRequestWrapper request = new RestRequestWrapper(httpRequest);
 				String tenantId = readTenantId(request);
-				String userToken = readAuthToken(request);
+				String userToken = readAuthToken(request, tenantId);
 				HttpSession session = httpRequest.getSession();
 				session.setAttribute(MS_TENANTID_KEY, tenantId);
 				session.setAttribute(MS_USER_TOKEN, userToken);
@@ -152,8 +152,8 @@ public class RestServiceAuthFilter implements Filter {
 
 	private User getUserDetails(HttpServletRequest request) throws AuthorizationException {
 
-		String userToken = readAuthToken(request);
 		String tenantId = readTenantId(request);
+		String userToken = readAuthToken(request, tenantId);
 		setSchema(tenantId);
 		if (userToken == null)
 			throw new AuthorizationException("AuthToken not found");
@@ -196,8 +196,7 @@ public class RestServiceAuthFilter implements Filter {
 	}
 
 	@SuppressWarnings({ "deprecation", "unchecked" })
-	private String readAuthToken(HttpServletRequest request)
-			throws AuthorizationException, ApplicationRuntimeException {
+	private String readAuthToken(HttpServletRequest request, String tenantId) {
 		LOGGER.info("Rest service - reading authtoken");
 
 		try {
@@ -215,14 +214,10 @@ public class RestServiceAuthFilter implements Filter {
 
 			String authToken = (String) reqInfo.get("authToken");
 			if (authToken == null)
-				throw new AuthorizationException("authToken not found");
-
+				authToken = this.microserviceUtils.generateAdminToken(tenantId);
 			return authToken;
-		} catch (JsonParseException e) {
-			throw new ApplicationRuntimeException("Request parsing failed" + e.getMessage());
-		} catch (JsonMappingException e) {
-			throw new ApplicationRuntimeException("Request object Mapping failed" + e.getMessage());
 		} catch (IOException e) {
+			LOGGER.error("Request processing failed" + e.getMessage());
 			throw new ApplicationRuntimeException("Request processing failed" + e.getMessage());
 		}
 	}
