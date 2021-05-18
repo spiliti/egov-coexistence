@@ -94,7 +94,7 @@ public class RestServiceAuthFilter implements Filter {
 				Authentication auth = this.prepareAuthenticationObj(request, user);
 				SecurityContextHolder.getContext().setAuthentication(auth);
 				chain.doFilter(request, res);
-			} catch (IOException | ServletException e) {
+			} catch (IOException | ServletException | AuthorizationException e) {
 				httpUtilities.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
 				httpResponse.setStatus(HttpStatus.SC_UNAUTHORIZED);
 				httpResponse.getWriter().write(getErrorResponse(e.getMessage()));
@@ -150,7 +150,7 @@ public class RestServiceAuthFilter implements Filter {
 		return auth;
 	}
 
-	private User getUserDetails(HttpServletRequest request) {
+	private User getUserDetails(HttpServletRequest request) throws AuthorizationException {
 
 		String userToken = readAuthToken(request);
 		String tenantId = readTenantId(request);
@@ -196,7 +196,8 @@ public class RestServiceAuthFilter implements Filter {
 	}
 
 	@SuppressWarnings({ "deprecation", "unchecked" })
-	private String readAuthToken(HttpServletRequest request) {
+	private String readAuthToken(HttpServletRequest request)
+			throws AuthorizationException, ApplicationRuntimeException {
 		LOGGER.info("Rest service - reading authtoken");
 
 		try {
@@ -218,11 +219,11 @@ public class RestServiceAuthFilter implements Filter {
 
 			return authToken;
 		} catch (JsonParseException e) {
-            throw new ApplicationRuntimeException("Request parsing failed" +e.getMessage());
+			throw new ApplicationRuntimeException("Request parsing failed" + e.getMessage());
 		} catch (JsonMappingException e) {
-            throw new ApplicationRuntimeException("Request object Mapping failed" +e.getMessage());
+			throw new ApplicationRuntimeException("Request object Mapping failed" + e.getMessage());
 		} catch (IOException e) {
-            throw new ApplicationRuntimeException("Request processing failed" +e.getMessage());
+			throw new ApplicationRuntimeException("Request processing failed" + e.getMessage());
 		}
 	}
 
@@ -247,11 +248,11 @@ public class RestServiceAuthFilter implements Filter {
 
 			return tenantId;
 		} catch (JsonParseException e) {
-            throw new ApplicationRuntimeException("Request parsing failed" +e.getMessage());
+			throw new ApplicationRuntimeException("Request parsing failed" + e.getMessage());
 		} catch (JsonMappingException e) {
-            throw new ApplicationRuntimeException("Request object Mapping failed" +e.getMessage());
+			throw new ApplicationRuntimeException("Request object Mapping failed" + e.getMessage());
 		} catch (IOException e) {
-            throw new ApplicationRuntimeException("Request processing failed" + e.getMessage());
+			throw new ApplicationRuntimeException("Request processing failed" + e.getMessage());
 		}
 
 	}
