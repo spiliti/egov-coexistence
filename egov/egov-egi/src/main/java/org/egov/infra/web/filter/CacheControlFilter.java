@@ -73,7 +73,6 @@ public class CacheControlFilter implements Filter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CacheControlFilter.class);
 
 	private static final String EXPIRE_HEADER = "Expires";
-	private static final String ETAG_HEADER = "ETag";
 	private static final String CACHE_CONTROL_HEADER = "Cache-Control";
 	private static final String PRAGMA_HEADER = "Pragma";
 	public static final long DEFAULT_EXPIRES_SECONDS = 30 * 24 * 60 * 60;
@@ -100,9 +99,7 @@ public class CacheControlFilter implements Filter {
 		final HTTPUtilities httpUtilities = ESAPI.httpUtilities();
 		httpUtilities.setCurrentHTTP((HttpServletRequest) request, (HttpServletResponse) response);
 		httpUtilities.setHeader(CACHE_CONTROL_HEADER, "public,max-age=" + expireInSeconds);
-		httpUtilities.setHeader(PRAGMA_HEADER, "");
-		httpUtilities.setHeader(ETAG_HEADER, "");
-
+		httpUtilities.setHeader(PRAGMA_HEADER, "no-cache");
 		httpServletResponse.setDateHeader(EXPIRE_HEADER, System.currentTimeMillis() + expireInSeconds * 1000L);
 		chain.doFilter(request, httpServletResponse);
 	}
