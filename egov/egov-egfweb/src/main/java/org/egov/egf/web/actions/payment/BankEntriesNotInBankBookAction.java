@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -156,9 +157,16 @@ public class BankEntriesNotInBankBookAction extends BasePaymentAction {
         return NEW;
     }
 
-    @SkipValidation
     @Action(value = "/payment/bankEntriesNotInBankBook-search")
     public String search() {
+        validateForm();
+        if (hasErrors()) {
+            prepareNewform();
+            addDropdownData("bankList", bankHibernateDAO.getAllBanksByFund(voucherHeader.getFundId().getId()));
+            addDropdownData("bankBranchList", bankBranchHibernateDAO.getAllBankBranchsByBank(bank));
+            addDropdownData("bankAccountList", bankaccountHibernateDAO.getBankAccountByBankBranch(bank_branch));
+            return NEW;
+        }
         final Map.Entry<String, Map<String, Object>> queryMapEntry = getQuery().entrySet().iterator().next();
         final String queryString = queryMapEntry.getKey();
         final Map<String, Object> queryParams = queryMapEntry.getValue();
@@ -190,6 +198,11 @@ public class BankEntriesNotInBankBookAction extends BasePaymentAction {
         return NEW;
     }
 
+    private void validateForm() {
+        if (voucherHeader.getVouchermis().getFunction() == null ) {
+            addActionError(getText("msg.please.select.function"));
+        }
+    }
     private Map<String, Map<String, Object>> getQuery() {
         final Map<String, Map<String, Object>> queryMap = new HashMap<>();
         final Map<String, Object> queryParams = new HashMap<>();
