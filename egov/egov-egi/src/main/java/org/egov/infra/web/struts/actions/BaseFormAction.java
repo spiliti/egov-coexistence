@@ -151,9 +151,9 @@ public abstract class BaseFormAction extends ActionSupport
 				else
 					setValue(relationshipName, getPersistenceService().load(Integer.valueOf(id), class1));
 			} else if (("vouchermis.schemeid".equals(relationshipName)
-					|| "vouchermis.subschemeid".equals(relationshipName)) && id != null) {
+					|| "vouchermis.subschemeid".equals(relationshipName)) && id != null && !id.equals("-1")) {
 				setValue(relationshipName, getPersistenceService().load(Integer.valueOf(id), class1));
-			} else if ("department".equals(relationshipName) && id != null) {
+			} else if ("department".equals(relationshipName) && id != null && !id.equals("-1")) {
 				Department dept = microserviceUtils.getDepartmentByCode(id);
 				setValue(relationshipName, dept);
 			} else if ("executingDepartment".equals(relationshipName) && id != null) {

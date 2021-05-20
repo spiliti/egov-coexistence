@@ -84,13 +84,11 @@ import org.egov.egf.commons.CommonsUtil;
 import org.egov.infra.admin.master.entity.AppConfigValues;
 import org.egov.infra.admin.master.entity.Department;
 import org.egov.infra.admin.master.entity.User;
-import org.egov.infra.admin.master.service.DepartmentService;
 import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
 import org.egov.infra.microservice.models.EmployeeInfo;
 import org.egov.infra.persistence.utils.Page;
-import org.egov.infra.script.entity.Script;
 import org.egov.infra.script.service.ScriptService;
 import org.egov.infra.security.utils.SecurityUtils;
 import org.egov.infra.utils.DateUtils;
@@ -161,8 +159,6 @@ public class PaymentAction extends BasePaymentAction {
     @Autowired
     @Qualifier("voucherService")
     private VoucherService voucherService;
-    @Autowired
-    private DepartmentService departmentService;
     @Autowired
     private FunctionService functionService;
     @Autowired
@@ -1417,30 +1413,21 @@ public class PaymentAction extends BasePaymentAction {
         if (LOGGER.isInfoEnabled())
             LOGGER.info(
                     "-------------------------------------------------------------------------------------------------");
-        final Script validScript = (Script) getPersistenceService()
-                .findAllByNamedQuery(Script.BY_NAME, "Paymentheader.show.bankbalance").get(0);
-        final List<String> list = (List<String>) scriptService.executeScript(validScript,
-                ScriptService.createContext("persistenceService", paymentService, "purpose", purpose));
-        if (list.get(0).equals("true")) {
-            if (purpose.equals("balancecheck")) {
-                paymentheader = getPayment();
-                try {
-                    getBankBalance(paymentheader.getBankaccount().getId().toString(), formatter.format(new Date()),
-                            paymentheader.getPaymentAmount(), paymentheader.getId(),
-                            paymentheader.getBankaccount().getChartofaccounts().getId());
-                } catch (final ValidationException e) {
-                    LOGGER.error("Error" + e.getMessage(), e);
-                    balance = BigDecimal.valueOf(-1);
-                }
+        if (purpose.equals("balancecheck")) {
+            paymentheader = getPayment();
+            try {
+                getBankBalance(paymentheader.getBankaccount().getId().toString(), formatter.format(new Date()),
+                        paymentheader.getPaymentAmount(), paymentheader.getId(),
+                        paymentheader.getBankaccount().getChartofaccounts().getId());
+            } catch (final ValidationException e) {
+                LOGGER.error("Error" + e.getMessage(), e);
+                balance = BigDecimal.valueOf(-1);
             }
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("Completed validateUser.");
-            return true;
-        } else {
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("Completed validateUser.");
-            return false;
         }
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("Completed validateUser.");
+        return true;
+    
     }
 
     @SkipValidation
