@@ -112,6 +112,7 @@ import org.egov.infra.admin.master.entity.User;
 import org.egov.infra.config.core.ApplicationThreadLocals;
 import org.egov.infra.exception.ApplicationException;
 import org.egov.infra.exception.ApplicationRuntimeException;
+import org.egov.infra.microservice.models.BillDetail;
 import org.egov.infra.microservice.models.BillDetailAdditional;
 import org.egov.infra.microservice.models.BusinessService;
 import org.egov.infra.microservice.models.CollectionType;
@@ -1030,7 +1031,7 @@ public class ReceiptAction extends BaseFormAction {
 
 			receipt.getBill().forEach(bill -> {
 				BigDecimal totalAmountPaid = BigDecimal.ZERO;
-				bill.getBillDetails().forEach(billDetail -> {
+                		for (BillDetail billDetail : bill.getBillDetails()) {
 					ReceiptHeader header = new ReceiptHeader();
 					receiptHeader.setReceiptnumber(billDetail.getReceiptNumber());
 					receiptHeader.setReceiptdate(new Date(billDetail.getReceiptDate()));
@@ -1041,7 +1042,8 @@ public class ReceiptAction extends BaseFormAction {
 					receiptHeader.setPaidBy(bill.getPaidBy());
 					receiptHeader.setPayeeName(bill.getPayerName());
 					receiptHeader.setPayeeAddress(bill.getPayerAddress());
-					receiptHeader.setTotalAmount(totalAmountPaid.add(billDetail.getAmountPaid()));
+					totalAmountPaid = totalAmountPaid.add(billDetail.getAmountPaid());
+                    			receiptHeader.setTotalAmount(totalAmountPaid);
 					receiptHeader.setCurretnStatus(billDetail.getStatus());
 					receiptHeader.setCurrentreceipttype(billDetail.getReceiptType());
 					receiptHeader.setManualreceiptnumber(billDetail.getManualReceiptNumber());
@@ -1163,7 +1165,7 @@ public class ReceiptAction extends BaseFormAction {
 						receiptHeader.setCreatedUser(empInfo.getUser().getName());
 					receipts[0] = receiptHeader;
 
-				});
+				};
 			});
 
 		});
