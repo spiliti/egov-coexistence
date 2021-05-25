@@ -60,6 +60,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -128,6 +130,7 @@ import org.egov.utils.Constants;
 import org.egov.utils.FinancialConstants;
 import org.egov.utils.VoucherHelper;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -234,6 +237,12 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
     FinanceDashboardService finDashboardService;
     @Autowired
     private ChartOfAccounts chartOfAccounts;
+    private Session session;
+    @PersistenceContext
+    private EntityManager entityManager;
+    public Session getCurrentSession() {
+        return entityManager.unwrap(Session.class);
+    }
 
     @Override
     public StateAware getModel() {
@@ -525,8 +534,11 @@ public class PreApprovedVoucherAction extends GenericWorkFlowAction {
 
        //heading = ReportUtil.getCityName();
        heading = microserviceUtils.getHeaderNameForTenant().toUpperCase();
-       final EgBillregister billRegister = (EgBillregister) persistenceService
-               .find("from EgBillregister br where br.egBillregistermis.voucherHeader.id=" + voucherHeader.getId());
+       session = getCurrentSession();
+       final Query qry = session
+               .createQuery("from  EgBillregister br where br.egBillregistermis.voucherHeader.id=:voucherId");
+       qry.setLong("voucherId", voucherHeader.getId());
+       final EgBillregister billRegister = (EgBillregister) qry.uniqueResult();
        voucherHeader.setBillNumber(billRegister.getBillnumber());
        voucherHeader.setBillDate(billRegister.getBilldate());
         getMasterDataForBillVoucher();
