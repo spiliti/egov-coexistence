@@ -52,23 +52,23 @@
     <parent>
         <artifactId>egov-erp</artifactId>
         <groupId>org.egov</groupId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>e-governments portal</name>
-    <artifactId>egov-portal-secfix</artifactId>
+    <artifactId>egov-portal</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi-secfix</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <artifactId>egov-egi</artifactId>
+            <version>3.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-config-secfix</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <artifactId>egov-config</artifactId>
+            <version>3.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

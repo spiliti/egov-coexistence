@@ -52,55 +52,55 @@
     <parent>
         <artifactId>egov-erp</artifactId>
         <groupId>org.egov</groupId>
-        <version>3.0.0-COE-SNAPSHOT</version>
+        <version>3.0.1-COE-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>e-governments collection</name>
-    <artifactId>egov-collection-secfix</artifactId>
+    <artifactId>egov-collection</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi-secfix</artifactId>
-            <version>3.0.0-COE-SNAPSHOT</version>
+            <artifactId>egov-egi</artifactId>
+            <version>3.0.1-COE-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-eis-secfix</artifactId>
-            <version>3.0.0-COE-SNAPSHOT</version>
+            <artifactId>egov-eis</artifactId>
+            <version>3.0.1-COE-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egf-secfix</artifactId>
-            <version>3.0.0-COE-SNAPSHOT</version>
+            <artifactId>egov-egf</artifactId>
+            <version>3.0.1-COE-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-config-secfix</artifactId>
-            <version>3.0.0-COE-SNAPSHOT</version>
+            <artifactId>egov-config</artifactId>
+            <version>3.0.1-COE-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi-secfix</artifactId>
-            <version>3.0.0-COE-SNAPSHOT</version>
+            <artifactId>egov-egi</artifactId>
+            <version>3.0.1-COE-SNAPSHOT</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-config-secfix</artifactId>
-            <version>3.0.0-COE-SNAPSHOT</version>
+            <artifactId>egov-config</artifactId>
+            <version>3.0.1-COE-SNAPSHOT</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-eis-secfix</artifactId>
-            <version>3.0.0-COE-SNAPSHOT</version>
+            <artifactId>egov-eis</artifactId>
+            <version>3.0.1-COE-SNAPSHOT</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>

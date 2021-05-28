@@ -51,12 +51,12 @@
     <parent>
         <artifactId>egov-erp</artifactId>
         <groupId>org.egov</groupId>
-        <version>3.0.0-COE-SNAPSHOT</version>
+        <version>3.0.1-COE-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>e-governments config</name>
-    <artifactId>egov-config-secfix</artifactId>
+    <artifactId>egov-config</artifactId>
 
     <build>
         <plugins>

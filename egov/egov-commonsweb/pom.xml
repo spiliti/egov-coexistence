@@ -52,10 +52,10 @@
     <parent>
         <groupId>org.egov</groupId>
         <artifactId>egov-erp</artifactId>
-        <version>3.0.0-COE-SNAPSHOT</version>
+        <version>3.0.1-COE-SNAPSHOT</version>
     </parent>
 
-    <artifactId>egov-commonsweb-secfix</artifactId>
+    <artifactId>egov-commonsweb</artifactId>
     <packaging>war</packaging>
     <name>e-governments commons web</name>
 
@@ -63,16 +63,16 @@
     <dependencies>
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-egi-secfix</artifactId>
-            <version>3.0.0-COE-SNAPSHOT</version>
+            <artifactId>egov-egi</artifactId>
+            <version>3.0.1-COE-SNAPSHOT</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.egov</groupId>
-            <artifactId>egov-commons-secfix</artifactId>
-            <version>3.0.0-COE-SNAPSHOT</version>
+            <artifactId>egov-commons</artifactId>
+            <version>3.0.1-COE-SNAPSHOT</version>
         </dependency>
 
         <!-- VIEWS RELATED END -->
