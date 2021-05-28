@@ -201,5 +201,4 @@ public class SupplierService implements EntityTypeService {
 			throws ValidationException {
 		return Collections.emptyList();
 	}
-
 }

@@ -2050,5 +2050,4 @@ public class ReceiptAction extends BaseFormAction {
 	public void setServiceTypeId(final String serviceType) {
 		serviceTypeId = serviceType;
 	}
-
 }
