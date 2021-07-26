@@ -180,7 +180,7 @@ public class SubLedgerReportAction extends BaseFormAction {
 			fund = (Fund) persistenceService.find("from Fund where id = ?",
 					Long.valueOf(subLedgerReport.getFund_id()));
 		}
-		heading = "Sub Ledger Report for " + subLedgerReport.getEntityName() + " in " + glCode.getName() + " under "
+		heading = "Sub Ledger Report for " + subLedgerReport.getEntityName() + " in " + glCode.getName() + glCode.getGlcode() + " under "
 				+ fund.getName() + " from " + subLedgerReport.getStartDate() + " to " + subLedgerReport.getEndDate();
 		if (checkNullandEmpty(subLedgerReport.getDepartmentCode()))
 			heading = heading + " under " + depMap.get(subLedgerReport.getDepartmentCode()) + " ";
