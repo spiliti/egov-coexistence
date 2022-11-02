@@ -123,10 +123,16 @@
             <id>JBoss Repository</id>
             <url>https://repository.jboss.org/nexus/content/groups/public/</url>
         </repository>
+<!--  Shuller edit
         <repository>
             <id>JSPRESSO</id>
             <url>http://repository.jspresso.org/maven2/</url>
-        </repository>
+        </repository>   
+-->
+        <repository>
+            <id>javaxt.com</id>
+            <url>https://www.javaxt.com/maven</url>
+       </repository>
     </repositories>
 
     <pluginRepositories>
